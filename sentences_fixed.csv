@@ -1,0 +1,213 @@
+sentence,label
+More RNA-seq data are needed to confirm the order of enzymes within this metabolic branch.,1
+Greater genomic coverage could further resolve the structure of this membrane protein.,1
+Additional linkage analyses across populations could refine the phylogenetic relationships observed here.,1
+More longitudinal metabolomics data from diabetic subjects could elucidate the mechanism by which the microbiome influences lipid storage.,1
+Integrating host transcriptomic and bacterial metatranscriptomic profiles may reveal cross-kingdom regulatory interactions.,1
+Expanding the cohort with dietary intake data could clarify the causal direction between nutrient availability and microbial flux.,1
+Single-cell metabolite imaging in infected macrophages could test whether carbon flux is compartmentalized during latency.,1
+Additional flux-balance simulations using AGORA2 reconstructions could evaluate the metabolic trade-offs predicted here.,1
+Incorporating time-resolved proteomics data would enable dynamic modeling of enzyme activation states.,1
+Whole-genome sequencing of environmental isolates could determine whether these adaptive mutations pre-exist in soil populations.,1
+Further integration of host and microbial epigenomic data may identify co-regulated pathways driving inflammation.,1
+New metagenomic assemblies from under-sampled populations could reveal lineage-specific metabolic capabilities.,1
+Multi-omics data collected under antibiotic stress could uncover compensatory flux rerouting strategies.,1
+Cross-sectional lipidomic datasets could quantify how bile acid pools vary with microbial composition.,1
+Comparative genomics with closely related pathogens could pinpoint horizontally transferred resistance loci.,1
+Prospective cohort data linking microbiome profiles and serum metabolites could test the proposed metabolic feedback loop.,1
+Expansion of the dataset to include anaerobic time-series samples would validate the inferred oxygen-dependent switches.,1
+Additional cryo-EM structures with bound cofactors could clarify the catalytic sequence of electron transfer.,1
+Quantitative modeling with newly generated kinetic constants could refine flux control coefficients in this pathway.,1
+Integrating public metabolite databases with in-house LC-MS spectra may identify unknown intermediates predicted by the model.,1
+Further studies should validate these findings in a larger cohort.,0
+Future research is needed to confirm these results.,0
+Replication in independent samples will strengthen the conclusions.,0
+The model should be tested on additional datasets.,0
+These observations require confirmation in different populations.,0
+Larger studies are necessary to verify these associations.,0
+Further work should focus on validating the proposed mechanism.,0
+Additional experiments are required to ensure reproducibility.,0
+Future investigations should confirm whether these effects persist.,0
+The current results need to be corroborated by others.,0
+Validation in larger trials is warranted.,0
+Future research should re-evaluate the findings using other methods.,0
+Independent replication will be important to confirm these outcomes.,0
+Further studies are required to test the robustness of our conclusions.,0
+Subsequent analyses should verify the consistency of these patterns.,0
+The approach must be validated before clinical translation.,0
+Additional studies should confirm the significance of these differences.,0
+Further investigation is warranted to ensure accuracy of the predictions.,0
+Future work should assess the generalizability of the results.,0
+Replication studies are needed to validate these preliminary observations.,0
+Additional metatranscriptomic profiling of M. tuberculosis within human macrophages could clarify the temporal order of stress-response genes.,1
+Expanding metabolomic coverage in sputum samples may reveal unique biomarkers of latent tuberculosis infection.,1
+Integrating host transcriptomics with microbial metabolite flux models could uncover bidirectional signaling in the lung microenvironment.,1
+Longitudinal stool sampling during antibiotic therapy could quantify how recovery trajectories vary across metabolic subnetworks.,1
+Stable-isotope tracing in granuloma tissue could define how carbon sources shift under hypoxia.,1
+Comparative single-cell RNA-seq between infected and uninfected alveolar macrophages might identify regulatory circuits driving dormancy.,1
+Adding serum lipidomic data to gut metagenomes could reveal host–microbe interactions influencing systemic inflammation.,1
+Expansion of the cohort to include HIV-co-infected individuals could disentangle immune–metabolic trade-offs in TB progression.,1
+Time-resolved metabolomics of mycobacterial cultures under nutrient limitation could map alternative carbon assimilation routes.,1
+Further integration of AGORA2-based reconstructions with patient-specific microbiome data could simulate therapeutic nutrient competition.,1
+Including environmental isolates from household contacts may identify transmission-linked metabolic variants.,1
+Whole-metagenome sequencing of treatment-resistant cases could expose collateral metabolic adaptations in commensal taxa.,1
+Quantifying bacterial SCFA production across clinical stages could connect energy metabolism to immune modulation.,1
+Cross-referencing fecal metabolite profiles with dietary intake logs could pinpoint diet-dependent microbial pathways in TB recovery.,1
+Metabolomic flux analysis of macrophage cultures exposed to M. tuberculosis exudates could clarify host metabolic reprogramming.,1
+Integration of spatial transcriptomics with histological granuloma maps could reveal micro-niches of metabolic activity.,1
+Prospective metagenomic surveillance in high-incidence communities could track metabolic gene flow among gut commensals and pathogens.,1
+Incorporating breath volatile analysis might identify non-invasive metabolic signatures of early infection.,1
+"Machine-learning integration of microbiome, cytokine, and metabolite datasets could predict progression from latent to active disease.",1
+Further experimental validation using CRISPRi knockdowns of predicted metabolic regulators could confirm host–pathogen flux coupling.,1
+Future research should confirm these findings in larger TB cohorts.,0
+Additional studies are required to validate the observed microbial shifts.,0
+Further work should replicate our metabolomic results in independent populations.,0
+Validation in animal models is warranted.,0
+These associations should be confirmed using other analytical platforms.,0
+Future investigations need to verify the reproducibility of these patterns.,0
+Further studies should confirm whether these metabolic differences persist after treatment.,0
+Replication in different geographical settings is necessary.,0
+The proposed mechanism should be tested in future experiments.,0
+Larger cohorts are required to validate these associations.,0
+Future research should re-evaluate these results using alternative normalization methods.,0
+Additional experiments are needed to confirm the robustness of our conclusions.,0
+Replication studies are required before drawing firm conclusions.,0
+The findings should be validated in more diverse patient groups.,0
+Future studies must confirm the clinical relevance of these observations.,0
+Additional analyses should test the stability of these microbial clusters.,0
+Further investigation is needed to ensure accuracy of the metabolite quantification.,0
+Future work should verify the functional role of these taxa.,0
+Larger sample sizes will be required to reproduce these associations.,0
+Replication in independent datasets is essential to confirm these results.,0
+Collecting serial stool metabolomics and dietary logs could identify which fiber fractions restore butyrate deficits in active colitis.,1
+Linking pharmacy refill records to culture conversion dates is needed to test whether adherence mediates rifampicin resistance.,1
+High-coverage long-read sequencing of relapse isolates is required to resolve structural variants driving isoniazid failure.,1
+Paired host and pathogen transcriptomes from the same granuloma are needed to model reciprocal metabolic crosstalk.,1
+Systematic capture of BMI micronutrient status and microbiome profiles could quantify nutrition–TB outcome interactions.,1
+Longitudinal PET-CT with harmonized protocols is needed to determine whether lesion glycolysis trajectories predict relapse.,1
+Adding breath volatile organic compound panels could test if non-invasive biomarkers track early treatment response.,1
+Prospective household contact networks with strain genotyping are required to estimate superspreading contributions.,1
+Standardized 16S and shotgun pipelines across sites are needed to compare microbiome–asthma associations globally.,1
+Acquiring single-cell RNA-seq from bronchoalveolar samples could identify macrophage states permissive to intracellular persistence.,1
+Time-resolved plasma lipidomics during intensive TB therapy could clarify host metabolic adaptation to bactericidal drugs.,1
+Incorporating environmental PM2.5 and NO₂ exposures is necessary to quantify air pollution’s effect on tuberculosis incidence.,1
+Comprehensive registry linkage should determine whether diabetes modifies preventive therapy effectiveness at population scale.,1
+Serial interferon-γ release assays and culture load are needed to model thresholds for reactivation risk.,1
+Collecting stool and sputum samples from pediatric contacts could define age-specific transmission dynamics.,1
+Uniform preanalytical documentation of stool storage conditions is required to assess bias in microbiome metrics.,1
+Targeted lipidomic profiling of plasma before and after therapy could identify predictors of drug-induced hepatotoxicity.,1
+Metabolic flux analyses using 13C substrates in infected macrophages are needed to quantify glyoxylate shunt engagement.,1
+Prospective capture of antacid and macrolide co-prescriptions is necessary to estimate drug–drug interaction effects on cure rates.,1
+Deep exome sequencing in high-burden settings could uncover rare host variants modulating susceptibility to extrapulmonary TB.,1
+Including rural and peri-urban clinics with standardized case definitions is required to refine true incidence estimates.,1
+Paired cytokine panels and nasal microbiome surveys could determine whether mucosal inflammation predicts household transmission.,1
+Collecting pharmacokinetic curves alongside microbiome data is needed to test if dysbiosis alters rifamycin exposure.,1
+Harmonized machine-read chest X-ray datasets across vendors would enable robust external validation of AI triage tools.,1
+Linkage of hospital EHR vitals with microbiome profiles could quantify how antibiotics perturb recovery trajectories.,1
+Geo-referenced social mixing diaries are required to parameterize school-based tuberculosis transmission models.,1
+Standardized protocols for sputum induction and decontamination are needed to compare culture yield across studies.,1
+Capturing housing density and ventilation metrics could disentangle built-environment drivers of household TB clustering.,1
+Randomized trials with microbiome-stratified arms are required to test diet–drug interaction hypotheses.,1
+Serum metabolite panels measured at baseline and week two could predict slow response phenotypes.,1
+Collecting paired mycobacterial transcriptomes and drug concentrations in lesions would clarify within-host selection gradients.,1
+Prospective serology with antigen-specific T-cell assays is needed to determine correlates of durable TB vaccine protection.,1
+Adding host genetic ancestry markers could resolve population stratification in microbiome–phenotype associations.,1
+Wearable respiratory rate monitoring during therapy could quantify nocturnal symptom trajectories predictive of failure.,1
+Linking national mortality registries to clinical cohorts is necessary to capture post-treatment deaths.,1
+Standardized dietary recalls and food environment audits are needed to assess the effect of food security programs on TB risk.,1
+Paired sputum metabolomics and CFU counts should test whether specific lipid signatures precede culture conversion.,1
+Multi-center metagenomic sequencing of nontuberculous mycobacteria is required to map environmental reservoirs.,1
+Collecting serial imaging and microbiome data in MDR-TB could determine whether cavity dynamics predict resistance amplification.,1
+Quantifying household water and sanitation metrics alongside infection status is needed to model enteric pathogen transmission.,1
+Routine capture of occupational exposure histories would clarify links between silica dust and TB reactivation risk.,1
+High-resolution dietary sodium measures and ambulatory blood pressure monitoring could disentangle microbiome-mediated salt sensitivity.,1
+Prospective fecal calprotectin and 16S rRNA sequencing are required to determine whether gut inflammation precedes pulmonary flares.,1
+Targeted metabolomics of tryptophan–kynurenine pathway intermediates should test whether IDO activity predicts TB treatment outcomes.,1
+Linking plasma drug levels with CYP450 genotypes is needed to quantify interindividual variability in isoniazid response.,1
+Standardized collection of breastmilk microbiome and infant stool metabolome could clarify vertical transmission pathways.,1
+Adding nasal swabs and air sampling in clinics would permit estimation of short-range aerosol transmission probabilities.,1
+Longitudinal metagenomic profiling of skin lesions is necessary to map microbial succession during cutaneous leishmaniasis treatment.,1
+"Capture–recapture analyses using lab, pharmacy, and surveillance databases could refine estimates of undiagnosed TB burden.",1
+Geocoded rainfall and housing materials data should test whether humidity extremes drive seasonal spikes in respiratory infections.,1
+Deep immune phenotyping before and after BCG revaccination is required to identify cellular correlates of protection.,1
+Paired host phosphoproteomics and bacterial transcriptomics could resolve signaling nodes that govern intracellular survival.,1
+Collecting stool antibiotic resistome data before and after deworming could quantify collateral selection pressures.,1
+Systematic adverse event reporting harmonized across sites is needed to evaluate safety signals of novel TB regimens.,1
+Targeted capture of household pet microbiomes may help attribute zoonotic reservoirs in peri-urban tuberculosis outbreaks.,1
+Expanded sputum culture with digital colony counting could estimate within-host kill-curve heterogeneity across regimens.,1
+"Linkage of birth records, vaccination histories, and TB outcomes is required to measure the population impact of infant BCG schedules.",1
+Standardized nutrient intake diaries coupled with metabolomics are needed to parse diet–microbiome–glycemia relationships.,1
+Prospective wearable-based activity and sleep metrics should test whether circadian disruption predicts pulmonary exacerbations.,1
+Genome-resolved metagenomics from archived sputum is required to quantify horizontal gene transfer among *M. tuberculosis* lineages.,1
+High-frequency home spirometry combined with symptom e-diaries could detect preclinical COPD exacerbations in TB survivors.,1
+Integrating satellite-derived vegetation indices with case data could test environmental drivers of zoonotic spillover risk.,1
+Collecting paired saliva and plasma cytokines at defined intervals would clarify the trajectory of host inflammatory responses.,1
+Stratified enrollment by prior antibiotic exposure is needed to quantify its effect on microbiome–drug interaction studies.,1
+Prospective sampling of healthcare workers with genomic contact tracing could estimate nosocomial TB transmission fractions.,1
+Multi-omics analysis of cerebrospinal fluid from TB meningitis cases is required to identify prognostic biomarkers.,1
+Capture of household crowding and ventilation features alongside infection status could parameterize agent-based models.,1
+Serial PET-MRI acquisitions pre- and post-therapy initiation are needed to quantify early metabolic responses in pulmonary TB.,1
+Longitudinal metabolite flux assays in alveolar macrophages could determine how hypoxia reprograms central carbon metabolism.,1
+Routine quantification of isoniazid acetylation phenotypes is required to personalize dosing in high-burden clinics.,1
+Standardized reporting of culture methods and contamination rates would enable cross-study comparisons of sputum diagnostics.,1
+Prospective biobanking of stool and plasma from HIV/TB coinfected patients could clarify antiretroviral–microbiome interactions.,1
+Linking contact tracing outcomes with genomic distances is needed to validate thresholds for transmission clustering.,1
+Expanded environmental sampling of water points and soil would test hypothesized environmental reservoirs of mycobacteria.,1
+Collecting detailed occupational history and cumulative silica exposure could quantify dose–response relationships with TB risk.,1
+Integrating wearable cough acoustics with culture data may estimate patient-level infectiousness over the course of therapy.,1
+Serial measurement of vitamin D and calcium homeostasis is required to evaluate micronutrient effects on TB immune recovery.,1
+Cross-site calibration of metagenomic library prep kits is needed to reduce batch effects in multi-center microbiome studies.,1
+Household-level WASH indicators linked to pediatric growth monitoring could determine pathways from enteropathy to stunting.,1
+Prospective T-cell receptor repertoire sequencing before and after vaccination is required to map protective clonotypes.,1
+Collecting precise treatment start dates and community mobility data could refine models of programmatic TB control.,1
+Additional thermal imaging during DOT visits could quantify fever trajectories and predict sputum conversion timelines.,1
+High-frequency home air-quality monitoring with GPS tagging is needed to attribute exposure during commuting versus household time.,1
+Standardized symptom scoring and digital adherence data should determine whether counseling modifies cure rates.,1
+Paired metatranscriptomics and short-chain fatty acid assays are required to test whether dysbiosis precedes immune activation.,1
+Cluster-randomized studies with routine registry linkage could estimate real-world effectiveness of new TB preventive regimens.,1
+Expanded sequencing of non-tuberculous mycobacteria from water systems is needed to map strain flow between clinics and households.,1
+Serial echocardiography with inflammatory biomarker profiling could determine whether TB therapy unmasks subclinical cardiomyopathy.,1
+Uniform reporting of household ventilation and occupancy metrics is necessary to assess airborne transmission interventions.,1
+Prospective bioaerosol sampling alongside index-case genotyping could quantify environmental persistence of viable bacilli.,1
+Metabolically stratified case–control recruitment is required to test whether dysglycemia modifies host response to infection.,1
+Further research is needed to clarify the observed associations.,0
+Future studies should explore potential mechanisms in more detail.,0
+These findings warrant additional investigation in larger cohorts.,0
+Whether these results generalize to other populations remains unknown.,0
+Replication in independent samples would strengthen confidence.,0
+Additional studies are required to confirm our observations.,0
+Future work should validate these preliminary findings.,0
+The long-term impact is unclear and merits further study.,0
+More rigorous trials could help establish causality.,0
+Further exploration of confounding factors is necessary.,0
+The biological mechanisms remain to be elucidated.,0
+Subsequent studies should evaluate clinical relevance.,0
+Future research should consider multi-disciplinary approaches.,0
+A larger sample size would increase statistical power.,0
+Broader population studies are needed to confirm these results.,0
+Additional analyses may yield deeper insights into the phenomenon.,0
+Future investigations should reassess outcomes with longer follow-up.,0
+Further studies should examine potential sources of bias.,0
+More comprehensive datasets could refine these estimates.,0
+We recommend continued monitoring in future research.,0
+Further validation across diverse contexts is required.,0
+Future work should re-evaluate the findings using other methods.,0
+Additional research is warranted to confirm these trends.,0
+It remains to be seen whether the effect persists.,0
+Further study is needed to explore this association.,0
+Subsequent research should clarify the clinical implications.,0
+More robust methodologies could improve confidence in the findings.,0
+Future studies might consider alternative designs.,0
+External validation would be valuable.,0
+The generalizability of these results requires evaluation.,0
+Additional work should investigate subgroup differences.,0
+Further research is necessary to solidify these observations.,0
+Ongoing surveillance may inform future investigations.,0
+Future studies should aim to replicate our results.,0
+Further inquiry is needed to explore alternative explanations.,0
+These results should be interpreted cautiously and revisited.,0
+Future research could address remaining gaps in knowledge.,0
+Additional study is required before firm conclusions can be drawn.,0
+More data are desirable to strengthen the conclusions.,0
+Further research should consider potential confounders.,0
+Future work should explore broader applications of these findings.,0

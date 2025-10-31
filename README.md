@@ -1,4 +1,6 @@
-Research Question Discovery & Data Matching Pipeline
+Status: Early-stage prototype. Core orchestration and worker modules functional; full API integration in progress.
+
+**Research Question Discovery & Data Matching Pipeline**
 An AI-driven framework for identifying open research questions and linking them to relevant public datasets
 Overview
 This repository contains a modular, continuously operating research-automation pipeline that detects unresolved scientific questions from the literature, evaluates their relevance and answerability, and matches them to available datasets that could support further investigation.

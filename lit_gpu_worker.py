@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
+"""Streaming literature-signal worker.
+
+For topic-level orchestrator runs this worker computes embeddings when optional
+model dependencies are available, and always emits deterministic literature
+signals from the reusable open-question analysis utilities.
+"""
+
 import os, sys, json, time, argparse, asyncio, threading
 from collections import deque
 from typing import List
+
+from litdatamatcher.literature import analyze_topic_signal
 
 # -----------------------------
 # CLI
@@ -119,6 +128,14 @@ class Encoder:
 # -----------------------------
 # Main worker
 # -----------------------------
+def build_payload(topic: str, emb_dim: int) -> dict:
+    """Build the JSON payload emitted for one topic."""
+
+    payload = analyze_topic_signal(topic)
+    payload["emb_dim"] = int(emb_dim)
+    return payload
+
+
 async def main():
     args = parse_args()
 
@@ -152,6 +169,7 @@ async def main():
     pending: List[str] = []
     completed_times = deque(maxlen=1000)
     last_batch_latency_ms = None
+    shutdown_seen = False
 
     # metrics reporter
     def reporter():
@@ -174,22 +192,16 @@ async def main():
 
     threading.Thread(target=reporter, daemon=True).start()
 
-    # async stdin reader
-    loop = asyncio.get_event_loop()
-    reader = asyncio.StreamReader()
-    protocol = asyncio.StreamReaderProtocol(reader)
-    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
-
-    # processing loop
-    while True:
-        line = await reader.readline()
-        if not line:
-            break
-        msg = line.decode().strip()
+    # Stdin loop. A plain iterator is more portable than
+    # asyncio.connect_read_pipe on Windows; batching and model calls still
+    # happen inside this async function.
+    for line in sys.stdin:
+        msg = line.strip()
         if not msg:
             continue
 
         if msg == "SHUTDOWN":
+            shutdown_seen = True
             # flush remaining work quickly
             if pending:
                 batch = pending[:]
@@ -197,13 +209,7 @@ async def main():
                 t0 = time.perf_counter()
                 dim = encoder.encode([f"abstract for {t}" for t in batch], batch_size=min(state["max_batch"], len(batch)))
                 for t in batch:
-                    payload = {
-                        "topic": t,
-                        "counts": [120, 140, 155, 170, 182],
-                        "significance_score": 0.80,
-                        "top_terms": ["diversity", "antibiotics", "IBD"],
-                        "emb_dim": int(dim),
-                    }
+                    payload = build_payload(t, dim)
                     print(json.dumps({"type": "lit_result", "payload": payload}), flush=True)
                     completed_times.append(time.time())
                 last_batch_latency_ms = int((time.perf_counter() - t0) * 1000)
@@ -256,13 +262,7 @@ async def main():
             t0 = time.perf_counter()
             dim = encoder.encode([f"abstract for {t}" for t in batch], batch_size=min(state["max_batch"], got))
             for t in batch:
-                payload = {
-                    "topic": t,
-                    "counts": [120, 140, 155, 170, 182],
-                    "significance_score": 0.80,
-                    "top_terms": ["diversity", "antibiotics", "IBD"],
-                    "emb_dim": int(dim),
-                }
+                payload = build_payload(t, dim)
                 print(json.dumps({"type": "lit_result", "payload": payload}), flush=True)
                 completed_times.append(time.time())
             last_batch_latency_ms = int((time.perf_counter() - t0) * 1000)
@@ -275,17 +275,12 @@ async def main():
             t0 = time.perf_counter()
             dim = encoder.encode([f"abstract for {t}" for t in batch], batch_size=min(state["max_batch"], len(batch)))
             for t in batch:
-                payload = {
-                    "topic": t,
-                    "counts": [120, 140, 155, 170, 182],
-                    "significance_score": 0.80,
-                    "top_terms": ["diversity", "antibiotics", "IBD"],
-                    "emb_dim": int(dim),
-                }
+                payload = build_payload(t, dim)
                 print(json.dumps({"type": "lit_result", "payload": payload}), flush=True)
                 completed_times.append(time.time())
             last_batch_latency_ms = int((time.perf_counter() - t0) * 1000)
-        print(json.dumps({"type": "lit_done"}), flush=True)
+        if not shutdown_seen:
+            print(json.dumps({"type": "lit_done"}), flush=True)
     except Exception:
         pass
 

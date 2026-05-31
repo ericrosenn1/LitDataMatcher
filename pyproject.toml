@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "litdatamatcher"
+version = "0.1.0"
+description = "A reproducible pipeline for extracting open scientific questions and ranking matching public datasets."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Eric Rosenn" }
+]
+keywords = [
+  "bioinformatics",
+  "literature-mining",
+  "dataset-discovery",
+  "evidence-synthesis",
+  "research-automation"
+]
+dependencies = [
+  "numpy>=1.24",
+  "requests>=2.31",
+  "rich>=13.7",
+]
+
+[project.optional-dependencies]
+nlp = [
+  "sentence-transformers>=2.6",
+  "transformers>=4.40",
+  "spacy>=3.7",
+  "pdfminer.six>=20231228",
+]
+ml = [
+  "joblib>=1.3",
+  "scikit-learn>=1.3",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+litdatamatcher = "litdatamatcher.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["litdatamatcher*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "test_lit_analyzer.py"]
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]

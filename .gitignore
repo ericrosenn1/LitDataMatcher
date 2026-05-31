@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+dist/
+build/
+out_lit/
+run/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+rejected_sentences.txt

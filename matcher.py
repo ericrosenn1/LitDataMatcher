@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
+"""Streaming matcher for orchestrator-driven runs.
+
+This script keeps a small in-memory cache of literature and dataset worker
+outputs keyed by topic. The package-level ranking node is used by the full CLI
+pipeline; this streaming matcher remains intentionally compact for live demos.
+"""
+
 import os, sys, json, time, argparse, threading
 from collections import deque
-from rich.live import Live
-from rich.panel import Panel
-from rich.table import Table
+
+try:
+    from rich.live import Live
+    from rich.panel import Panel
+    from rich.table import Table
+except Exception:  # pragma: no cover - exercised only when rich is unavailable
+    Live = Panel = Table = None
 
 # -----------------------------
 # CLI
@@ -49,6 +60,8 @@ def main():
     fout = open(args.out, "w", encoding="utf-8")
 
     def render_dashboard():
+        if Table is None or Panel is None:
+            return None
         now = time.time()
         tbl = Table(show_header=True, header_style="bold cyan")
         tbl.add_column("Metric"); tbl.add_column("Value")
@@ -60,10 +73,14 @@ def main():
         return Panel(tbl, title="Matcher Live Dashboard", border_style="green")
 
     def dashboard_updater():
+        if Live is None or not sys.stdout.isatty():
+            while not (done["data"] and done["lit"]):
+                time.sleep(args.report_interval)
+            return
         with Live(render_dashboard(), refresh_per_second=4) as live:
             while not (done["data"] and done["lit"]):
                 live.update(render_dashboard())
-                time.sleep(args.report-interval)
+                time.sleep(args.report_interval)
             live.update(render_dashboard())
 
     threading.Thread(target=dashboard_updater, daemon=True).start()
@@ -73,19 +90,21 @@ def main():
         topics = set(data_cache).intersection(lit_cache)
         for topic in list(topics):
             d, l = data_cache.pop(topic), lit_cache.pop(topic)
-            combined = round(0.6 * d["feasibility_score"] + 0.4 * l["significance_score"], 3)
+            feasibility = float(d.get("feasibility_score", 0.0))
+            significance = float(l.get("significance_score", 0.0))
+            combined = round(0.6 * feasibility + 0.4 * significance, 3)
             record = {
                 "topic": topic,
                 "scores": {
-                    "feasibility": d["feasibility_score"],
-                    "significance": l["significance_score"],
+                    "feasibility": feasibility,
+                    "significance": significance,
                     "combined": combined,
                 },
                 "why": {
-                    "datasets": d["datasets"],
-                    "variables": d["variables"],
-                    "pub_trend": l["counts"],
-                    "top_terms": l["top_terms"],
+                    "datasets": d.get("datasets", []),
+                    "variables": d.get("variables", {}),
+                    "pub_trend": l.get("counts", []),
+                    "top_terms": l.get("top_terms", []),
                 },
             }
             fout.write(json.dumps(record) + "\n"); fout.flush()
@@ -95,7 +114,7 @@ def main():
         # update throughput every few seconds
         now = time.time()
         dt = now - last_time
-        if dt >= args.report-interval:
+        if dt >= args.report_interval:
             rate = (matched_count - last_window_count) / max(dt, 1e-9)
             match_rate_hist.append(rate)
             last_window_count = matched_count

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Process orchestrator for streaming LitDataMatcher workers."""
+
 import os, sys, json, time, argparse, threading, subprocess, collections
 
 TOPICS = [
@@ -16,8 +18,33 @@ def parse_args():
     ap.add_argument("--init-rate-data", type=float, default=4.0, help="topics/sec to data worker")
     ap.add_argument("--init-rate-lit",  type=float, default=2.0, help="topics/sec to literature worker")
     ap.add_argument("--adjust-every", type=float, default=3.0, help="seconds between control updates")
-    ap.add_argument("--out", default=os.path.expanduser("~/research_project/run/matches.jsonl"))
+    ap.add_argument("--topics-file", default="", help="Optional text/JSONL file of topics.")
+    ap.add_argument("--out", default=os.path.join("run", "matches.jsonl"))
     return ap.parse_args()
+
+
+def load_topics(path: str) -> list[str]:
+    """Load topics from a plain-text file or JSONL rows with a topic field."""
+
+    if not path:
+        return list(TOPICS)
+    topics: list[str] = []
+    with open(path, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("{"):
+                try:
+                    obj = json.loads(line)
+                    topic = obj.get("topic") or obj.get("question") or obj.get("title")
+                    if topic:
+                        topics.append(str(topic))
+                except json.JSONDecodeError:
+                    continue
+            else:
+                topics.append(line)
+    return topics or list(TOPICS)
 
 def start_process(cmd, env=None):
     return subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -49,10 +76,19 @@ def forward(src_proc, name, match_stdin, counters, last_ts_map):
         except Exception:
             pass
 
+
+def echo_output(src_proc, name):
+    """Drain and prefix a child process stdout stream."""
+
+    for line in src_proc.stdout:
+        s = line.strip()
+        if s:
+            print(f"[{name}] {s}")
+
 def main():
     args = parse_args()
     base = os.path.dirname(__file__)
-    run_dir = os.path.expanduser("~/research_project/run")
+    run_dir = os.path.abspath(os.path.dirname(args.out) or "run")
     os.makedirs(run_dir, exist_ok=True)
 
     env_lit = os.environ.copy()
@@ -63,10 +99,11 @@ def main():
     else:
         dev_flag = "auto"
 
-    p_data = start_process(["python", os.path.join(base, "data_worker.py")])
-    p_lit  = start_process(["python", os.path.join(base, "lit_gpu_worker.py"),
+    python_exe = sys.executable or "python"
+    p_data = start_process([python_exe, os.path.join(base, "data_worker.py")])
+    p_lit  = start_process([python_exe, os.path.join(base, "lit_gpu_worker.py"),
                             "--device", dev_flag, "--batch-size", str(args.lit_batch)], env=env_lit)
-    p_match= start_process(["python", os.path.join(base, "matcher.py"),
+    p_match= start_process([python_exe, os.path.join(base, "matcher.py"),
                             "--out", args.out])
 
     counters = collections.Counter(data_in=0, lit_in=0, data_out=0, lit_out=0)
@@ -74,12 +111,13 @@ def main():
 
     t_data = threading.Thread(target=forward, args=(p_data,"DATA", p_match.stdin, counters, last_ts), daemon=True)
     t_lit  = threading.Thread(target=forward, args=(p_lit, "LIT",  p_match.stdin, counters, last_ts), daemon=True)
-    t_data.start(); t_lit.start()
+    t_match = threading.Thread(target=echo_output, args=(p_match, "MATCH"), daemon=True)
+    t_data.start(); t_lit.start(); t_match.start()
 
     bucket_data = TokenBucket(rate_per_s=args.init_rate_data, burst=50.0)
     bucket_lit  = TokenBucket(rate_per_s=args.init_rate_lit,  burst=50.0)
 
-    topics = list(TOPICS); i_data = 0; i_lit = 0
+    topics = load_topics(args.topics_file); i_data = 0; i_lit = 0
     last_adjust = time.perf_counter()
     print(f"[ORCH] starting feeder with data_rate={bucket_data.rate:.2f}/s, lit_rate={bucket_lit.rate:.2f}/s")
 

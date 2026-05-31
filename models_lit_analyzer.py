@@ -6,7 +6,7 @@ Each model represents a specific concept with strong typing and validation.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from enum import Enum
 
 # =============================================================================
@@ -394,7 +394,7 @@ class Document:
         
         # Auto-split sections if not provided
         if not self.sections:
-            from processing.sectioning import split_sections
+            from litdatamatcher.text import split_sections
             full_text = f"{self.abstract}\n{self.text}".strip()
             self.sections = split_sections(full_text)
     
@@ -526,7 +526,7 @@ class AnalysisResults:
             return 0.0
         return sum(d.total_extractions for d in self.documents) / len(self.documents)
     
-    def get_summary_stats(self) -> Dict[str, any]:
+    def get_summary_stats(self) -> Dict[str, Any]:
         """Get summary statistics."""
         return {
             "documents": self.total_documents,

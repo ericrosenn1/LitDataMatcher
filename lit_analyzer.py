@@ -2,6 +2,10 @@
 import os, sys, json, argparse, pathlib, time
 from typing import List, Dict, Any
 import numpy as np
+from litdatamatcher.text import (
+    lexical_similarity as _fallback_lexical_similarity,
+    split_sentences as _fallback_split_sentences,
+)
 
 # Import all the models
 from models_lit_analyzer import (
@@ -529,7 +533,20 @@ def semantic_match(sentence: str, kind: str, threshold: float = SEM_SIM_THRESHOL
     emb = ensure_sentence_embedder()
     sv = emb.encode([sentence])[0]
     if not sv:
-        return False
+        proto_map = {"future": FUTURE_PROTOS, "limit": LIMIT_PROTOS, "rq": RQ_PROTOS}
+        best = max(
+            (_fallback_lexical_similarity(sentence, proto) for proto in proto_map.get(kind, [])),
+            default=0.0,
+        )
+        low = sentence.lower()
+        lexical_hits = {
+            "future": ("future", "further research", "should examine", "remains unclear"),
+            "limit": ("limitation", "limited by", "small sample", "lack of"),
+            "rq": ("we ask", "we investigate", "we aim", "?"),
+        }
+        return best >= max(0.2, threshold * 0.5) or any(
+            cue in low for cue in lexical_hits.get(kind, ())
+        )
     protos = get_proto_vecs(kind)
     best = 0.0
     for pv in protos:
@@ -642,16 +659,7 @@ def split_sents(text: str) -> List[str]:
             return out
     except Exception:
         pass
-    buf, out = "", []
-    for ch in text:
-        buf += ch
-        if ch in [".", "!", "?"]:
-            if buf.strip():
-                out.append(buf.strip())
-            buf = ""
-    if buf.strip():
-        out.append(buf.strip())
-    return out
+    return _fallback_split_sentences(text)
 
 # --------------- Wrapper functions for extraction ---------------
 def find_research_questions(text: str) -> List[ResearchQuestion]:
@@ -984,7 +992,6 @@ def main():
                 fs.write(", ".join(labels) + "\n")
             fs.write("\n---\n\n")
     print_terminal_summary(args, docs, rq_map, st_map, fd_map, metrics)
-    print(json.dumps({"type": "lit_done", "payload": metrics}), flush=True)
 
 if __name__ == "__main__":
     try:

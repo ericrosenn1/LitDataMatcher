@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use LitDataMatcher in academic work, please cite this software."
+title: "LitDataMatcher: A reproducible pipeline for literature-derived question and public dataset matching"
+version: "0.1.0"
+date-released: "2026-05-31"
+authors:
+  - family-names: "Rosenn"
+    given-names: "Eric"
+repository-code: "https://github.com/ericrosenn1/LitDataMatcher"
+url: "https://github.com/ericrosenn1/LitDataMatcher"
+keywords:
+  - bioinformatics
+  - literature mining
+  - dataset discovery
+  - research automation
+  - evidence synthesis
+license: "MIT"

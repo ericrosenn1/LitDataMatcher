@@ -12,9 +12,9 @@ public datasets, and ranking the most plausible question-dataset pairs for
 expert review.
 
 The current implementation is a functional research-software foundation. It is
-offline-reproducible by default, produces auditable JSONL/SQLite artifacts, and
-is organized into explicit scientific nodes that can be independently tested,
-benchmarked, replaced, or extended.
+offline and reproducible by default, produces auditable JSONL/SQLite artifacts,
+and is organized into explicit scientific nodes that can be independently
+tested, benchmarked, replaced, or extended.
 
 ## What It Does Today
 
@@ -282,6 +282,14 @@ Optional scaffolds are already present for OpenAlex literature metadata and
 ClinicalTrials.gov study metadata. Priority future adapters include PubMed, GEO,
 SRA/ENA, MGnify, Qiita, Metabolomics Workbench, dbGaP, and domain-specific
 biomedical repositories.
+
+## Citation And License
+
+Citation metadata is provided in `CITATION.cff`. If this project contributes to
+academic work, cite the software repository and the exact commit or release used
+for the analysis.
+
+The project is distributed under the MIT License. See `LICENSE`.
 
 ## Current Limitations
 

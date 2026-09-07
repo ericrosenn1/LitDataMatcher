@@ -5,7 +5,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from litdatamatcher.acquisition_v2 import audit_offline_recovery, run_numeric_alignment, sync_datasets, sync_literature, sync_targeted_studies
+from litdatamatcher.acquisition_v2 import (
+    audit_offline_recovery,
+    run_numeric_alignment,
+    sync_datasets,
+    sync_literature,
+    sync_targeted_studies,
+)
 
 
 def main():

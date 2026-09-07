@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from .schemas import JsonDict
 
-
 MODALITY_FAMILIES = {
     "bulk_transcriptomics": {"rna-seq", "microarray", "transcriptomics"},
     "single_cell_transcriptomics": {"single-cell rna-seq", "scrna-seq"},

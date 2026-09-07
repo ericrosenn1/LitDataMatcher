@@ -14,7 +14,12 @@ def test_missing_ledger_is_schema_valid_and_honestly_not_run(tmp_path):
     assert report["product_status"] == "NOT_READY"
     assert report["validator"]["executed"] is True
     assert {gate["status"] for gate in report["gates"].values()} == {"NOT_RUN"}
-    assert list(Draft202012Validator(json.loads(ACCEPTANCE_SCHEMA_PATH.read_text())).iter_errors(report)) == []
+    assert (
+        list(
+            Draft202012Validator(json.loads(ACCEPTANCE_SCHEMA_PATH.read_text())).iter_errors(report)
+        )
+        == []
+    )
 
 
 def test_file_only_evidence_cannot_promote_a_gate(tmp_path):
@@ -51,12 +56,22 @@ def test_stale_observation_cannot_be_reused_as_successful_evidence(tmp_path):
     assert "stale evidence" in report["gates"]["G05"]["reason"]
 
 
-def test_hashed_executed_receipts_can_validate_a_complete_gate_and_cli_writes_report(tmp_path, capsys):
+def test_hashed_executed_receipts_can_validate_a_complete_gate_and_cli_writes_report(
+    tmp_path, capsys
+):
     _write_run(tmp_path)
     _write_ledger(tmp_path, checks=_g05_checks())
     output = tmp_path / "ACCEPTANCE_REPORT.json"
 
-    result = main(["acceptance", "--evidence", str(tmp_path / "ACCEPTANCE_EVIDENCE.json"), "--out", str(output)])
+    result = main(
+        [
+            "acceptance",
+            "--evidence",
+            str(tmp_path / "ACCEPTANCE_EVIDENCE.json"),
+            "--out",
+            str(output),
+        ]
+    )
     printed = json.loads(capsys.readouterr().out)
 
     assert result == 0
@@ -122,15 +137,63 @@ def _write_run(root: Path, *, execution_status="PASS", forged_proof_digest=False
             "spec_digest": "c" * 64,
             "config_digest": "d" * 64,
         },
-        "environment": {"python": "3.12", "platform": "test", "dependency_lock_digest": None, "hardware_record": None},
-        "models": [{"id": "local-model", "revision": "r1", "runtime": "test", "license_status": "ok", "prompt_version": "p1"}],
+        "environment": {
+            "python": "3.12",
+            "platform": "test",
+            "dependency_lock_digest": None,
+            "hardware_record": None,
+        },
+        "models": [
+            {
+                "id": "local-model",
+                "revision": "r1",
+                "runtime": "test",
+                "license_status": "ok",
+                "prompt_version": "p1",
+            }
+        ],
         "source_snapshots": [],
-        "commands": [{"command": "pytest test", "cwd": str(run), "started_at": "2026-09-07T11:00:00+00:00", "exit_code": 0, "log_reference": "commands.log"}],
-        "evaluation": {"protocol_version": "EP-20260907-1", "split_id": "development", "split_role": "DEVELOPMENT", "label_origins": [], "holdout_exposed_to_tuning": False},
-        "coverage": {"unique_literature_records": 0, "parsed_full_texts": 0, "unique_accession_studies": 0, "sample_profiled_studies": 0, "inspected_processed_studies": 0, "external_structured_resources": 0, "distinct_pilot_contexts": 0, "case_dossiers": 0},
+        "commands": [
+            {
+                "command": "pytest test",
+                "cwd": str(run),
+                "started_at": "2026-09-07T11:00:00+00:00",
+                "exit_code": 0,
+                "log_reference": "commands.log",
+            }
+        ],
+        "evaluation": {
+            "protocol_version": "EP-20260907-1",
+            "split_id": "development",
+            "split_role": "DEVELOPMENT",
+            "label_origins": [],
+            "holdout_exposed_to_tuning": False,
+        },
+        "coverage": {
+            "unique_literature_records": 0,
+            "parsed_full_texts": 0,
+            "unique_accession_studies": 0,
+            "sample_profiled_studies": 0,
+            "inspected_processed_studies": 0,
+            "external_structured_resources": 0,
+            "distinct_pilot_contexts": 0,
+            "case_dossiers": 0,
+        },
         "artifacts": [
-            {"path": "commands.log", "sha256": _hash(run / "commands.log"), "size_bytes": (run / "commands.log").stat().st_size, "kind": "command_log", "validation": "PASS"},
-            {"path": "proof.json", "sha256": proof_digest, "size_bytes": (run / "proof.json").stat().st_size, "kind": "test_result", "validation": "PASS"},
+            {
+                "path": "commands.log",
+                "sha256": _hash(run / "commands.log"),
+                "size_bytes": (run / "commands.log").stat().st_size,
+                "kind": "command_log",
+                "validation": "PASS",
+            },
+            {
+                "path": "proof.json",
+                "sha256": proof_digest,
+                "size_bytes": (run / "proof.json").stat().st_size,
+                "kind": "test_result",
+                "validation": "PASS",
+            },
         ],
         "network": {"mode": "OFFLINE", "offline_block_test": True, "external_requests_observed": 0},
         "inference": {"fresh_calls": 1, "cache_replays": 0, "backend_qualified": True},

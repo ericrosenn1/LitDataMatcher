@@ -70,13 +70,13 @@ def source_chunks(document, max_chars=1800, max_chunks=2):
     sections = document.get("sections") or [
         {"start": 0, "end": len(text), "text": text, "section": "unstructured"}
     ]
+
     def priority(section):
         return (
-            0
-            if re.search("result|discussion|conclusion", section.get("section", ""), re.I)
-            else 1,
+            0 if re.search("result|discussion|conclusion", section.get("section", ""), re.I) else 1,
             section.get("start", 0),
         )
+
     result = []
     for section in sorted(sections, key=priority):
         start = section.get("start", 0)
@@ -268,8 +268,10 @@ def render_report(run: Path) -> Path:
     matches = read_rows(run / "matches.jsonl")
     questions = {q["question_id"]: q for q in read_rows(run / "questions.jsonl")}
     bundles = {b["question_id"]: b for b in read_rows(run / "evidence_bundles.jsonl")}
+
     def esc(value):
         return html.escape(str(value), quote=True)
+
     cards = []
     for match in matches:
         q = questions[match["question_id"]]
@@ -305,6 +307,7 @@ def analyze(
     fresh=False,
     device="cpu",
     document_path=None,
+    topic=None,
 ):
     from .semantic_runtime import LocalSemanticRuntime, PretrainedSemanticIndex, RuntimeConfig
 
@@ -321,6 +324,24 @@ def analyze(
         localout.mkdir()
         ingest_literature_sources([str(document_path)], localout / "literature.jsonl")
         documents = read_rows(localout / "literature.jsonl")
+    if topic:
+        topic_tokens = set(re.findall(r"\w+", topic.casefold()))
+        documents = [
+            document
+            for document in documents
+            if topic_tokens
+            and topic_tokens
+            <= set(
+                re.findall(
+                    r"\w+",
+                    " ".join(
+                        str(document.get(field, "")) for field in ("topic", "title", "text")
+                    ).casefold(),
+                )
+            )
+        ]
+        if not documents:
+            raise ValueError(f"No literature documents matched topic: {topic}")
     # Reserved transfer/final families are never silently consumed in development.
     selected = sorted(
         [
@@ -554,6 +575,7 @@ def analyze(
                         "model": str(model_dir),
                         "question": question,
                         "requirements": requirements,
+                        "topic": topic,
                         "limit": limit,
                         "chunks": chunks,
                     }
@@ -699,6 +721,7 @@ def main(argv=None):
     run.add_argument("--question")
     run.add_argument("--requirements")
     run.add_argument("--document")
+    run.add_argument("--topic")
     run.add_argument("--limit", type=int, default=3)
     run.add_argument("--chunks", type=int, default=2)
     run.add_argument("--fresh", action="store_true")
@@ -714,9 +737,7 @@ def main(argv=None):
     acceptance.add_argument(
         "--evidence", required=True, help="Versioned acceptance evidence ledger JSON"
     )
-    acceptance.add_argument(
-        "--out", required=True, help="ACCEPTANCE_REPORT.json output path"
-    )
+    acceptance.add_argument("--out", required=True, help="ACCEPTANCE_REPORT.json output path")
 
     args = parser.parse_args(argv)
     if args.command == "doctor":
@@ -770,6 +791,7 @@ def main(argv=None):
             fresh=args.fresh,
             device=args.device,
             document_path=Path(args.document) if args.document else None,
+            topic=args.topic,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return int(result.get("status") == "FAIL")

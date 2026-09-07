@@ -13,12 +13,18 @@ import json
 import math
 import re
 import time
+import os
+import uuid
 import xml.etree.ElementTree as ET
+from contextlib import AbstractContextManager
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from functools import wraps
 from pathlib import Path
 from urllib.parse import urlencode
 
 import requests
+import numpy as np
 
 VERSION = "acquisition-v2.1"
 RESERVED_STUDIES = {"GSE112372": "final_primary_holdout", "GSE214695": "transfer_holdout", "GSE226875": "transfer_holdout"}
@@ -38,16 +44,71 @@ def sha256(data: bytes) -> str:
 
 def write_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp = path.with_suffix(path.suffix + "." + uuid.uuid4().hex + ".tmp")
     tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     tmp.replace(path)
 
 
 def write_jsonl(path: Path, rows) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp = path.with_suffix(path.suffix + "." + uuid.uuid4().hex + ".tmp")
     tmp.write_text("".join(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n" for row in rows), encoding="utf-8")
     tmp.replace(path)
+
+
+class StageLease(AbstractContextManager):
+    """OS-released advisory lease; abnormal process exit cannot strand a writer."""
+    def __init__(self, path):
+        self.path, self.handle = Path(path), None
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.handle = self.path.open("a+b")
+        if self.path.stat().st_size == 0:
+            self.handle.write(b"\0")
+            self.handle.flush()
+        self.handle.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(self.handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as exc:
+            self.handle.close()
+            self.handle = None
+            raise RuntimeError("acquisition stage already has a writer: " + str(self.path)) from exc
+        return self
+
+    def __exit__(self, *args):
+        if self.handle:
+            self.handle.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(self.handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.handle.fileno(), fcntl.LOCK_UN)
+            self.handle.close()
+        return False
+
+
+def stage_lease(stage):
+    def decorate(function):
+        @wraps(function)
+        def wrapped(root, *args, **kwargs):
+            with StageLease(Path(root) / "locks" / (stage + ".lock")):
+                return function(root, *args, **kwargs)
+        return wrapped
+    return decorate
+
+
+class DeferredRetry(RuntimeError):
+    def __init__(self, url, wait_seconds, now):
+        self.next_eligible_at = datetime.fromtimestamp(now + wait_seconds, timezone.utc).isoformat()
+        self.wait_seconds = wait_seconds
+        super().__init__(f"deferred_retry: provider requested {wait_seconds:.1f}s; next_eligible_at={self.next_eligible_at}; url={url}")
 
 
 class SnapshotClient:
@@ -56,11 +117,12 @@ class SnapshotClient:
     Offline cache misses and corruption fail before constructing any session.
     Refresh never overwrites an old object. One writer owns each stage/root.
     """
-    def __init__(self, root, *, offline=False, refresh=False, session=None, sleep=time.sleep, max_bytes=40_000_000):
+    def __init__(self, root, *, offline=False, refresh=False, session=None, sleep=time.sleep, max_bytes=40_000_000, max_retry_wait=60, clock=time.time):
         self.root = Path(root)
         self.offline, self.refresh = offline, refresh
         self.session, self.sleep, self.max_bytes = session, sleep, max_bytes
         self.events = []
+        self.max_retry_wait, self.clock = max_retry_wait, clock
 
     def get(self, url, params=None):
         full = url + (("&" if "?" in url else "?") + urlencode(sorted(params.items())) if params else "")
@@ -84,8 +146,18 @@ class SnapshotClient:
                     status = response.status_code
                     if status == 429 or 500 <= status < 600:
                         retry = response.headers.get("Retry-After", "")
-                        delay = min(10, float(retry)) if re.fullmatch(r"\d+(\.\d+)?", retry) else min(8, 2 ** attempt)
+                        now = self.clock()
+                        if re.fullmatch(r"\d+(\.\d+)?", retry):
+                            delay = float(retry)
+                        else:
+                            try:
+                                retry_at = parsedate_to_datetime(retry)
+                                delay = max(0, retry_at.timestamp() - now)
+                            except (ValueError, TypeError, OverflowError):
+                                delay = min(8, 2 ** attempt)
                         self.events.append({"url": full, "status": status, "attempt": attempt, "retry_seconds": delay})
+                        if delay > self.max_retry_wait:
+                            raise DeferredRetry(full, delay, now)
                         response.raise_for_status()
                     response.raise_for_status()
                     chunks, total = [], 0
@@ -99,8 +171,18 @@ class SnapshotClient:
                     obj = self.root / "objects" / digest
                     obj.parent.mkdir(parents=True, exist_ok=True)
                     if not obj.exists():
-                        with obj.open("xb") as handle:
-                            handle.write(data)
+                        temporary = obj.with_suffix("." + uuid.uuid4().hex + ".tmp")
+                        temporary.write_bytes(data)
+                        # Hash-keyed destination is immutable: an existing equivalent
+                        # response may already have arrived from a different request.
+                        try:
+                            os.link(temporary, obj)
+                        except FileExistsError:
+                            pass
+                        finally:
+                            temporary.unlink()
+                    if sha256(obj.read_bytes()) != digest:
+                        raise ValueError("existing immutable object is corrupt")
                     meta = {"url": full, "sha256": digest, "size_bytes": len(data), "retrieved_at": datetime.now(timezone.utc).isoformat(), "status_code": status, "attempts": attempt, "content_type": response.headers.get("Content-Type"), "etag": response.headers.get("ETag"), "last_modified": response.headers.get("Last-Modified"), "object_path": str(obj.resolve())}
                     write_json(index, meta)
                     self.events.append(meta)
@@ -147,6 +229,7 @@ def parse_article(data: bytes) -> dict:
     return {"text": text, "text_sha256": sha256(text.encode()), "sections": spans, "license": [" ".join("".join(x.itertext()).split()) for x in root.iter("license")], "article_type": root.get("article-type"), "fulltext_status": "parsed"}
 
 
+@stage_lease("literature")
 def sync_literature(root, limit=200, fulltexts=50, offline=False, refresh=False):
     root = Path(root)
     client = SnapshotClient(root / "snapshots" / "literature", offline=offline, refresh=refresh)
@@ -280,6 +363,7 @@ def profile_capabilities(record, samples):
     record.update({"samples": samples, "capabilities": capabilities, "independent_units": len(donors) if donors and all(s.get("donor_id") for s in samples) else None, "independent_unit_status": "explicit_sample_donor_ids" if donors and all(s.get("donor_id") for s in samples) else "unknown", "groups": sorted({s["group"] for s in samples if s.get("group")}), "profile_status": "sample_annotations_parsed" if samples else "metadata_only"})
 
 
+@stage_lease("datasets")
 def sync_datasets(root, limit=100, profiles=30, offline=False, refresh=False):
     root = Path(root)
     client = SnapshotClient(root / "snapshots" / "datasets", offline=offline, refresh=refresh)
@@ -376,3 +460,155 @@ def sync_datasets(root, limit=100, profiles=30, offline=False, refresh=False):
     report = {"schema_version": VERSION, "requested_studies": limit, "accession_records": len(records), "unique_study_groups": unique, "cohort_overlap": "unresolved except explicit shared BioProject aliases; no claim all independent cohorts", "requested_profiles": profiles, "sample_profiles": profiled, "processed_studies": processed, "ena_run_metadata_records": len(ena_rows), "ena_additional_studies_counted": 0, "searches": searches, "failures": failures, "events": client.events, "offline": offline, "status": "PASS" if unique >= limit and profiled >= profiles and processed >= 2 and ena_rows else "FAIL"}
     write_json(root / "catalog" / "dataset_acquisition.json", report)
     return records, report
+
+
+def read_processed_matrix(snapshot: dict):
+    """Load a previously inspected bounded matrix, verifying its immutable bytes."""
+    raw = Path(snapshot["object_path"]).read_bytes()
+    if sha256(raw) != snapshot["sha256"]:
+        raise ValueError("matrix snapshot hash mismatch")
+    if raw[:2] == b"\x1f\x8b":
+        with gzip.GzipFile(fileobj=io.BytesIO(raw)) as handle:
+            raw = handle.read(250_000_001)
+        if len(raw) > 250_000_000:
+            raise ValueError("decompressed matrix exceeds bound")
+    table, samples, features, values = False, [], [], []
+    for row in csv.reader(io.StringIO(raw.decode("utf-8-sig")), delimiter="\t"):
+        if not row:
+            continue
+        if row[0] == "!series_matrix_table_begin":
+            table = True
+        elif row[0] == "!series_matrix_table_end":
+            table = False
+        elif table and not samples:
+            samples = row[1:]
+        elif table:
+            if len(row) != len(samples) + 1:
+                raise ValueError("matrix row width mismatch")
+            features.append(row[0])
+            values.append([float(v) if v not in ("", "null", "NA", "NaN", "nan") else np.nan for v in row[1:]])
+    matrix = np.asarray(values, dtype="<f8")
+    if not features or not samples or np.isinf(matrix).any():
+        raise ValueError("invalid processed matrix")
+    if len(features) != len(set(features)) or len(samples) != len(set(samples)):
+        raise ValueError("duplicate matrix identifiers")
+    return features, samples, matrix
+
+
+def align_same_study_partitions(partitions: list[dict], feature_order: list[str], sample_order: list[str]):
+    """Exact ID alignment under a source-bound same-study/units contract.
+
+    This joins disjoint sample columns, never estimates cohort independence,
+    pools effect sizes, imputes values, changes units or makes an orthology map.
+    """
+    if not partitions or len(set(feature_order)) != len(feature_order) or len(set(sample_order)) != len(sample_order):
+        raise ValueError("empty partitions or duplicate contract identifiers")
+    if any(len({p[key] for p in partitions}) != 1 for key in ("study_id", "units_contract", "source_matrix_sha256")):
+        raise ValueError("different study, source measurements, or units: NOT_COMBINABLE")
+    feature_set, observed = set(feature_order), set()
+    output = np.empty((len(feature_order), len(sample_order)), dtype="<f8")
+    sample_columns = {value: index for index, value in enumerate(sample_order)}
+    for partition in partitions:
+        features, samples = partition["feature_ids"], partition["sample_ids"]
+        values = np.asarray(partition["values"], dtype="<f8")
+        if values.shape != (len(features), len(samples)) or np.isinf(values).any():
+            raise ValueError("invalid partition dimensions or infinite values")
+        if len(set(features)) != len(features) or set(features) != feature_set:
+            raise ValueError("duplicate, missing or unexpected feature identifiers")
+        if len(set(samples)) != len(samples) or observed.intersection(samples):
+            raise ValueError("sample collision; duplicate observations cannot be combined")
+        if not set(samples).issubset(sample_columns):
+            raise ValueError("unexpected sample identifier")
+        observed.update(samples)
+        rows = {value: index for index, value in enumerate(features)}
+        aligned = values[[rows[value] for value in feature_order], :]
+        output[:, [sample_columns[value] for value in samples]] = aligned
+    if observed != set(sample_order):
+        raise ValueError("missing sample identifiers")
+    return output
+
+
+@stage_lease("numeric_integration")
+def run_numeric_alignment(root):
+    """Executed real-value demonstration, explicitly not independent-study pooling."""
+    root = Path(root)
+    inspections = [json.loads(line) for line in (root / "catalog" / "processed_inspections.jsonl").read_text(encoding="utf-8").splitlines()]
+    valid = [r for r in inspections if r["status"] == "PASS"]
+    if len({r["dataset_id"] for r in valid}) < 2:
+        raise ValueError("two distinct inspected studies required for positive and rejected integration")
+    first = valid[0]
+    other = next(r for r in valid if r["dataset_id"] != first["dataset_id"])
+    features, samples, matrix = read_processed_matrix(first["source_snapshot"])
+    shared = {"study_id": first["dataset_id"], "units_contract": "unchanged submitted series matrix values; no renormalization", "source_matrix_sha256": first["source_snapshot"]["sha256"]}
+    left = {**shared, "feature_ids": features, "sample_ids": samples[::2], "values": matrix[:, ::2]}
+    # Reverse one partition's feature order to exercise real identifier alignment.
+    right = {**shared, "feature_ids": features[::-1], "sample_ids": samples[1::2], "values": matrix[::-1, 1::2]}
+    aligned = align_same_study_partitions([right, left], features, samples)
+    equal = bool(np.array_equal(matrix, aligned, equal_nan=True))
+    rejected = []
+    for name, candidate in (
+        ("sample_collision", [left, left]),
+        ("missing_samples", [left]),
+        ("cross_study_and_platform_without_units_contract", [left, {**right, "study_id": other["dataset_id"], "source_matrix_sha256": other["source_snapshot"]["sha256"], "units_contract": other["units"]}]),
+    ):
+        try:
+            align_same_study_partitions(candidate, features, samples)
+        except ValueError as exc:
+            rejected.append({"case": name, "status": "NOT_COMBINABLE", "reason": str(exc)})
+        else:
+            raise AssertionError("invalid integration accepted: " + name)
+    report = {"schema_version": VERSION, "integration_mode": "DIRECT_COMBINE", "demonstration": "same-study exact sample/feature harmonization roundtrip on real measured values", "source_dataset": first["dataset_id"], "source_snapshot": first["source_snapshot"], "second_study_snapshot": other["source_snapshot"], "analysis_contract": shared, "sample_count": len(samples), "feature_count": len(features), "partitions": [len(left["sample_ids"]), len(right["sample_ids"])], "feature_reordering_exercised": True, "discarded_features": 0, "imputed_values": 0, "independent_cohort_pooling": False, "source_values_sha256": sha256(matrix.tobytes()), "aligned_values_sha256": sha256(aligned.tobytes()), "exact_values_and_missingness_preserved": equal, "rejected_integrations": rejected, "limitations": ["Engineered partitions of one real source matrix demonstrate the alignment operation, not a new biological result or independent replication.", "Cross-study numerical pooling remains unsupported without compatible units, design and an estimand contract."], "status": "PASS" if equal and len(rejected) == 3 else "FAIL"}
+    write_json(root / "catalog" / "numeric_integration.json", report)
+    return report
+
+
+def audit_offline_recovery(root):
+    """Block sockets/HTTP, interrupt both source stages, resume and compare bytes.
+
+    Fault injection is process local and only exercises this supplied data root.
+    Live acquisition must already have captured the requested expanded coverage.
+    """
+    import socket
+    from unittest.mock import patch
+
+    root = Path(root)
+    original_get = SnapshotClient.get
+    stages = [("literature", sync_literature, "literature.jsonl", (200, 50)), ("datasets", sync_datasets, "studies.jsonl", (100, 30))]
+    network_attempts, results = [], []
+    def blocked(*args, **kwargs):
+        network_attempts.append("attempted")
+        raise AssertionError("network forbidden by offline audit")
+    started = time.perf_counter()
+    with patch.object(socket.socket, "connect", blocked), patch.object(socket, "create_connection", blocked), patch.object(requests.sessions.Session, "request", blocked):
+        for name, sync, filename, counts in stages:
+            # Establish deterministic current-parser bytes before interruption.
+            _, baseline = sync(root, *counts, offline=True)
+            before = sha256((root / "catalog" / filename).read_bytes())
+            calls = []
+            def interrupt(client, *args, **kwargs):
+                result = original_get(client, *args, **kwargs)
+                calls.append(result[1]["sha256"])
+                if len(calls) == 3:
+                    raise KeyboardInterrupt("task-owned interruption after 3 verified snapshots")
+                return result
+            interrupted = False
+            with patch.object(SnapshotClient, "get", interrupt):
+                try:
+                    sync(root, *counts, offline=True)
+                except KeyboardInterrupt:
+                    interrupted = True
+            _, resumed = sync(root, *counts, offline=True)
+            after = sha256((root / "catalog" / filename).read_bytes())
+            rows = [json.loads(line) for line in (root / "catalog" / filename).read_text(encoding="utf-8").splitlines()]
+            identity = "document_id" if name == "literature" else "dataset_id"
+            unique = len({r[identity] for r in rows}) == len(rows)
+            results.append({"stage": name, "interrupted": interrupted, "verified_objects_before_interruption": calls, "before_sha256": before, "after_sha256": after, "normalized_records_identical": before == after, "no_duplicate_identities": unique, "resume_status": resumed["status"], "status": "PASS" if interrupted and unique and before == after and baseline["status"] == resumed["status"] == "PASS" else "FAIL"})
+    objects = []
+    for namespace in ("literature", "datasets"):
+        for obj in (root / "snapshots" / namespace / "objects").iterdir():
+            if len(obj.name) == 64:
+                objects.append({"path": str(obj), "sha256": obj.name, "size_bytes": obj.stat().st_size, "valid": sha256(obj.read_bytes()) == obj.name})
+    report = {"schema_version": VERSION, "network_blockers": ["socket.socket.connect", "socket.create_connection", "requests.sessions.Session.request"], "network_attempts": len(network_attempts), "elapsed_seconds": time.perf_counter() - started, "stages": results, "immutable_objects_verified": len(objects), "invalid_objects": [r for r in objects if not r["valid"]], "object_manifest_sha256": sha256(json.dumps(objects, sort_keys=True).encode()), "status": "PASS" if not network_attempts and all(r["status"] == "PASS" for r in results) and all(r["valid"] for r in objects) else "FAIL"}
+    write_json(root / "catalog" / "acquisition_offline_recovery.json", report)
+    write_json(root / "catalog" / "source_object_manifest.json", objects)
+    return report

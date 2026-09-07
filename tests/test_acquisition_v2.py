@@ -1,10 +1,13 @@
 import gzip
 import json
+import subprocess
+import sys
 
 import pytest
 import requests
+import numpy as np
 
-from litdatamatcher.acquisition_v2 import SnapshotClient, parse_article, parse_series_matrix, profile_capabilities
+from litdatamatcher.acquisition_v2 import DeferredRetry, SnapshotClient, StageLease, align_same_study_partitions, parse_article, parse_series_matrix, profile_capabilities
 
 
 class Response:
@@ -49,6 +52,46 @@ def test_retry_after_transient_and_network_free_replay(tmp_path, monkeypatch):
     monkeypatch.setattr(requests, "Session", lambda: pytest.fail("offline attempted network session"))
     assert SnapshotClient(tmp_path, offline=True).get("https://example.test/resource")[0] == data
     assert len(list((tmp_path / "objects").iterdir())) == 1
+
+
+def test_retry_after_long_and_http_date_honored_or_deferred(tmp_path):
+    delays = []
+    session = Session(Response(429, headers={"Retry-After": "30"}), Response())
+    SnapshotClient(tmp_path / "numeric", session=session, sleep=delays.append).get("https://example.test/a")
+    assert delays == [30]
+    session = Session(Response(429, headers={"Retry-After": "120"}), Response())
+    with pytest.raises(DeferredRetry, match="next_eligible_at") as error:
+        SnapshotClient(tmp_path / "defer", session=session, sleep=delays.append, clock=lambda: 0).get("https://example.test/a")
+    assert error.value.next_eligible_at == "1970-01-01T00:02:00+00:00"
+    assert session.calls == 1
+    session = Session(Response(503, headers={"Retry-After": "Thu, 01 Jan 1970 00:00:40 GMT"}), Response())
+    SnapshotClient(tmp_path / "date", session=session, sleep=delays.append, clock=lambda: 10).get("https://example.test/a")
+    assert delays == [30, 30]
+
+
+def test_stage_lease_prevents_duplicate_writers_and_releases(tmp_path):
+    with StageLease(tmp_path / "writer.lock"):
+        with pytest.raises(RuntimeError, match="already has a writer"):
+            with StageLease(tmp_path / "writer.lock"):
+                pytest.fail("second writer entered")
+    with StageLease(tmp_path / "writer.lock"):
+        pass
+
+
+def test_killed_writer_os_lease_can_resume(tmp_path):
+    path = tmp_path / "interrupted.lock"
+    script = "import sys,time;from litdatamatcher.acquisition_v2 import StageLease\nwith StageLease(sys.argv[1]):\n print('locked',flush=True)\n time.sleep(30)\n"
+    process = subprocess.Popen([sys.executable, "-c", script, str(path)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        assert process.stdout.readline().strip() == "locked"
+        with pytest.raises(RuntimeError, match="already has a writer"):
+            with StageLease(path):
+                pytest.fail("accepted competing owner")
+    finally:
+        process.kill()
+        process.communicate(timeout=5)
+    with StageLease(path):
+        pass
 
 
 def test_interrupted_download_never_installs_partial_object(tmp_path):
@@ -133,3 +176,20 @@ def test_paragraph_spans_recover_qualifiers_without_duplication():
     assert result["text"].count("Unknown donor linkage.") == 1
     with pytest.raises(ValueError, match="body missing"):
         parse_article(b"<article><front/></article>")
+
+
+def test_exact_alignment_preserves_values_and_missingness_and_rejects_invalid():
+    base = {"study_id": "GSE1", "units_contract": "same array units", "source_matrix_sha256": "a"}
+    p1 = {**base, "feature_ids": ["b", "a"], "sample_ids": ["s1"], "values": [[2.0], [float("nan")]]}
+    p2 = {**base, "feature_ids": ["a", "b"], "sample_ids": ["s2"], "values": [[3.0], [4.0]]}
+    aligned = align_same_study_partitions([p2, p1], ["a", "b"], ["s1", "s2"])
+    assert np.array_equal(aligned, [[float("nan"), 3], [2, 4]], equal_nan=True)
+    for key in ("study_id", "units_contract", "source_matrix_sha256"):
+        with pytest.raises(ValueError, match="NOT_COMBINABLE"):
+            align_same_study_partitions([p1, {**p2, key: "different"}], ["a", "b"], ["s1", "s2"])
+    with pytest.raises(ValueError, match="collision"):
+        align_same_study_partitions([p1, p1], ["a", "b"], ["s1", "s2"])
+    with pytest.raises(ValueError, match="missing sample"):
+        align_same_study_partitions([p1], ["a", "b"], ["s1", "s2"])
+    with pytest.raises(ValueError, match="feature"):
+        align_same_study_partitions([p1, {**p2, "feature_ids": ["c", "b"]}], ["a", "b"], ["s1", "s2"])

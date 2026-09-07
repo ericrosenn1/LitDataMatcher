@@ -67,6 +67,7 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     preservation_path = data.parent / "preservation" / "manifest.json"
     delivery_path = data / "release" / "delivery_validation.json"
     security_path = data / "evaluation" / "security_validation.json"
+    concurrency_path = data / "evaluation" / "concurrency" / "final" / "concurrency_validation.json"
     full_junit_path = data / "tests" / "post-acceptance-full.xml"
     controller_junit_path = data / "evaluation" / "E03_controller_independent.xml"
     reservation_path = source / "benchmarks" / "v2" / "final_holdout_reservation_v3.json"
@@ -86,6 +87,7 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     preservation, preservation_problem = _json_array(preservation_path)
     delivery, delivery_problem = _json_object(delivery_path)
     security, security_problem = _json_object(security_path)
+    concurrency, concurrency_problem = _json_object(concurrency_path)
     reservation, reservation_problem = _json_object(reservation_path)
     state, state_problem = _json_object(state_path)
     runs = _run_manifests(data / "runs")
@@ -155,6 +157,20 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
         delivery_path,
         security_path,
     )
+    if (
+        not concurrency_problem
+        and concurrency.get("status") == "PASS"
+        and concurrency.get("overlap_seconds", 0) > 0
+        and len(concurrency.get("jobs", [])) >= 2
+        and all(job.get("exit_code") == 0 for job in concurrency["jobs"])
+    ):
+        replace(
+            "G13",
+            "overlapping_jobs",
+            "PASS",
+            "Two independent contract suites executed concurrently with a measured overlap and successful numeric exits.",
+            concurrency_path,
+        )
 
     # G05--G06: qualification is useful only if it records a fresh local runtime
     # and an extractive, source-anchored claim.  This does not elevate a later

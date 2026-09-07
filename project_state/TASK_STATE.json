@@ -4,11 +4,11 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T11:45:06.781721+00:00",
+  "updated_at": "2026-09-07T12:26:36.1300857Z",
   "execution_status": "RUNNING",
   "product_status": "NOT_READY",
-  "automation_status": "PREPARED_NOT_ENABLED",
-  "calibration_status": "PENDING_EXPERT_LABELS",
+  "automation_status": "VERIFIED_ENABLED",
+  "calibration_status": "SOURCE_ASSISTED_EVALUATION",
   "source": {
     "repository": "ericrosenn1/LitDataMatcher",
     "original_root": "C:\\Codex\\2026-05-31\\github-plugin-github-openai-curated-can\\work\\LitDataMatcher",
@@ -24,7 +24,7 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "EXECUTION_POLICY_TRANSITION",
+  "current_phase": "PRE_HOLDOUT_GATE_REVIEW",
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
@@ -36,7 +36,7 @@
     {
       "id": "W01",
       "name": "Architecture and scientific contracts",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": [
         "docs/v2/EXECUTION_OVERRIDE.md"
       ]
@@ -53,43 +53,43 @@
     {
       "id": "W03",
       "name": "External-component qualification and reuse",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
       "id": "W04",
       "name": "Local data plane",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
       "id": "W05",
       "name": "Literature acquisition and parsing",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
       "id": "W06",
       "name": "Semantic evidence extraction",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
       "id": "W07",
       "name": "Question and requirement discovery",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
       "id": "W08",
       "name": "Dataset acquisition and capability profiling",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
       "id": "W09",
       "name": "Evidence compilation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "evidence": []
     },
     {
@@ -100,29 +100,29 @@
     }
   ],
   "coverage": {
-    "unique_literature_records": 0,
-    "parsed_full_texts": 0,
-    "unique_accession_studies": 0,
-    "sample_profiled_studies": 0,
-    "inspected_processed_studies": 0,
-    "external_structured_resources": 0,
-    "distinct_pilot_contexts": 0,
-    "case_dossiers": 0
+    "unique_literature_records": 200,
+    "parsed_full_texts": 50,
+    "unique_accession_studies": 111,
+    "sample_profiled_studies": 31,
+    "inspected_processed_studies": 3,
+    "external_structured_resources": 1,
+    "distinct_pilot_contexts": 2,
+    "case_dossiers": 20
   },
   "blockers": [],
   "next_action": {
-    "description": "Follow docs/v2/EXECUTION_OVERRIDE.md; continue unfinished runtime qualification and evaluation with Terra High workers, then real v2 integration under selected Sol/Terra High lead.",
+    "description": "Complete independent pre-holdout gate review, close any evidence gaps, then execute the newly frozen untouched holdout once.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "python -m litdatamatcher.v2 doctor --root C:/Codex/LitDataMatcher-v2/data",
-    "command_tested": true
+    "command": "python -m pytest -q; python -m litdatamatcher.v2 acceptance --evidence C:\\Codex\\LitDataMatcher-v2\\data\\acceptance\\ACCEPTANCE_EVIDENCE.json --out C:\\Codex\\LitDataMatcher-v2\\data\\acceptance\\ACCEPTANCE_REPORT.json",
+    "command_tested": false
   },
   "checkpoint": {
-    "last_source_commit": "31da244320b2f2b28991f10c305d1ae2c8fd1971",
-    "last_verified_remote_commit": "31da244320b2f2b28991f10c305d1ae2c8fd1971",
-    "push_pending": true
+    "last_source_commit": "14c44e971142324b477e73cee9e496be3de3b075",
+    "last_verified_remote_commit": "14c44e971142324b477e73cee9e496be3de3b075",
+    "push_pending": false
   },
   "milestones": {
-    "functional_alpha_run": null,
+    "functional_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\hardened-alpha-candidate-01",
     "hardened_alpha_run": null,
     "final_holdout_run": null
   },

@@ -332,6 +332,12 @@ def validate_acceptance(
         for check in validated["checks"]:
             checks_by_target[check["target"]].append(check)
 
+    run_ids = {entry["manifest"]["run_id"] for entry in validated_runs}
+    if len(run_ids) == 1:
+        report["run_id"] = next(iter(run_ids))
+    elif run_ids:
+        report["run_id"] = "multiple-validated-runs"
+
     report["evidence_fingerprint"] = _fingerprint(validated_runs)
     report["coverage"] = _coverage(validated_runs)
     _apply_gate_results(report, checks_by_target, faults)

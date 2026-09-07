@@ -29,6 +29,15 @@ def test_file_only_evidence_cannot_promote_a_gate(tmp_path):
     report = validate_acceptance(tmp_path / "ACCEPTANCE_EVIDENCE.json")
 
     assert report["gates"]["G05"]["status"] == "NOT_RUN"
+
+
+def test_validated_single_run_populates_report_run_id(tmp_path):
+    _write_run(tmp_path, execution_status="PASS")
+    _write_ledger(tmp_path, checks=[])
+
+    report = validate_acceptance(tmp_path / "ACCEPTANCE_EVIDENCE.json")
+
+    assert report["run_id"] == "run-1"
     assert report["product_status"] == "NOT_READY"
 
 

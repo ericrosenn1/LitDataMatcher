@@ -1,0 +1,251 @@
+{
+  "spec_id": "LITDATAMATCHER_V2_CODEX_BUILD_20260907",
+  "spec_version": "2.0.0",
+  "prepared_date": "2026-09-07",
+  "artifact_type": "build_assignment_not_application",
+  "repository": "ericrosenn1/LitDataMatcher",
+  "preferred_branch": "codex/litdatamatcher-v2-build",
+  "authority": {
+    "master": "01_MASTER_CODEX_BUILD_PROMPT.md",
+    "scientific_architecture": "02_FINAL_ARCHITECTURE_SPEC.md",
+    "validation": "08_VALIDATION_AND_ACCEPTANCE_GATES.md",
+    "milestones": "09_FUNCTIONAL_ALPHA_DEFINITION.md"
+  },
+  "workstreams": [
+    {
+      "id": "W01",
+      "name": "Architecture and scientific contracts"
+    },
+    {
+      "id": "W02",
+      "name": "Repository preservation and migration"
+    },
+    {
+      "id": "W03",
+      "name": "External-component qualification and reuse"
+    },
+    {
+      "id": "W04",
+      "name": "Local data plane"
+    },
+    {
+      "id": "W05",
+      "name": "Literature acquisition and parsing"
+    },
+    {
+      "id": "W06",
+      "name": "Semantic evidence extraction"
+    },
+    {
+      "id": "W07",
+      "name": "Question and requirement discovery"
+    },
+    {
+      "id": "W08",
+      "name": "Dataset acquisition and capability profiling"
+    },
+    {
+      "id": "W09",
+      "name": "Evidence compilation"
+    },
+    {
+      "id": "W10",
+      "name": "Matching, evaluation, ranking and delivery"
+    }
+  ],
+  "development_agents": {
+    "allowed": "Codex-native only",
+    "excluded_applications": [
+      "OpenCode",
+      "Muse"
+    ],
+    "repeat_auxiliary_benchmarks": false,
+    "independent_review_required": true,
+    "roles_are_not_fixed_concurrency": true
+  },
+  "model_preferences": {
+    "initial_display_name": "GPT-6 Astra",
+    "initial_reasoning": "High",
+    "effective_model_id": "discover_in_installed_client",
+    "effort_policy": "highest_sustainable",
+    "higher_effort_when_justified": [
+      "Extra High",
+      "Max"
+    ],
+    "ultra_allowed": false,
+    "speed_preference": "Standard",
+    "new_paid_api_budget_usd": 0,
+    "bypass_subscription_limits": false,
+    "local_application_models_allowed": true
+  },
+  "git_policy": {
+    "checkpoint_commits": true,
+    "wip_commits": true,
+    "push_verified_development_branch": true,
+    "force_push": false,
+    "merge_main": false,
+    "publish_remote_release": false,
+    "change_visibility": false,
+    "push_secrets_or_bulk_data": false,
+    "preserve_newer_local_work": true
+  },
+  "time_policy": {
+    "wall_clock_deadline": null,
+    "minimum_runtime_days": null,
+    "continuous_productive_work": true,
+    "interim_checkpoints_days": [
+      7,
+      14
+    ],
+    "checkpoints_are_deadlines": false,
+    "stop_at_first_functional_alpha": false
+  },
+  "review_minima": {
+    "substantive_passes_per_central_worker": 2,
+    "distinct_integrated_rounds": 3,
+    "no_material_gain_development_rounds_before_closeout": 2
+  },
+  "coverage_minima": {
+    "functional_alpha": {
+      "unique_literature_records": 50,
+      "parsed_full_texts": 20,
+      "unique_accession_studies": 50,
+      "sample_profiled_studies": 20,
+      "inspected_processed_studies": 1,
+      "external_structured_resources": 1
+    },
+    "hardened_alpha": {
+      "unique_literature_records": 200,
+      "parsed_full_texts": 50,
+      "unique_accession_studies": 100,
+      "sample_profiled_studies": 30,
+      "inspected_processed_studies": 2,
+      "external_structured_resources": 1,
+      "distinct_pilot_contexts": 2,
+      "case_dossiers": 6
+    }
+  },
+  "required_product_gates": [
+    {
+      "id": "G01",
+      "name": "Installation and user inputs"
+    },
+    {
+      "id": "G02",
+      "name": "Real literature"
+    },
+    {
+      "id": "G03",
+      "name": "Real dataset catalog"
+    },
+    {
+      "id": "G04",
+      "name": "Capabilities and data files"
+    },
+    {
+      "id": "G05",
+      "name": "Real semantic runtime"
+    },
+    {
+      "id": "G06",
+      "name": "Evidence and normalization"
+    },
+    {
+      "id": "G07",
+      "name": "Questions and dated gaps"
+    },
+    {
+      "id": "G08",
+      "name": "Experimental matching"
+    },
+    {
+      "id": "G09",
+      "name": "Evidence compiler"
+    },
+    {
+      "id": "G10",
+      "name": "Evaluation and ranking"
+    },
+    {
+      "id": "G11",
+      "name": "Incremental and offline"
+    },
+    {
+      "id": "G12",
+      "name": "Failure recovery"
+    },
+    {
+      "id": "G13",
+      "name": "Resource and concurrency"
+    },
+    {
+      "id": "G14",
+      "name": "Scientific and engineering review"
+    },
+    {
+      "id": "G15",
+      "name": "User-facing outputs and security"
+    },
+    {
+      "id": "G16",
+      "name": "Delivery and readiness"
+    }
+  ],
+  "functional_modes": [
+    "automatic_literature_gap_discovery",
+    "explicit_question",
+    "new_local_document",
+    "independent_literature_sync",
+    "independent_dataset_sync",
+    "offline_cached_replay",
+    "offline_fresh_local_inference"
+  ],
+  "evidence_integration_modes": [
+    "DIRECT_COMBINE",
+    "HARMONIZED_COMBINE",
+    "EVIDENCE_SYNTHESIS",
+    "CONTEXT_ONLY_OR_UNRESOLVED",
+    "NOT_COMBINABLE"
+  ],
+  "initial_scope": {
+    "primary_default": "human inflammatory-response perturbational transcriptomics",
+    "transfer_default": "related gut/IBD transcriptomics",
+    "scope_is_configurable": true,
+    "dataset_sources": [
+      "GEO",
+      "SRA or ENA"
+    ],
+    "all_world_data_required": false
+  },
+  "supervision": {
+    "default_cadence_hours": 1,
+    "created_by_this_package": false,
+    "local_access_required": true,
+    "actual_repair_and_resume_test_required": true,
+    "healthy_status_only_reports": false,
+    "respect_user_pause": true,
+    "share_lead_lease": true,
+    "disable_at_closeout": true
+  },
+  "readiness_axes": {
+    "product": [
+      "NOT_READY",
+      "FUNCTIONAL_ALPHA_AVAILABLE",
+      "HARDENED_ALPHA_READY",
+      "BLOCKED_EXTERNAL_PREREQUISITE"
+    ],
+    "automation": [
+      "NOT_CONFIGURED",
+      "PREPARED_NOT_ENABLED",
+      "VERIFIED_ENABLED",
+      "PAUSED",
+      "UNAVAILABLE",
+      "DISABLED_AT_COMPLETION"
+    ],
+    "calibration": [
+      "PENDING_EXPERT_LABELS",
+      "SOURCE_ASSISTED_EVALUATION",
+      "EXPERT_CALIBRATED"
+    ]
+  }
+}

@@ -47,7 +47,7 @@ Run:
 
 ```bash
 python -m pytest
-python -m compileall litdatamatcher data_worker.py lit_gpu_worker.py matcher.py orchestrator.py
+python -m compileall litdatamatcher
 python -m litdatamatcher.cli demo --out run/demo
 python -m litdatamatcher.cli report --run-dir run/demo
 ```

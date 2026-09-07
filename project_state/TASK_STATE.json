@@ -1,0 +1,125 @@
+{
+  "schema_version": "2.0",
+  "spec_id": "LITDATAMATCHER_V2_CODEX_BUILD_20260907",
+  "spec_version": "2.0.0",
+  "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
+  "build_id": "litdatamatcher-v2-20260907",
+  "updated_at": "2026-09-07T11:17:47.227985+00:00",
+  "execution_status": "RUNNING",
+  "product_status": "NOT_READY",
+  "automation_status": "NOT_CONFIGURED",
+  "calibration_status": "PENDING_EXPERT_LABELS",
+  "source": {
+    "repository": "ericrosenn1/LitDataMatcher",
+    "original_root": "C:\\Codex\\2026-05-31\\github-plugin-github-openai-curated-can\\work\\LitDataMatcher",
+    "lead_worktree": "C:\\Codex\\LitDataMatcher-v2\\lead",
+    "base_commit": "48ef6580efccf55578dd865cb7154cfa34c5a872",
+    "branch": "codex/litdatamatcher-v2-build",
+    "source_digest": "0c8567df5a7b2cfbfa939615441e378944fba15afc7a04b2cc858ab29bf4d083",
+    "preservation_verified": true
+  },
+  "coordination": {
+    "canonical_state_root": "C:\\Codex\\LitDataMatcher-v2\\data\\controller",
+    "job_store": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\jobs.sqlite3",
+    "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
+    "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
+  },
+  "current_phase": "BOOTSTRAP",
+  "manual_pause": false,
+  "stop_requested": false,
+  "capacity": {
+    "status": "UNKNOWN",
+    "verified_reset_at": null,
+    "source": null
+  },
+  "workstreams": [
+    {
+      "id": "W01",
+      "name": "Architecture and scientific contracts",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W02",
+      "name": "Repository preservation and migration",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W03",
+      "name": "External-component qualification and reuse",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W04",
+      "name": "Local data plane",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W05",
+      "name": "Literature acquisition and parsing",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W06",
+      "name": "Semantic evidence extraction",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W07",
+      "name": "Question and requirement discovery",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W08",
+      "name": "Dataset acquisition and capability profiling",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W09",
+      "name": "Evidence compilation",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W10",
+      "name": "Matching, evaluation, ranking and delivery",
+      "status": "NOT_STARTED",
+      "evidence": []
+    }
+  ],
+  "coverage": {
+    "unique_literature_records": 0,
+    "parsed_full_texts": 0,
+    "unique_accession_studies": 0,
+    "sample_profiled_studies": 0,
+    "inspected_processed_studies": 0,
+    "external_structured_resources": 0,
+    "distinct_pilot_contexts": 0,
+    "case_dossiers": 0
+  },
+  "blockers": [],
+  "next_action": {
+    "description": "Install isolated baseline environment, run regressions, delegate runtime and acquisition writers.",
+    "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
+    "command": "uv sync --extra dev",
+    "command_tested": false
+  },
+  "checkpoint": {
+    "last_source_commit": null,
+    "last_verified_remote_commit": null,
+    "push_pending": false
+  },
+  "milestones": {
+    "functional_alpha_run": null,
+    "hardened_alpha_run": null,
+    "final_holdout_run": null
+  },
+  "stop_reason": null
+}

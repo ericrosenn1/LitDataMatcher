@@ -1,0 +1,100 @@
+LitDataMatcher schema vocabulary review
+=======================================
+
+Purpose
+-------
+This note flags project-specific vocabulary that may shape how reviewers,
+collaborators, or future annotators interpret the system. These are not standard
+biomedical terms unless explicitly noted; they are local labels used to keep the
+pipeline inspectable.
+
+Renamed in this pass
+--------------------
+extraction_type -> question_origin
+  Reason: "question_origin" better describes where the candidate question came
+  from: an explicit question, a future-direction statement, a limitation-derived
+  gap, or an unspecified source.
+
+confidence -> extraction_confidence
+  Scope: renamed only for literature extraction and evidence spans.
+  Reason: plain "confidence" was too broad and could be confused with model
+  certainty, reviewer confidence, dataset quality, or statistical confidence.
+
+answerability_hint -> answerability
+  Reason: the shorter term is clearer. It should still be read as a heuristic
+  project score, not proof that a question is answerable.
+
+Terms that may deserve future review
+------------------------------------
+expert_question_quality
+  Current meaning: human-entered review score for question quality.
+  Potential issue: "expert" may imply a specialist has already reviewed every
+  row. Consider "question_quality_score" or "review_question_quality".
+
+expert_data_match_quality
+  Current meaning: human-entered review score for how well a dataset matches a
+  question.
+  Potential issue: same "expert" ambiguity. Consider "data_match_quality_score"
+  or "review_data_match_quality".
+
+expert_notes
+  Current meaning: free-text notes from a reviewer.
+  Potential issue: could simply be "review_notes".
+
+QuestionLabel.label
+  Current meaning: broad annotation decision field.
+  Potential issue: "label" is too generic. Consider "question_decision" or
+  "question_label_type" once annotation guidelines are written.
+
+quality_score
+  Current meaning: coarse dataset metadata-quality score.
+  Potential issue: broad phrase. Consider "dataset_quality_score" if the field
+  becomes user-facing or appears in tables.
+
+semantic_relevance
+  Current meaning: lexical/semantic similarity component in ranking.
+  Potential issue: current implementation is mostly deterministic lexical
+  fallback logic. Avoid implying deep semantic understanding until embedding or
+  model-based matching is added and validated.
+
+feasibility
+  Current meaning: whether dataset metadata suggests a plausible analysis path.
+  Potential issue: broad. In narrative text, prefer "analysis feasibility" or
+  "match feasibility".
+
+governance
+  Current meaning: access, license, reuse, and human-subject risk context.
+  Potential issue: acceptable if defined, but broad in isolation. In tables,
+  "reuse_governance" may read more clearly.
+
+uncertainty_penalty
+  Current meaning: ranking penalty from weak or uncertain literature synthesis.
+  Potential issue: not statistical uncertainty. Keep docs clear that this is a
+  ranking heuristic.
+
+novelty_score and significance_score
+  Current meaning: deterministic heuristic scores used for triage.
+  Potential issue: these can sound like validated scientific claims. Public
+  documentation should call them project-derived triage scores until benchmarked.
+
+capability_type
+  Current meaning: class of direct or derived dataset capability.
+  Potential issue: needs a controlled vocabulary before large annotation work.
+
+DerivedVariableRule
+  Current meaning: a cataloged possibility that a variable could be derived from
+  available fields.
+  Potential issue: readers may assume calculations are performed. Documentation
+  should keep saying this records likely derivability, not computed results.
+
+Recommended naming posture
+--------------------------
+Use concrete names when possible:
+  - "extraction_confidence" instead of "confidence" for extractor certainty.
+  - "match_relevance" instead of "expert_relevance" for pair-level relevance.
+  - "question_origin" instead of "extraction_type" for candidate genesis.
+  - "answerability" only with caveats that it is a heuristic score.
+
+Keep "expert" only where the field truly requires a human reviewer or specialist
+label. For general model outputs, prefer neutral terms such as "review",
+"annotation", "label", "match", or "score".

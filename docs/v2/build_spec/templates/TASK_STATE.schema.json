@@ -1,0 +1,641 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:litdatamatcher:task-state:2.0",
+  "title": "LitDataMatcher build state, not a process controller",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "spec_id",
+    "spec_version",
+    "spec_digest",
+    "build_id",
+    "updated_at",
+    "execution_status",
+    "product_status",
+    "automation_status",
+    "calibration_status",
+    "source",
+    "coordination",
+    "current_phase",
+    "manual_pause",
+    "stop_requested",
+    "capacity",
+    "workstreams",
+    "coverage",
+    "blockers",
+    "next_action",
+    "checkpoint",
+    "milestones",
+    "stop_reason"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "spec_id": {
+      "const": "LITDATAMATCHER_V2_CODEX_BUILD_20260907"
+    },
+    "spec_version": {
+      "const": "2.0.0"
+    },
+    "spec_digest": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "build_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "updated_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "execution_status": {
+      "enum": [
+        "TEMPLATE_NOT_RUNNING",
+        "BOOTSTRAP",
+        "RUNNING",
+        "WAITING_FOR_CAPACITY",
+        "WAITING_FOR_ACCESS",
+        "PAUSED_BY_USER",
+        "BLOCKED",
+        "COMPLETE"
+      ]
+    },
+    "product_status": {
+      "enum": [
+        "NOT_READY",
+        "FUNCTIONAL_ALPHA_AVAILABLE",
+        "HARDENED_ALPHA_READY",
+        "BLOCKED_EXTERNAL_PREREQUISITE"
+      ]
+    },
+    "automation_status": {
+      "enum": [
+        "NOT_CONFIGURED",
+        "PREPARED_NOT_ENABLED",
+        "VERIFIED_ENABLED",
+        "PAUSED",
+        "UNAVAILABLE",
+        "DISABLED_AT_COMPLETION"
+      ]
+    },
+    "calibration_status": {
+      "enum": [
+        "PENDING_EXPERT_LABELS",
+        "SOURCE_ASSISTED_EVALUATION",
+        "EXPERT_CALIBRATED"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "repository",
+        "original_root",
+        "lead_worktree",
+        "base_commit",
+        "branch",
+        "source_digest",
+        "preservation_verified"
+      ],
+      "properties": {
+        "repository": {
+          "const": "ericrosenn1/LitDataMatcher"
+        },
+        "preservation_verified": {
+          "type": "boolean"
+        },
+        "original_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lead_worktree": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "base_commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_digest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "coordination": {
+      "type": "object",
+      "required": [
+        "canonical_state_root",
+        "job_store",
+        "integration_lease_reference",
+        "lead_identity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "canonical_state_root": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "job_store": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "integration_lease_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lead_identity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "current_phase": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manual_pause": {
+      "type": "boolean"
+    },
+    "stop_requested": {
+      "type": "boolean"
+    },
+    "capacity": {
+      "type": "object",
+      "required": [
+        "status",
+        "verified_reset_at",
+        "source"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "UNKNOWN",
+            "AVAILABLE",
+            "LIMITED",
+            "EXHAUSTED"
+          ]
+        },
+        "verified_reset_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "workstreams": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "W01",
+              "W02",
+              "W03",
+              "W04",
+              "W05",
+              "W06",
+              "W07",
+              "W08",
+              "W09",
+              "W10"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "NOT_STARTED",
+              "IN_PROGRESS",
+              "BLOCKED",
+              "IMPLEMENTED",
+              "VALIDATED"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W01"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W02"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W03"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W04"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W05"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W06"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W07"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W08"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W09"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "const": "W10"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "unique_literature_records",
+        "parsed_full_texts",
+        "unique_accession_studies",
+        "sample_profiled_studies",
+        "inspected_processed_studies",
+        "external_structured_resources",
+        "distinct_pilot_contexts",
+        "case_dossiers"
+      ],
+      "properties": {
+        "unique_literature_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parsed_full_texts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unique_accession_studies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_profiled_studies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inspected_processed_studies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "external_structured_resources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "distinct_pilot_contexts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "case_dossiers": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "requires_user"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "requires_user": {
+            "type": "boolean"
+          },
+          "affected_workstreams": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "required": [
+        "description",
+        "cwd",
+        "command",
+        "command_tested"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "cwd": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "command_tested": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "last_source_commit",
+        "last_verified_remote_commit",
+        "push_pending"
+      ],
+      "properties": {
+        "last_source_commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_verified_remote_commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "push_pending": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "milestones": {
+      "type": "object",
+      "required": [
+        "functional_alpha_run",
+        "hardened_alpha_run",
+        "final_holdout_run"
+      ],
+      "properties": {
+        "functional_alpha_run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hardened_alpha_run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "final_holdout_run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "stop_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_status": {
+            "const": "COMPLETE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "product_status": {
+            "const": "HARDENED_ALPHA_READY"
+          },
+          "stop_reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "manual_pause": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_status": {
+            "enum": [
+              "PAUSED_BY_USER",
+              "TEMPLATE_NOT_RUNNING"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

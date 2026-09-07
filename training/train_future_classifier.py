@@ -4,7 +4,8 @@ train_future_classifier.py
 Trains the Option A "strong future-direction" classifier used by lit_analyzer.py
 """
 
-import os, argparse, json, csv
+import os, argparse, json, csv, sys
+from pathlib import Path
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
@@ -12,7 +13,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_auc_score
 from joblib import dump
 
-# --- import helpers from your analyzer (same dir) ---------------------------
+# --- import helpers from the archived analyzer ------------------------------
+REPO_ROOT = Path(__file__).resolve().parents[1]
+LEGACY_LITERATURE_DIR = REPO_ROOT / "archive" / "legacy_literature"
+if str(LEGACY_LITERATURE_DIR) not in sys.path:
+    sys.path.insert(0, str(LEGACY_LITERATURE_DIR))
+
 from lit_analyzer import ensure_sentence_embedder, build_future_features
 
 # ---------------------------------------------------------------------------
@@ -45,7 +51,7 @@ def read_labeled_examples(path: str):
     return examples
 
 
-def train_classifier(examples, out_path="models/future_strong.joblib"):
+def train_classifier(examples, out_path=str(REPO_ROOT / "models" / "legacy" / "future_strong.joblib")):
     print(f"[INFO] Building embeddings for {len(examples)} examples...")
 
     # sentences + labels
@@ -78,7 +84,11 @@ def train_classifier(examples, out_path="models/future_strong.joblib"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", required=True, help="Path to labeled CSV or JSONL with fields sentence,text,label")
-    ap.add_argument("--out", default="models/future_strong.joblib", help="Output model path")
+    ap.add_argument(
+        "--out",
+        default=str(REPO_ROOT / "models" / "legacy" / "future_strong.joblib"),
+        help="Output model path",
+    )
     args = ap.parse_args()
 
     examples = read_labeled_examples(args.data)

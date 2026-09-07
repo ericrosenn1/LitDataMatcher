@@ -19,12 +19,14 @@ def cluster_questions(
         placed = False
         for cluster in clusters:
             representative = cluster[0]
+            # Use the first question as a stable representative for deterministic clustering.
             similarity = lexical_similarity(
                 question.normalized_question, representative.normalized_question
             )
             shared_variables = set(question.required_variables) & set(
                 representative.required_variables
             )
+            # Shared required variables can join moderately similar wording into one gap.
             if similarity >= similarity_threshold or (similarity >= 0.35 and shared_variables):
                 cluster.append(question)
                 placed = True
@@ -44,14 +46,19 @@ def synthesize_question_cluster(cluster: list[QuestionCandidate]) -> EvidenceSyn
     for question in cluster:
         for term in question.domain_terms:
             terms[term] += 1
+    # Top terms make the synthesis summary inspectable without re-reading every sentence.
     top_terms = [term for term, _ in sorted(terms.items(), key=lambda item: item[1], reverse=True)[:5]]
 
     support_count = len(all_evidence)
+    # Recurrence is a source-diversity signal, not a formal meta-analytic effect size.
     recurrence_score = min(1.0, len(source_ids) / 5.0)
-    mean_confidence = (
-        sum(question.confidence for question in cluster) / len(cluster) if cluster else 0.0
+    mean_extraction_confidence = (
+        sum(question.extraction_confidence for question in cluster) / len(cluster)
+        if cluster
+        else 0.0
     )
-    evidence_strength = min(1.0, 0.5 * mean_confidence + 0.5 * recurrence_score)
+    # Evidence strength blends extraction confidence with independent-source recurrence.
+    evidence_strength = min(1.0, 0.5 * mean_extraction_confidence + 0.5 * recurrence_score)
     uncertainty = max(0.05, 1.0 - evidence_strength)
     summary = (
         f"{len(cluster)} question candidate(s) across {len(source_ids)} source(s)"
@@ -87,5 +94,6 @@ def synthesis_index(syntheses: Iterable[EvidenceSynthesis]) -> dict[str, Evidenc
     index: dict[str, EvidenceSynthesis] = {}
     for synthesis in syntheses:
         for question_id in synthesis.question_ids:
+            # Ranking looks up each question's cluster-level evidence through this index.
             index[question_id] = synthesis
     return index

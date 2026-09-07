@@ -26,6 +26,7 @@ class PipelineStore:
     def initialize(self) -> None:
         """Create tables if they do not already exist."""
 
+        # WAL improves local read/write behavior without changing the database schema.
         self.conn.executescript(
             """
             PRAGMA journal_mode=WAL;
@@ -57,6 +58,7 @@ class PipelineStore:
             );
             """
         )
+        # Store a schema version so future migrations can be explicit.
         self.conn.execute(
             "INSERT OR REPLACE INTO metadata(key, value) VALUES(?, ?)",
             ("schema_version", str(SCHEMA_VERSION)),
@@ -68,6 +70,19 @@ class PipelineStore:
 
         self.conn.close()
 
+    def reset_run_tables(self) -> None:
+        """Clear per-run tables before writing a fresh pipeline run."""
+
+        self.conn.executescript(
+            """
+            DELETE FROM matches;
+            DELETE FROM syntheses;
+            DELETE FROM datasets;
+            DELETE FROM questions;
+            """
+        )
+        self.conn.commit()
+
     def store_questions(self, questions: Iterable[QuestionCandidate]) -> None:
         """Upsert question candidates."""
 
@@ -77,6 +92,7 @@ class PipelineStore:
             VALUES(?, ?, ?)
             """,
             [
+                # Full JSON payloads preserve nested evidence while columns support lookup.
                 (question.question_id, question.question, json.dumps(question.to_dict(), sort_keys=True))
                 for question in questions
             ],
@@ -149,6 +165,7 @@ def write_jsonl(path: str | Path, rows: Iterable[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
+            # Sorted keys keep JSONL artifacts stable across reproducible runs.
             handle.write(json.dumps(row, sort_keys=True) + "\n")
 
 
@@ -164,5 +181,6 @@ def read_jsonl(path: str | Path) -> list[dict]:
             try:
                 rows.append(json.loads(line))
             except json.JSONDecodeError as exc:
+                # Include the row number so malformed catalogs/reports are easy to fix.
                 raise ValueError(f"Invalid JSONL at {path}:{line_number}: {exc}") from exc
     return rows

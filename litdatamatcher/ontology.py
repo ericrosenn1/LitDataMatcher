@@ -29,6 +29,7 @@ class OntologyConcept:
 
 
 CONCEPTS: tuple[OntologyConcept, ...] = (
+    # Concept labels are used downstream as stable variable names.
     OntologyConcept(
         "LDM:AGE",
         "age",
@@ -117,6 +118,7 @@ CONCEPTS: tuple[OntologyConcept, ...] = (
 
 CANONICAL_BY_LABEL = {concept.label: concept for concept in CONCEPTS}
 TERM_TO_LABEL = {
+    # Synonym lookup keeps raw metadata comparable to canonical labels.
     term: concept.label
     for concept in CONCEPTS
     for term in concept.all_terms()
@@ -144,6 +146,7 @@ def normalize_variable_name(value: str) -> str:
     if spaced in TERM_TO_LABEL:
         return TERM_TO_LABEL[spaced]
     for term, label in TERM_TO_LABEL.items():
+        # Substring matching catches noisy field names but should stay well tested.
         if term in raw or normalize_token(term) in normalized:
             return label
     return normalized
@@ -161,6 +164,7 @@ def infer_concepts_from_text(text: str) -> list[str]:
     lowered = str(text or "").lower()
     hits: list[str] = []
     for concept in CONCEPTS:
+        # Text inference is recall-oriented; later nodes handle feasibility and caveats.
         if any(term in lowered for term in concept.all_terms()):
             hits.append(concept.label)
     return hits
@@ -173,6 +177,7 @@ def explain_variable_match(required: list[str], available: set[str]) -> dict[str
     available_norm = {normalize_variable_name(item) for item in available}
     present = sorted(set(required_norm) & available_norm)
     missing = sorted(set(required_norm) - available_norm)
+    # Questions without explicit variables receive a neutral low-information score.
     coverage = len(present) / max(1, len(set(required_norm))) if required_norm else 0.45
     return {
         "coverage": round(coverage, 3),

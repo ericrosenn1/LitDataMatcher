@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Iterable, Protocol
 
+from .provenance import curated_catalog_provenance
 from .schemas import DatasetRecord, DatasetVariable, QuestionCandidate, stable_id
 from .text import extract_domain_terms, infer_population, infer_required_variables, lexical_similarity
 
@@ -31,6 +32,24 @@ def _var(name: str, category: str, count: int, completeness: float, *synonyms: s
     )
 
 
+def _cap(name: str, category: str, count: int, completeness: float, *synonyms: str) -> DatasetVariable:
+    """Build a study-design or ML-readiness capability variable."""
+
+    return _var(name, category, count, completeness, *synonyms)
+
+
+def _capability_annotations(*entries: dict[str, object]) -> dict[str, object]:
+    """Return conservative curated capability metadata for review surfaces."""
+
+    return {
+        "capability_annotations": list(entries),
+        "capability_caveats": [
+            "Curated capability metadata is a review aid, not evidence of raw data access or analysis readiness.",
+            "Study-specific source inspection is required before treating proxy capabilities as answerable variables.",
+        ],
+    }
+
+
 class CuratedBiomedicalCatalogAdapter:
     """Offline biomedical catalog used for deterministic demos and tests.
 
@@ -43,6 +62,7 @@ class CuratedBiomedicalCatalogAdapter:
     name = "curated_biomedical_catalog"
 
     def __init__(self) -> None:
+        # Curated records are deterministic stand-ins for future live database adapters.
         self.records = [
             DatasetRecord(
                 dataset_id="qiita_microbiome_antibiotics_longitudinal",
@@ -58,7 +78,11 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("antibiotic_exposure", "exposure", 900, 0.72, "antibiotics"),
                     _var("body_site", "metadata", 1500, 0.95, "sample_site"),
                     _var("age", "metadata", 1200, 0.82),
-                    _var("timepoint", "metadata", 850, 0.7, "visit"),
+                    _var("timepoint", "temporal_structure", 850, 0.7, "visit"),
+                    _cap("sample_size", "study_design_feature", 2000, 0.95, "cohort_size"),
+                    _cap("longitudinal_time", "temporal_structure", 850, 0.7, "timepoint"),
+                    _cap("predictor", "derived_or_proxy_capability", 1500, 0.55, "feature", "16s_feature"),
+                    _cap("covariate", "metadata_variable", 1200, 0.65, "age", "body_site"),
                 ],
                 populations=["human", "adult", "pediatric"],
                 organisms=["human-associated microbiome"],
@@ -67,6 +91,26 @@ class CuratedBiomedicalCatalogAdapter:
                 license="varies by study",
                 access_type="public metadata with study-specific access",
                 quality_score=0.78,
+                metadata=_capability_annotations(
+                    {
+                        "capability": "sample_size",
+                        "capability_type": "study_design_feature",
+                        "support": "direct_metadata",
+                        "evidence": "Curated record carries study-level sample_size.",
+                    },
+                    {
+                        "capability": "longitudinal_time",
+                        "capability_type": "temporal_structure",
+                        "support": "direct_metadata",
+                        "evidence": "Description and variables indicate longitudinal sampling/timepoint metadata.",
+                    },
+                    {
+                        "capability": "predictor",
+                        "capability_type": "derived_or_proxy_capability",
+                        "support": "proxy",
+                        "evidence": "Microbiome profiles may serve as features after source-specific processing.",
+                    },
+                ),
             ),
             DatasetRecord(
                 dataset_id="mgnify_human_gut_metagenomics",
@@ -82,6 +126,9 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("body_site", "metadata", 4800, 0.85),
                     _var("disease_activity", "phenotype", 900, 0.45, "IBD"),
                     _var("age", "metadata", 2500, 0.55),
+                    _cap("sample_size", "study_design_feature", 5000, 0.95, "cohort_size"),
+                    _cap("predictor", "derived_or_proxy_capability", 5000, 0.6, "feature", "metagenomic_feature"),
+                    _cap("covariate", "metadata_variable", 2500, 0.45, "age", "body_site"),
                 ],
                 populations=["human", "adult"],
                 organisms=["human gut microbiome"],
@@ -90,6 +137,20 @@ class CuratedBiomedicalCatalogAdapter:
                 license="open metadata",
                 access_type="public",
                 quality_score=0.82,
+                metadata=_capability_annotations(
+                    {
+                        "capability": "sample_size",
+                        "capability_type": "study_design_feature",
+                        "support": "direct_metadata",
+                        "evidence": "Curated record carries study-level sample_size.",
+                    },
+                    {
+                        "capability": "predictor",
+                        "capability_type": "derived_or_proxy_capability",
+                        "support": "proxy",
+                        "evidence": "Metagenomic profiles may serve as model features after study-specific processing.",
+                    },
+                ),
             ),
             DatasetRecord(
                 dataset_id="geo_ibd_transcriptomics",
@@ -105,6 +166,11 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("disease_activity", "phenotype", 1600, 0.78, "inflammation"),
                     _var("treatment", "clinical", 900, 0.62, "therapy"),
                     _var("outcome", "clinical", 850, 0.58, "response"),
+                    _cap("sample_size", "study_design_feature", 1800, 0.95, "cohort_size"),
+                    _cap("predictor", "derived_or_proxy_capability", 1800, 0.68, "feature", "gene_expression_feature"),
+                    _cap("class_label", "supervised_learning_label", 1600, 0.55, "label", "outcome_label", "disease_state"),
+                    _cap("outcome_label", "evaluation_outcome", 850, 0.58, "label", "response"),
+                    _cap("covariate", "metadata_variable", 900, 0.5, "treatment", "disease_activity"),
                 ],
                 populations=["human", "adult", "pediatric"],
                 organisms=["human"],
@@ -113,6 +179,26 @@ class CuratedBiomedicalCatalogAdapter:
                 license="public repository terms",
                 access_type="public",
                 quality_score=0.8,
+                metadata=_capability_annotations(
+                    {
+                        "capability": "predictor",
+                        "capability_type": "derived_or_proxy_capability",
+                        "support": "proxy",
+                        "evidence": "Transcriptomic measurements may serve as features after source-specific normalization.",
+                    },
+                    {
+                        "capability": "class_label",
+                        "capability_type": "supervised_learning_label",
+                        "support": "partial_metadata",
+                        "evidence": "Disease state and treatment response labels are represented in curated metadata.",
+                    },
+                    {
+                        "capability": "outcome_label",
+                        "capability_type": "evaluation_outcome",
+                        "support": "partial_metadata",
+                        "evidence": "Outcome/response metadata is curated but must be checked per GEO series.",
+                    },
+                ),
             ),
             DatasetRecord(
                 dataset_id="clinicaltrials_ibd_interventions",
@@ -129,6 +215,10 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("age", "metadata", 1200, 0.85),
                     _var("sex", "metadata", 900, 0.65),
                     _var("disease_activity", "phenotype", 1000, 0.7),
+                    _cap("sample_size", "study_design_feature", 1200, 0.95, "cohort_size"),
+                    _cap("outcome_label", "evaluation_outcome", 1200, 0.9, "label", "endpoint"),
+                    _cap("class_label", "supervised_learning_label", 1200, 0.45, "label", "study_arm", "outcome_label"),
+                    _cap("covariate", "metadata_variable", 1200, 0.72, "eligibility", "age", "sex"),
                 ],
                 populations=["human", "adult", "pediatric"],
                 organisms=["human"],
@@ -137,6 +227,20 @@ class CuratedBiomedicalCatalogAdapter:
                 license="public domain US government work",
                 access_type="public",
                 quality_score=0.74,
+                metadata=_capability_annotations(
+                    {
+                        "capability": "outcome_label",
+                        "capability_type": "evaluation_outcome",
+                        "support": "direct_registry_metadata",
+                        "evidence": "Registry records include outcome/end point definitions.",
+                    },
+                    {
+                        "capability": "class_label",
+                        "capability_type": "supervised_learning_label",
+                        "support": "partial_metadata",
+                        "evidence": "Study arms/outcomes can define labels, but patient-level analysis data are not implied.",
+                    },
+                ),
             ),
             DatasetRecord(
                 dataset_id="metabolomics_workbench_gut_inflammation",
@@ -152,6 +256,10 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("diet", "exposure", 300, 0.55, "nutrition"),
                     _var("disease_activity", "phenotype", 450, 0.58),
                     _var("treatment", "clinical", 250, 0.42),
+                    _cap("sample_size", "study_design_feature", 700, 0.9, "cohort_size"),
+                    _cap("predictor", "derived_or_proxy_capability", 700, 0.62, "feature", "metabolomic_feature"),
+                    _cap("outcome_label", "evaluation_outcome", 450, 0.45, "label", "disease_activity"),
+                    _cap("covariate", "metadata_variable", 300, 0.48, "diet", "treatment"),
                 ],
                 populations=["human", "mouse"],
                 organisms=["human", "mouse"],
@@ -160,8 +268,24 @@ class CuratedBiomedicalCatalogAdapter:
                 license="varies by study",
                 access_type="public metadata with study-specific files",
                 quality_score=0.72,
+                metadata=_capability_annotations(
+                    {
+                        "capability": "predictor",
+                        "capability_type": "derived_or_proxy_capability",
+                        "support": "proxy",
+                        "evidence": "Metabolite abundances may serve as model features after source-specific processing.",
+                    },
+                    {
+                        "capability": "outcome_label",
+                        "capability_type": "evaluation_outcome",
+                        "support": "partial_metadata",
+                        "evidence": "Disease activity metadata may support labels in some studies.",
+                    },
+                ),
             ),
         ]
+        for record in self.records:
+            _attach_curated_catalog_provenance(record)
 
     def search(self, query: str) -> list[DatasetRecord]:
         """Return catalog records with lexical or variable overlap."""
@@ -170,6 +294,7 @@ class CuratedBiomedicalCatalogAdapter:
         query_vars = set(infer_required_variables(query))
         scored: list[tuple[float, DatasetRecord]] = []
         for record in self.records:
+            # Blend text, inferred-variable, and domain-term signals for transparent ranking.
             text_score = lexical_similarity(query, record.searchable_text())
             var_score = len(query_vars & record.variable_aliases()) / max(1, len(query_vars))
             term_score = len(query_terms & set(extract_domain_terms(record.searchable_text(), 20))) / max(
@@ -205,6 +330,7 @@ def classify_dataset_record(raw: dict) -> DatasetRecord:
     source = raw.get("source") or raw.get("repository") or "unknown"
     variables = raw.get("variables")
     if not variables:
+        # Sparse external metadata still becomes usable by inferring a minimal variable list.
         variables = [
             {"name": variable, "category": "inferred", "observed_count": 0, "completeness": 0.5}
             for variable in infer_required_variables(f"{title} {description}")
@@ -228,6 +354,21 @@ def classify_dataset_record(raw: dict) -> DatasetRecord:
     )
 
 
+def _attach_curated_catalog_provenance(record: DatasetRecord) -> None:
+    """Attach advisory provenance to built-in offline catalog records."""
+
+    metadata = dict(record.metadata or {})
+    metadata.setdefault(
+        "source_provenance",
+        curated_catalog_provenance(
+            dataset_id=record.dataset_id,
+            source_name=record.source,
+            source_url=record.url,
+        ).to_dict(),
+    )
+    record.metadata = metadata
+
+
 def load_dataset_catalog(path: str | Path) -> list[DatasetRecord]:
     """Load a JSONL dataset catalog into validated records."""
 
@@ -238,6 +379,7 @@ def load_dataset_catalog(path: str | Path) -> list[DatasetRecord]:
             if not line:
                 continue
             try:
+                # Row-specific errors make catalog curation easier to debug.
                 records.append(classify_dataset_record(json.loads(line)))
             except (json.JSONDecodeError, ValueError) as exc:
                 raise ValueError(f"Invalid dataset catalog row {line_number}: {exc}") from exc
@@ -249,6 +391,7 @@ def default_adapters(catalog_path: str | Path | None = None) -> list[DataSourceA
 
     adapters: list[DataSourceAdapter] = [CuratedBiomedicalCatalogAdapter()]
     if catalog_path:
+        # User catalogs take precedence while the curated catalog remains a fallback.
         adapters.insert(0, JsonlCatalogAdapter(catalog_path))
     return adapters
 
@@ -273,6 +416,7 @@ def discover_datasets_for_question(
     records: list[DatasetRecord] = []
     for adapter in adapters:
         for record in adapter.search(query):
+            # Adapter outputs are deduplicated by stable dataset IDs before ranking.
             if record.dataset_id not in seen:
                 seen.add(record.dataset_id)
                 records.append(record)
@@ -300,6 +444,7 @@ def summarize_dataset_matches(topic: str, top_n: int = 5) -> dict:
     total_samples = 0
     quality_scores: list[float] = []
     for record in records:
+        # The worker summary is intentionally compact for streaming/status displays.
         total_samples += record.sample_size
         quality_scores.append(record.quality_score)
         for variable in record.variables:

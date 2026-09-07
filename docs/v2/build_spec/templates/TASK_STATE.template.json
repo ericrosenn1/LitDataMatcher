@@ -1,0 +1,125 @@
+{
+  "schema_version": "2.0",
+  "spec_id": "LITDATAMATCHER_V2_CODEX_BUILD_20260907",
+  "spec_version": "2.0.0",
+  "spec_digest": null,
+  "build_id": null,
+  "updated_at": null,
+  "execution_status": "TEMPLATE_NOT_RUNNING",
+  "product_status": "NOT_READY",
+  "automation_status": "NOT_CONFIGURED",
+  "calibration_status": "PENDING_EXPERT_LABELS",
+  "source": {
+    "repository": "ericrosenn1/LitDataMatcher",
+    "original_root": null,
+    "lead_worktree": null,
+    "base_commit": null,
+    "branch": null,
+    "source_digest": null,
+    "preservation_verified": false
+  },
+  "coordination": {
+    "canonical_state_root": null,
+    "job_store": null,
+    "integration_lease_reference": null,
+    "lead_identity": null
+  },
+  "current_phase": "BOOTSTRAP",
+  "manual_pause": false,
+  "stop_requested": false,
+  "capacity": {
+    "status": "UNKNOWN",
+    "verified_reset_at": null,
+    "source": null
+  },
+  "workstreams": [
+    {
+      "id": "W01",
+      "name": "Architecture and scientific contracts",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W02",
+      "name": "Repository preservation and migration",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W03",
+      "name": "External-component qualification and reuse",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W04",
+      "name": "Local data plane",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W05",
+      "name": "Literature acquisition and parsing",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W06",
+      "name": "Semantic evidence extraction",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W07",
+      "name": "Question and requirement discovery",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W08",
+      "name": "Dataset acquisition and capability profiling",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W09",
+      "name": "Evidence compilation",
+      "status": "NOT_STARTED",
+      "evidence": []
+    },
+    {
+      "id": "W10",
+      "name": "Matching, evaluation, ranking and delivery",
+      "status": "NOT_STARTED",
+      "evidence": []
+    }
+  ],
+  "coverage": {
+    "unique_literature_records": 0,
+    "parsed_full_texts": 0,
+    "unique_accession_studies": 0,
+    "sample_profiled_studies": 0,
+    "inspected_processed_studies": 0,
+    "external_structured_resources": 0,
+    "distinct_pilot_contexts": 0,
+    "case_dossiers": 0
+  },
+  "blockers": [],
+  "next_action": {
+    "description": "Resolve active project and verify package before initializing live state.",
+    "cwd": null,
+    "command": null,
+    "command_tested": false
+  },
+  "checkpoint": {
+    "last_source_commit": null,
+    "last_verified_remote_commit": null,
+    "push_pending": false
+  },
+  "milestones": {
+    "functional_alpha_run": null,
+    "hardened_alpha_run": null,
+    "final_holdout_run": null
+  },
+  "stop_reason": null
+}

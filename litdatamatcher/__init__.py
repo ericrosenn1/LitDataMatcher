@@ -9,23 +9,43 @@ kept as thin executable entrypoints around these modules.
 from .schemas import (
     DatasetRecord,
     DatasetVariable,
+    DatasetCapability,
+    DerivedCapabilityLabel,
+    DerivedVariableRule,
     Evidence,
     EvidenceSynthesis,
+    EvidenceSpanLabel,
+    ExpertPaperAnnotation,
     MatchCandidate,
     MatchScore,
     QuestionCandidate,
+    QuestionDataMatchLabel,
+    QuestionLabel,
+    QuestionQualityScore,
     stable_id,
 )
+from .capability_registry import DEFAULT_DERIVED_RULES, capability_summary, infer_dataset_capabilities
 from .ontology import normalize_variable_name
 
 __all__ = [
+    "DEFAULT_DERIVED_RULES",
     "DatasetRecord",
     "DatasetVariable",
+    "DatasetCapability",
+    "DerivedCapabilityLabel",
+    "DerivedVariableRule",
     "Evidence",
     "EvidenceSynthesis",
+    "EvidenceSpanLabel",
+    "ExpertPaperAnnotation",
     "MatchCandidate",
     "MatchScore",
     "QuestionCandidate",
+    "QuestionDataMatchLabel",
+    "QuestionLabel",
+    "QuestionQualityScore",
+    "capability_summary",
+    "infer_dataset_capabilities",
     "stable_id",
     "normalize_variable_name",
 ]

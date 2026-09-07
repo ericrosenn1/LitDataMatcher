@@ -1,0 +1,237 @@
+import json
+
+from litdatamatcher.adapters import (
+    GEODatasetAdapter,
+    MGnifyDatasetAdapter,
+    PubMedLiteratureAdapter,
+    search_dataset_sources,
+    search_literature_sources,
+)
+from litdatamatcher.capability_registry import (
+    CAPABILITY_VOCABULARY,
+    capability_summary,
+    infer_dataset_capabilities,
+)
+from litdatamatcher.cli import main
+from litdatamatcher.datasets import CuratedBiomedicalCatalogAdapter, classify_dataset_record
+from litdatamatcher.provenance import summarize_source_provenance
+from litdatamatcher.storage import read_jsonl, write_jsonl
+
+
+class FakeClient:
+    def __init__(self, payloads):
+        self.payloads = list(payloads)
+        self.calls = []
+
+    def get_json(self, url, params=None, **kwargs):
+        self.calls.append((url, params or {}))
+        return self.payloads.pop(0)
+
+    def get_text(self, url, params=None, **kwargs):
+        self.calls.append((url, params or {}))
+        return self.payloads.pop(0)
+
+
+def test_pubmed_literature_adapter_normalizes_esummary_rows():
+    client = FakeClient(
+        [
+            {"esearchresult": {"idlist": ["123"]}},
+            {
+                "result": {
+                    "123": {
+                        "title": "Microbiome recovery after antibiotics",
+                        "pubdate": "2025 Jan",
+                        "articleids": [{"idtype": "doi", "value": "10.1/example"}],
+                    }
+                }
+            },
+            """<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID>123</PMID>
+      <Article>
+        <Journal><Title>Example Journal</Title><JournalIssue><PubDate><Year>2025</Year></PubDate></JournalIssue></Journal>
+        <ArticleTitle>Microbiome recovery after antibiotics</ArticleTitle>
+        <Abstract><AbstractText>Future studies should examine longitudinal recovery.</AbstractText></Abstract>
+        <AuthorList><Author><LastName>Smith</LastName><Initials>J</Initials></Author></AuthorList>
+      </Article>
+    </MedlineCitation>
+    <PubmedData><ArticleIdList><ArticleId IdType="doi">10.1/xml</ArticleId></ArticleIdList></PubmedData>
+  </PubmedArticle>
+</PubmedArticleSet>""",
+        ]
+    )
+
+    rows = PubMedLiteratureAdapter(client).search_literature("microbiome", limit=5)
+
+    assert rows[0]["source_id"] == "pubmed:123"
+    assert rows[0]["abstract"] == "Future studies should examine longitudinal recovery."
+    assert rows[0]["doi"] == "10.1/xml"
+    assert rows[0]["year"] == 2025
+    assert rows[0]["metadata"]["authors"] == ["Smith J"]
+
+
+def test_geo_dataset_adapter_normalizes_dataset_records():
+    client = FakeClient(
+        [
+            {"esearchresult": {"idlist": ["200"]}},
+            {
+                "result": {
+                    "200": {
+                        "accession": "GSE200",
+                        "title": "IBD transcriptomics",
+                        "summary": "RNA-seq study of treatment response.",
+                        "gdstype": "Expression profiling by high throughput sequencing",
+                        "n_samples": "42",
+                    }
+                }
+            },
+        ]
+    )
+
+    records = GEODatasetAdapter(client).search("IBD transcriptomics")
+
+    assert records[0].dataset_id == "GSE200"
+    assert records[0].source == "GEO"
+    assert records[0].sample_size == 42
+    assert any(variable.name == "transcriptomics" for variable in records[0].variables)
+
+
+def test_mgnify_dataset_adapter_normalizes_json_api_rows():
+    client = FakeClient(
+        [
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "accession": "MGYS0001",
+                        "study_name": "Gut microbiome study",
+                        "abstract": "Metagenomic profiles from human gut samples.",
+                        "sample_count": 12,
+                        "experiment_type": "metagenomics",
+                    }
+                ]
+            }
+        ]
+    )
+
+    records = MGnifyDatasetAdapter(client).search("gut microbiome")
+
+    assert records[0].dataset_id == "MGYS0001"
+    assert records[0].source == "MGnify"
+    assert records[0].sample_size == 12
+    assert records[0].variables[0].name == "microbiome_composition"
+    assert "api/v2/studies" in client.calls[0][0]
+
+
+def test_search_helpers_deduplicate_and_limit_rows():
+    literature_client = FakeClient(
+        [
+            {"esearchresult": {"idlist": ["1", "2"]}},
+            {
+                "result": {
+                    "1": {"title": "One", "articleids": []},
+                    "2": {"title": "Two", "articleids": []},
+                }
+            },
+            "<PubmedArticleSet />",
+        ]
+    )
+    dataset_client = FakeClient(
+        [
+            {"esearchresult": {"idlist": ["1"]}},
+            {"result": {"1": {"accession": "GSE1", "title": "One", "summary": "RNA-seq"}}},
+        ]
+    )
+
+    literature = search_literature_sources("query", ["pubmed"], client=literature_client, limit=1)
+    datasets = search_dataset_sources("query", ["geo"], client=dataset_client, limit=1)
+
+    assert len(literature) == 1
+    assert len(datasets) == 1
+
+
+def test_curated_catalog_records_carry_advisory_source_provenance():
+    record = CuratedBiomedicalCatalogAdapter().records[0]
+    provenance = record.metadata["source_provenance"]
+    summary = summarize_source_provenance([record.to_dict()])
+
+    assert provenance["source_type"] == "curated_biomedical_catalog"
+    assert provenance["content_scope"] == "dataset_metadata"
+    assert provenance["acquisition_method"] == "bundled_curated_catalog"
+    assert provenance["status"] == "warning"
+    assert summary["records_without_provenance"] == 0
+    assert summary["source_types"]["curated_biomedical_catalog"] == 1
+
+
+def test_curated_catalog_separates_capability_categories():
+    records = {record.dataset_id: record for record in CuratedBiomedicalCatalogAdapter().records}
+    qiita = records["qiita_microbiome_antibiotics_longitudinal"]
+    geo = records["geo_ibd_transcriptomics"]
+
+    qiita_categories = {variable.name: variable.category for variable in qiita.variables}
+    geo_categories = {variable.name: variable.category for variable in geo.variables}
+
+    assert qiita_categories["sample_size"] == "study_design_feature"
+    assert qiita_categories["longitudinal_time"] == "temporal_structure"
+    assert qiita_categories["predictor"] == "derived_or_proxy_capability"
+    assert geo_categories["class_label"] == "supervised_learning_label"
+    assert geo_categories["outcome_label"] == "evaluation_outcome"
+    assert qiita.metadata["capability_caveats"]
+    assert geo.metadata["capability_annotations"]
+
+
+def test_capability_vocabulary_contains_ml_readiness_terms():
+    assert CAPABILITY_VOCABULARY["sample_size"]["category"] == "study_design_feature"
+    assert CAPABILITY_VOCABULARY["class_label"]["category"] == "supervised_learning_label"
+    assert CAPABILITY_VOCABULARY["predictor"]["category"] == "derived_or_proxy_capability"
+    assert CAPABILITY_VOCABULARY["prediction_performance"]["category"] == "evaluation_outcome"
+
+
+def test_capability_registry_infers_observed_and_derived_capabilities():
+    dataset = classify_dataset_record(
+        {
+            "dataset_id": "clinical-1",
+            "title": "Treatment outcome cohort",
+            "source": "Example",
+            "variables": [
+                {"name": "treatment", "category": "clinical", "completeness": 0.9},
+                {"name": "outcome", "category": "clinical", "completeness": 0.8},
+                {"name": "timepoint", "category": "design", "completeness": 0.7},
+            ],
+        }
+    )
+
+    capabilities = infer_dataset_capabilities(dataset)
+    variables = {capability.variable_name for capability in capabilities}
+    summary = capability_summary(capabilities)
+
+    assert "treatment" in variables
+    assert "treatment_response" in variables
+    assert "longitudinal_change" in variables
+    assert summary["vocabulary_terms"]
+    assert summary["capabilities_by_type"]["derived"] >= 2
+
+
+def test_capability_export_cli_writes_capability_jsonl(tmp_path, capsys):
+    dataset = classify_dataset_record(
+        {
+            "dataset_id": "clinical-1",
+            "title": "Treatment outcome cohort",
+            "source": "Example",
+            "variables": [
+                {"name": "treatment", "category": "clinical", "completeness": 0.9},
+                {"name": "outcome", "category": "clinical", "completeness": 0.8},
+            ],
+        }
+    )
+    datasets_path = tmp_path / "datasets.jsonl"
+    out_path = tmp_path / "capabilities.jsonl"
+    write_jsonl(datasets_path, [dataset.to_dict()])
+
+    result = main(["capability-export", "--datasets", str(datasets_path), "--out", str(out_path)])
+    captured = json.loads(capsys.readouterr().out)
+
+    assert result == 0
+    assert captured["capabilities"] >= 3
+    assert any(row["capability_type"] == "derived" for row in read_jsonl(out_path))

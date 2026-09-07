@@ -10,8 +10,22 @@ dist/
 build/
 out_lit/
 run/
+local/
+outputs/
+artifacts/
+*.parquet
+*.arrow
+*.pkl
+*.joblib
 *.sqlite
 *.sqlite3
 *.db
 *.log
 rejected_sentences.txt
+
+# v2 local scientific payloads and runtime assets
+data/legacy_training/*.csv
+data/legacy_fixtures/papers/*.pdf
+*.safetensors
+*.gguf
+*.bin

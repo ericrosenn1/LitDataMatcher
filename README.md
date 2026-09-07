@@ -11,10 +11,13 @@ questions from text, normalizing their data requirements, discovering relevant
 public datasets, and ranking the most plausible question-dataset pairs for
 expert review.
 
-The current implementation is a functional research-software foundation. It is
-offline and reproducible by default, produces auditable JSONL/SQLite artifacts,
-and is organized into explicit scientific nodes that can be independently
-tested, benchmarked, replaced, or extended.
+The current implementation is a local research-software scaffold and
+deterministic pipeline foundation. It is offline and reproducible by default,
+produces auditable JSONL/SQLite artifacts, and is organized into explicit
+scientific nodes that can be independently tested, benchmarked, replaced, or
+extended. It is not yet a validated biomedical discovery engine, not yet
+calibrated on a large expert-labeled corpus, and not yet validated at scale on
+large PMC/database corpora.
 
 ## What It Does Today
 
@@ -29,6 +32,13 @@ LitDataMatcher currently supports:
   antibiotic exposure, microbiome composition, transcriptomics, metabolomics,
   disease activity, treatment, outcomes, and timepoints.
 - Dataset discovery through a curated offline biomedical catalog.
+- Optional live metadata adapters for PubMed/OpenAlex literature search and
+  ClinicalTrials.gov/GEO/MGnify dataset discovery.
+- Source/provenance-aware ingestion and review metadata that distinguish full
+  text, abstract-only records, metadata-only records, dataset metadata, and
+  derived capability catalog entries.
+- Dataset capability and derived-variable export for observed versus plausibly
+  derivable fields.
 - Dataset metadata normalization into stable `DatasetRecord` objects.
 - Governance and reuse-risk scoring for access, license, and human-subject
   concerns.
@@ -39,7 +49,8 @@ LitDataMatcher currently supports:
 - Expert review exports as CSV and JSONL.
 - Evaluation utilities for question-extraction and ranking benchmarks.
 - Manuscript-style Markdown reports for run summaries.
-- A legacy streaming orchestrator for live topic-level demos.
+- Preserved legacy streaming and literature prototypes for provenance and
+  future cannibalization.
 
 ## Scientific Workflow
 
@@ -65,12 +76,13 @@ The repository has two execution paths:
 
 - `litdatamatcher` package: the recommended reproducible pipeline for research
   and publication-oriented analyses.
-- Top-level worker scripts: streaming subprocess entrypoints used by
-  `orchestrator.py` for topic-level demonstrations and resource-management
-  experiments.
+- `workflows/legacy_streaming/`: archived streaming subprocess entrypoints used
+  for earlier topic-level demonstrations and resource-management experiments.
 
-The package path should be used for serious analyses. The orchestrator path is
-kept for live demos and future distributed-worker development.
+The package path should be used for serious analyses. Legacy literature code is
+preserved under `archive/legacy_literature/`, training experiments under
+`training/`, and historical data/model artifacts under `data/legacy_training/`
+and `models/legacy/`.
 
 ## Installation
 
@@ -109,13 +121,74 @@ python -m litdatamatcher.cli demo --out run/demo
 Run on a JSONL literature corpus:
 
 ```bash
-litdatamatcher run --input test_input.jsonl --out run/full --top-n 100
+litdatamatcher run --input tests/fixtures/test_input.jsonl --out run/full --top-n 100
 ```
 
 Each input row should include some combination of:
 
 ```json
 {"title": "...", "abstract": "...", "text": "...", "doi": "..."}
+```
+
+Convert local text, Markdown, PDF, JATS/PMC XML, GROBID TEI XML, or existing
+JSONL sources into that format:
+
+```bash
+litdatamatcher ingest --input papers/ --out run/corpus/literature.jsonl --recursive
+litdatamatcher run --input run/corpus/literature.jsonl --out run/full --top-n 100
+```
+
+Ingestion writes three reviewable artifacts:
+
+- `literature.jsonl`: canonical records for `litdatamatcher run`.
+- `literature.manifest.json`: machine-readable file provenance, record counts,
+  skipped-file diagnostics, source IDs, and document IDs.
+- `literature.ingestion_report.md`: human-readable ingestion summary.
+
+`source_path` records local file provenance. `source_id` and `document_id` are
+stable content-based grouping keys that help review exports and training labels
+trace records back to their ingested source.
+
+Each ingested or remotely retrieved record can also include a
+`source_provenance` object. This records source type, content depth, acquisition
+method, parser/adapter name, retrieval time, source URL or local path, caveats,
+and the next intended handoff. This distinction is important because a
+structured full-text JATS/TEI record, an abstract-only PubMed record, and a
+dataset-metadata MGnify record should not be interpreted as equivalent evidence
+depth.
+
+The source-ingestion and provenance contract is documented in
+`docs/source_ingestion_and_provenance.md`.
+
+PDF ingestion uses the optional `pdfminer.six` dependency included in the
+`.[nlp]` installation extra. XML ingestion supports deterministic JATS/PMC and
+GROBID TEI parsing from local files, including section records and compact
+author metadata when present.
+
+If you have a local GROBID service running, convert a PDF to TEI before
+ingestion:
+
+```bash
+litdatamatcher grobid-tei --input papers/example.pdf --out run/tei/example.tei.xml
+litdatamatcher ingest --input run/tei/example.tei.xml --out run/corpus/literature.jsonl
+```
+
+Search optional live metadata sources:
+
+```bash
+litdatamatcher literature-search --query "microbiome antibiotic recovery" --source pubmed --out run/search/pubmed.jsonl
+litdatamatcher dataset-search --query "IBD transcriptomics treatment response" --source geo mgnify --out run/search/datasets.jsonl
+```
+
+The PubMed adapter uses NCBI E-utilities ESearch/ESummary plus EFetch XML so
+abstracts and article identifiers can be preserved when available. The MGnify
+adapter targets API v2 and still accepts legacy cached/mock JSON:API-shaped
+rows for reproducible tests.
+
+Export observed and derived dataset capabilities from a dataset JSONL:
+
+```bash
+litdatamatcher capability-export --datasets run/full/datasets.jsonl --out run/full/capabilities.jsonl
 ```
 
 ## Outputs
@@ -128,6 +201,12 @@ A full run writes:
 - `matches.jsonl`: ranked question-dataset opportunities with component scores.
 - `summary.md`: concise human-readable ranking summary.
 - `publication_report.md`: manuscript-style methods/results summary.
+- `source_provenance_summary.json`: machine-readable source-type,
+  content-scope, acquisition, status, warning, and limitation counts.
+- `module_boundary_map.json`: developer-facing ownership map for pipeline
+  responsibilities.
+- `provenance_transfer_check.json`: advisory traceability check showing whether
+  provenance stayed visible across handoffs.
 - `review_sheet.csv`: expert review sheet for relevance annotation.
 - `review_sheet.jsonl`: programmatic review export.
 - `litdatamatcher.sqlite`: queryable run database.
@@ -168,24 +247,75 @@ Summarize completed review labels:
 litdatamatcher review-summary --labels run/full/review.csv
 ```
 
+Export completed review labels as normalized annotation-training artifacts:
+
+```bash
+litdatamatcher annotation-export --labels run/full/review.csv --out run/full/annotations
+```
+
+The annotation export schema, optional split files, QA artifacts, and
+training-readiness statuses are documented in
+`docs/annotation_export_schema.md`.
+
+Create an exploratory ranking-threshold calibration report from completed match
+labels:
+
+```bash
+litdatamatcher calibrate-ranking ^
+  --matches run/full/matches.jsonl ^
+  --labels run/full/annotations/question_data_match_labels.jsonl ^
+  --out run/full/annotations/ranking_calibration.json
+```
+
+Generate grouped train/validation/test split files for later calibration or
+training experiments:
+
+```bash
+litdatamatcher annotation-export ^
+  --labels run/full/review.csv ^
+  --out run/full/annotations ^
+  --split-strategy by_question_id ^
+  --split-fractions 0.8 0.1 0.1
+```
+
 Generate a manuscript-style report:
 
 ```bash
 litdatamatcher report --run-dir run/full --out run/full/publication_report.md
 ```
 
-## Streaming Orchestrator Demo
-
-The legacy subprocess demo remains available:
+Create a small daily review queue:
 
 ```bash
-python orchestrator.py --out run/orchestrator_matches.jsonl
+litdatamatcher review-queue --run-dir run/full --out run/full/daily_queue.csv --limit 5 --reviewer-id reviewer_a
+```
+
+Run a deterministic stress smoke test:
+
+```bash
+litdatamatcher stress-demo --out run/stress_demo --documents 50 --top-n 100
+```
+
+Run a controlled 3-5 file manual smoke test before scaling real corpora:
+
+```bash
+litdatamatcher manual-smoke --prepare-only
+litdatamatcher manual-smoke
+```
+
+## Streaming Orchestrator Demo
+
+The legacy subprocess demo is preserved for provenance and future workflow
+experiments:
+
+```bash
+python workflows/legacy_streaming/orchestrator.py --out run/orchestrator_matches.jsonl
 ```
 
 Provide custom topics with:
 
 ```bash
-python orchestrator.py --topics-file topics.txt --out run/orchestrator_matches.jsonl
+python workflows/legacy_streaming/orchestrator.py --topics-file topics.txt --out run/orchestrator_matches.jsonl
 ```
 
 `topics.txt` may be plain text, one topic per line, or JSONL with a `topic`,
@@ -211,7 +341,15 @@ The main package modules are:
 - `litdatamatcher.evaluation`: extraction and ranking benchmark metrics.
 - `litdatamatcher.review`: expert review exports and label summaries.
 - `litdatamatcher.reporting`: publication-oriented run reports.
+- `litdatamatcher.provenance`: source provenance helpers and summary counts.
 - `litdatamatcher.adapters`: optional live-source adapter scaffolds.
+- `litdatamatcher.capability_registry`: observed and derived dataset capability
+  inference.
+- `litdatamatcher.literature_xml`: JATS/PMC, GROBID TEI, and generic XML
+  ingestion.
+- `litdatamatcher.review_queue`: small recurring review-queue exports.
+- `litdatamatcher.stress`: deterministic synthetic corpus stress helpers.
+- `litdatamatcher.manual_smoke`: controlled real-file smoke-test workflow.
 - `litdatamatcher.pipeline`: end-to-end orchestration.
 - `litdatamatcher.cli`: command-line interface.
 
@@ -220,8 +358,10 @@ Additional documentation:
 - `docs/architecture.md`
 - `docs/node_contracts.md`
 - `docs/reproducibility.md`
+- `docs/source_ingestion_and_provenance.md`
 - `docs/model_robustness_plan.md`
 - `docs/feature_roadmap.md`
+- `docs/end_user_workflows.md`
 
 ## Testing
 
@@ -229,7 +369,7 @@ After installing development dependencies:
 
 ```bash
 python -m pytest
-python -m compileall litdatamatcher data_worker.py lit_gpu_worker.py matcher.py orchestrator.py
+python -m compileall litdatamatcher
 python -m litdatamatcher.cli demo --out run/demo
 python -m litdatamatcher.cli report --run-dir run/demo
 ```
@@ -247,7 +387,8 @@ LitDataMatcher is designed for auditable runs:
 - Generated runtime files are ignored by `.gitignore`.
 - Line-ending behavior is pinned through `.gitattributes`.
 - Default dataset discovery is offline and deterministic.
-- Optional HTTP adapters use caching and retry scaffolds.
+- Optional HTTP adapters use caching, retry scaffolds, and deterministic tests
+  with mocked network responses.
 - Scores are decomposed into interpretable components.
 
 For a publication run, archive:
@@ -278,9 +419,9 @@ when possible. Live API adapters should include retry, caching, rate-limit,
 schema-drift tests, source timestamps, and provenance before being used for
 production ranking.
 
-Optional scaffolds are already present for OpenAlex literature metadata and
-ClinicalTrials.gov study metadata. Priority future adapters include PubMed, GEO,
-SRA/ENA, MGnify, Qiita, Metabolomics Workbench, dbGaP, and domain-specific
+Optional adapters are already present for PubMed/OpenAlex literature metadata
+and ClinicalTrials.gov/GEO/MGnify dataset metadata. Priority future adapters
+include SRA/ENA, Qiita, Metabolomics Workbench, dbGaP, and domain-specific
 biomedical repositories.
 
 ## Citation And License
@@ -300,8 +441,17 @@ autonomous discovery engine. Important limitations remain:
   against expert annotations.
 - Ranking weights are interpretable heuristics, not yet calibrated from expert
   relevance labels.
+- Source/provenance reporting distinguishes evidence depth, but it does not
+  validate that all source records are complete or publication-ready.
 - The default dataset catalog is curated and offline; production use requires
-  live source adapters and source-specific validation.
+  live source adapters and source-specific validation. Its provenance records are
+  advisory catalog metadata, not evidence that source datasets were downloaded.
+- Optional live adapters have mocked/cached test coverage, but have not yet
+  been validated at scale against real API behavior.
+- Dataset metadata records are not downloaded or analyzed datasets, and derived
+  capabilities are plausibility/catalog claims rather than computed results.
+- Ranking calibration is currently a threshold QA/reporting utility, not a
+  trained ranking model.
 - The meta-analysis node currently estimates recurrence and evidence strength;
   it does not yet extract effect sizes or perform statistical meta-analysis.
 - Top-ranked pairs require manual review for study design, consent, license,

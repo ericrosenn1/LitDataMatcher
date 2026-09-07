@@ -25,7 +25,7 @@ Recommended first milestone:
 Primary metrics:
 
 - Extraction precision, recall, and F1
-- Calibration error for confidence scores
+- Calibration error for extraction-confidence and ranking scores
 - Precision@k, MRR, and nDCG for ranked matches
 - Expert acceptance rate of top 25 opportunities
 

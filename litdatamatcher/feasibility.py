@@ -35,6 +35,7 @@ class FeasibilityAssessment:
 def sample_adequacy(sample_size: int, minimum: int = 200, target: int = 2000) -> float:
     """Return a smooth 0..1 sample adequacy score."""
 
+    # Log scaling rewards larger cohorts without letting sample size dominate.
     sample_size = max(0, int(sample_size or 0))
     if sample_size == 0:
         return 0.0
@@ -56,6 +57,7 @@ def population_fit(question: QuestionCandidate, dataset: DatasetRecord) -> float
         return 0.8
     if requested in {"adult", "pediatric", "infant"} and "human" in available:
         return 0.75
+    # Unknown dataset populations are uncertain rather than automatic failures.
     return 0.25 if available else 0.4
 
 
@@ -64,6 +66,7 @@ def assay_fit(question: QuestionCandidate, dataset: DatasetRecord) -> float:
 
     required = {item.lower() for item in question.required_variables}
     assays = " ".join(dataset.assay_types).lower()
+    # Assay matching is intentionally coarse until richer ontology mappings exist.
     if "microbiome_composition" in required and any(term in assays for term in ("16s", "metagenomic")):
         return 1.0
     if "transcriptomics" in required and any(term in assays for term in ("rna", "microarray")):
@@ -77,6 +80,7 @@ def recommended_design(question: QuestionCandidate, dataset: DatasetRecord) -> s
     """Return a concise suggested analysis design."""
 
     text = f"{question.question} {' '.join(question.required_variables)}".lower()
+    # Recommendations are review prompts, not claims that the analysis is valid.
     if "timepoint" in question.required_variables or "longitudinal" in text:
         return "longitudinal mixed-effects model or time-to-event analysis"
     if "treatment" in question.required_variables:
@@ -96,9 +100,11 @@ def assess_pair_feasibility(
     sample_fit = sample_adequacy(dataset.sample_size)
     longitudinal = 1.0 if "timepoint" in dataset.variable_aliases() else 0.45
     if "timepoint" not in [item.lower() for item in question.required_variables]:
+        # Longitudinal structure matters less when the question does not request time.
         longitudinal = max(longitudinal, 0.65)
     assay = assay_fit(question, dataset)
     governance = assess_governance(dataset)
+    # Caveats are preserved for review even when the overall score remains usable.
     caveats = list(governance.risk_flags)
     if variable_info["missing"]:
         caveats.append("missing_required_variables")
@@ -108,6 +114,7 @@ def assess_pair_feasibility(
         caveats.append("population_mismatch")
 
     overall = round(
+        # The weighted score keeps each feasibility dimension inspectable downstream.
         0.28 * float(variable_info["coverage"])
         + 0.18 * pop_fit
         + 0.18 * sample_fit

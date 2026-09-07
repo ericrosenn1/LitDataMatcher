@@ -126,4 +126,5 @@ class TestSemanticMatching:
         assert semantic_match(sent, "future", threshold=0.6) == False
 
 
-# Run with: pytest test_lit_analyzer.py -v
+# Legacy note: run directly only when intentionally validating the archived
+# analyzer, for example: pytest archive/legacy_literature/test_lit_analyzer.py -v

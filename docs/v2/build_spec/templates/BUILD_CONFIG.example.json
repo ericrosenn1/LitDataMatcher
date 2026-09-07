@@ -1,0 +1,68 @@
+{
+  "template_only": true,
+  "not_a_codex_config_file": true,
+  "spec_version": "2.0.0",
+  "paths": {
+    "repository_root": null,
+    "lead_worktree": null,
+    "data_root": null,
+    "shared_state_root": null,
+    "model_cache": null,
+    "release_root": null
+  },
+  "discovery": {
+    "prefer_active_authorized_workspace": true,
+    "historical_candidates": [
+      "C:\\Users\\eric\\Documents\\Codex\\2026-05-31\\github-plugin-github-openai-curated-can\\work\\LitDataMatcher",
+      "C:\\Users\\eric\\OneDrive\\AI project\\LitDataMatcher-main\\LitDataMatcher-main"
+    ],
+    "exclude_disposable_benchmark_snapshots": true
+  },
+  "execution": {
+    "controller_environment": "prefer_native_windows",
+    "python_environment": "isolated_and_verified",
+    "codex_concurrency": "adaptive_to_capacity_and_dependencies",
+    "cpu_workers": "adaptive",
+    "gpu_workers": "batch_or_shared_backend",
+    "state_export": "meaningful_changes_only"
+  },
+  "resource_defaults": {
+    "idle_entry_seconds": 600,
+    "memory_headroom_fraction": 0.2,
+    "gpu_headroom": "measure_display_and_other_workloads",
+    "no_global_power_or_driver_changes": true,
+    "optional_sensors_may_fall_back": true
+  },
+  "data_plane": {
+    "offline_default_after_sync": true,
+    "local_stores": "select_minimum_needed",
+    "raw_snapshots_immutable": true,
+    "incremental_recompute": true
+  },
+  "runtime_inference": {
+    "backend": null,
+    "model_id": null,
+    "model_revision": null,
+    "tokenizer_revision": null,
+    "dtype_or_quantization": null,
+    "local_fresh_inference_required": true,
+    "paid_api_enabled": false
+  },
+  "supervisor": {
+    "enabled": false,
+    "scheduler_id": null,
+    "canonical_root": null,
+    "verified_resume_command": null,
+    "cadence_hours": 1
+  },
+  "pilot": {
+    "primary_topic": "human inflammatory-response perturbational transcriptomics",
+    "transfer_topic": "related gut/IBD transcriptomics",
+    "selection_status": "to_be_frozen_before_evaluation"
+  },
+  "validation": {
+    "quality_thresholds": "declare_before_tuning",
+    "expert_calibration_status": "PENDING_EXPERT_LABELS",
+    "output_file": "ACCEPTANCE_REPORT.json"
+  }
+}

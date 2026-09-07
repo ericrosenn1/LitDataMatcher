@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import sys, csv, os
+from pathlib import Path
 
-inp = sys.argv[1] if len(sys.argv) > 1 else "sentences.csv"
-out = sys.argv[2] if len(sys.argv) > 2 else "sentences_fixed.csv"
+repo_root = Path(__file__).resolve().parents[2]
+legacy_data = repo_root / "data" / "legacy_training"
+inp = sys.argv[1] if len(sys.argv) > 1 else str(legacy_data / "sentences.csv")
+out = sys.argv[2] if len(sys.argv) > 2 else str(legacy_data / "sentences_fixed.csv")
 
 def normalize(line: str):
     # remove BOM/CR and trim

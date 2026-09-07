@@ -7,6 +7,7 @@ import math
 import re
 
 
+# These cue lists are deterministic fallbacks; update tests when changing them.
 ABBREVIATIONS = {
     "al.",
     "dr.",
@@ -82,6 +83,15 @@ SECTION_ALIASES = {
     "conclusion": "conclusion",
 }
 
+EXCLUDED_SECTION_HEADINGS = {
+    "references",
+    "reference",
+    "bibliography",
+    "literature cited",
+    "works cited",
+    "suggested reading",
+}
+
 VARIABLE_LEXICON = {
     "age": {"age", "adult", "infant", "elderly", "pediatric"},
     "sex": {"sex", "gender", "male", "female"},
@@ -95,6 +105,24 @@ VARIABLE_LEXICON = {
     "disease_activity": {"ibd", "crohn", "colitis", "inflammation", "remission"},
     "treatment": {"treatment", "therapy", "drug", "intervention"},
     "outcome": {"outcome", "response", "remission", "recovery", "relapse"},
+    "sample_size": {"sample size", "sample sizes", "number of samples", "observations"},
+    "class_label": {"class label", "label", "labels", "positive", "negative", "imbalanced"},
+    "predictor": {"predictor", "predictors", "feature", "features", "covariate"},
+}
+
+OUTCOME_LEXICON = {
+    "clinical_outcome": {"clinical outcome", "outcome", "endpoint", "response"},
+    "remission": {"remission"},
+    "recovery": {"recovery"},
+    "relapse": {"relapse"},
+    "prediction_performance": {
+        "prediction",
+        "predictive",
+        "model performance",
+        "accuracy",
+        "auc",
+        "classification",
+    },
 }
 
 
@@ -125,6 +153,7 @@ def split_sentences(text: str) -> list[str]:
     protected = cleaned
     replacements: dict[str, str] = {}
     for idx, abbr in enumerate(sorted(ABBREVIATIONS, key=len, reverse=True)):
+        # Protect abbreviations before punctuation splitting to avoid false boundaries.
         pattern = re.compile(re.escape(abbr), flags=re.IGNORECASE)
         for hit_idx, match in enumerate(list(pattern.finditer(protected))):
             token = f"__ABBR{idx}_{hit_idx}__"
@@ -168,8 +197,14 @@ def split_sections(raw_text: str) -> dict[str, str]:
         if not line:
             continue
         heading = re.sub(r"^\d+(\.\d+)*\s+", "", line).strip(" :.-").lower()
+        if len(heading) <= 40 and heading in EXCLUDED_SECTION_HEADINGS:
+            active = ""
+            continue
         if len(heading) <= 40 and heading in SECTION_ALIASES:
+            # Only short known headings switch sections; ordinary prose stays in place.
             active = SECTION_ALIASES[heading]
+            continue
+        if not active:
             continue
         sections[active] += line + "\n"
     return sections
@@ -189,12 +224,14 @@ def extract_domain_terms(text: str, max_terms: int = 12) -> list[str]:
 def infer_required_variables(text: str) -> list[str]:
     """Infer likely data variables needed to answer a question."""
 
+    # Local import avoids a module cycle while keeping ontology inference central.
     from .ontology import infer_concepts_from_text
 
     ontology_hits = infer_concepts_from_text(text)
     lowered = str(text or "").lower()
     hits: list[str] = list(ontology_hits)
     for variable, cues in VARIABLE_LEXICON.items():
+        # Lexicon cues supplement ontology hits for transparent deterministic fallback.
         if any(cue in lowered for cue in cues):
             hits.append(variable)
     return list(dict.fromkeys(hits))
@@ -204,6 +241,7 @@ def infer_population(text: str) -> str:
     """Infer a coarse study population from text."""
 
     lowered = str(text or "").lower()
+    # Specific populations are checked before broad human-cohort language.
     if any(term in lowered for term in ("infant", "neonate", "newborn")):
         return "infant"
     if any(term in lowered for term in ("child", "pediatric", "paediatric")):
@@ -215,9 +253,21 @@ def infer_population(text: str) -> str:
     return ""
 
 
+def infer_outcomes(text: str) -> list[str]:
+    """Infer likely outcomes from transparent local lexical cues."""
+
+    lowered = str(text or "").lower()
+    hits: list[str] = []
+    for outcome, cues in OUTCOME_LEXICON.items():
+        if any(cue in lowered for cue in cues):
+            hits.append(outcome)
+    return list(dict.fromkeys(hits))
+
+
 def lexical_similarity(left: str, right: str) -> float:
     """Return Jaccard similarity over normalized content tokens."""
 
+    # Jaccard overlap is a reproducible lexical fallback, not semantic equivalence.
     a = {token for token in tokenize(left) if token not in STOPWORDS}
     b = {token for token in tokenize(right) if token not in STOPWORDS}
     if not a or not b:

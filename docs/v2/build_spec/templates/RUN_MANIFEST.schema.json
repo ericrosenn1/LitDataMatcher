@@ -1,0 +1,482 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:litdatamatcher:run-manifest:2.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "execution_status",
+    "started_at",
+    "finished_at",
+    "source",
+    "environment",
+    "models",
+    "source_snapshots",
+    "commands",
+    "evaluation",
+    "coverage",
+    "artifacts",
+    "network",
+    "inference",
+    "failures"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "run_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "execution_status": {
+      "enum": [
+        "NOT_RUN",
+        "RUNNING",
+        "PASS",
+        "FAIL",
+        "PARTIAL",
+        "INTERRUPTED"
+      ]
+    },
+    "started_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finished_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "repository",
+        "commit",
+        "working_tree_digest",
+        "spec_digest",
+        "config_digest"
+      ],
+      "properties": {
+        "repository": {
+          "const": "ericrosenn1/LitDataMatcher"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "working_tree_digest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spec_digest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "config_digest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "object",
+      "required": [
+        "python",
+        "platform",
+        "dependency_lock_digest",
+        "hardware_record"
+      ],
+      "properties": {
+        "python": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "platform": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dependency_lock_digest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hardware_record": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision",
+          "runtime",
+          "license_status",
+          "prompt_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "runtime": {
+            "type": "string"
+          },
+          "license_status": {
+            "type": "string"
+          },
+          "prompt_version": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "source_snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "snapshot_id",
+          "retrieved_at",
+          "manifest_digest"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "snapshot_id": {
+            "type": "string"
+          },
+          "retrieved_at": {
+            "type": "string"
+          },
+          "manifest_digest": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "command",
+          "cwd",
+          "started_at",
+          "exit_code",
+          "log_reference"
+        ],
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "log_reference": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": [
+        "protocol_version",
+        "split_id",
+        "split_role",
+        "label_origins",
+        "holdout_exposed_to_tuning"
+      ],
+      "properties": {
+        "protocol_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "split_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "split_role": {
+          "enum": [
+            "UNASSIGNED",
+            "DEVELOPMENT",
+            "VALIDATION",
+            "FINAL_HOLDOUT",
+            "TRANSFER"
+          ]
+        },
+        "label_origins": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "expert",
+              "source_determined",
+              "model_assisted",
+              "unreviewed"
+            ]
+          }
+        },
+        "holdout_exposed_to_tuning": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "unique_literature_records",
+        "parsed_full_texts",
+        "unique_accession_studies",
+        "sample_profiled_studies",
+        "inspected_processed_studies",
+        "external_structured_resources",
+        "distinct_pilot_contexts",
+        "case_dossiers"
+      ],
+      "properties": {
+        "unique_literature_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parsed_full_texts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unique_accession_studies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_profiled_studies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inspected_processed_studies": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "external_structured_resources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "distinct_pilot_contexts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "case_dossiers": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256",
+          "size_bytes",
+          "kind",
+          "validation"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "type": "string"
+          },
+          "validation": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_RUN"
+            ]
+          }
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "required": [
+        "mode",
+        "offline_block_test",
+        "external_requests_observed"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "UNSET",
+            "CONNECTED_SYNC",
+            "OFFLINE",
+            "CONNECTED_ENRICHMENT"
+          ]
+        },
+        "offline_block_test": {
+          "type": "boolean"
+        },
+        "external_requests_observed": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "inference": {
+      "type": "object",
+      "required": [
+        "fresh_calls",
+        "cache_replays",
+        "backend_qualified"
+      ],
+      "properties": {
+        "fresh_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_replays": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "backend_qualified": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stage",
+          "description"
+        ],
+        "properties": {
+          "stage": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_status": {
+            "const": "PASS"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "finished_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "properties": {
+              "commit": {
+                "type": "string",
+                "minLength": 1
+              },
+              "working_tree_digest": {
+                "type": "string",
+                "minLength": 1
+              },
+              "spec_digest": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config_digest": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "commands": {
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "exit_code": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "artifacts": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

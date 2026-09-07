@@ -41,6 +41,7 @@ def assess_governance(dataset: DatasetRecord) -> GovernanceAssessment:
     text = f"{dataset.title} {dataset.description} {' '.join(dataset.populations)}".lower()
     flags: list[str] = []
 
+    # Access terms estimate whether a researcher can realistically obtain the data.
     if _contains_any(access, ("public", "open")):
         access_score = 0.9
     elif _contains_any(access, ("controlled", "restricted", "application", "dbgap")):
@@ -50,6 +51,7 @@ def assess_governance(dataset: DatasetRecord) -> GovernanceAssessment:
         access_score = 0.55
         flags.append("unclear_access_terms")
 
+    # License terms stay separate from access because open metadata may still limit reuse.
     if _contains_any(access, ("public domain", "cc0", "open metadata", "public repository")):
         license_score = 0.9
     elif _contains_any(access, ("varies", "study-specific", "unknown")):
@@ -60,6 +62,7 @@ def assess_governance(dataset: DatasetRecord) -> GovernanceAssessment:
 
     human = _contains_any(text, ("human", "patient", "participant", "clinical", "ibd"))
     controlled = "controlled_or_restricted_access" in flags
+    # Human-subjects signals lower confidence unless reuse terms are clearly permissive.
     if human and controlled:
         privacy_score = 0.35
         flags.append("human_subjects_controlled_data")
@@ -69,6 +72,7 @@ def assess_governance(dataset: DatasetRecord) -> GovernanceAssessment:
     else:
         privacy_score = 0.9
 
+    # The aggregate score remains interpretable because each component is exported.
     reuse_score = round(0.35 * access_score + 0.3 * license_score + 0.35 * privacy_score, 3)
     return GovernanceAssessment(
         access_score=round(access_score, 3),

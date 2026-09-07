@@ -7,8 +7,62 @@ from typing import Iterable
 
 from .feasibility import assess_pair_feasibility
 from .governance import assess_governance
-from .schemas import DatasetRecord, EvidenceSynthesis, MatchCandidate, MatchScore, QuestionCandidate, stable_id
+from .schemas import (
+    DatasetRecord,
+    EvidenceSynthesis,
+    JsonDict,
+    MatchCandidate,
+    MatchScore,
+    QuestionCandidate,
+    stable_id,
+)
 from .text import extract_domain_terms, lexical_similarity
+
+
+ScoreQuestionDatasetResult = tuple[MatchScore, list[str], list[str], JsonDict]
+PROXY_CAPABILITY_CATEGORIES = {"derived_or_proxy_capability"}
+
+
+def capability_support_summary(
+    question: QuestionCandidate, dataset: DatasetRecord, missing: Iterable[str]
+) -> JsonDict:
+    """Summarize direct/proxy/missing capability support without scoring changes."""
+
+    missing_set = {str(item) for item in missing}
+    variable_categories: dict[str, str] = {}
+    for variable in dataset.variables:
+        for alias in variable.aliases():
+            variable_categories.setdefault(alias, variable.category)
+    direct: list[str] = []
+    proxy: list[str] = []
+    missing_capabilities: list[str] = []
+    for required in question.required_variables:
+        if required in missing_set:
+            missing_capabilities.append(required)
+            continue
+        category = variable_categories.get(required, "")
+        if category in PROXY_CAPABILITY_CATEGORIES:
+            proxy.append(required)
+        else:
+            direct.append(required)
+    if not direct and not proxy:
+        answerability = "weak"
+    elif proxy:
+        answerability = "proxy"
+    elif missing_capabilities:
+        answerability = "partial"
+    else:
+        answerability = "direct"
+    return {
+        "direct_capabilities": direct,
+        "proxy_capabilities": proxy,
+        "missing_capabilities": missing_capabilities,
+        "answerability_class": answerability,
+        "dataset_capability_categories": sorted(set(variable_categories.values())),
+        "capability_caveats": list(dataset.metadata.get("capability_caveats", []))
+        if isinstance(dataset.metadata, dict)
+        else [],
+    }
 
 
 def _sample_adequacy(sample_size: int) -> float:
@@ -43,12 +97,14 @@ def score_question_dataset(
     question: QuestionCandidate,
     dataset: DatasetRecord,
     synthesis: EvidenceSynthesis | None = None,
-) -> tuple[MatchScore, list[str], list[str]]:
-    """Compute an explainable composite score for one question-dataset pair."""
+) -> ScoreQuestionDatasetResult:
+    """Compute score, rationale, missing variables, and review assessments."""
 
+    # Feasibility carries the structured question-to-dataset contract checks.
     variable_overlap, missing = _variable_overlap(question, dataset)
     feasibility_assessment = assess_pair_feasibility(question, dataset)
     governance = assess_governance(dataset)
+    # Lexical relevance is a deterministic fallback until semantic embeddings are added.
     semantic_relevance = max(
         lexical_similarity(question.question, dataset.searchable_text()),
         lexical_similarity(" ".join(question.domain_terms), dataset.searchable_text()),
@@ -63,6 +119,7 @@ def score_question_dataset(
     sample_adequacy = feasibility_assessment.sample_adequacy
     significance = question.significance_score
     if synthesis:
+        # Recurrent literature signals can raise importance but also carry uncertainty.
         significance = max(significance, synthesis.evidence_strength)
         uncertainty = synthesis.uncertainty
     else:
@@ -75,6 +132,7 @@ def score_question_dataset(
         + 0.15 * sample_adequacy
         + 0.1 * semantic_relevance,
     )
+    # Penalize missing variables and uncertain literature support without hiding the match.
     uncertainty_penalty = min(0.6, 0.35 * uncertainty + 0.15 * len(missing))
     combined = (
         0.32 * significance
@@ -97,11 +155,13 @@ def score_question_dataset(
         combined=round(combined, 3),
         governance=round(governance.reuse_score, 3),
         design_fit=round(
+            # Design fit summarizes whether assays and study timing match the question.
             0.5 * feasibility_assessment.assay_fit
             + 0.5 * feasibility_assessment.longitudinal_fit,
             3,
         ),
     )
+    # Rationale strings are exported for human review, so keep them short and auditable.
     rationale = [
         f"variable overlap {score.variable_overlap:.2f}",
         f"semantic relevance {score.semantic_relevance:.2f}",
@@ -111,15 +171,26 @@ def score_question_dataset(
         f"governance reuse {score.governance:.2f}",
         f"recommended design: {feasibility_assessment.recommended_design}",
     ]
+    capability_support = capability_support_summary(question, dataset, missing)
+    if capability_support["direct_capabilities"]:
+        rationale.append(
+            f"direct capability support: {', '.join(capability_support['direct_capabilities'])}"
+        )
+    if capability_support["proxy_capabilities"]:
+        rationale.append(
+            f"proxy capability support: {', '.join(capability_support['proxy_capabilities'])}"
+        )
     if synthesis:
         rationale.append(
             f"literature recurrence {synthesis.recurrence_score:.2f} with uncertainty {synthesis.uncertainty:.2f}"
         )
     if missing:
         rationale.append(f"missing variables: {', '.join(missing)}")
+    rationale.append(f"answerability class: {capability_support['answerability_class']}")
     assessments = {
         "feasibility": feasibility_assessment.to_dict(),
         "governance": governance.to_dict(),
+        "capability_support": capability_support,
     }
     return score, rationale, missing, assessments
 
@@ -137,6 +208,7 @@ def rank_matches(
     for question in questions:
         synthesis = syntheses_by_question.get(question.question_id)
         for dataset in datasets:
+            # Every positive-scoring pair becomes a reviewable MatchCandidate.
             score, rationale, missing, assessments = score_question_dataset(question, dataset, synthesis)
             if score.combined <= 0:
                 continue
@@ -151,5 +223,6 @@ def rank_matches(
                     assessments=assessments,
                 )
             )
+    # Downstream reports and review sheets consume the already-sorted opportunity list.
     matches.sort(key=lambda item: item.score.combined, reverse=True)
     return matches[:top_n]

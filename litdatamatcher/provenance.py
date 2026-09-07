@@ -242,6 +242,17 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "review_caveats": ["ClinicalTrials.gov metadata can suggest a study, not guarantee usable individual-level data."],
         "do_not_infer": ["patient-level access", "analysis-ready trial data"],
     },
+    "ena": {
+        "source_type": "ena",
+        "category": "sequencing_repository_metadata",
+        "content_scope": "study, sample, experiment, and run metadata",
+        "acquisition_method": "ena_portal_api",
+        "native_id_fields": ["study_accession", "sample_accession", "run_accession", "bioproject_accession"],
+        "strengths": ["stable study/sample/run accessions", "library strategy and file-availability metadata"],
+        "limitations": ["technical runs are not biological samples", "donor and independence links may be ambiguous"],
+        "review_caveats": ["Inspect ENA study/sample relationships and file metadata before treating a record as analysis-ready."],
+        "do_not_infer": ["donor identity", "biological-sample count from runs", "processed-data availability from raw-read metadata"],
+    },
     "geo": {
         "source_type": "geo",
         "category": "dataset_metadata",
@@ -288,7 +299,7 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
     },
 }
 
-ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "europepmc", "crossref", "clinicaltrials", "geo", "mgnify")
+ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "europepmc", "crossref", "clinicaltrials", "ena", "geo", "mgnify")
 
 # Module boundaries are developer-facing documentation, not runtime dispatch rules.
 MODULE_BOUNDARIES: dict[str, JsonDict] = {
@@ -367,7 +378,7 @@ MODULE_OWNERSHIP_REGISTRY: dict[str, JsonDict] = {
     "live_adapters": {
         "owner_module": "litdatamatcher.adapters",
         "owned_by": "optional metadata adapter layer",
-        "responsibility": "PubMed/OpenAlex/Europe PMC/Crossref/ClinicalTrials.gov/GEO/MGnify metadata retrieval and normalization",
+        "responsibility": "PubMed/OpenAlex/Europe PMC/Crossref/ClinicalTrials.gov/ENA/GEO/MGnify metadata retrieval and normalization",
     },
     "provenance": {
         "owner_module": "litdatamatcher.provenance",

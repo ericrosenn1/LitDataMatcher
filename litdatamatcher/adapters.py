@@ -460,6 +460,129 @@ class MGnifyDatasetAdapter:
         return records
 
 
+@dataclass(slots=True)
+class ENASRADatasetAdapter:
+    """ENA/SRA run-index adapter that groups technical runs under a study record."""
+
+    client: CachedHttpClient
+    name: str = "ena"
+
+    def search(self, query: str) -> list[DatasetRecord]:
+        """Search a bounded ENA read-run page and group rows by stable study accession."""
+
+        data = self.client.get_json(
+            "https://www.ebi.ac.uk/ena/portal/api/search",
+            params={
+                "result": "read_run",
+                "query": query,
+                "fields": "study_accession,secondary_study_accession,secondary_project,study_title,study_alias,run_accession,experiment_accession,sample_accession,secondary_sample_accession,sample_alias,sample_title,sample_description,scientific_name,library_strategy,library_source,library_selection,fastq_ftp,submitted_ftp,sra_ftp,first_public,last_updated",
+                "format": "json",
+                "limit": 100,
+            },
+        )
+        response_metadata = _client_response_metadata(self.client)
+        rows = data if isinstance(data, list) else data.get("data", [])
+        grouped: dict[str, list[JsonDict]] = {}
+        for row in rows if isinstance(rows, list) else []:
+            if not isinstance(row, dict):
+                continue
+            study_id = str(row.get("study_accession", "") or "").strip().upper()
+            if not re.fullmatch(r"(?:ERP|SRP|DRP|PRJ(?:EB|NA|DB))\d+", study_id):
+                continue
+            grouped.setdefault(study_id, []).append(row)
+        records = [
+            _ena_study_record(study_id, study_rows, response_metadata)
+            for study_id, study_rows in grouped.items()
+        ]
+        return [record for record in records if record is not None]
+
+
+def _ena_study_record(
+    study_id: str, rows: list[JsonDict], response_metadata: JsonDict
+) -> DatasetRecord | None:
+    """Build one study-level record while retaining sample/run distinction in metadata."""
+
+    if not rows:
+        return None
+    newest = max(rows, key=lambda row: str(row.get("last_updated", "") or ""))
+    title = _first_text(newest, "study_title", "study_alias", default=study_id)
+    run_ids = _unique_field(rows, "run_accession")
+    sample_ids = _unique_field(rows, "sample_accession")
+    experiments = _unique_field(rows, "experiment_accession")
+    strategies = _unique_field(rows, "library_strategy")
+    organisms = _unique_field(rows, "scientific_name")
+    samples = [
+        {
+            "sample_accession": str(row.get("sample_accession", "") or ""),
+            "secondary_sample_accession": str(row.get("secondary_sample_accession", "") or ""),
+            "sample_alias": str(row.get("sample_alias", "") or ""),
+            "attributes": {
+                "title": str(row.get("sample_title", "") or ""),
+                "description": str(row.get("sample_description", "") or ""),
+            },
+        }
+        for row in _dedupe_rows(rows, "sample_accession")
+    ]
+    provenance = remote_source_provenance(
+        source_type="ena",
+        source_url=f"https://www.ebi.ac.uk/ena/browser/view/{study_id}",
+        adapter_name="ena",
+        adapter_version="ena_portal_read_run_v1",
+        retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
+        acquisition_method="ena_portal_api",
+        content_scope="study_sample_run_metadata",
+        raw_record_id=study_id,
+        limitations=[
+            "ENA run metadata does not establish donor identity or biological-sample independence.",
+            "Run accessions are technical records and are not equated with biological samples.",
+        ],
+        next_handoff="dataset matching",
+        metadata={"source_profile": source_profile("ena"), "cache_snapshot": response_metadata},
+    ).to_dict()
+    raw_available = any(_has_remote_file(row, "fastq_ftp", "sra_ftp") for row in rows)
+    processed_available = any(_has_remote_file(row, "submitted_ftp") for row in rows)
+    metadata = {
+        "secondary_study_accessions": _unique_field(rows, "secondary_study_accession"),
+        "bioproject_accessions": _unique_field(rows, "secondary_project"),
+        "runs": run_ids,
+        "experiments": experiments,
+        "samples": samples,
+        "run_sample_links": [
+            {"run_accession": str(row.get("run_accession", "") or ""), "sample_accession": str(row.get("sample_accession", "") or ""), "relation": "TECHNICAL_RUN_OF_DECLARED_SAMPLE"}
+            for row in _dedupe_rows(rows, "run_accession")
+        ],
+        "access_availability": {"raw_reads": raw_available, "submitted_files": processed_available, "interpretation": "availability metadata only; file-level access and processing status require inspection"},
+        "version_time": str(newest.get("last_updated", "UNKNOWN") or "UNKNOWN"),
+        "pagination": {"page_size": 100, "returned_run_rows": len(rows), "status": "BOUNDED_PAGE_NOT_COMPLETE_CENSUS"},
+        "dependence": {"biological_sample_count": len(sample_ids), "technical_run_count": len(run_ids), "donor_links": "AMBIGUOUS_NOT_INFERRED", "deduplication_key": "study_accession+run_accession"},
+        "missingness": {"sample_accessions": "PRESENT" if sample_ids else "MISSING", "run_accessions": "PRESENT" if run_ids else "MISSING", "organism": "PRESENT" if organisms else "MISSING", "library_strategy": "PRESENT" if strategies else "MISSING"},
+        "source_provenance": provenance,
+    }
+    variables = [
+        {"name": "sequencing_run", "category": "technical_metadata", "observed_count": 0, "completeness": 0.8 if run_ids else 0.0},
+        {"name": "biological_sample", "category": "metadata", "observed_count": 0, "completeness": 0.8 if sample_ids else 0.0},
+        {"name": "library_strategy", "category": "assay_metadata", "observed_count": 0, "completeness": 0.8 if strategies else 0.0},
+    ]
+    return classify_dataset_record({"dataset_id": study_id, "title": title, "source": "ENA/SRA", "description": _first_text(newest, "sample_description"), "url": f"https://www.ebi.ac.uk/ena/browser/view/{study_id}", "variables": variables, "populations": [], "organisms": organisms, "assay_types": strategies, "sample_size": 0, "license": "ENA/SRA metadata; source-specific data reuse review required", "access_type": "public metadata; per-file availability as recorded", "quality_score": 0.68, "metadata": metadata})
+
+
+def _unique_field(rows: list[JsonDict], name: str) -> list[str]:
+    return _string_list([row.get(name, "") for row in rows])
+
+
+def _dedupe_rows(rows: list[JsonDict], key: str) -> list[JsonDict]:
+    selected: dict[str, JsonDict] = {}
+    for row in rows:
+        value = str(row.get(key, "") or "").strip()
+        if value and value not in selected:
+            selected[value] = row
+    return list(selected.values())
+
+
+def _has_remote_file(row: JsonDict, *names: str) -> bool:
+    return any(str(row.get(name, "") or "").strip() for name in names)
+
+
 def _clinicaltrials_record(
     study: JsonDict, *, response_metadata: JsonDict
 ) -> DatasetRecord | None:
@@ -680,6 +803,7 @@ def _append_clinical_version(selected: DatasetRecord, discarded: DatasetRecord) 
 
 DATASET_ADAPTERS = {
     "clinicaltrials": ClinicalTrialsDatasetAdapter,
+    "ena": ENASRADatasetAdapter,
     "geo": GEODatasetAdapter,
     "mgnify": MGnifyDatasetAdapter,
 }

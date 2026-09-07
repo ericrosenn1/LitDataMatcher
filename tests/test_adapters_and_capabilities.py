@@ -5,6 +5,7 @@ import pytest
 from litdatamatcher.adapters import (
     ClinicalTrialsDatasetAdapter,
     CrossrefLiteratureAdapter,
+    ENASRADatasetAdapter,
     EuropePMCLiteratureAdapter,
     GEODatasetAdapter,
     MGnifyDatasetAdapter,
@@ -214,6 +215,46 @@ def test_dataset_search_cli_replays_clinicaltrials_cache_offline(tmp_path, capsy
 
     assert main(["dataset-search", "--query", "study", "--source", "clinicaltrials", "--cache-dir", str(cache.cache_dir), "--offline", "--out", str(out)]) == 0
     assert read_jsonl(out)[0]["metadata"]["causal_interpretation"] == "NOT_PERTURBATIONAL"
+    assert json.loads(capsys.readouterr().out)["records"] == 1
+
+
+def test_ena_adapter_groups_runs_without_equating_them_to_samples():
+    rows = [
+        {"study_accession": "ERP12345", "secondary_study_accession": "PRJEB123", "study_title": "Sequencing study", "run_accession": "ERR1", "experiment_accession": "ERX1", "sample_accession": "ERS1", "secondary_sample_accession": "SAME1", "sample_title": "Sample one", "scientific_name": "Homo sapiens", "library_strategy": "RNA-SEQ", "fastq_ftp": "ftp://x", "last_updated": "2025-01-01"},
+        {"study_accession": "ERP12345", "run_accession": "ERR2", "experiment_accession": "ERX2", "sample_accession": "ERS1", "scientific_name": "Homo sapiens", "library_strategy": "RNA-SEQ", "last_updated": "2025-01-02"},
+        {"study_accession": "bad", "run_accession": "ERR_BAD"},
+        "schema-drift-row",
+    ]
+    record = ENASRADatasetAdapter(FakeClient([rows])).search("ignored")[0]
+
+    assert record.dataset_id == "ERP12345"
+    assert record.sample_size == 0
+    assert record.metadata["dependence"]["technical_run_count"] == 2
+    assert record.metadata["dependence"]["biological_sample_count"] == 1
+    assert record.metadata["dependence"]["donor_links"] == "AMBIGUOUS_NOT_INFERRED"
+    assert record.metadata["access_availability"]["raw_reads"] is True
+    assert record.metadata["pagination"]["status"] == "BOUNDED_PAGE_NOT_COMPLETE_CENSUS"
+
+
+def test_ena_adapter_deduplicates_repeated_run_links_and_missing_fields():
+    rows = [{"study_accession": "SRP12345", "study_title": "Run duplicate", "run_accession": "SRR1", "sample_accession": "SRS1"}, {"study_accession": "SRP12345", "study_title": "Run duplicate", "run_accession": "SRR1", "sample_accession": "SRS1"}]
+    record = ENASRADatasetAdapter(FakeClient([{"data": rows}])).search("ignored")[0]
+
+    assert record.metadata["runs"] == ["SRR1"]
+    assert len(record.metadata["run_sample_links"]) == 1
+    assert record.metadata["missingness"]["organism"] == "MISSING"
+
+
+def test_dataset_search_cli_replays_ena_cache_offline(tmp_path, capsys, monkeypatch):
+    cache = CachedHttpClient(cache_dir=tmp_path / "cache")
+    url = "https://www.ebi.ac.uk/ena/portal/api/search"
+    params = {"result": "read_run", "query": "study", "fields": "study_accession,secondary_study_accession,secondary_project,study_title,study_alias,run_accession,experiment_accession,sample_accession,secondary_sample_accession,sample_alias,sample_title,sample_description,scientific_name,library_strategy,library_source,library_selection,fastq_ftp,submitted_ftp,sra_ftp,first_public,last_updated", "format": "json", "limit": 100}
+    cache._cache_path(url, params).write_text(json.dumps([{"study_accession": "ERP77777", "study_title": "Cached ENA", "run_accession": "ERR7", "sample_accession": "ERS7"}]), encoding="utf-8")
+    out = tmp_path / "ena.jsonl"
+    monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
+
+    assert main(["dataset-search", "--query", "study", "--source", "ena", "--cache-dir", str(cache.cache_dir), "--offline", "--out", str(out)]) == 0
+    assert read_jsonl(out)[0]["dataset_id"] == "ERP77777"
     assert json.loads(capsys.readouterr().out)["records"] == 1
 
 

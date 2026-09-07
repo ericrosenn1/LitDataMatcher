@@ -4,10 +4,10 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T12:39:01.6539226Z",
-  "execution_status": "RUNNING",
-  "product_status": "NOT_READY",
-  "automation_status": "VERIFIED_ENABLED",
+  "updated_at": "2026-09-07T14:15:00Z",
+  "execution_status": "COMPLETE",
+  "product_status": "HARDENED_ALPHA_READY",
+  "automation_status": "DISABLED_AT_COMPLETION_RUNTIME_UNVERIFIED",
   "calibration_status": "SOURCE_ASSISTED_EVALUATION",
   "source": {
     "repository": "ericrosenn1/LitDataMatcher",
@@ -24,13 +24,13 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "HOLDOUT_LINEAGE_CLOSURE",
-  "manual_pause": false,
+  "current_phase": "COMPLETE",
+  "manual_pause": true,
   "stop_requested": false,
   "capacity": {
     "status": "AVAILABLE",
-    "verified_reset_at": null,
-    "source": "supported get_usage_limits at bootstrap"
+    "verified_reset_at": "2026-09-14T17:09:23-04:00",
+    "source": "supported get_usage_limits: shared 7-day Codex bucket, 17 percent used / 83 percent remaining. Conservative window-start estimate: 17 / 5.8264 = 2.9177 percentage points per hour; 162.1736 hours to reset projects 490.18 percent total and exhaustion at 2026-09-08T18:19:05Z. Account-level bucket is authoritative; per-thread/subagent/supervisor attribution and rolling series are unavailable. Verdict UNSUSTAINABLE: sole Terra Medium reasoning worker, no concurrent reasoning workers."
   },
   "workstreams": [
     {
@@ -95,8 +95,12 @@
     {
       "id": "W10",
       "name": "Matching, evaluation, ranking and delivery",
-      "status": "IN_PROGRESS",
-      "evidence": []
+      "status": "VALIDATED",
+      "evidence": [
+        "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run\\RUN_MANIFEST.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\independent\\final_review.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT.json"
+      ]
     }
   ],
   "coverage": {
@@ -109,32 +113,22 @@
     "distinct_pilot_contexts": 2,
     "case_dossiers": 20
   },
-  "blockers": [
-    {
-      "id": "B-HOLDOUT-LINEAGE",
-      "status": "ACTIVE",
-      "description": "Replacement holdout candidates GSE282859 and GSE264666 are disqualified or unreservable until publication/version and complete paginated ENA/SRA identifier closure proves source disjointness.",
-      "evidence": [
-        "benchmarks/v2/replacement_final_holdout_reservation.json",
-        "benchmarks/v2/fallback_identifier_lineage_audit.json"
-      ]
-    }
-  ],
+  "blockers": [],
   "next_action": {
-    "description": "Complete bounded official identifier-only publication and ENA/SRA lineage closure; reserve a source-disjoint replacement only if every required component is resolved, then finish pre-holdout gate review.",
+    "description": "COMPLETE: retain frozen validated artifacts. Continue only under the strict Terra/High ceiling; never rerun the sealed holdout.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "python -m litdatamatcher.v2 closeout-audit --data-root C:\\Codex\\LitDataMatcher-v2\\data --source-root C:\\Codex\\LitDataMatcher-v2\\lead --out C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\closeout\\pre_holdout_audit_02.json",
-    "command_tested": false
+    "command": "python -m litdatamatcher.v2 closeout-audit --root C:\\Codex\\LitDataMatcher-v2\\data --source-root C:\\Codex\\LitDataMatcher-v2\\lead --out C:\\Codex\\LitDataMatcher-v2\\data\\release\\FINAL_CLOSEOUT_AUDIT.json; python scripts/v2/validate_delivery.py --source C:\\Codex\\LitDataMatcher-v2\\lead --data C:\\Codex\\LitDataMatcher-v2\\data --release C:\\Codex\\LitDataMatcher-v2\\data\\release --cleanroom C:\\Codex\\LitDataMatcher-v2\\data\\releases\\0.2.0-hardened-alpha-final2\\cleanroom_validation.json --final-run C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03 --holdout-run C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run --independent-review C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\independent\\final_review.json --worker-evidence C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\worker_refinement.json --out C:\\Codex\\LitDataMatcher-v2\\data\\release\\DELIVERY_VALIDATION.json",
+    "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "42ee64a8fa69d4b8903f5a43c5f903c095fcdf39",
-    "last_verified_remote_commit": "42ee64a8fa69d4b8903f5a43c5f903c095fcdf39",
-    "push_pending": false
+    "last_source_commit": "PENDING_FINAL_POLICY_COMMIT",
+    "last_verified_remote_commit": "PENDING_FINAL_POLICY_COMMIT",
+    "push_pending": true
   },
   "milestones": {
     "functional_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\hardened-alpha-candidate-01",
-    "hardened_alpha_run": null,
-    "final_holdout_run": null
+    "hardened_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03",
+    "final_holdout_run": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run"
   },
-  "stop_reason": null
+  "stop_reason": "HARDENED_ALPHA_READY: strict execution ceiling corrected; frozen final run, untouched holdout, release archives, deterministic validation, and supervisor-paused closeout retained."
 }

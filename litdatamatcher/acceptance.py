@@ -31,7 +31,7 @@ ACCEPTANCE_SCHEMA_PATH = _TEMPLATE_DIR / "ACCEPTANCE_REPORT.schema.json"
 ACCEPTANCE_TEMPLATE_PATH = _TEMPLATE_DIR / "ACCEPTANCE_REPORT.template.json"
 RUN_MANIFEST_SCHEMA_PATH = _TEMPLATE_DIR / "RUN_MANIFEST.schema.json"
 
-IMPLEMENTATION_VERSION = "acceptance-validator-v1"
+IMPLEMENTATION_VERSION = "acceptance-validator-v2"
 PRODUCT_GATE_IDS = tuple(f"G{number:02d}" for number in range(1, 17))
 OPERATION_IDS = tuple(f"O{number:02d}" for number in range(1, 6))
 
@@ -436,7 +436,49 @@ def _validate_check(
             faults.append(
                 f"check artifact is not a hashed, validated manifest artifact: {artifact_path}"
             )
+    if not faults and not _has_semantic_attestation(check, run_root):
+        faults.append(
+            "no referenced structured audit attests this exact target/kind as PASS"
+        )
     return faults
+
+
+def _has_semantic_attestation(check: JsonObject, run_root: Path) -> bool:
+    """Require machine-readable meaning in addition to a valid file digest.
+
+    A check cannot be promoted merely by pointing at an arbitrary nonempty JSON
+    file.  At least one referenced artifact must be a closeout audit containing
+    the same target and evidence kind with a substantive PASS observation.
+    """
+    for artifact_path in check["artifacts"]:
+        candidate = _safe_relative_path(run_root, artifact_path)
+        if candidate is None or candidate.suffix.lower() != ".json":
+            continue
+        try:
+            payload = _read_json(candidate)
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        runner = payload.get("runner")
+        evidence = payload.get("evidence")
+        if not isinstance(runner, dict) or not str(
+            runner.get("implementation_version", "")
+        ).startswith("closeout-evidence-audit-"):
+            continue
+        if not isinstance(evidence, list):
+            continue
+        if any(
+            isinstance(item, dict)
+            and item.get("target") == check["target"]
+            and item.get("kind") == check["kind"]
+            and item.get("status") == "PASS"
+            and isinstance(item.get("reason"), str)
+            and item["reason"].strip()
+            and isinstance(item.get("artifacts"), list)
+            and item["artifacts"]
+            for item in evidence
+        ):
+            return True
+    return False
 
 
 def _apply_gate_results(
@@ -577,6 +619,12 @@ def _calibration(runs: list[JsonObject]) -> tuple[str, list[str]]:
 
 
 def _automation_status(report: JsonObject) -> str:
+    if (
+        report["operations"]["O05"]["status"] == "PASS"
+        and report["gates"]["G16"]["status"] == "PASS"
+        and report["stop_reason"]
+    ):
+        return "DISABLED_AT_COMPLETION"
     o04 = report["operations"]["O04"]["status"]
     if o04 == "PASS":
         return "VERIFIED_ENABLED"

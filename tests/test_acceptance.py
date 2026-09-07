@@ -43,6 +43,16 @@ def test_forged_artifact_digest_fails_the_claimed_gate(tmp_path):
     assert report["product_status"] == "NOT_READY"
 
 
+def test_hashed_arbitrary_json_cannot_promote_a_gate(tmp_path):
+    _write_run(tmp_path, semantic_proof=False)
+    _write_ledger(tmp_path, checks=_g05_checks())
+
+    report = validate_acceptance(tmp_path / "ACCEPTANCE_EVIDENCE.json")
+
+    assert report["gates"]["G05"]["status"] == "FAIL"
+    assert "structured audit" in report["gates"]["G05"]["reason"]
+
+
 def test_stale_observation_cannot_be_reused_as_successful_evidence(tmp_path):
     _write_run(tmp_path)
     checks = _g05_checks()
@@ -116,11 +126,37 @@ def _write_ledger(root: Path, *, checks):
     )
 
 
-def _write_run(root: Path, *, execution_status="PASS", forged_proof_digest=False):
+def _write_run(
+    root: Path,
+    *,
+    execution_status="PASS",
+    forged_proof_digest=False,
+    semantic_proof=True,
+):
     run = root / "run"
     run.mkdir()
     (run / "commands.log").write_text("command completed with exit code 0\n", encoding="utf-8")
-    (run / "proof.json").write_text('{"executed": true}\n', encoding="utf-8")
+    proof = {"executed": True}
+    if semantic_proof:
+        proof = {
+            "runner": {"implementation_version": "closeout-evidence-audit-test"},
+            "evidence": [
+                {
+                    "target": "G05",
+                    "kind": kind,
+                    "status": "PASS",
+                    "reason": "Executed test observation.",
+                    "artifacts": [{"path": "source.json", "sha256": "a" * 64}],
+                }
+                for kind in (
+                    "fresh_application_process",
+                    "previously_unprocessed_input",
+                    "runtime_model_revision",
+                    "no_prewritten_or_regex_substitution",
+                )
+            ],
+        }
+    (run / "proof.json").write_text(json.dumps(proof) + "\n", encoding="utf-8")
     proof_digest = _hash(run / "proof.json")
     if forged_proof_digest:
         proof_digest = "0" * 64

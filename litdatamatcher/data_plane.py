@@ -3,6 +3,7 @@
 Source snapshots are immutable. Scientific identities are independent of content
 hashes. SQLite owns normalized versions and invalidation, not raw source bytes.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -15,8 +16,9 @@ from typing import Any
 
 
 def canonical_json(value: Any) -> bytes:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
-                      allow_nan=False).encode("utf-8")
+    return json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
 
 
 def digest(value: Any) -> str:
@@ -83,53 +85,86 @@ class Catalog:
         atomic_json(self.root / "source_manifests" / (digest(result) + ".json"), result)
         return result
 
-    def upsert(self, kind: str, identity: str, payload: dict,
-               parents: list[tuple[str, str]] = (), search_text: str = "") -> bool:
+    def upsert(
+        self,
+        kind: str,
+        identity: str,
+        payload: dict,
+        parents: list[tuple[str, str]] = (),
+        search_text: str = "",
+    ) -> bool:
         if not kind or not identity:
             raise ValueError("Record kind and stable identity are required")
         encoded = canonical_json(payload).decode()
         sha = digest(payload)
         with self.conn:
             self.conn.execute("BEGIN IMMEDIATE")
-            old = self.conn.execute("SELECT digest,valid FROM current WHERE kind=? AND id=?",
-                                    (kind, identity)).fetchone()
-            old_parents = set(map(tuple,self.conn.execute(
-                'SELECT parent_kind,parent_id FROM dependencies WHERE child_kind=? AND child_id=?',
-                (kind,identity)).fetchall()))
+            old = self.conn.execute(
+                "SELECT digest,valid FROM current WHERE kind=? AND id=?", (kind, identity)
+            ).fetchone()
+            old_parents = set(
+                map(
+                    tuple,
+                    self.conn.execute(
+                        "SELECT parent_kind,parent_id FROM dependencies WHERE child_kind=? AND child_id=?",
+                        (kind, identity),
+                    ).fetchall(),
+                )
+            )
             # Parent links are part of derivation even when output content is unchanged.
             for pk, pi in parents:
-                row = self.conn.execute("SELECT valid FROM current WHERE kind=? AND id=?", (pk, pi)).fetchone()
+                row = self.conn.execute(
+                    "SELECT valid FROM current WHERE kind=? AND id=?", (pk, pi)
+                ).fetchone()
                 if row is None or not row[0]:
                     raise ValueError(f"Missing or invalid parent {pk}/{pi}")
                 if (pk, pi) == (kind, identity):
                     raise ValueError("Self dependency")
-                ancestors=self.conn.execute('''WITH RECURSIVE ancestors(k,i) AS (
+                ancestors = self.conn.execute(
+                    """WITH RECURSIVE ancestors(k,i) AS (
                   SELECT parent_kind,parent_id FROM dependencies WHERE child_kind=? AND child_id=?
                   UNION SELECT d.parent_kind,d.parent_id FROM dependencies d JOIN ancestors a
-                    ON d.child_kind=a.k AND d.child_id=a.i) SELECT 1 FROM ancestors WHERE k=? AND i=?''',
-                  (pk,pi,kind,identity)).fetchone()
-                if ancestors: raise ValueError('Dependency cycle')
+                    ON d.child_kind=a.k AND d.child_id=a.i) SELECT 1 FROM ancestors WHERE k=? AND i=?""",
+                    (pk, pi, kind, identity),
+                ).fetchone()
+                if ancestors:
+                    raise ValueError("Dependency cycle")
             changed = old is None or old[0] != sha or old_parents != set(parents)
             if changed:
-                descendants = self.conn.execute("""WITH RECURSIVE children(k,i) AS (
+                descendants = self.conn.execute(
+                    """WITH RECURSIVE children(k,i) AS (
                  SELECT child_kind,child_id FROM dependencies WHERE parent_kind=? AND parent_id=?
                  UNION SELECT d.child_kind,d.child_id FROM dependencies d JOIN children c
                    ON d.parent_kind=c.k AND d.parent_id=c.i) SELECT k,i FROM children""",
-                                                (kind, identity)).fetchall()
-                self.conn.executemany("UPDATE current SET valid=0 WHERE kind=? AND id=?", descendants)
-            self.conn.execute("INSERT OR IGNORE INTO versions VALUES(?,?,?,?)", (kind, identity, sha, encoded))
-            self.conn.execute("INSERT OR REPLACE INTO current VALUES(?,?,?,1)", (kind, identity, sha))
-            self.conn.execute("DELETE FROM dependencies WHERE child_kind=? AND child_id=?", (kind, identity))
-            self.conn.executemany("INSERT INTO dependencies VALUES(?,?,?,?)",
-                                  [(pk, pi, kind, identity) for pk, pi in parents])
+                    (kind, identity),
+                ).fetchall()
+                self.conn.executemany(
+                    "UPDATE current SET valid=0 WHERE kind=? AND id=?", descendants
+                )
+            self.conn.execute(
+                "INSERT OR IGNORE INTO versions VALUES(?,?,?,?)", (kind, identity, sha, encoded)
+            )
+            self.conn.execute(
+                "INSERT OR REPLACE INTO current VALUES(?,?,?,1)", (kind, identity, sha)
+            )
+            self.conn.execute(
+                "DELETE FROM dependencies WHERE child_kind=? AND child_id=?", (kind, identity)
+            )
+            self.conn.executemany(
+                "INSERT INTO dependencies VALUES(?,?,?,?)",
+                [(pk, pi, kind, identity) for pk, pi in parents],
+            )
             self.conn.execute("DELETE FROM search WHERE kind=? AND id=?", (kind, identity))
             self.conn.execute("INSERT INTO search VALUES(?,?,?)", (kind, identity, search_text))
         return changed
 
     def records(self, kind: str, include_invalid: bool = False) -> list[dict]:
-        rows = self.conn.execute("""SELECT v.payload FROM versions v JOIN current c
+        rows = self.conn.execute(
+            """SELECT v.payload FROM versions v JOIN current c
           ON v.kind=c.kind AND v.id=c.id AND v.digest=c.digest
-          WHERE c.kind=? AND (c.valid=1 OR ?) ORDER BY c.id""", (kind, include_invalid))
+          WHERE c.kind=? AND (c.valid=1 OR ?) ORDER BY c.id""",
+            (kind, include_invalid),
+        )
         return [json.loads(row[0]) for row in rows]
 
     def search(self, kind: str, query: str, limit: int = 50) -> list[str]:
@@ -138,7 +173,10 @@ class Catalog:
         safe = " OR ".join('"' + t.replace('"', '""') + '"' for t in tokens)
         if not safe:
             return []
-        rows = self.conn.execute("""SELECT search.id FROM search JOIN current c
+        rows = self.conn.execute(
+            """SELECT search.id FROM search JOIN current c
           ON c.id=search.id AND c.kind=search.kind WHERE search MATCH ?
-          AND search.kind=? AND c.valid=1 ORDER BY rank LIMIT ?""", (safe, kind, min(max(limit, 1), 1000)))
+          AND search.kind=? AND c.valid=1 ORDER BY rank LIMIT ?""",
+            (safe, kind, min(max(limit, 1), 1000)),
+        )
         return [row[0] for row in rows]

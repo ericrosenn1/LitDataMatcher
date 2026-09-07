@@ -69,7 +69,11 @@ def _archives_pass(release: Path, release_manifest: dict) -> bool:
         return False
     for item in entries:
         path = (release / item.get("path", "")).resolve()
-        if path.parent != release.resolve() or not path.is_file():
+        try:
+            path.relative_to(release.resolve())
+        except ValueError:
+            return False
+        if not path.is_file():
             return False
         if item.get("sha256") != _sha256(path) or item.get("size_bytes") != path.stat().st_size:
             return False

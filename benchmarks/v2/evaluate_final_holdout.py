@@ -300,13 +300,13 @@ def build_manifest(result: dict[str, Any], model: dict[str, Any], reservation: d
     selected = reservation["selected_accession"]
     return {
         "schema_version": "2.0",
-        "run_id": "final-holdout-v3-" + uuid.uuid4().hex,
+        "run_id": "final-holdout-v4-" + uuid.uuid4().hex,
         "execution_status": "PASS",
         "started_at": started,
         "finished_at": finished,
         "source": {"repository": "ericrosenn1/LitDataMatcher", "commit": git_value("-C", str(root), "rev-parse", "HEAD"), "working_tree_digest": canonical_digest(git_value("-C", str(root), "status", "--porcelain")), "spec_digest": sha256_file(root / "docs" / "v2" / "build_spec" / "PACKAGE_MANIFEST.json"), "config_digest": canonical_digest({"reservation": reservation, "audit": audit, "candidate_universe_sha256": result["candidate_universe_sha256"]})},
         "environment": {"python": sys.version, "platform": platform.platform(), "dependency_lock_digest": sha256_file(root / "requirements-v2.lock"), "hardware_record": "CPU: local PretrainedSemanticIndex inference"},
-        "models": [{"id": model["model_id"], "revision": model["revision"], "runtime": model["runtime"], "license_status": model["license"], "prompt_version": "source-determined-final-holdout-v3"}],
+        "models": [{"id": model["model_id"], "revision": model["revision"], "runtime": model["runtime"], "license_status": model["license"], "prompt_version": "source-determined-final-holdout-v4"}],
         "source_snapshots": [{"source": "NCBI GEO GDS ESummary acquired snapshot", "snapshot_id": audit["candidate"]["source_snapshot_sha256"], "retrieved_at": snapshot_retrieved_at, "manifest_digest": sha256_file(snapshot)}],
         "commands": [{"command": "evaluate_final_holdout.py (one-time final-holdout execution)", "cwd": str(root), "started_at": started, "exit_code": 0, "log_reference": "metrics.json"}],
         "evaluation": {"protocol_version": reservation["protocol_id"], "split_id": selected, "split_role": "FINAL_HOLDOUT", "label_origins": ["source_determined"], "holdout_exposed_to_tuning": False, "source_disjointness": {"status": "PROVEN_SOURCE_DISJOINT", "selected_accession": selected, "unknown_overlap_count": 0}},

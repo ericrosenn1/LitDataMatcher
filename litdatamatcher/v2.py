@@ -315,7 +315,8 @@ def analyze(
         raise ValueError("Run output already exists; use a new run ID or the resume command")
     out.mkdir(parents=True)
     started = dt.datetime.now(dt.timezone.utc).isoformat()
-    documents = read_rows(root / "catalog/literature.jsonl")
+    catalog_documents = read_rows(root / "catalog/literature.jsonl")
+    documents = catalog_documents
     all_datasets = [normalize_dataset(r) for r in read_rows(root / "catalog/studies.jsonl")]
     if document_path:
         from .ingestion import ingest_literature_sources
@@ -325,8 +326,14 @@ def analyze(
         ingest_literature_sources([str(document_path)], localout / "literature.jsonl")
         documents = read_rows(localout / "literature.jsonl")
     if topic:
-        topic_tokens = set(re.findall(r"\w+", topic.casefold()))
-        documents = [
+        normalized_topic = topic.casefold().strip()
+        exact_topic = [
+            document
+            for document in documents
+            if str(document.get("topic", "")).casefold().strip() == normalized_topic
+        ]
+        topic_tokens = set(re.findall(r"\w+", normalized_topic))
+        documents = exact_topic or [
             document
             for document in documents
             if topic_tokens
@@ -335,7 +342,7 @@ def analyze(
                 re.findall(
                     r"\w+",
                     " ".join(
-                        str(document.get(field, "")) for field in ("topic", "title", "text")
+                        str(document.get(field, "")) for field in ("title", "text")
                     ).casefold(),
                 )
             )
@@ -508,8 +515,10 @@ def analyze(
             write_rows(out / f"{name}.jsonl", rows)
         inspected = read_rows(root / "catalog/processed_inspections.jsonl")
         coverage = {
-            "unique_literature_records": len({d["document_id"] for d in documents}),
-            "parsed_full_texts": sum(d.get("fulltext_status") == "parsed" for d in documents),
+            "unique_literature_records": len({d["document_id"] for d in catalog_documents}),
+            "parsed_full_texts": sum(
+                d.get("fulltext_status") == "parsed" for d in catalog_documents
+            ),
             "unique_accession_studies": len(
                 {d.get("dependence_group", d["dataset_id"]) for d in all_datasets}
             ),
@@ -524,13 +533,17 @@ def analyze(
                 }
             ),
             "external_structured_resources": int((root / "external_evidence/uniprot").exists()),
-            "distinct_pilot_contexts": len({d.get("topic") for d in documents if d.get("topic")}),
+            "distinct_pilot_contexts": len(
+                {d.get("topic") for d in catalog_documents if d.get("topic")}
+            ),
             "case_dossiers": len({(m["question_id"], m["dataset_id"]) for m in matches}),
         }
         source_root = Path(__file__).parents[1]
         try:
             commit = subprocess.check_output(
-                ["git", "-C", str(source_root), "rev-parse", "HEAD"], text=True
+                ["git", "-C", str(source_root), "rev-parse", "HEAD"],
+                text=True,
+                stderr=subprocess.DEVNULL,
             ).strip()
         except (OSError, subprocess.CalledProcessError):
             commit = "installed-distribution"

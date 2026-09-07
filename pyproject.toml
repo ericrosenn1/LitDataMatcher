@@ -8,7 +8,8 @@ version = "0.2.0"
 description = "A reproducible pipeline for extracting open scientific questions and ranking matching public datasets."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
   { name = "Eric Rosenn" }
 ]

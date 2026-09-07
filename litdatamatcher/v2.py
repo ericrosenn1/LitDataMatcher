@@ -753,6 +753,14 @@ def main(argv=None):
     )
     acceptance.add_argument("--out", required=True, help="ACCEPTANCE_REPORT.json output path")
 
+    closeout = sub.add_parser(
+        "closeout-audit",
+        help="Read-only deterministic audit of real closeout evidence and blockers",
+    )
+    closeout.add_argument("--root", required=True, help="Shared data root to audit")
+    closeout.add_argument("--source-root", required=True, help="Source checkout to fingerprint")
+    closeout.add_argument("--out", required=True, help="Structured audit JSON output path")
+
     args = parser.parse_args(argv)
     if args.command == "doctor":
         from .resources import ResourceGovernor
@@ -787,6 +795,11 @@ def main(argv=None):
         from .acceptance import validate_acceptance
 
         result = validate_acceptance(args.evidence, output_path=args.out)
+    elif args.command == "closeout-audit":
+        from .closeout import run_closeout_audit, write_closeout_audit
+
+        result = run_closeout_audit(args.root, args.source_root)
+        write_closeout_audit(result, args.out)
     else:
         if args.limit < 1 or args.chunks < 1:
             raise ValueError("Positive limits required")

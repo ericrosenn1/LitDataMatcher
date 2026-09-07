@@ -1,0 +1,64 @@
+{
+  "protocol_id": "EP-20260907-1",
+  "reservation_version": "v4_after_consumed_v3_and_exposed_GSE284624",
+  "status": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION",
+  "selected_accession": "GSE279879",
+  "selection_rule": "After retired GSE112372, disqualified GSE282859, consumed/contaminated GSE264666, and metadata-exposed GSE284624, scan primary catalog families in persisted order. Reserve the first candidate with zero exact intersections across declared series, BioProject/repository alias, GEO sample, GDS-linked PubMed/PMC, and complete ENA/SRA identifier relations against every development, transfer, challenge, retired, reserved, contaminated, and prior-reserved component. Official successful empty GDS->PubMed, PubMed->PMC, or ENA read-run response is recorded as EXPLICIT_NO_INDEXED_LINK, not missing data; errors and responses at the 1000-record limit block reservation.",
+  "audit": {
+    "path": "fallback_identifier_lineage_audit_v4.json",
+    "sha256": "4257BA6D50B7A5373C67A7BAA8CE08C9DF4D8F06E9E833B28D930BC9C16E7F11",
+    "decision": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION"
+  },
+  "identifier_lineage": {
+    "series": [
+      "GSE279879"
+    ],
+    "bioproject": [
+      "PRJNA1175029"
+    ],
+    "geo_samples": [
+      "GSM8582474",
+      "GSM8582475",
+      "GSM8582476",
+      "GSM8582477",
+      "GSM8582478",
+      "GSM8582479",
+      "GSM8582480",
+      "GSM8582481",
+      "GSM8582482",
+      "GSM8582483",
+      "GSM8582484",
+      "GSM8582485",
+      "GSM8582486",
+      "GSM8582487"
+    ],
+    "pubmed": [
+      "39489917"
+    ],
+    "pmc": [
+      "11638867"
+    ],
+    "sra": [
+      "SRP539541"
+    ]
+  },
+  "verification": {
+    "all_exact_identifier_intersections_zero": true,
+    "candidate_publication_pmc_complete": true,
+    "candidate_ena_sra_complete": true,
+    "base_official_relation_errors": 0,
+    "base_official_relation_truncations": 0
+  },
+  "sealed_evaluation_state": {
+    "title_summary_outcome_status": "UNINSPECTED",
+    "label_status": "UNINSPECTED",
+    "prediction_status": "NOT_RUN",
+    "ranking_status": "NOT_RUN",
+    "execution_requires": "Explicit lead authorization for one-time final holdout execution after preflight."
+  },
+  "limitations": [
+    "Known-identifier disjointness does not prove absence of undisclosed reused cohorts, source-of-source links, or external mirrors.",
+    "No GSE279879 scientific content, labels, predictions, ranks, or scores were accessed.",
+    "GSE284624 cannot be claimed untouched after accidental nested sample-title exposure."
+  ]
+}

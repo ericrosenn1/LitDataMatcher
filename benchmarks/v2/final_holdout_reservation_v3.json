@@ -1,7 +1,7 @@
 {
   "protocol_id": "EP-20260907-1",
   "reservation_version": "v3_complete_official_relation_status",
-  "status": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION",
+  "status": "FAILED_CONSUMED_CONTAMINATED_DEVELOPMENT_EVIDENCE",
   "selected_accession": "GSE264666",
   "selection_rule": "First primary catalog family after disqualified GSE282859 whose exact series, BioProject/repository alias, GEO sample, GDS-linked PubMed/PMC, and complete ENA/SRA identifier relations have zero intersection with every development, transfer, challenge, retired, and prior-reserved component.",
   "audit": {
@@ -25,11 +25,18 @@
     "base_official_relation_truncations": 0
   },
   "sealed_evaluation_state": {
-    "title_summary_outcome_status": "UNINSPECTED",
-    "label_status": "UNINSPECTED",
-    "prediction_status": "NOT_RUN",
-    "ranking_status": "NOT_RUN",
-    "execution_requires": "Explicit lead authorization for one-time final holdout execution"
+    "title_summary_outcome_status": "EXPOSED_DURING_FAILED_EXECUTION",
+    "label_status": "SOURCE_DETERMINED_CASE_CONSTRUCTED_DURING_FAILED_EXECUTION",
+    "prediction_status": "RAN_FAILED_NO_RESULT_MANIFEST",
+    "ranking_status": "RAN_FAILED_NO_RESULT_MANIFEST",
+    "execution_requires": "Prohibited: consumption receipt records a failed attempt after source snapshot scoring. This family is contaminated development evidence."
+  },
+  "consumption_receipt": {
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v3\\CONSUMED.json",
+    "sha256": "9c1245f7938b489ed148a018d2973c96fecc69ed823a18ba753108760c7885d9",
+    "status": "FAILED_CONSUMED",
+    "failure": "ModuleNotFoundError: No module named 'jsonschema'",
+    "result_manifest": "NOT_CREATED"
   },
   "limitations": [
     "Known-identifier disjointness does not prove absence of undisclosed reused cohorts, source-of-source links, or external mirrors.",

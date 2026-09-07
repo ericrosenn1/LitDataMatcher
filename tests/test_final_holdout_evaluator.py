@@ -2,6 +2,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -141,6 +142,51 @@ def test_selected_snapshot_constructs_source_determined_case_only(tmp_path):
     assert profile["capabilities"]["comparator"]["status"] == "unknown"
     assert profile["independent_units"] is None
     assert "GSE999999" not in retrieval_text
+
+
+def test_missing_jsonschema_preflight_never_marks_consumed_or_reads_source(tmp_path, monkeypatch):
+    reservation_path, audit_path = _sealed_paths(tmp_path)
+    source_snapshot = tmp_path / "selected-source.json"
+    source_snapshot.write_text("{}", encoding="utf-8")
+    args = SimpleNamespace(
+        reservation=reservation_path,
+        audit=audit_path,
+        frozen_universe=tmp_path / "universe.json",
+        source_snapshot=source_snapshot,
+        source_snapshot_retrieved_at="2026-09-07T00:00:00+00:00",
+        lead=tmp_path,
+        model=tmp_path,
+        schema=tmp_path / "schema.json",
+        output=tmp_path / "output" / "run",
+        consumption_ledger=tmp_path / "output" / "CONSUMED.json",
+    )
+    args.frozen_universe.write_text("{}", encoding="utf-8")
+    args.schema.write_text("{}", encoding="utf-8")
+    observed = {"source_read": False}
+
+    def missing_jsonschema(name):
+        if name == "jsonschema":
+            raise ModuleNotFoundError("No module named 'jsonschema'")
+        raise AssertionError(f"unexpected import: {name}")
+
+    with pytest.raises(ModuleNotFoundError, match="jsonschema"):
+        EVALUATOR.runtime_preflight(args, module_loader=missing_jsonschema)
+
+    def source_read(*_args, **_kwargs):
+        observed["source_read"] = True
+        raise AssertionError("source snapshot must not be opened")
+
+    original_preflight = EVALUATOR.runtime_preflight
+    monkeypatch.setattr(
+        EVALUATOR,
+        "runtime_preflight",
+        lambda _args: original_preflight(args, module_loader=missing_jsonschema),
+    )
+    monkeypatch.setattr(EVALUATOR, "source_record", source_read)
+    with pytest.raises(ModuleNotFoundError, match="jsonschema"):
+        EVALUATOR.execute(args)
+    assert not args.consumption_ledger.exists()
+    assert observed["source_read"] is False
 
 
 def test_final_holdout_manifest_requires_proven_disjointness_with_zero_unknowns(tmp_path):

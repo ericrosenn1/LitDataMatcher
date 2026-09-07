@@ -139,6 +139,43 @@ def test_proven_replacement_final_holdout_can_replace_retired_exposed_family(tmp
     assert _status(report, "G10", "source_disjoint_test") == "PASS"
 
 
+def test_closeout_prefers_v4_reservation_when_present(tmp_path):
+    data = tmp_path / "data"
+    source = tmp_path / "source"
+    _reservation(source)
+    _write(
+        source / "benchmarks" / "v2" / "final_holdout_reservation_v4.json",
+        {
+            "status": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION",
+            "selected_accession": "GSE279879",
+            "verification": {
+                "all_exact_identifier_intersections_zero": True,
+                "candidate_publication_pmc_complete": True,
+                "candidate_ena_sra_complete": True,
+                "base_official_relation_errors": 0,
+                "base_official_relation_truncations": 0,
+            },
+            "sealed_evaluation_state": {
+                "prediction_status": "NOT_RUN",
+                "ranking_status": "NOT_RUN",
+            },
+        },
+    )
+    _final_run(
+        data,
+        "final-v4",
+        source_disjointness={
+            "selected_accession": "GSE279879",
+            "status": "PROVEN_SOURCE_DISJOINT",
+            "unknown_overlap_count": 0,
+        },
+    )
+
+    report = run_closeout_audit(data, source)
+
+    assert _status(report, "G10", "source_disjoint_test") == "PASS"
+
+
 def test_junit_receipt_credits_only_exact_unskipped_contract_tests(tmp_path):
     receipt = tmp_path / "data" / "tests" / "post-acceptance-full.xml"
     receipt.parent.mkdir(parents=True)

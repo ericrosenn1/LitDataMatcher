@@ -1,4 +1,4 @@
-"""Sealed, one-time evaluator for the v3 source-disjoint final holdout.
+"""Sealed, one-time evaluator for a source-disjoint final holdout.
 
 This command deliberately has no default paths: the invoker must make every
 immutable input and every output/consumption location explicit.  Gate checks
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
 import math
 import os
@@ -325,11 +326,39 @@ def validate_manifest(manifest: dict[str, Any], schema: Path) -> None:
         raise ValueError("RUN_MANIFEST schema validation failed: " + "; ".join(error.message for error in errors))
 
 
+def runtime_preflight(args: argparse.Namespace, module_loader=importlib.import_module) -> dict[str, Any]:
+    """Prove local runtime/output readiness before consuming any holdout input."""
+    _require(args.schema.is_file(), "RUN_MANIFEST schema is unavailable")
+    _require(args.frozen_universe.is_file(), "frozen candidate universe is unavailable")
+    _require(args.source_snapshot.is_file(), "selected source snapshot is unavailable")
+    _require(args.lead.is_dir(), "lead implementation directory is unavailable")
+    _require(args.model.is_dir(), "local model directory is unavailable")
+    _require(not args.consumption_ledger.exists(), "final holdout is already consumed or reserved")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=args.output.parent, prefix=".final-holdout-preflight-"):
+        pass
+    jsonschema = module_loader("jsonschema")
+    validator = jsonschema.Draft202012Validator
+    validator.check_schema(read_json(args.schema))
+    sys.path.insert(0, str(args.lead))
+    module_loader("torch")
+    module_loader("transformers")
+    module_loader("numpy")
+    from litdatamatcher.semantic_runtime import PretrainedSemanticIndex, verify_model
+
+    manifest = verify_model(args.model)
+    # Instantiate from local files only. No source snapshot is read and no query is encoded.
+    index = PretrainedSemanticIndex(args.model, device="cpu")
+    del index
+    return manifest
+
+
 def execute(args: argparse.Namespace) -> int:
     reservation, audit = validate_preconditions(args.reservation, args.audit)
     _require(args.output.resolve() != args.consumption_ledger.resolve(), "output directory cannot be the consumption ledger")
     _require(not args.output.exists(), "final output path already exists")
     _require(bool(args.source_snapshot_retrieved_at.strip()), "source snapshot retrieval timestamp is required")
+    runtime_preflight(args)
     record = reserve_consumption(args.consumption_ledger, reservation, args.audit)
     started = utc_now()
     try:

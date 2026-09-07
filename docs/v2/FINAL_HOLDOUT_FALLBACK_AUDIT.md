@@ -1,11 +1,32 @@
 # Final holdout fallback audit
 
-GSE282859 is retained as `DISQUALIFIED_INCOMPLETE_LINEAGE`. Its zero known identifier intersections were insufficient because its publication/version and ENA/SRA lineage could not initially be established; the frozen protocol treats that unknown as disqualifying for a proven-independent holdout claim.
+`GSE112372` remains retired because detailed metadata was exposed.
+`GSE282859` remains `DISQUALIFIED_INCOMPLETE_LINEAGE` because its lineage could
+not establish the required publication/version and ENA/SRA disjointness.
 
-The versioned fallback rule in [fallback_identifier_lineage_audit.json](../../benchmarks/v2/fallback_identifier_lineage_audit.json) then considered the next source-order family, GSE264666, using only identifier fields. It found zero known overlap in series, BioProject, GEO samples, PubMed, PMC, ENA study, secondary-study, sample, and run identifiers. It did not read a title, summary, outcome field, label, rank, or prediction.
+The authorized v3 `GSE264666` attempt created an exclusive consumption receipt,
+opened and scored the snapshot, then failed before manifest creation with
+`ModuleNotFoundError: No module named 'jsonschema'`. It is preserved as
+`FAILED_CONSUMED_CONTAMINATED_DEVELOPMENT_EVIDENCE`; no result manifest exists,
+and it must not be rerun. The receipt hash is recorded in
+`final_holdout_reservation_v3.json`.
 
-The v3 continuation closed those relation states using official identifier-only endpoints. A successful GDS-to-PubMed or PubMed-to-PMC response without the requested link is recorded as `EXPLICIT_NO_INDEXED_LINK`; a successful ENA JSON empty array is `EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK`. These are complete negative relation results, distinct from error or truncation. All 43 ENA/SRA queries returned fewer than 1,000 rows (maximum 234), so pagination was not needed.
+`GSE284624` was the next source-order candidate. During identifier extraction,
+nested sample-title values were inadvertently exposed. It is retained as
+`EXPOSED_METADATA_NOT_ELIGIBLE_FOR_UNTOUCHED_CLAIM`; no score, ranking,
+prediction, outcome, or label was generated.
 
-GSE264666 now has complete linked PubMed, PMC, ENA, and SRA identifiers and zero exact intersections with the full comparison union across series, BioProject, GEO samples, PubMed, PMC, ENA study, secondary-study, sample, and run identifiers. It is prospectively reserved in [final_holdout_reservation_v3.json](../../benchmarks/v2/final_holdout_reservation_v3.json), pending one-time lead authorization. It has not been scored or executed.
+The v4 audit selected `GSE279879`, the next candidate in persisted source
+order. It used only official identifier relations: GEO accession/sample and
+BioProject identifiers; GDS-to-PubMed; PubMed-to-PMC; and ENA/SRA
+study/secondary-study/sample/run fields. It found complete candidate relations
+and zero exact intersections with the inherited base union plus consumed
+`GSE264666`. A successful empty ENA GSE query is recorded as an explicit
+no-indexed-link result; the BioProject query returned 14 rows, below the 1,000
+row boundary. No GSE279879 title, summary, outcome, label, rank, prediction, or
+score was accessed.
 
-The identifier-only source responses are preserved outside Git in `C:\Codex\LitDataMatcher-v2\data\evaluation\replacement_holdout_identifier_lineage_20260907`; the committed audit records their filenames and SHA256 values. Do not execute the holdout until the lead explicitly authorizes the one-time final run.
+Raw identifier responses are outside Git at
+`C:\Codex\LitDataMatcher-v2\data\evaluation\replacement_holdout_v4_identifier_lineage_20260907`.
+The committed v4 audit retains filenames, sizes, hashes, counts, and the raw
+manifest digest. `GSE279879` remains sealed until one-time lead authorization.

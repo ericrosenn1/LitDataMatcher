@@ -70,7 +70,9 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     concurrency_path = data / "evaluation" / "concurrency" / "final" / "concurrency_validation.json"
     full_junit_path = data / "tests" / "post-acceptance-full.xml"
     controller_junit_path = data / "evaluation" / "E03_controller_independent.xml"
-    reservation_path = source / "benchmarks" / "v2" / "final_holdout_reservation_v3.json"
+    reservation_path = source / "benchmarks" / "v2" / "final_holdout_reservation_v4.json"
+    if not reservation_path.is_file():
+        reservation_path = source / "benchmarks" / "v2" / "final_holdout_reservation_v3.json"
     state_path = source / "project_state" / "TASK_STATE.json"
     next_path = source / "project_state" / "NEXT_ACTION.md"
 

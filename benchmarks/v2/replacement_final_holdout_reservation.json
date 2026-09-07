@@ -1,0 +1,58 @@
+{
+  "protocol_id": "EP-20260907-1",
+  "reservation_status": "PREPARED_NOT_AUTHORIZED_FOR_EXECUTION",
+  "purpose": "Replacement primary final holdout after GSE112372 metadata exposure; no prediction, ranking, outcome label, title, or summary was inspected for the replacement.",
+  "selection_rule": "Read studies.jsonl in its persisted order. Among topic=primary records, select the first accession whose declared series, BioProject/repository alias, and sample identifiers have no exact overlap with the union of all development or transfer scoring families, challenge-development families, retired/existing holdout families, and their known explicit identifiers. Do not use title, summary, organism, assay, sample count, outcomes, model output, or label attractiveness for selection.",
+  "catalog": "C:\\Codex\\LitDataMatcher-v2\\data\\catalog\\studies.jsonl",
+  "catalog_sha256": "e52aef7e18d7c10b4a151af2c4ee005a4d92601a3ece53d11b70a6df8ffc7cc8",
+  "excluded_scoring_or_reserved_accessions": [
+    "GSE278521", "GSE275189", "GSE271810", "GSE267066", "GSE263125", "GSE262638", "GSE255144", "GSE248047", "GSE247134", "GSE234612", "GSE232352", "GSE229937", "GSE228684", "GSE212865", "GSE210175", "GSE189320", "GSE254179", "GSE213737", "GSE193185", "GSE285174",
+    "GSE243444", "GSE276837", "GSE186963", "GSE268929", "GSE245890", "GSE261334", "GSE244981", "GSE248578", "GSE246987", "GSE223481",
+    "GSE193336", "GSE128885", "GSE99787", "GSE133844", "GSE95435", "GSE112372", "GSE214695", "GSE226875"
+  ],
+  "selected_accession": "GSE282859",
+  "catalog_order_index_1_based": 24,
+  "source_locator": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE282859",
+  "source_snapshot": {
+    "sha256": "10a1096e704bf668a409b9e7aef65d9b6d0453f62eae24c442741b64050b32a2",
+    "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gds&id=200213737%2C200193185%2C200285174%2C200282859%2C200264666%2C200284624%2C200279879%2C200277961%2C200264387%2C200260587%2C200272294%2C200250522%2C200250449%2C200246315%2C200284426%2C200280866%2C200266616%2C200223328%2C200272325%2C200158955&retmode=json",
+    "json_pointer": "/result/GSE282859"
+  },
+  "identifier_only_lineage": {
+    "series": ["GSE282859"],
+    "bioproject": ["PRJNA1190897"],
+    "publication": [],
+    "geo_samples": ["GSM8651595", "GSM8651598", "GSM8651597", "GSM8651594", "GSM8651599", "GSM8651596"],
+    "ena_runs_or_samples": []
+  },
+  "exact_overlap_audit": {
+    "against_excluded_known_families": {
+      "series_overlap": [],
+      "bioproject_overlap": [],
+      "publication_overlap": [],
+      "geo_sample_overlap": [],
+      "ena_overlap": []
+    },
+    "excluded_known_identifier_counts": {
+      "series": 35,
+      "bioproject": 30,
+      "publication": 0,
+      "geo_samples": 1045,
+      "ena_records": 37
+    },
+    "ena_catalog_coverage": "The acquired ENA run file contains canonical records only for GSE278521 and none for GSE282859; absence of a candidate ENA record is unresolved, not evidence of no ENA linkage."
+  },
+  "uncertainties": [
+    "No publication identifier is declared for GSE282859 in the acquired catalog lineage fields, so publication/version disjointness cannot be proven.",
+    "No candidate ENA record is acquired; SRA/ENA alias and run/sample overlap are unresolved.",
+    "Undisclosed reused donors/cohorts, source-of-source links, DOI/PMCID versions, and external mirrors remain unresolved.",
+    "Exact non-overlap of known identifiers is not proof of cohort independence."
+  ],
+  "sealed_evaluation_state": {
+    "prediction_status": "NOT_RUN",
+    "ranking_status": "NOT_RUN",
+    "outcome_label_status": "UNINSPECTED",
+    "title_summary_status": "UNINSPECTED_BY_EVALUATOR_AFTER_SELECTION",
+    "execution_requires": "Explicit lead authorization after remaining protocol gates are reviewed"
+  }
+}

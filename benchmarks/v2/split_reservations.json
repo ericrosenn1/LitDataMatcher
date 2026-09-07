@@ -1,13 +1,14 @@
 {
   "protocol_id": "EP-20260907-1",
-  "status": "FROZEN_RESERVATIONS_LINKAGE_CLOSURE_PENDING",
+  "status": "REPLACEMENT_PRIMARY_HOLDOUT_PREPARED_NOT_AUTHORIZED",
   "frozen_before_tuning": true,
   "base_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
   "development": ["GSE193336", "GSE128885", "GSE99787", "GSE133844", "GSE95435"],
-  "primary_holdout": ["GSE112372"],
+  "primary_holdout": ["GSE282859"],
+  "retired_primary_holdout": ["GSE112372"],
   "transfer_holdout": ["GSE214695", "GSE226875"],
   "grouping": "connected publication/version/study/cohort/mirror/source-of-source families",
   "label_origin": "source_determined",
   "expert_labels_available": false,
-  "untouched_status": "Discovery metadata only seen; predictions and detailed labels not inspected. Full linkage closure and exposure audit required before final claim."
+  "untouched_status": "GSE112372 detailed metadata was exposed and is retired from untouched-holdout status. GSE282859 was selected from identifier-only catalog lineage fields under replacement_final_holdout_reservation.json; no title/summary/outcome field, label, prediction, or rank was inspected by the evaluator. Known identifier linkage is disjoint, while publication, ENA, version, source-of-source and undisclosed-cohort overlap remain unresolved. Final execution requires lead authorization."
 }

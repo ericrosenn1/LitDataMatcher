@@ -4,7 +4,7 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T12:26:36.1300857Z",
+  "updated_at": "2026-09-07T12:39:01.6539226Z",
   "execution_status": "RUNNING",
   "product_status": "NOT_READY",
   "automation_status": "VERIFIED_ENABLED",
@@ -24,7 +24,7 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "PRE_HOLDOUT_GATE_REVIEW",
+  "current_phase": "HOLDOUT_LINEAGE_CLOSURE",
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
@@ -109,16 +109,26 @@
     "distinct_pilot_contexts": 2,
     "case_dossiers": 20
   },
-  "blockers": [],
+  "blockers": [
+    {
+      "id": "B-HOLDOUT-LINEAGE",
+      "status": "ACTIVE",
+      "description": "Replacement holdout candidates GSE282859 and GSE264666 are disqualified or unreservable until publication/version and complete paginated ENA/SRA identifier closure proves source disjointness.",
+      "evidence": [
+        "benchmarks/v2/replacement_final_holdout_reservation.json",
+        "benchmarks/v2/fallback_identifier_lineage_audit.json"
+      ]
+    }
+  ],
   "next_action": {
-    "description": "Complete independent pre-holdout gate review, close any evidence gaps, then execute the newly frozen untouched holdout once.",
+    "description": "Complete bounded official identifier-only publication and ENA/SRA lineage closure; reserve a source-disjoint replacement only if every required component is resolved, then finish pre-holdout gate review.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "python -m pytest -q; python -m litdatamatcher.v2 acceptance --evidence C:\\Codex\\LitDataMatcher-v2\\data\\acceptance\\ACCEPTANCE_EVIDENCE.json --out C:\\Codex\\LitDataMatcher-v2\\data\\acceptance\\ACCEPTANCE_REPORT.json",
+    "command": "python -m litdatamatcher.v2 closeout-audit --data-root C:\\Codex\\LitDataMatcher-v2\\data --source-root C:\\Codex\\LitDataMatcher-v2\\lead --out C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\closeout\\pre_holdout_audit_02.json",
     "command_tested": false
   },
   "checkpoint": {
-    "last_source_commit": "14c44e971142324b477e73cee9e496be3de3b075",
-    "last_verified_remote_commit": "14c44e971142324b477e73cee9e496be3de3b075",
+    "last_source_commit": "42ee64a8fa69d4b8903f5a43c5f903c095fcdf39",
+    "last_verified_remote_commit": "42ee64a8fa69d4b8903f5a43c5f903c095fcdf39",
     "push_pending": false
   },
   "milestones": {

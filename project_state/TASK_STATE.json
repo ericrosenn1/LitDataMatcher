@@ -121,8 +121,8 @@
     "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "460d486265aeca07fa75b86a2147ce3cc497f478",
-    "last_verified_remote_commit": "460d486265aeca07fa75b86a2147ce3cc497f478",
+    "last_source_commit": "4ff864390695483cc08553bced46d19d9e4bf17b",
+    "last_verified_remote_commit": "4ff864390695483cc08553bced46d19d9e4bf17b",
     "push_pending": false
   },
   "milestones": {

@@ -536,7 +536,8 @@ def analyze(
             commit = "installed-distribution"
         qualification_path = root / "runtime-qualification/qualified_7b_pass1.json"
         backend_qualified, qualification_digest = qualified_runtime(qualification_path, runtime)
-        lock_path = source_root / "requirements-v2.lock"
+        package_assets = Path(__file__).resolve().parent / "schemas_v2"
+        lock_path = package_assets / "requirements-v2.lock"
         source_snapshots = []
         for document in selected:
             snapshot = document.get("fulltext_snapshot") or document.get("source_snapshot")
@@ -568,7 +569,7 @@ def analyze(
                     }
                 ),
                 "spec_digest": hashlib.sha256(
-                    (source_root / "docs/v2/build_spec/PACKAGE_MANIFEST.json").read_bytes()
+                    (package_assets / "PACKAGE_MANIFEST.json").read_bytes()
                 ).hexdigest(),
                 "config_digest": digest(
                     {

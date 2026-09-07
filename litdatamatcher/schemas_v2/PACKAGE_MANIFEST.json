@@ -1,0 +1,178 @@
+{
+  "spec_id": "LITDATAMATCHER_V2_CODEX_BUILD_20260907",
+  "spec_version": "2.0.0",
+  "file_count": 34,
+  "files": [
+    {
+      "path": "00_START_HERE.md",
+      "size_bytes": 4513,
+      "sha256": "037e5c8dd0722f0be58ed416ac9fb9c747ccfcddec9b6cd954503ef4906fdf4d"
+    },
+    {
+      "path": "01_MASTER_CODEX_BUILD_PROMPT.md",
+      "size_bytes": 14867,
+      "sha256": "331b3d783112df55c3ef3b27516e00ee00dc457b8e6155a2d81827867b25165b"
+    },
+    {
+      "path": "02_FINAL_ARCHITECTURE_SPEC.md",
+      "size_bytes": 12404,
+      "sha256": "01fa8ffea1583d68b7a0270eb6430b02cd0cbe94c51bb4cdfe39e860486d6478"
+    },
+    {
+      "path": "03_WORKER_AND_AGENT_CONTRACTS.md",
+      "size_bytes": 6810,
+      "sha256": "8a2bf66274da4c1a6f129550672bddf32c8d9314a07cc84b6891d2a8be1de289"
+    },
+    {
+      "path": "04_EXTERNAL_COMPONENT_REUSE_PLAN.md",
+      "size_bytes": 5494,
+      "sha256": "77156b0de5284127a25fe96b5301b6069f88248731b2802fe95c280e12930df8"
+    },
+    {
+      "path": "05_LONG_HORIZON_EXECUTION_POLICY.md",
+      "size_bytes": 5916,
+      "sha256": "d556de772f7f6492fb5055ce9da60493683566145105d05d4a3fe3c276ed22d1"
+    },
+    {
+      "path": "06_GIT_GITHUB_CHECKPOINT_POLICY.md",
+      "size_bytes": 5360,
+      "sha256": "7f3b4d5bf684fa8b3600cc6c7d9890c905540af61b858034deb53ba4b745a0bc"
+    },
+    {
+      "path": "07_RESOURCE_AND_PARALLELISM_POLICY.md",
+      "size_bytes": 5446,
+      "sha256": "e16bf3e43fed635627f46969479bc33ba0cd29e7f7affe2975c524c2ba3b5860"
+    },
+    {
+      "path": "08_VALIDATION_AND_ACCEPTANCE_GATES.md",
+      "size_bytes": 11104,
+      "sha256": "e40bf2bfa88c1bf9ef197150eb7e52f6b1e8e3737b6ecca4af780f93b3860afc"
+    },
+    {
+      "path": "09_FUNCTIONAL_ALPHA_DEFINITION.md",
+      "size_bytes": 4899,
+      "sha256": "f25302759d82d7cf8a95d60b9fdf8fe7b401fdc9739183af7aa12c1d51ff9581"
+    },
+    {
+      "path": "10_SCHEDULED_SUPERVISOR_PROMPT.md",
+      "size_bytes": 5334,
+      "sha256": "425f13e248e81cac596bfcc3b1a9f53a75e3b887e2cde2772803fcb3a58a15cd"
+    },
+    {
+      "path": "11_TASK_STATE_AND_MACHINE_CONTRACTS.md",
+      "size_bytes": 3226,
+      "sha256": "838a0701e0b039a8cb4eb0bdcb933845c82fae7badc349fbfe6cfd378b6d1438"
+    },
+    {
+      "path": "12_EXPECTED_OUTPUTS_AND_DIRECTORY_LAYOUT.md",
+      "size_bytes": 5606,
+      "sha256": "53e8f962b86e147af143eb9ee5ff006b430a23f0f600f54a1b6c4a1185d3597f"
+    },
+    {
+      "path": "13_RECOVERY_AND_RESUME_POLICY.md",
+      "size_bytes": 3585,
+      "sha256": "e66f6a0c15333659a977c8929130eb528e04a10c728bc708d0985ea9f8981578"
+    },
+    {
+      "path": "14_WEEK1_WEEK2_PROGRESS_EXPECTATIONS.md",
+      "size_bytes": 2535,
+      "sha256": "b178ad448201884433df9e92ee33864793f280e00c3663837aeafeb73ef676bb"
+    },
+    {
+      "path": "15_SOURCE_NOTES_AND_DECISIONS.md",
+      "size_bytes": 6194,
+      "sha256": "9e7938a92a3f55a730de851121af8cb398a4e32a4d32a194e63cd5824750c45d"
+    },
+    {
+      "path": "16_RUNTIME_MODEL_AND_DATA_POLICY.md",
+      "size_bytes": 5131,
+      "sha256": "6b16daacf2a1837590a6a70e395cbd917546a06b856ff12bbf22db8072d16f11"
+    },
+    {
+      "path": "LAUNCH_IN_CODEX.txt",
+      "size_bytes": 2730,
+      "sha256": "4abd12fb4c45ce1d2a6e3071d74639ba9c0b0d232a3e971ee9e308760962b85c"
+    },
+    {
+      "path": "PACKAGE_VALIDATION.json",
+      "size_bytes": 6738,
+      "sha256": "c398d5cd69da26d818f2248adf45340ba39a47a24483e09b39ed664e81751792"
+    },
+    {
+      "path": "README_FOR_ERIC.txt",
+      "size_bytes": 1572,
+      "sha256": "f7f08f98c5927aa5c650a8e3f9d560936a7df0b4e7d6994ac2e4bd3b730342e3"
+    },
+    {
+      "path": "evidence/AUXILIARY_AGENT_FINAL_DECISION.source.md",
+      "size_bytes": 6203,
+      "sha256": "bc80d65601e800f7fe4641faed13027dbb3f54639fbd5daa1d31c567dae884a9"
+    },
+    {
+      "path": "evidence/BENCHMARK_HANDOFF.source.md",
+      "size_bytes": 1392,
+      "sha256": "41e5fe2f162e5e20adc523d7eb2ba40a26a9209bf3b214f337eb256c94bea938"
+    },
+    {
+      "path": "evidence/MUSE_RESULTS.source.tsv",
+      "size_bytes": 1959,
+      "sha256": "324659535a92015e937e27435a17b45f716f1e0ee1a885573fd504e33f605074"
+    },
+    {
+      "path": "evidence/OPENCODE_RESULTS.source.tsv",
+      "size_bytes": 2789,
+      "sha256": "321ace3bac559a9a8958eb54e006f11016f3d6c78c37cd1ce11db542f9a1fd4f"
+    },
+    {
+      "path": "evidence/SOURCE_MANIFEST.json",
+      "size_bytes": 1472,
+      "sha256": "a06a0bcf23c408fb2954fa59fac428a07270a1b371b2d252c3e092a871902184"
+    },
+    {
+      "path": "templates/ACCEPTANCE_REPORT.schema.json",
+      "size_bytes": 37113,
+      "sha256": "43f755433f38dcf79b3ef08738ae2f4d19f11f80bb5d61abf29474166bfce68b"
+    },
+    {
+      "path": "templates/ACCEPTANCE_REPORT.template.json",
+      "size_bytes": 3999,
+      "sha256": "e99c820c7bed1513f63b8ecb07c72e386a84e8d6c84c34e0f5516dee5c437ac3"
+    },
+    {
+      "path": "templates/BUILD_CONFIG.example.json",
+      "size_bytes": 2168,
+      "sha256": "b0d04b379ad5e414277b5615b37d41911f3c2176bb7da7d32db69947f57be521"
+    },
+    {
+      "path": "templates/BUILD_SPEC.json",
+      "size_bytes": 6180,
+      "sha256": "acc466252a2456c27ac53e89341ad86eef9626c81870653d98f5cfbfaa332077"
+    },
+    {
+      "path": "templates/RUN_MANIFEST.schema.json",
+      "size_bytes": 9976,
+      "sha256": "41178f52d0b3efcb395eb963d791623f5460dccb9d7d1e8dea5ac31d7e0397b6"
+    },
+    {
+      "path": "templates/RUN_MANIFEST.template.json",
+      "size_bytes": 1196,
+      "sha256": "1b8a4a105ec715ae7cedc6b2186dfa2d6e6dffc06d79cedb90d23cb658fc6077"
+    },
+    {
+      "path": "templates/TASK_STATE.schema.json",
+      "size_bytes": 13105,
+      "sha256": "9d8a4ce0c1539eb681ea52747b6d060f30ca296f8b8a949b94d7903bc329b96d"
+    },
+    {
+      "path": "templates/TASK_STATE.template.json",
+      "size_bytes": 3037,
+      "sha256": "ae33153637e16486974104d534dc8089419d3f5fd73cf2a54f8d6ce043286db0"
+    },
+    {
+      "path": "tools/verify_package.py",
+      "size_bytes": 7835,
+      "sha256": "5287abe3ead884237114753ce180ac4d7d47a3d409aeec47c512ed9087f3500d"
+    }
+  ],
+  "self_excluded": true
+}

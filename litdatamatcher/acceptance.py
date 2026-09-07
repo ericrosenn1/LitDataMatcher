@@ -26,8 +26,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 JsonObject = dict[str, Any]
 
-_HERE = Path(__file__).resolve().parents[1]
-_TEMPLATE_DIR = _HERE / "docs" / "v2" / "build_spec" / "templates"
+_TEMPLATE_DIR = Path(__file__).resolve().parent / "schemas_v2"
 ACCEPTANCE_SCHEMA_PATH = _TEMPLATE_DIR / "ACCEPTANCE_REPORT.schema.json"
 ACCEPTANCE_TEMPLATE_PATH = _TEMPLATE_DIR / "ACCEPTANCE_REPORT.template.json"
 RUN_MANIFEST_SCHEMA_PATH = _TEMPLATE_DIR / "RUN_MANIFEST.schema.json"

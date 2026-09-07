@@ -679,15 +679,18 @@ def analyze(
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__)
-    sub = p.add_subparsers(dest="command", required=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+
     doctor = sub.add_parser("doctor")
     doctor.add_argument("--root", required=True)
+
     sync = sub.add_parser("sync")
     sync.add_argument("--root", required=True)
     sync.add_argument("--stage", choices=["literature", "datasets"], required=True)
     sync.add_argument("--offline", action="store_true")
     sync.add_argument("--expanded", action="store_true")
+
     run = sub.add_parser("analyze")
     run.add_argument("--root", required=True)
     run.add_argument("--out", required=True)
@@ -700,9 +703,22 @@ def main(argv=None):
     run.add_argument("--chunks", type=int, default=2)
     run.add_argument("--fresh", action="store_true")
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+
     report = sub.add_parser("report")
     report.add_argument("--run", required=True)
-    args = p.parse_args(argv)
+
+    acceptance = sub.add_parser(
+        "acceptance",
+        help="Derive a strict machine acceptance report from hashed run evidence",
+    )
+    acceptance.add_argument(
+        "--evidence", required=True, help="Versioned acceptance evidence ledger JSON"
+    )
+    acceptance.add_argument(
+        "--out", required=True, help="ACCEPTANCE_REPORT.json output path"
+    )
+
+    args = parser.parse_args(argv)
     if args.command == "doctor":
         from .resources import ResourceGovernor
 
@@ -732,6 +748,10 @@ def main(argv=None):
             )
     elif args.command == "report":
         result = {"report": str(render_report(Path(args.run)))}
+    elif args.command == "acceptance":
+        from .acceptance import validate_acceptance
+
+        result = validate_acceptance(args.evidence, output_path=args.out)
     else:
         if args.limit < 1 or args.chunks < 1:
             raise ValueError("Positive limits required")

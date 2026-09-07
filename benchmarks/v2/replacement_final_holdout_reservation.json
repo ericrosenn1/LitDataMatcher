@@ -1,7 +1,7 @@
 {
   "protocol_id": "EP-20260907-1",
-  "reservation_status": "PREPARED_NOT_AUTHORIZED_FOR_EXECUTION",
-  "purpose": "Replacement primary final holdout after GSE112372 metadata exposure; no prediction, ranking, outcome label, title, or summary was inspected for the replacement.",
+  "reservation_status": "DISQUALIFIED_INCOMPLETE_LINEAGE",
+  "purpose": "Replacement primary final holdout after GSE112372 metadata exposure; no prediction, ranking, outcome label, title, or summary was inspected for the replacement. This reservation is retained as disqualified evidence, not an executable holdout.",
   "selection_rule": "Read studies.jsonl in its persisted order. Among topic=primary records, select the first accession whose declared series, BioProject/repository alias, and sample identifiers have no exact overlap with the union of all development or transfer scoring families, challenge-development families, retired/existing holdout families, and their known explicit identifiers. Do not use title, summary, organism, assay, sample count, outcomes, model output, or label attractiveness for selection.",
   "catalog": "C:\\Codex\\LitDataMatcher-v2\\data\\catalog\\studies.jsonl",
   "catalog_sha256": "e52aef7e18d7c10b4a151af2c4ee005a4d92601a3ece53d11b70a6df8ffc7cc8",
@@ -48,11 +48,15 @@
     "Undisclosed reused donors/cohorts, source-of-source links, DOI/PMCID versions, and external mirrors remain unresolved.",
     "Exact non-overlap of known identifiers is not proof of cohort independence."
   ],
+  "disqualification": {
+    "reason": "Publication/version and ENA/SRA separation were unresolved at preparation, and the frozen protocol disallows a proven-independent claim when overlap is unknown.",
+    "superseded_by": "fallback_identifier_lineage_audit.json, whose first fallback candidate is blocked because the base comparison components have incomplete identifier lineage."
+  },
   "sealed_evaluation_state": {
     "prediction_status": "NOT_RUN",
     "ranking_status": "NOT_RUN",
     "outcome_label_status": "UNINSPECTED",
     "title_summary_status": "UNINSPECTED_BY_EVALUATOR_AFTER_SELECTION",
-    "execution_requires": "Explicit lead authorization after remaining protocol gates are reviewed"
+    "execution_requires": "Not executable; complete lineage closure and a new eligible reservation are required before any lead authorization"
   }
 }

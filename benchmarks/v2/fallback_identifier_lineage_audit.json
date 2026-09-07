@@ -1,0 +1,123 @@
+{
+  "protocol_id": "EP-20260907-1",
+  "audit_scope": "identifier_only; no titles, summaries, outcome fields, labels, rankings, or predictions read",
+  "fallback_version": "v2_after_GSE282859_disqualification",
+  "selection_rule": "After GSE282859, scan persisted primary catalog rows in order and select the first candidate with zero exact intersection in declared series, BioProject/repository alias, or GEO sample identifiers against all development, transfer, challenge, retired, and reserved components. Require complete known publication/PMC and ENA/SRA identifiers for every base component before reserving any candidate.",
+  "candidate": {
+    "accession": "GSE264666",
+    "catalog_order_index_1_based": 25,
+    "series": [
+      "GSE246318",
+      "GSE264666"
+    ],
+    "bioproject": [
+      "PRJNA1103770"
+    ],
+    "geo_samples": [
+      "GSM8395208",
+      "GSM8395209",
+      "GSM8395210"
+    ],
+    "pubmed": [
+      "39613875"
+    ],
+    "pmc": [
+      "11634783"
+    ],
+    "source_locator": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE264666",
+    "source_snapshot_sha256": "10a1096e704bf668a409b9e7aef65d9b6d0453f62eae24c442741b64050b32a2"
+  },
+  "base_component_counts": {
+    "input_accessions": 38,
+    "series": 43,
+    "bioprojects": 35,
+    "geo_samples": 1045
+  },
+  "source_queries": {
+    "gds_to_pubmed": {
+      "endpoint": "NCBI ELink",
+      "parameters": "dbfrom=gds;db=pubmed;linkname=gds_pubmed;43 GDS identifiers",
+      "file": "gds_to_pubmed.xml",
+      "sha256": "2ba4a2df2ec7054284b15655647560698b236c064e15bd449e8d6e8d7e54a8b4",
+      "bytes": 9294
+    },
+    "pubmed_to_pmc": {
+      "endpoint": "NCBI ELink",
+      "parameters": "dbfrom=pubmed;db=pmc;linkname=pubmed_pmc;28 PubMed identifiers",
+      "file": "pubmed_to_pmc.xml",
+      "sha256": "e6c2e0fa00c54aacfbc3470b82e27009bed744d26884a60276ff3e30470e6e6d",
+      "bytes": 34816
+    },
+    "candidate_gds_to_pubmed": {
+      "endpoint": "NCBI ELink",
+      "parameters": "dbfrom=gds;db=pubmed;linkname=gds_pubmed;2 candidate family GDS identifiers",
+      "file": "candidate_gds_to_pubmed.xml",
+      "sha256": "7b9b41b618aae2ff00f7acd2a72f237afe41dbe4eaee35f75161fe3d3cc9f427",
+      "bytes": 720
+    },
+    "candidate_pubmed_to_pmc": {
+      "endpoint": "NCBI ELink",
+      "parameters": "dbfrom=pubmed;db=pmc;linkname=pubmed_pmc;1 candidate PubMed identifier",
+      "file": "candidate_pubmed_to_pmc.xml",
+      "sha256": "c3c35e30cfe73844d76dc21b3fab5aa34a0a9546bc9a34b16558dc14a2966083",
+      "bytes": 2121
+    },
+    "ena_identifier_queries": {
+      "endpoint": "ENA filereport",
+      "parameters": "study BioProject; fields=study_accession,secondary_study_accession,sample_accession,run_accession; format=json; result=read_run; limit=1000",
+      "projects": 36,
+      "files_directory": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\replacement_holdout_identifier_lineage_20260907"
+    }
+  },
+  "identifier_overlap": {
+    "series": [],
+    "bioproject": [],
+    "geo_samples": [],
+    "pubmed": [],
+    "pmc": [],
+    "ena": {
+      "study_accession": [],
+      "secondary_study_accession": [],
+      "sample_accession": [],
+      "run_accession": []
+    }
+  },
+  "coverage_gaps": {
+    "base_series_without_pubmed_link": [
+      "GSE186963",
+      "GSE189320",
+      "GSE210175",
+      "GSE212865",
+      "GSE223481",
+      "GSE228684",
+      "GSE229937",
+      "GSE247134",
+      "GSE248047",
+      "GSE262638",
+      "GSE267066",
+      "GSE278521",
+      "GSE285174",
+      "GSE95435",
+      "GSE99787"
+    ],
+    "base_bioprojects_with_empty_or_limit_reaching_ena": [
+      "PRJNA1035495",
+      "PRJNA1036265",
+      "PRJNA1086513",
+      "PRJNA1092683",
+      "PRJNA1159204",
+      "PRJNA776893",
+      "PRJNA795205",
+      "PRJNA877669",
+      "PRJNA982126"
+    ],
+    "candidate_series_without_pubmed_link": [],
+    "candidate_ena_complete": true
+  },
+  "decision": "BLOCKED_INCOMPLETE_BASE_COMPONENT_LINEAGE",
+  "decision_reason": "Base publication and ENA/SRA lineage is incomplete, so no candidate can establish the required disjointness from every component.",
+  "limitations": [
+    "Identifier-only source queries establish known-link overlap only. No title, summary, outcome, label, ranking, or prediction was accessed.",
+    "Undisclosed reused cohorts and source-of-source links would remain a separate limitation even after complete known identifiers."
+  ]
+}

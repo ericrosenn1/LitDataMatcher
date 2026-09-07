@@ -7,3 +7,5 @@
 
 - D06: independent reliability tests found dependency cycles, provenance-only invalidation, relative output resolution and active-pause resume defects. Fixed without changing scientific assumptions;15targeted tests pass including9independent cases. Scheduler remains disabled pending independent retest.
 - D07: measured1.5B model negation/future-work failures justify qualifying7B locally; no paid inference or changed development agent.
+
+- D08: later user execution-budget override preserved verbatim in substance at EXECUTION_OVERRIDE.md, referenced by AGENTS/state. No scientific thresholds changed, no existing worktrees/data/models discarded. Old Astra workers stopped safely; no scheduler existed to change.

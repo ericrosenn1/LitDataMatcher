@@ -4,7 +4,7 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T11:39:18.427262+00:00",
+  "updated_at": "2026-09-07T11:45:06.781721+00:00",
   "execution_status": "RUNNING",
   "product_status": "NOT_READY",
   "automation_status": "PREPARED_NOT_ENABLED",
@@ -24,7 +24,7 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "REAL_SLICE_INTEGRATION",
+  "current_phase": "EXECUTION_POLICY_TRANSITION",
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
@@ -37,7 +37,9 @@
       "id": "W01",
       "name": "Architecture and scientific contracts",
       "status": "IN_PROGRESS",
-      "evidence": []
+      "evidence": [
+        "docs/v2/EXECUTION_OVERRIDE.md"
+      ]
     },
     {
       "id": "W02",
@@ -109,14 +111,14 @@
   },
   "blockers": [],
   "next_action": {
-    "description": "Integrate qualified runtime; fix independent controller/catalog findings; execute first real v2 analyze and validate outputs.",
+    "description": "Follow docs/v2/EXECUTION_OVERRIDE.md; continue unfinished runtime qualification and evaluation with Terra High workers, then real v2 integration under selected Sol/Terra High lead.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
     "command": "python -m litdatamatcher.v2 doctor --root C:/Codex/LitDataMatcher-v2/data",
     "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
-    "last_verified_remote_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
+    "last_source_commit": "31da244320b2f2b28991f10c305d1ae2c8fd1971",
+    "last_verified_remote_commit": "31da244320b2f2b28991f10c305d1ae2c8fd1971",
     "push_pending": true
   },
   "milestones": {

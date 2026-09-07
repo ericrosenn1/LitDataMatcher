@@ -50,7 +50,7 @@ def test_question_and_match_training_labels_validate_scores():
         question_id="q1",
         annotator_id="expert-a",
         clarity_score="4",
-        overall_score=6,
+        overall_score=5,
     )
     match_label = QuestionDataMatchLabel(
         match_id="m1",
@@ -59,7 +59,7 @@ def test_question_and_match_training_labels_validate_scores():
         annotator_id="expert-a",
         relevance_score=0.9,
         question_quality_score=quality.overall_score,
-        data_match_quality_score=5.5,
+        data_match_quality_score=5,
     )
     restored = QuestionDataMatchLabel.from_dict(match_label.to_dict())
 

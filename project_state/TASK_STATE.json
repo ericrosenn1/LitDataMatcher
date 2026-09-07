@@ -4,10 +4,10 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T11:17:47.227985+00:00",
+  "updated_at": "2026-09-07T11:39:18.427262+00:00",
   "execution_status": "RUNNING",
   "product_status": "NOT_READY",
-  "automation_status": "NOT_CONFIGURED",
+  "automation_status": "PREPARED_NOT_ENABLED",
   "calibration_status": "PENDING_EXPERT_LABELS",
   "source": {
     "repository": "ericrosenn1/LitDataMatcher",
@@ -24,73 +24,76 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "BOOTSTRAP",
+  "current_phase": "REAL_SLICE_INTEGRATION",
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
-    "status": "UNKNOWN",
+    "status": "AVAILABLE",
     "verified_reset_at": null,
-    "source": null
+    "source": "supported get_usage_limits at bootstrap"
   },
   "workstreams": [
     {
       "id": "W01",
       "name": "Architecture and scientific contracts",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W02",
       "name": "Repository preservation and migration",
-      "status": "NOT_STARTED",
-      "evidence": []
+      "status": "VALIDATED",
+      "evidence": [
+        "docs/v2/STARTING_STATE.md",
+        "docs/v2/CURRENT_REPO_MIGRATION_MATRIX.tsv"
+      ]
     },
     {
       "id": "W03",
       "name": "External-component qualification and reuse",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W04",
       "name": "Local data plane",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W05",
       "name": "Literature acquisition and parsing",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W06",
       "name": "Semantic evidence extraction",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W07",
       "name": "Question and requirement discovery",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W08",
       "name": "Dataset acquisition and capability profiling",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W09",
       "name": "Evidence compilation",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     },
     {
       "id": "W10",
       "name": "Matching, evaluation, ranking and delivery",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "evidence": []
     }
   ],
@@ -106,15 +109,15 @@
   },
   "blockers": [],
   "next_action": {
-    "description": "Install isolated baseline environment, run regressions, delegate runtime and acquisition writers.",
+    "description": "Integrate qualified runtime; fix independent controller/catalog findings; execute first real v2 analyze and validate outputs.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "uv sync --extra dev",
-    "command_tested": false
+    "command": "python -m litdatamatcher.v2 doctor --root C:/Codex/LitDataMatcher-v2/data",
+    "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": null,
-    "last_verified_remote_commit": null,
-    "push_pending": false
+    "last_source_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
+    "last_verified_remote_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
+    "push_pending": true
   },
   "milestones": {
     "functional_alpha_run": null,

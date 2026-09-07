@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field as dataclass_field
 from hashlib import sha1
+import math
 from typing import Any
 
 
@@ -30,13 +31,10 @@ def stable_id(prefix: str, *parts: object) -> str:
 
 
 def _clamp01(value: float, field_name: str) -> float:
-    """Validate and clamp a score into the inclusive 0..1 interval."""
-
-    try:
-        val = float(value)
-    except (TypeError, ValueError) as exc:
-        raise ValueError(f"{field_name} must be numeric, got {value!r}") from exc
-    return max(0.0, min(1.0, val))
+    """Validate a finite score; malformed scores cannot become usable evidence."""
+    if type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 1:
+        raise ValueError(f"{field_name} must be a finite number in 0..1")
+    return float(value)
 
 
 def _clean_list(values: list[str] | tuple[str, ...] | None) -> list[str]:
@@ -64,7 +62,9 @@ def _optional_score(value: object, field_name: str, maximum: float = 5.0) -> flo
         score = float(value)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{field_name} must be numeric or blank, got {value!r}") from exc
-    return max(0.0, min(float(maximum), score))
+    if isinstance(value, bool) or not math.isfinite(score) or not 0 <= score <= maximum:
+        raise ValueError(f"{field_name} must be finite and within 0..{maximum}")
+    return score
 
 
 def _optional_bool(value: object) -> bool | None:

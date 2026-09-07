@@ -23,6 +23,8 @@ dependencies = [
   "numpy>=1.24",
   "requests>=2.31",
   "rich>=13.7",
+  "psutil>=7.0",
+  "jsonschema>=4.23",
 ]
 
 [project.optional-dependencies]
@@ -43,6 +45,8 @@ dev = [
 
 [project.scripts]
 litdatamatcher = "litdatamatcher.cli:main"
+litdatamatcher-controller = "litdatamatcher.controller:main"
+litdatamatcher-v2 = "litdatamatcher.v2:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

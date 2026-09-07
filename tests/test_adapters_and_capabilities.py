@@ -280,7 +280,8 @@ def test_mgnify_dataset_adapter_normalizes_json_api_rows():
 
     assert records[0].dataset_id == "MGYS0001"
     assert records[0].source == "MGnify"
-    assert records[0].sample_size == 12
+    assert records[0].sample_size == 0
+    assert records[0].metadata["declared_sample_count"]["count"] == 12
     assert records[0].variables[0].name == "microbiome_composition"
     assert "api/v2/studies" in client.calls[0][0]
 

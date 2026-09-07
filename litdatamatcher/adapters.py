@@ -307,6 +307,7 @@ class ClinicalTrialsDatasetAdapter:
             params={"query.term": query, "pageSize": 25, "format": "json"},
         )
         response_metadata = _client_response_metadata(self.client)
+        response_metadata = _client_response_metadata(self.client)
         records_by_id: dict[str, DatasetRecord] = {}
         for study in data.get("studies", []):
             if not isinstance(study, dict):
@@ -394,6 +395,7 @@ class MGnifyDatasetAdapter:
             "https://www.ebi.ac.uk/metagenomics/api/v2/studies",
             params={"search": query, "page_size": 25},
         )
+        response_metadata = _client_response_metadata(self.client)
         records: list[DatasetRecord] = []
         for item in _mgnify_items(data):
             accession = _first_text(item, "accession", "id", "study_accession")
@@ -417,12 +419,14 @@ class MGnifyDatasetAdapter:
                 source_type="mgnify",
                 source_url=source_url,
                 adapter_name=self.name,
+                adapter_version="mgnify_api_v2",
+                retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
                 acquisition_method="mgnify_api_v2",
                 content_scope="dataset_metadata",
                 raw_record_id=accession,
                 limitations=["MGnify list metadata may need study detail follow-up for full sample context."],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("mgnify")},
+                metadata={"source_profile": source_profile("mgnify"), "cache_snapshot": response_metadata},
             ).to_dict()
             records.append(
                 classify_dataset_record(
@@ -449,11 +453,11 @@ class MGnifyDatasetAdapter:
                         "populations": [],
                         "organisms": ["microbiome"],
                         "assay_types": [_first_text(item, "experiment-type", "experiment_type")],
-                        "sample_size": sample_size,
+                        "sample_size": 0,
                         "license": "EMBL-EBI public metadata terms",
                         "access_type": "public metadata with study-specific files",
                         "quality_score": 0.72,
-                        "metadata": _metadata_with_provenance(item, provenance),
+                        "metadata": _mgnify_metadata(item, provenance, sample_size),
                     }
                 )
             )
@@ -1202,6 +1206,21 @@ def _mgnify_items(data: JsonDict) -> list[JsonDict]:
             attrs["relationships"] = item.get("relationships")
         legacy_rows.append(attrs)
     return legacy_rows
+
+
+def _mgnify_metadata(item: JsonDict, provenance: JsonDict, declared_sample_count: int) -> JsonDict:
+    """Retain study metadata without promoting declared counts to analyzed samples."""
+
+    metadata = _metadata_with_provenance(item, provenance)
+    metadata.update({
+        "declared_sample_count": {"count": declared_sample_count, "interpretation": "source metadata; not analyzed biological sample count"},
+        "modality": _first_text(item, "experiment-type", "experiment_type", default="UNKNOWN"),
+        "organism_or_biome": _string_list(item.get("biome", []) or item.get("organism", [])),
+        "sample_group_design": item.get("sample_groups", "UNKNOWN"),
+        "raw_processed_availability": {"raw": "UNKNOWN", "processed": "UNKNOWN", "interpretation": "study detail inspection required"},
+        "missingness": {"specimen": "PRESENT" if item.get("biome") else "MISSING", "group_design": "PRESENT" if item.get("sample_groups") else "MISSING", "timepoint": "PRESENT" if item.get("timepoint") else "MISSING"},
+    })
+    return metadata
 
 
 def _mgnify_sample_count(item: JsonDict) -> int:

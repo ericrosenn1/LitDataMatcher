@@ -8,6 +8,8 @@ Frozen V2.0-HARDENED-ALPHA baseline: source commit `5747cbea2ae65c8570280d0e53f7
 
 The ClinicalTrials.gov registry-metadata tranche is complete at source commit `1d230cefa4e2e0ff49f63dc7e672b60ea1a77e7f`. It preserves study status/type/version, conditions, interventions, comparators, outcomes/timepoints, eligibility, phase, enrollment unit, arms, access limits, explicit missingness, and cache provenance. Registry enrollment remains distinct from analyzed sample count, and observational records are `NOT_PERTURBATIONAL`. One-record live and byte-identical offline-cache replay evidence is under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_clinicaltrials`.
 
+The ENA/SRA tranche is complete at source commit `772331f6cc3f5a1de57964b913f6a5a937ba7cd9`. It groups bounded run metadata under a study while retaining stable study/sample/run/experiment IDs, secondary accessions, availability, version time, provenance, typed missingness, and explicit run-to-sample/dependence links. Technical runs are never counted as biological samples and donor links remain ambiguous. Evidence is under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_ena`.
+
 For the next V2.1 continuation, first verify the frozen baseline and replay the bounded source cache:
 
 ```powershell

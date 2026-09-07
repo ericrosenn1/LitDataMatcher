@@ -4,7 +4,7 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T16:35:00Z",
+  "updated_at": "2026-09-07T17:05:00Z",
   "execution_status": "RUNNING",
   "product_status": "HARDENED_ALPHA_COMPLETE",
   "automation_status": "DISABLED_AT_COMPLETION_RUNTIME_UNVERIFIED",
@@ -88,7 +88,8 @@
       "name": "Dataset acquisition and capability profiling",
       "status": "VALIDATED",
       "evidence": [
-        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_clinicaltrials\\qualification_receipt.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_clinicaltrials\\qualification_receipt.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_ena\\qualification_receipt.json"
       ]
     },
     {
@@ -120,14 +121,14 @@
   },
   "blockers": [],
   "next_action": {
-    "description": "Continue V2.1-MULTISOURCE from the frozen alpha baseline by qualifying a next bounded repository adapter or explicit study-metadata version/retraction relation; retain offline replay and do not infer participant-data access or causal evidence from registry metadata.",
+    "description": "Continue V2.1-MULTISOURCE from the frozen alpha baseline by qualifying a next bounded repository adapter or explicit cross-source study-version relation; retain offline replay and never infer donor identity, biological-sample count from runs, participant-data access, or causal evidence from metadata.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe scripts\\v2\\validate_alpha_baseline.py --source C:\\Codex\\LitDataMatcher-v2\\lead --data C:\\Codex\\LitDataMatcher-v2\\data --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_clinicaltrials\\alpha_baseline_non_regression.json; C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe -m litdatamatcher.cli dataset-search --query microbiome --source clinicaltrials --limit 1 --cache-dir C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_clinicaltrials\\http_cache --offline --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_clinicaltrials\\continuation_offline.jsonl",
+    "command": "C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe scripts\\v2\\validate_alpha_baseline.py --source C:\\Codex\\LitDataMatcher-v2\\lead --data C:\\Codex\\LitDataMatcher-v2\\data --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_ena\\alpha_baseline_non_regression.json; C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe -m litdatamatcher.cli dataset-search --query tax_tree(9606) --source ena --limit 1 --cache-dir C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_ena\\http_cache --offline --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_ena\\continuation_offline.jsonl",
     "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "1d230cefa4e2e0ff49f63dc7e672b60ea1a77e7f",
-    "last_verified_remote_commit": "1d230cefa4e2e0ff49f63dc7e672b60ea1a77e7f",
+    "last_source_commit": "772331f6cc3f5a1de57964b913f6a5a937ba7cd9",
+    "last_verified_remote_commit": "772331f6cc3f5a1de57964b913f6a5a937ba7cd9",
     "push_pending": false
   },
   "milestones": {
@@ -135,5 +136,5 @@
     "hardened_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03",
     "final_holdout_run": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run"
   },
-  "stop_reason": "V2.0-HARDENED-ALPHA baseline frozen at commit 5747cbea2ae65c8570280d0e53f77bfabc968712; V2.1 ClinicalTrials.gov registry-metadata tranche validated at source commit 1d230cefa4e2e0ff49f63dc7e672b60ea1a77e7f. Alpha supervisor remains PAUSED."
+  "stop_reason": "V2.0-HARDENED-ALPHA baseline frozen at commit 5747cbea2ae65c8570280d0e53f77bfabc968712; V2.1 ENA study/sample/run metadata tranche validated at source commit 772331f6cc3f5a1de57964b913f6a5a937ba7cd9. Alpha supervisor remains PAUSED."
 }

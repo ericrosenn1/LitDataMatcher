@@ -19,7 +19,6 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-
 DEFAULT_CATALOG = Path(r"C:\Codex\LitDataMatcher-v2\data\catalog\studies.jsonl")
 DEFAULT_LEAD = Path(r"C:\Codex\LitDataMatcher-v2\lead")
 DEFAULT_MODEL = Path(r"C:\Codex\LitDataMatcher-v2\data\models\all-MiniLM-L6-v2\1110a243fdf4706b3f48f1d95db1a4f5529b4d41")
@@ -74,7 +73,13 @@ def source_profile(row: dict[str, Any]) -> dict[str, Any]:
     count = row.get("sample_count_reported")
     if type(count) is not int or count < 0:
         raise ValueError(f"{row['dataset_id']} lacks a valid source-reported sample count")
-    observed = lambda value: {"value": value, "status": "observed", "source_locator": loc["url"], "mapping_type": "exact"}
+    def observed(value: Any) -> dict[str, Any]:
+        return {
+            "value": value,
+            "status": "observed",
+            "source_locator": loc["url"],
+            "mapping_type": "exact",
+        }
     return {
         "dataset_id": row["dataset_id"],
         "availability": "SOURCE_METADATA_CAPTURED",
@@ -132,9 +137,6 @@ def ranking_metrics(order: list[str], labels: dict[str, int], k: int = 10) -> di
     gains = [labels[item] for item in order]
     relevant = [index for index, gain in enumerate(gains, 1) if gain > 0]
     hits = sum(gain > 0 for gain in gains[:k])
-    dcg = sum(gain / math.log2(index + 1) for index, gain in enumerate(gains[:k], 1))
-    ideal = sorted(labels.values(), reverse=True)[:k]
-    idcg = sum(gain / math.log2(index + 1) for index, gain in enumerate(ideal, 1))
     return {
         "queries": 1, "candidate_relevance_labels": len(labels), "positive_queries": int(bool(relevant)),
         "recall_at_10_numerator": int(bool(relevant and relevant[0] <= k)), "recall_at_10_denominator": int(bool(relevant)),
@@ -221,7 +223,8 @@ def evaluate_split(rows: list[dict[str, Any]], split: str, model_dir: Path) -> d
         compatibility = rank_candidates(question["requirements"], profiles, {key: 2.0 * value - 1.0 for key, value in hybrid.items()})
         orders["compatibility_aware"] = [item["dataset_id"] for item in compatibility]
         metrics = {name: ranking_metrics(order, labels) for name, order in orders.items()}
-        for name, value in metrics.items(): by_method[name].append(value)
+        for name, value in metrics.items():
+            by_method[name].append(value)
         per_query.append({"question_id": question["question_id"], "source_fact_locator": question["source_fact_locator"],
                           "candidate_universe": [row["dataset_id"] for row in rows], "negative_labels": len(rows) - 1,
                           "top_candidates": {name: order[:5] for name, order in orders.items()}, "metrics": metrics})

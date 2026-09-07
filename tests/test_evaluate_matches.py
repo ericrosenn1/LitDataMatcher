@@ -1,6 +1,5 @@
-from pathlib import Path
 import importlib.util
-
+from pathlib import Path
 
 MODULE = Path(__file__).parents[1] / "benchmarks" / "v2" / "evaluate_matches.py"
 SPEC = importlib.util.spec_from_file_location("evaluate_matches", MODULE)

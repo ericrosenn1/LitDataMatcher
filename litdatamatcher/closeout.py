@@ -270,11 +270,40 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     if replacement["status"] == "PASS":
         replace("G10", "study_grouped_holdout", "PASS", replacement["reason"], reservation_path, replacement["run"]["path"])
         replace("G10", "source_disjoint_test", "PASS", replacement["reason"], reservation_path, replacement["run"]["path"])
+        observations.append(
+            observation(
+                "G14",
+                "untouched_holdout_pass",
+                "PASS",
+                "The sealed replacement holdout passed once with proven source disjointness and no tuning exposure.",
+                reservation_path,
+                replacement["run"]["path"],
+            )
+        )
     elif replacement["status"] == "FAIL":
         replace("G10", "study_grouped_holdout", "FAIL", replacement["reason"], reservation_path, replacement.get("path", reservation_path))
         replace("G10", "source_disjoint_test", "FAIL", replacement["reason"], reservation_path, replacement.get("path", reservation_path))
     elif exposed:
         replace("G10", "study_grouped_holdout", "NOT_RUN", "GSE112372 is retired; no distinct source-disjoint replacement final holdout has passed.", *refinement_paths, reservation_path)
+
+    valid_refinement = [
+        (round_record, path)
+        for round_record, path in zip(refinement["rounds"], refinement["paths"], strict=True)
+        if _valid_round(round_record)
+    ]
+    if len(valid_refinement) >= 3:
+        for previous, current in zip(valid_refinement[-3:-1], valid_refinement[-2:], strict=True):
+            if _metric_signature(previous[0]) == _metric_signature(current[0]):
+                observations.append(
+                    observation(
+                        "G14",
+                        "no_material_gain_round",
+                        "PASS",
+                        "A retained comparable refinement round produced no material metric gain over its predecessor.",
+                        previous[1],
+                        current[1],
+                    )
+                )
 
     gates = _summaries(observations, GATE_REQUIREMENTS)
     operations = _summaries(observations, OPERATION_REQUIREMENTS)

@@ -174,6 +174,7 @@ def test_closeout_prefers_v4_reservation_when_present(tmp_path):
     report = run_closeout_audit(data, source)
 
     assert _status(report, "G10", "source_disjoint_test") == "PASS"
+    assert _status(report, "G14", "untouched_holdout_pass") == "PASS"
 
 
 def test_junit_receipt_credits_only_exact_unskipped_contract_tests(tmp_path):
@@ -207,6 +208,22 @@ def test_refinement_metrics_require_structured_comparable_methods(tmp_path):
         "comparable_rounds": 2,
         "two_latest_metric_identical": True,
     }
+
+
+def test_three_identical_refinement_rounds_attest_two_no_gain_rounds(tmp_path):
+    root = tmp_path / "data" / "evaluation" / "refinement"
+    for number in (2, 3, 4):
+        _write(root / f"round{number}.json", _round())
+
+    report = run_closeout_audit(tmp_path / "data", tmp_path / "source")
+
+    observations = [
+        item
+        for item in report["evidence"]
+        if item["target"] == "G14" and item["kind"] == "no_material_gain_round"
+    ]
+    assert len(observations) == 2
+    assert all(item["status"] == "PASS" for item in observations)
 
 
 def _final_run(data, name, source_disjointness, *, final_integrated=False):

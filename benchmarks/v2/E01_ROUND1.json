@@ -1,0 +1,21 @@
+{
+  "round": "E01-independent-contract-pass1",
+  "tested_source": "lead working scientific_v2.py sha256 ba9678225ee5c891f345fc7cf3776b54501df881a3b825cad7cd840f31188687",
+  "command": "python -m pytest <evaluation-worktree>/tests/test_v2_scientific_challenges.py -q --tb=short (PYTHONPATH=<lead>; cwd=<lead>)",
+  "exit_code": 1,
+  "tests": 28,
+  "passed": 23,
+  "failed": 5,
+  "status": "FAIL_REPAIRS_REQUIRED",
+  "failed_cases": [
+    "BooleanTrue matched integer1",
+    "absence without provenance confirmed mismatch",
+    "negative exact answer became unresolved",
+    "future evidence used before as_of date",
+    "bundle identity depends on evidence order"
+  ],
+  "evaluation_type": "source-anchored contract and explicitly constructed metamorphic checks; not full fresh-model performance",
+  "independent_review_of": "lead implementation; tests authored independently by E01",
+  "expert_calibration": "PENDING_EXPERT_LABELS",
+  "holdout_evaluation": "NOT_RUN"
+}

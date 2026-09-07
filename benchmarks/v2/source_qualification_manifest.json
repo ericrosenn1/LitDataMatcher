@@ -1,0 +1,254 @@
+{
+  "repositories": [
+    {
+      "repository": "biomedicalinformaticsgroup/cadmus",
+      "captures": [
+        {
+          "url": "https://api.github.com/repos/biomedicalinformaticsgroup/cadmus",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "cc454d24cbc480315fb5697962ce4161e8b8f0d2f1018dc9341b3c819c3cc722",
+          "bytes": 7399,
+          "path": "repository.json",
+          "retrieved_at": "2026-09-07T11:24:03.586446+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/biomedicalinformaticsgroup/cadmus/commits?per_page=1",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "2e15f9bacac5c1b8427dede51eea507d8aeb0d2750eb38b93a123f1077d89a9a",
+          "bytes": 4472,
+          "path": "commit.json",
+          "retrieved_at": "2026-09-07T11:24:03.908769+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/biomedicalinformaticsgroup/cadmus/license",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "f6729cca20808dc0b780b9ce79c2d6a1b537b1fdef5056ea2c1dacadb5e64216",
+          "bytes": 2491,
+          "path": "license.json",
+          "retrieved_at": "2026-09-07T11:24:04.123023+00:00"
+        }
+      ],
+      "license_spdx": "MIT",
+      "default_branch": "main",
+      "commit": "8dc4d619904b323728383d8f8ffe6a9dff06b9de"
+    },
+    {
+      "repository": "tecosaur/interaction_finder",
+      "captures": [
+        {
+          "url": "https://api.github.com/repos/tecosaur/interaction_finder",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "dbc400206be5cb7d399fcad812ee4fee186e6c9482c5e0077230999bccfb8620",
+          "bytes": 5414,
+          "path": "repository.json",
+          "retrieved_at": "2026-09-07T11:24:03.537140+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/tecosaur/interaction_finder/commits?per_page=1",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "399d2f30b5d385f696e08285186208ce4a80cca580ebc5f0853f3d407e7cdf89",
+          "bytes": 3316,
+          "path": "commit.json",
+          "retrieved_at": "2026-09-07T11:24:03.868798+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/tecosaur/interaction_finder/license",
+          "status": "UNAVAILABLE",
+          "error": "HTTP Error 404: Not Found"
+        }
+      ],
+      "license_spdx": "UNKNOWN",
+      "default_branch": "main",
+      "commit": "3187c047899e9f25b0e087186a1a11de05459fb6"
+    },
+    {
+      "repository": "mims-harvard/OptimusKG",
+      "captures": [
+        {
+          "url": "https://api.github.com/repos/mims-harvard/OptimusKG",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "5325294b7bb385bf35e7d13e76e6087a0904082b35d0fd1a432a3ec87c7a6c77",
+          "bytes": 6657,
+          "path": "repository.json",
+          "retrieved_at": "2026-09-07T11:24:03.537140+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/mims-harvard/OptimusKG/commits?per_page=1",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "1682aa1f7a8153706e28c27884adb045260c121e75b011f6eacefccc7bf39839",
+          "bytes": 5773,
+          "path": "commit.json",
+          "retrieved_at": "2026-09-07T11:24:03.747749+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/mims-harvard/OptimusKG/license",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "8811e2a239b930fbf123131c047391d3a504325412f8a06001ef64df909a303e",
+          "bytes": 2476,
+          "path": "license.json",
+          "retrieved_at": "2026-09-07T11:24:03.947571+00:00"
+        }
+      ],
+      "license_spdx": "MIT",
+      "default_branch": "main",
+      "commit": "af09de36b8f0b61f64eb0f2b137d273b824a675e"
+    },
+    {
+      "repository": "mims-harvard/PrimeKG",
+      "captures": [
+        {
+          "url": "https://api.github.com/repos/mims-harvard/PrimeKG",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "38f0d7cf70fedba0a827369a1869eb479e6fa8ca979b0c3d22040b394703b851",
+          "bytes": 6588,
+          "path": "repository.json",
+          "retrieved_at": "2026-09-07T11:24:04.231962+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/mims-harvard/PrimeKG/commits?per_page=1",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "c30ce68a9c72edcc8d89e1eeb66d3b1833c054d7cd7ca6c9c9cb8d7b287d85e9",
+          "bytes": 4363,
+          "path": "commit.json",
+          "retrieved_at": "2026-09-07T11:24:04.445816+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/mims-harvard/PrimeKG/license",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "4dc54c56d82c0a3f8ce32c187fab530bfda5b4916765579516413bd215eb9969",
+          "bytes": 2432,
+          "path": "license.json",
+          "retrieved_at": "2026-09-07T11:24:04.701797+00:00"
+        }
+      ],
+      "license_spdx": "MIT",
+      "default_branch": "main",
+      "commit": "32a3818cf7ff981081c4887c20b2f733ad6ec0a6"
+    },
+    {
+      "repository": "coledeisseroth/SNACKKSS",
+      "captures": [
+        {
+          "url": "https://api.github.com/repos/coledeisseroth/SNACKKSS",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "fd2b73a9ebf46a3c88241e391ff62f1d1e7a6aca51492bd26c3910cd228a2375",
+          "bytes": 5524,
+          "path": "repository.json",
+          "retrieved_at": "2026-09-07T11:24:04.211792+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/coledeisseroth/SNACKKSS/commits?per_page=1",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "3d9546212018935c530749541f5b07058d1d06187876f8d55c80a9de938f9e6b",
+          "bytes": 4416,
+          "path": "commit.json",
+          "retrieved_at": "2026-09-07T11:24:04.467623+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/coledeisseroth/SNACKKSS/license",
+          "status": "UNAVAILABLE",
+          "error": "HTTP Error 404: Not Found"
+        }
+      ],
+      "license_spdx": "UNKNOWN",
+      "default_branch": "main",
+      "commit": "0bf3bccbf02245d03632bdcdd8fa82a699c25877"
+    },
+    {
+      "repository": "coledeisseroth/SNACKKSS_NLP",
+      "captures": [
+        {
+          "url": "https://api.github.com/repos/coledeisseroth/SNACKKSS_NLP",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "77598a3964e8a8931e29a253558268633c727bee578bcd0afc5b2da12f820f1d",
+          "bytes": 5615,
+          "path": "repository.json",
+          "retrieved_at": "2026-09-07T11:24:04.367681+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/coledeisseroth/SNACKKSS_NLP/commits?per_page=1",
+          "status": "CAPTURED",
+          "http_status": 200,
+          "sha256": "2da7af9a905dd6e72e2f18a2dd3a78addb000a243221af0512a4b4757a4383f7",
+          "bytes": 4562,
+          "path": "commit.json",
+          "retrieved_at": "2026-09-07T11:24:04.634844+00:00"
+        },
+        {
+          "url": "https://api.github.com/repos/coledeisseroth/SNACKKSS_NLP/license",
+          "status": "UNAVAILABLE",
+          "error": "HTTP Error 404: Not Found"
+        }
+      ],
+      "license_spdx": "UNKNOWN",
+      "default_branch": "main",
+      "commit": "31a33063ee93df9f00b40009025403e1fbd69e51"
+    }
+  ],
+  "sources": [
+    {
+      "accession": "GSE193336",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE193336&targ=self&form=text&view=full",
+      "status": "CAPTURED",
+      "http_status": 200,
+      "sha256": "d1513da7af68e6120ba51523fe8bf45f3eaa8e9ab1f753851c171817a0095853",
+      "bytes": 2692,
+      "path": "GSE193336.soft",
+      "retrieved_at": "2026-09-07T11:24:04.999110+00:00"
+    },
+    {
+      "accession": "GSE128885",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE128885&targ=self&form=text&view=full",
+      "status": "CAPTURED",
+      "http_status": 200,
+      "sha256": "92b9b1f9534273a9fd99b6f70559bdd418c2165092b6278332d8041b0583e641",
+      "bytes": 2578,
+      "path": "GSE128885.soft",
+      "retrieved_at": "2026-09-07T11:24:05.016630+00:00"
+    },
+    {
+      "accession": "GSE99787",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE99787&targ=self&form=text&view=full",
+      "status": "CAPTURED",
+      "http_status": 200,
+      "sha256": "f757a54be8c5c8a11ebd515314fcab7f01cb53c5109345c32fa9b4b5dd362f6b",
+      "bytes": 2475,
+      "path": "GSE99787.soft",
+      "retrieved_at": "2026-09-07T11:24:05.004617+00:00"
+    },
+    {
+      "accession": "GSE133844",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133844&targ=self&form=text&view=full",
+      "status": "CAPTURED",
+      "http_status": 200,
+      "sha256": "bf691fa3c3ed50f8438ac25c52cb302ed860f91ed5491251c1bf5acad3103e31",
+      "bytes": 1716,
+      "path": "GSE133844.soft",
+      "retrieved_at": "2026-09-07T11:24:05.173547+00:00"
+    },
+    {
+      "accession": "GSE95435",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE95435&targ=self&form=text&view=full",
+      "status": "CAPTURED",
+      "http_status": 200,
+      "sha256": "b4a409c1c7ba7e9a214c4aa6dc1dddfc4f81316ec0688aca580edadefb68bb41",
+      "bytes": 6003,
+      "path": "GSE95435.soft",
+      "retrieved_at": "2026-09-07T11:24:05.184747+00:00"
+    }
+  ]
+}

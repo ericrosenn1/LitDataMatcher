@@ -6,11 +6,13 @@ import hashlib
 import json
 import re
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
 MODELS = {
     "extractor": "Qwen/Qwen2.5-1.5B-Instruct",
+    "extractor7b": "Qwen/Qwen2.5-7B-Instruct",
     "embedding": "sentence-transformers/all-MiniLM-L6-v2",
 }
 
@@ -48,11 +50,11 @@ def main() -> None:
     allowed = {"config.json", "generation_config.json", "tokenizer_config.json", "tokenizer.json",
                "special_tokens_map.json", "vocab.json", "vocab.txt", "merges.txt", "LICENSE", "README.md",
                "model.safetensors", "model.safetensors.index.json", "sentence_bert_config.json"}
-    files = []
-    for entry in info["siblings"]:
-        name = entry["rfilename"]
-        if name not in allowed and not (name.startswith("model-") and name.endswith(".safetensors")):
-            continue
+    names = [entry["rfilename"] for entry in info["siblings"]
+             if entry["rfilename"] in allowed or
+             (entry["rfilename"].startswith("model-") and entry["rfilename"].endswith(".safetensors"))]
+
+    def download(name):
         dest = folder / name
         if not dest.exists():
             temporary = dest.with_suffix(dest.suffix + ".partial")
@@ -63,7 +65,10 @@ def main() -> None:
             temporary.replace(dest)
         with dest.open("rb") as stream:
             digest = hashlib.file_digest(stream, "sha256").hexdigest()
-        files.append({"path": name, "bytes": dest.stat().st_size, "sha256": digest})
+        return {"path": name, "bytes": dest.stat().st_size, "sha256": digest}
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        files = list(pool.map(download, names))
     manifest = {"model_id": repo, "revision": revision, "license": info.get("cardData", {}).get("license", "unknown"),
                 "retrieved_at": datetime.now(timezone.utc).isoformat(), "files": files,
                 "source": f"https://huggingface.co/{repo}/tree/{revision}"}

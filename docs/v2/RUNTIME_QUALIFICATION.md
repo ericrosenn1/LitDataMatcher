@@ -92,3 +92,54 @@ successful-partition preservation. All failure artifacts are retained outside Gi
 
 Final executed qualification status and evidence paths are appended after the
 unchanging-code qualification completes; installation/hardware alone is not G05 PASS.
+
+## Continuation at execution-policy stop, 2026-09-07 07:43 EDT
+
+The parent requested an immediate safe stop under the inherited Astra configuration;
+the replacement is to use Terra High. No new qualification/refinement was started
+after that request. Commit `edf4e43` is already integrated by the lead. The additional
+downloader change selects Qwen2.5-7B-Instruct and downloads three distinct files in
+parallel; it does not change runtime scientific interpretation.
+
+Executed evidence: 28 focused tests and Ruff passed. The 1.5B candidate produced two
+accepted real-source claims on PMID42074327 in 44.34 seconds in an actual process;
+its cached replay and pretrained retrieval completed, but optional question proposal
+validation caused the then-running qualifier to fail before writing an overall PASS.
+The hardened proposal path preserves unsupported fields as explicit unknowns.
+On source-selected PMID42455795, 1.5B reversed a negated predicate and omitted explicit
+future work; the guard rejected all output (`abstained_no_valid_records`, 42.57 seconds).
+This measured failure justified the second candidate. No final G05 qualification
+report has passed, and the 7B model has not yet been executed.
+
+All immutable source snapshots, normalized input documents, actual raw generated
+diagnostics and checksummed extraction caches remain in
+`C:/Codex/LitDataMatcher-v2/data/runtime-qualification`. Strong positive cached
+artifact: `runtime-cache/7438c139bba60a5fe20810ecf6f9ff057f8534755b1be3dbf736f1255035a712.json`.
+The two input documents are `qualification_document.json` (PMID42074327) and
+`qualification_document2.json` (PMID42455795). These are development sources, not
+held-out evaluation families.
+
+Healthy deterministic download is intentionally left running in exec session `84269`.
+The Windows venv launcher is PID 17832, created `2026-09-07T07:41:10.505189-04:00`;
+its actual Python child is PID 63448, created `2026-09-07T07:41:10.579539-04:00`.
+Working directory: `C:/Codex/LitDataMatcher-v2/worktrees/runtime`. Exact command:
+
+```powershell
+C:/Codex/LitDataMatcher-v2/runtime-env/Scripts/python.exe scripts/v2/runtime_download_models.py --root C:/Codex/LitDataMatcher-v2/data/models --kind extractor7b --revision a09a35458c702b33eeacc393d103063234e8bc28
+```
+
+Do not kill, restart or redownload while this process is healthy. Shards 2 and 3
+were complete at the stop boundary (~3.864 GB each); shards 1 and 4 were still in
+their bounded network requests. Success will write `MODEL_MANIFEST.json` under
+`C:/Codex/LitDataMatcher-v2/data/models/Qwen2.5-7B-Instruct/a09a35458c702b33eeacc393d103063234e8bc28`.
+Output is attached to exec session 84269; no separate downloader log file was created.
+
+First continuation: collect downloader completion, verify its manifest, then run
+the documented qualifier unchanged with the 7B directory, existing MiniLM directory
+`C:/Codex/LitDataMatcher-v2/data/models/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41`,
+and `qualification_document2.json` to a new `qualified_7b_pass1.json` output. Include
+`--device cuda --question "Does rapamycin reduce IL6 in human macrophages compared with untreated controls?"`.
+Freeze the module during qualification so source-code cache invalidation does not
+turn the replay step into a second fresh run. Preserve every rejected attempt.
+Only after actual fresh source-supported inference, replay, retrieval and proposal
+checks pass should the new candidate be declared qualified.

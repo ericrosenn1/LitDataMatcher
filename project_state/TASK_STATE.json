@@ -121,9 +121,9 @@
     "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "PENDING_FINAL_POLICY_COMMIT",
-    "last_verified_remote_commit": "PENDING_FINAL_POLICY_COMMIT",
-    "push_pending": true
+    "last_source_commit": "460d486265aeca07fa75b86a2147ce3cc497f478",
+    "last_verified_remote_commit": "460d486265aeca07fa75b86a2147ce3cc497f478",
+    "push_pending": false
   },
   "milestones": {
     "functional_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\hardened-alpha-candidate-01",

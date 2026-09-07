@@ -10,10 +10,11 @@ decide how much text or dataset detail can be used.
 
 from __future__ import annotations
 
+import re
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
-import xml.etree.ElementTree as ET
 
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
@@ -143,6 +144,147 @@ class PubMedLiteratureAdapter:
                         "efetch": xml_item,
                         "journal": xml_item.get("journal", ""),
                         "authors": xml_item.get("authors", []),
+                        "source_provenance": provenance,
+                    },
+                }
+            )
+        return rows
+
+
+@dataclass(slots=True)
+class EuropePMCLiteratureAdapter:
+    """Europe PMC metadata adapter with stable source and publication identifiers."""
+
+    client: CachedHttpClient
+    name: str = "europepmc"
+
+    def search_literature(self, query: str, limit: int = 25) -> list[dict]:
+        """Search Europe PMC core records without requesting article bodies."""
+
+        data = self.client.get_json(
+            "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            params={"query": query, "format": "json", "resultType": "core", "pageSize": min(max(1, limit), 100)},
+        )
+        response_metadata = _client_response_metadata(self.client)
+        rows: list[dict] = []
+        for item in data.get("resultList", {}).get("result", []):
+            if not isinstance(item, dict):
+                continue
+            source = str(item.get("source", "") or "").strip().upper()
+            record_id = str(item.get("id", "") or "").strip()
+            title = str(item.get("title", "") or "").strip()
+            if not source or not record_id or not title:
+                continue
+            doi = _normalize_doi(item.get("doi", ""))
+            stable_id = f"europepmc:{source}:{record_id}"
+            source_url = f"https://europepmc.org/article/{source}/{record_id}"
+            abstract = str(item.get("abstractText", "") or "").strip()
+            version_relationships = item.get("commentCorrectionList", {})
+            provenance = remote_source_provenance(
+                source_type="europepmc",
+                source_url=source_url,
+                adapter_name=self.name,
+                adapter_version="europepmc_rest_search_v1",
+                retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
+                acquisition_method="europepmc_rest_api",
+                content_scope="abstract_plus_metadata" if abstract else "metadata_only",
+                raw_record_id=stable_id,
+                limitations=["Europe PMC search records are metadata; no article body was requested."],
+                next_handoff="litdatamatcher run",
+                metadata={
+                    "source_profile": source_profile("europepmc"),
+                    "source_database": source,
+                    "cache_snapshot": response_metadata,
+                },
+            ).to_dict()
+            rows.append(
+                {
+                    "source_id": stable_id,
+                    "document_id": stable_id,
+                    "title": title,
+                    "abstract": abstract,
+                    "doi": doi,
+                    "pmid": record_id if source == "MED" else "",
+                    "pmcid": str(item.get("pmcid", "") or ""),
+                    "year": _year_from_value(item.get("firstPublicationDate", "") or item.get("pubYear", "")),
+                    "source": self.name,
+                    "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                    "source_provenance": provenance,
+                    "metadata": {
+                        "europepmc_source": source,
+                        "journal": str(item.get("journalTitle", "") or ""),
+                        "first_publication_date": str(item.get("firstPublicationDate", "") or ""),
+                        "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                        "source_provenance": provenance,
+                    },
+                }
+            )
+        return rows
+
+
+@dataclass(slots=True)
+class CrossrefLiteratureAdapter:
+    """Crossref DOI metadata adapter with update and relation provenance."""
+
+    client: CachedHttpClient
+    name: str = "crossref"
+
+    def search_literature(self, query: str, limit: int = 25) -> list[dict]:
+        """Search Crossref works and normalize only DOI-addressable records."""
+
+        data = self.client.get_json(
+            "https://api.crossref.org/works",
+            params={"query": query, "rows": min(max(1, limit), 100), "select": "DOI,title,abstract,published,published-online,published-print,indexed,created,relation,update-policy,container-title,author,type"},
+        )
+        response_metadata = _client_response_metadata(self.client)
+        rows: list[dict] = []
+        for item in data.get("message", {}).get("items", []):
+            if not isinstance(item, dict):
+                continue
+            doi = _normalize_doi(item.get("DOI", ""))
+            title = _first_sequence_text(item.get("title", []))
+            if not doi or not title:
+                continue
+            source_id = f"crossref:{doi}"
+            source_url = f"https://doi.org/{doi}"
+            version_relationships = item.get("relation", {})
+            provenance = remote_source_provenance(
+                source_type="crossref",
+                source_url=source_url,
+                adapter_name=self.name,
+                adapter_version="crossref_works_v1",
+                retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
+                acquisition_method="crossref_works_api",
+                content_scope="metadata_only",
+                raw_record_id=source_id,
+                limitations=["Crossref records are DOI metadata and are not article-body evidence."],
+                next_handoff="litdatamatcher run",
+                metadata={
+                    "source_profile": source_profile("crossref"),
+                    "indexed": item.get("indexed", {}),
+                    "created": item.get("created", {}),
+                    "cache_snapshot": response_metadata,
+                },
+            ).to_dict()
+            rows.append(
+                {
+                    "source_id": source_id,
+                    "document_id": source_id,
+                    "title": title,
+                    "abstract": _strip_jats(str(item.get("abstract", "") or "")),
+                    "doi": doi,
+                    "year": _crossref_year(item),
+                    "source": self.name,
+                    "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                    "source_provenance": provenance,
+                    "metadata": {
+                        "container_title": _first_sequence_text(item.get("container-title", [])),
+                        "authors": _crossref_authors(item.get("author", [])),
+                        "type": str(item.get("type", "") or ""),
+                        "indexed": item.get("indexed", {}),
+                        "created": item.get("created", {}),
+                        "update_policy": str(item.get("update-policy", "") or ""),
+                        "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
                         "source_provenance": provenance,
                     },
                 }
@@ -361,6 +503,8 @@ DATASET_ADAPTERS = {
 }
 
 LITERATURE_ADAPTERS = {
+    "crossref": CrossrefLiteratureAdapter,
+    "europepmc": EuropePMCLiteratureAdapter,
     "openalex": OpenAlexLiteratureAdapter,
     "pubmed": PubMedLiteratureAdapter,
 }
@@ -443,23 +587,56 @@ def search_literature_sources(
     """Search named live literature metadata sources."""
 
     rows: list[JsonDict] = []
-    seen: set[str] = set()
+    seen: dict[str, JsonDict] = {}
     for adapter in build_literature_adapters(source_names, client=client):
         for row in adapter.search_literature(query, limit=limit):
-            key = str(row.get("source_id", "") or row.get("doi", "") or row.get("title", ""))
+            key = _literature_identity(row)
             if key in seen:
+                _merge_literature_duplicate(seen[key], row)
                 continue
-            seen.add(key)
+            seen[key] = row
             rows.append(row)
             if len(rows) >= limit:
                 return rows
     return rows
 
 
-def cached_client(cache_dir: str | Path | None = None) -> CachedHttpClient:
+def cached_client(cache_dir: str | Path | None = None, *, offline: bool = False) -> CachedHttpClient:
     """Return a cached HTTP client for CLI adapter commands."""
 
-    return CachedHttpClient(cache_dir=cache_dir or Path("local/http_cache"))
+    return CachedHttpClient(cache_dir=cache_dir or Path("local/http_cache"), offline=offline)
+
+
+def _literature_identity(row: JsonDict) -> str:
+    """Use DOI first so the same work from separate sources is merged."""
+
+    doi = _normalize_doi(row.get("doi", ""))
+    return f"doi:{doi}" if doi else str(row.get("source_id", "") or row.get("title", "")).strip().lower()
+
+
+def _client_response_metadata(client: object) -> JsonDict:
+    """Return optional cache provenance without constraining test clients."""
+
+    metadata = getattr(client, "last_response_metadata", {})
+    return dict(metadata) if isinstance(metadata, dict) else {}
+
+
+def _merge_literature_duplicate(existing: JsonDict, duplicate: JsonDict) -> None:
+    """Preserve cross-source identifiers and version relations on a DOI merge."""
+
+    metadata = existing.setdefault("metadata", {})
+    alternate_ids = metadata.setdefault("alternate_source_ids", [])
+    duplicate_id = str(duplicate.get("source_id", "") or "")
+    if duplicate_id and duplicate_id != existing.get("source_id") and duplicate_id not in alternate_ids:
+        alternate_ids.append(duplicate_id)
+    relations = metadata.setdefault("version_relationships", {})
+    incoming = duplicate.get("version_relationships") or duplicate.get("metadata", {}).get("version_relationships", {})
+    if isinstance(incoming, dict):
+        relations.setdefault(str(duplicate.get("source", "") or "unknown"), incoming)
+    provenances = metadata.setdefault("alternate_source_provenance", [])
+    provenance = duplicate.get("source_provenance", {})
+    if provenance and provenance not in provenances:
+        provenances.append(provenance)
 
 
 def _openalex_abstract(index: dict[str, list[int]]) -> str:
@@ -472,6 +649,75 @@ def _openalex_abstract(index: dict[str, list[int]]) -> str:
         for position in positions:
             tokens.append((int(position), word))
     return " ".join(word for _, word in sorted(tokens))
+
+
+def _normalize_doi(value: object) -> str:
+    """Return a canonical DOI token without resolver prefixes."""
+
+    doi = str(value or "").strip().lower()
+    for prefix in ("https://doi.org/", "http://doi.org/", "doi:"):
+        if doi.startswith(prefix):
+            doi = doi[len(prefix) :]
+    return doi
+
+
+def _first_sequence_text(value: object) -> str:
+    """Return the first nonblank string from an API list or scalar."""
+
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            text = str(item or "").strip()
+            if text:
+                return text
+        return ""
+    return str(value or "").strip()
+
+
+def _year_from_value(value: object) -> int | None:
+    """Extract a plausible four-digit year from a source date field."""
+
+    match = re.search(r"(?<!\d)(\d{4})(?!\d)", str(value or ""))
+    return int(match.group(1)) if match else None
+
+
+def _crossref_year(item: JsonDict) -> int | None:
+    """Prefer Crossref publication dates while tolerating incomplete metadata."""
+
+    for key in ("published-online", "published-print", "published", "created"):
+        value = item.get(key, {})
+        if not isinstance(value, dict):
+            continue
+        parts = value.get("date-parts", [])
+        if isinstance(parts, list) and parts and isinstance(parts[0], list) and parts[0]:
+            try:
+                year = int(parts[0][0])
+            except (TypeError, ValueError):
+                continue
+            if 1000 <= year <= 9999:
+                return year
+    return None
+
+
+def _crossref_authors(value: object) -> list[str]:
+    """Normalize Crossref author dictionaries without manufacturing names."""
+
+    authors: list[str] = []
+    for item in value if isinstance(value, list) else []:
+        if not isinstance(item, dict):
+            continue
+        name = " ".join(str(item.get(key, "") or "").strip() for key in ("given", "family")).strip()
+        if name:
+            authors.append(name)
+    return authors
+
+
+def _strip_jats(value: str) -> str:
+    """Reduce Crossref's occasional lightweight JATS markup to text."""
+
+    try:
+        return _xml_text(ET.fromstring(value))
+    except ET.ParseError:
+        return " ".join(value.replace("<", " ").replace(">", " ").split())
 
 
 def _ncbi_search(client: CachedHttpClient, database: str, query: str, limit: int) -> list[str]:

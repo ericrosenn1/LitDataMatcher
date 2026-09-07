@@ -9,12 +9,11 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
 
 from .schemas import JsonDict, SourceProvenance
-
 
 PROVENANCE_SCHEMA_VERSION = "source_provenance_v1"
 
@@ -210,6 +209,28 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "review_caveats": ["OpenAlex records are discovery metadata and should not be treated as article-body extraction."],
         "do_not_infer": ["full article evidence"],
     },
+    "europepmc": {
+        "source_type": "europepmc",
+        "category": "literature_metadata",
+        "content_scope": "abstract plus metadata, or metadata only",
+        "acquisition_method": "europepmc_rest_api",
+        "native_id_fields": ["europepmc_source", "europepmc_id", "pmid", "pmcid", "doi"],
+        "strengths": ["Europe PMC identifiers", "publication metadata", "open-access status metadata"],
+        "limitations": ["search response is not article body text", "version relations require source-specific review"],
+        "review_caveats": ["Europe PMC search rows are discovery metadata unless full text is separately acquired and parsed."],
+        "do_not_infer": ["full methods", "full article evidence", "license clearance from metadata alone"],
+    },
+    "crossref": {
+        "source_type": "crossref",
+        "category": "scholarly_metadata",
+        "content_scope": "DOI metadata only",
+        "acquisition_method": "crossref_works_api",
+        "native_id_fields": ["doi"],
+        "strengths": ["DOI normalization", "publication update and relation metadata"],
+        "limitations": ["not article body text", "metadata quality varies by registrant"],
+        "review_caveats": ["Crossref rows support DOI-level linking and version review, not scientific evidence extraction by themselves."],
+        "do_not_infer": ["full article evidence", "current retraction or correction status without source review"],
+    },
     "clinicaltrials": {
         "source_type": "clinicaltrials",
         "category": "registry_metadata",
@@ -267,7 +288,7 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
     },
 }
 
-ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "clinicaltrials", "geo", "mgnify")
+ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "europepmc", "crossref", "clinicaltrials", "geo", "mgnify")
 
 # Module boundaries are developer-facing documentation, not runtime dispatch rules.
 MODULE_BOUNDARIES: dict[str, JsonDict] = {
@@ -346,7 +367,7 @@ MODULE_OWNERSHIP_REGISTRY: dict[str, JsonDict] = {
     "live_adapters": {
         "owner_module": "litdatamatcher.adapters",
         "owned_by": "optional metadata adapter layer",
-        "responsibility": "PubMed/OpenAlex/ClinicalTrials.gov/GEO/MGnify metadata retrieval and normalization",
+        "responsibility": "PubMed/OpenAlex/Europe PMC/Crossref/ClinicalTrials.gov/GEO/MGnify metadata retrieval and normalization",
     },
     "provenance": {
         "owner_module": "litdatamatcher.provenance",
@@ -630,6 +651,7 @@ def remote_source_provenance(
     raw_record_id: str = "",
     acquisition_method: str = "api",
     adapter_version: str = "",
+    retrieval_time_utc: str = "",
     status: str = "ok",
     warnings: Iterable[str] | None = None,
     limitations: Iterable[str] | None = None,
@@ -647,7 +669,7 @@ def remote_source_provenance(
         acquisition_method=acquisition_method,
         adapter_name=adapter_name,
         adapter_version=adapter_version,
-        retrieval_time_utc=utc_now(),
+        retrieval_time_utc=retrieval_time_utc or utc_now(),
         source_url=source_url,
         raw_record_id=raw_record_id,
         status=status,

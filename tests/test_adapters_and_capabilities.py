@@ -1,6 +1,10 @@
 import json
 
+import pytest
+
 from litdatamatcher.adapters import (
+    CrossrefLiteratureAdapter,
+    EuropePMCLiteratureAdapter,
     GEODatasetAdapter,
     MGnifyDatasetAdapter,
     PubMedLiteratureAdapter,
@@ -14,6 +18,7 @@ from litdatamatcher.capability_registry import (
 )
 from litdatamatcher.cli import main
 from litdatamatcher.datasets import CuratedBiomedicalCatalogAdapter, classify_dataset_record
+from litdatamatcher.http_cache import CachedHttpClient
 from litdatamatcher.provenance import summarize_source_provenance
 from litdatamatcher.storage import read_jsonl, write_jsonl
 
@@ -69,6 +74,69 @@ def test_pubmed_literature_adapter_normalizes_esummary_rows():
     assert rows[0]["doi"] == "10.1/xml"
     assert rows[0]["year"] == 2025
     assert rows[0]["metadata"]["authors"] == ["Smith J"]
+
+
+def test_europepmc_adapter_normalizes_identifiers_versions_and_malformed_rows():
+    client = FakeClient(
+        [{"resultList": {"result": [
+            {"source": "MED", "id": "123", "pmcid": "PMC123", "doi": "10.1/Example", "title": "Versioned study", "abstractText": "Abstract", "firstPublicationDate": "2025-01-02", "commentCorrectionList": {"commentCorrection": [{"id": "456"}]}},
+            {"source": "MED", "id": "", "title": "Malformed missing id"},
+        ]}}]
+    )
+
+    rows = EuropePMCLiteratureAdapter(client).search_literature("study", limit=5)
+
+    assert len(rows) == 1
+    assert rows[0]["source_id"] == "europepmc:MED:123"
+    assert rows[0]["doi"] == "10.1/example"
+    assert rows[0]["year"] == 2025
+    assert rows[0]["version_relationships"]["commentCorrection"][0]["id"] == "456"
+    assert rows[0]["source_provenance"]["retrieval_time_utc"]
+
+
+def test_crossref_adapter_skips_missing_doi_and_preserves_update_metadata():
+    client = FakeClient(
+        [{"message": {"items": [
+            {"DOI": "https://doi.org/10.2/Example", "title": ["Corrected study"], "published-online": {"date-parts": [[2024, 2, 1]]}, "relation": {"is-correction-of": [{"id": "10.2/original"}]}, "indexed": {"date-time": "2025-01-01T00:00:00Z"}, "author": [{"given": "Ada", "family": "Lovelace"}]},
+            {"title": ["Missing DOI"]},
+        ]}}]
+    )
+
+    rows = CrossrefLiteratureAdapter(client).search_literature("study", limit=5)
+
+    assert len(rows) == 1
+    assert rows[0]["source_id"] == "crossref:10.2/example"
+    assert rows[0]["year"] == 2024
+    assert rows[0]["metadata"]["authors"] == ["Ada Lovelace"]
+    assert rows[0]["version_relationships"]["is-correction-of"][0]["id"] == "10.2/original"
+
+
+def test_literature_search_merges_cross_source_doi_and_version_relations():
+    client = FakeClient(
+        [
+            {"resultList": {"result": [{"source": "MED", "id": "123", "doi": "10.3/shared", "title": "Shared"}]}},
+            {"message": {"items": [{"DOI": "10.3/shared", "title": ["Shared"], "relation": {"is-version-of": [{"id": "10.3/old"}]}}]}},
+        ]
+    )
+
+    rows = search_literature_sources("shared", ["europepmc", "crossref"], client=client, limit=5)
+
+    assert len(rows) == 1
+    assert rows[0]["metadata"]["alternate_source_ids"] == ["crossref:10.3/shared"]
+    assert rows[0]["metadata"]["version_relationships"]["crossref"]["is-version-of"][0]["id"] == "10.3/old"
+
+
+def test_cached_http_client_offline_replays_and_fails_closed_on_miss(tmp_path, monkeypatch):
+    client = CachedHttpClient(cache_dir=tmp_path)
+    url = "https://example.test/works"
+    params = {"query": "one"}
+    client._cache_path(url, params).write_text('{"message": "cached"}', encoding="utf-8")
+    offline = CachedHttpClient(cache_dir=tmp_path, offline=True)
+    monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
+
+    assert offline.get_json(url, params=params) == {"message": "cached"}
+    with pytest.raises(FileNotFoundError, match="offline cache missing"):
+        offline.get_json(url, params={"query": "missing"})
 
 
 def test_geo_dataset_adapter_normalizes_dataset_records():

@@ -4,8 +4,8 @@ from litdatamatcher.provenance import (
     curated_catalog_provenance,
     module_boundary_map,
     module_ownership_registry,
-    parser_caveats,
     parser_caveat_records,
+    parser_caveats,
     provenance_interpretation,
     provenance_review_caveats,
     source_profile,
@@ -79,7 +79,7 @@ def test_adapter_profiles_and_module_ownership_are_inspectable():
     profiles = adapter_source_profile_table()
     ownership = module_ownership_registry()
 
-    assert set(profiles) == {"clinicaltrials", "geo", "mgnify", "openalex", "pubmed"}
+    assert set(profiles) == {"clinicaltrials", "crossref", "europepmc", "geo", "mgnify", "openalex", "pubmed"}
     assert profiles["clinicaltrials"]["native_id_fields"] == ["nct_id"]
     assert ownership["xml_parsing"]["owner_module"] == "litdatamatcher.literature_xml"
     assert ownership["matching"]["owner_module"] == "litdatamatcher.ranking"

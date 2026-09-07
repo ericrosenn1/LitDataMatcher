@@ -7,9 +7,9 @@ import json
 from pathlib import Path
 
 from .adapters import cached_client, search_dataset_sources, search_literature_sources
-from .artifact_validation import validate_run_artifacts
 from .annotation_splits import DEFAULT_SPLIT_FRACTIONS, DEFAULT_SPLIT_SEED
 from .annotations import export_annotation_corpus
+from .artifact_validation import validate_run_artifacts
 from .calibration import calibrate_ranking_threshold
 from .capability_registry import capability_summary, infer_dataset_capabilities
 from .evaluation import (
@@ -26,8 +26,8 @@ from .reporting import write_methods_report
 from .review import export_review_csv, load_review_labels, summarize_review_labels
 from .review_queue import write_daily_review_queue
 from .schemas import DatasetRecord, MatchCandidate, QuestionCandidate
-from .stress import run_synthetic_stress_test
 from .storage import read_jsonl, write_jsonl
+from .stress import run_synthetic_stress_test
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -87,12 +87,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--source",
         nargs="+",
         default=["pubmed"],
-        choices=["openalex", "pubmed"],
+        choices=["crossref", "europepmc", "openalex", "pubmed"],
         help="Live literature source adapter(s) to query.",
     )
     literature_search.add_argument("--limit", type=int, default=25, help="Maximum rows to write.")
     literature_search.add_argument(
         "--cache-dir", default="local/http_cache", help="HTTP cache directory."
+    )
+    literature_search.add_argument(
+        "--offline",
+        action="store_true",
+        help="Replay cached responses only; fail before a network request on a cache miss.",
     )
 
     dataset_search = subparsers.add_parser(
@@ -272,7 +277,7 @@ def main(argv: list[str] | None = None) -> int:
             include_raw_affiliations=args.include_raw_affiliations,
         )
     elif args.command == "literature-search":
-        client = cached_client(args.cache_dir)
+        client = cached_client(args.cache_dir, offline=args.offline)
         rows = search_literature_sources(args.query, args.source, client=client, limit=args.limit)
         write_jsonl(args.out, rows)
         metrics = {"rows": len(rows), "out": args.out, "sources": args.source}

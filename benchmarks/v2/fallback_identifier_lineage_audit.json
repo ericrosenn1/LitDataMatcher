@@ -1,8 +1,8 @@
 {
   "protocol_id": "EP-20260907-1",
-  "audit_scope": "identifier_only; no titles, summaries, outcome fields, labels, rankings, or predictions read",
-  "fallback_version": "v2_after_GSE282859_disqualification",
-  "selection_rule": "After GSE282859, scan persisted primary catalog rows in order and select the first candidate with zero exact intersection in declared series, BioProject/repository alias, or GEO sample identifiers against all development, transfer, challenge, retired, and reserved components. Require complete known publication/PMC and ENA/SRA identifiers for every base component before reserving any candidate.",
+  "audit_scope": "identifier_only; no titles, summaries, outcomes, labels, ranks, predictions, or scientific content read",
+  "fallback_version": "v3_complete_official_relation_status",
+  "selection_rule": "After disqualified GSE282859, scan primary catalog rows in persisted order. Reserve the first candidate with zero exact intersections across declared series, BioProject/repository alias, GEO sample, GDS-linked PubMed/PMC, and complete ENA/SRA identifier relations against every development, transfer, challenge, retired, and reserved component. Official successful empty GDS->PubMed, PubMed->PMC, or ENA read-run response is recorded as EXPLICIT_NO_INDEXED_LINK, not as missing data; errors and responses at the 1000-record limit would block reservation.",
   "candidate": {
     "accession": "GSE264666",
     "catalog_order_index_1_based": 25,
@@ -24,49 +24,430 @@
     "pmc": [
       "11634783"
     ],
+    "sra": [
+      "SRP503574"
+    ],
     "source_locator": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE264666",
     "source_snapshot_sha256": "10a1096e704bf668a409b9e7aef65d9b6d0453f62eae24c442741b64050b32a2"
   },
   "base_component_counts": {
     "input_accessions": 38,
     "series": 43,
-    "bioprojects": 35,
-    "geo_samples": 1045
+    "bioprojects": 38,
+    "declared_sra": 5,
+    "geo_samples": 1108
   },
-  "source_queries": {
+  "official_relation_status": {
     "gds_to_pubmed": {
-      "endpoint": "NCBI ELink",
-      "parameters": "dbfrom=gds;db=pubmed;linkname=gds_pubmed;43 GDS identifiers",
-      "file": "gds_to_pubmed.xml",
-      "sha256": "2ba4a2df2ec7054284b15655647560698b236c064e15bd449e8d6e8d7e54a8b4",
-      "bytes": 9294
+      "queried_series": 43,
+      "indexed_links": 28,
+      "explicit_no_indexed_links": [
+        "GSE186963",
+        "GSE189320",
+        "GSE210175",
+        "GSE212865",
+        "GSE223481",
+        "GSE228684",
+        "GSE229937",
+        "GSE247134",
+        "GSE248047",
+        "GSE262638",
+        "GSE267066",
+        "GSE278521",
+        "GSE285174",
+        "GSE95435",
+        "GSE99787"
+      ],
+      "errors": [],
+      "truncated": [],
+      "raw_response": {
+        "file": "gds_to_pubmed.xml",
+        "sha256": "2ba4a2df2ec7054284b15655647560698b236c064e15bd449e8d6e8d7e54a8b4",
+        "bytes": 9294
+      }
     },
     "pubmed_to_pmc": {
-      "endpoint": "NCBI ELink",
-      "parameters": "dbfrom=pubmed;db=pmc;linkname=pubmed_pmc;28 PubMed identifiers",
-      "file": "pubmed_to_pmc.xml",
-      "sha256": "e6c2e0fa00c54aacfbc3470b82e27009bed744d26884a60276ff3e30470e6e6d",
-      "bytes": 34816
+      "queried_pubmed": 26,
+      "indexed_links": 21,
+      "explicit_no_indexed_links": [
+        "36566568",
+        "39277863",
+        "39343250",
+        "39742502",
+        "40107355"
+      ],
+      "errors": [],
+      "truncated": [],
+      "raw_response": {
+        "file": "pubmed_to_pmc.xml",
+        "sha256": "e6c2e0fa00c54aacfbc3470b82e27009bed744d26884a60276ff3e30470e6e6d",
+        "bytes": 34816
+      }
     },
-    "candidate_gds_to_pubmed": {
-      "endpoint": "NCBI ELink",
-      "parameters": "dbfrom=gds;db=pubmed;linkname=gds_pubmed;2 candidate family GDS identifiers",
-      "file": "candidate_gds_to_pubmed.xml",
-      "sha256": "7b9b41b618aae2ff00f7acd2a72f237afe41dbe4eaee35f75161fe3d3cc9f427",
-      "bytes": 720
-    },
-    "candidate_pubmed_to_pmc": {
-      "endpoint": "NCBI ELink",
-      "parameters": "dbfrom=pubmed;db=pmc;linkname=pubmed_pmc;1 candidate PubMed identifier",
-      "file": "candidate_pubmed_to_pmc.xml",
-      "sha256": "c3c35e30cfe73844d76dc21b3fab5aa34a0a9546bc9a34b16558dc14a2966083",
-      "bytes": 2121
-    },
-    "ena_identifier_queries": {
-      "endpoint": "ENA filereport",
-      "parameters": "study BioProject; fields=study_accession,secondary_study_accession,sample_accession,run_accession; format=json; result=read_run; limit=1000",
-      "projects": 36,
-      "files_directory": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\replacement_holdout_identifier_lineage_20260907"
+    "ena_sra": {
+      "queried_bioproject_or_sra": 43,
+      "indexed_links": 33,
+      "explicit_no_indexed_links": [
+        "PRJNA1035495",
+        "PRJNA1036265",
+        "PRJNA1086513",
+        "PRJNA1092683",
+        "PRJNA1159204",
+        "PRJNA776893",
+        "PRJNA795205",
+        "PRJNA877669",
+        "PRJNA941919",
+        "PRJNA982126"
+      ],
+      "errors": [],
+      "truncated": [],
+      "maximum_rows_returned": 234,
+      "raw_files": {
+        "PRJNA1018513": {
+          "file": "PRJNA1018513.json",
+          "sha256": "396bd75994f95762584b286363a74bf0147e95b6b63686fea0596d1e27bc62bc",
+          "rows": 8,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "62cadcd312a45c5b3038e76da35283b63cc158b647d333dc5e751e4e84bea5be"
+        },
+        "PRJNA1026558": {
+          "file": "PRJNA1026558.json",
+          "sha256": "8048fb095a126a721152ec1eb8301708473a20fc581bbba9b456d8cf08a0e842",
+          "rows": 4,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "e5a281013b26c3aa095f2ffa469da382a49958062755bb665df882a2c5e871df"
+        },
+        "PRJNA1030353": {
+          "file": "PRJNA1030353.json",
+          "sha256": "4bb430e73b81a3b192a7f9a9b60c619e10b0aeb535e502dbb47320dbe0422f0a",
+          "rows": 51,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "0895214c6d6ec2f9401e0ce95e22f81ddd63cf62c9c0ae7cb5d66cd74da62061"
+        },
+        "PRJNA1035495": {
+          "file": "PRJNA1035495.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA1036265": {
+          "file": "PRJNA1036265.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA1041455": {
+          "file": "PRJNA1041455.json",
+          "sha256": "98c024f56ec58794f2d0c17974096e3902bddd51ff29564a467a08b928f0c6ae",
+          "rows": 20,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "25110a29c98928b119718775e4f70a6bb7a1962bf667d9939f4c1e0fd8713be2"
+        },
+        "PRJNA1044803": {
+          "file": "PRJNA1044803.json",
+          "sha256": "06c125f2707e1106925cb9af28ab9176d645b5e6f5f283be5713428c0e98d0c2",
+          "rows": 18,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "dee75ac8186de6701e09a9d68987c2434542b7be96a25423536ef81a44bb5cba"
+        },
+        "PRJNA1068943": {
+          "file": "PRJNA1068943.json",
+          "sha256": "ee2a4767a3613185d7d02100d73724a34322cabf7c45404367d88aff82e5176e",
+          "rows": 58,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "044d350fc2124033a4829a3ef3221daa8a6a38cf13238ee34a956a069ff4b7ab"
+        },
+        "PRJNA1073841": {
+          "file": "PRJNA1073841.json",
+          "sha256": "031119360989921894e94b06c7916607120f1910f8c5002bb0baba9db8f240c2",
+          "rows": 6,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "5c0864e3e8ec80eebfb84803d964ac3c2de07a42afd300304b9f0f6199785502"
+        },
+        "PRJNA1086513": {
+          "file": "PRJNA1086513.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA1092683": {
+          "file": "PRJNA1092683.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA1095896": {
+          "file": "PRJNA1095896.json",
+          "sha256": "ea47429d1ab55138762bd5325e451f8de937b9ddfc3a952320d8045300a67003",
+          "rows": 23,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "d70e1aa0d771d0f5abd5b150cf560613a202444d570c8b38c451b0d2289ee943"
+        },
+        "PRJNA1109430": {
+          "file": "PRJNA1109430.json",
+          "sha256": "b44c2f68979ac6eac421670c4e5b483a8c1acea8082eeff94cf721bfd41b92f6",
+          "rows": 11,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "85f57c7bf4bd786457371b58008723e3f5f03c58119c40fe870a9a4fc080fbef"
+        },
+        "PRJNA1119469": {
+          "file": "PRJNA1119469.json",
+          "sha256": "c2ac219e62ab31e8acbb79e0560920a5e282c9a5e093bd18e9ff74a9a43eebd6",
+          "rows": 1,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "ee0f38ac8b3804533eee5863c86ac268aa9ca536fac67ac35e7f62c143aaa694"
+        },
+        "PRJNA1133661": {
+          "file": "PRJNA1133661.json",
+          "sha256": "97cf707f92905bd0d19792ed6aa9f018fef3aef2d7cd09237b5f09c09152fb88",
+          "rows": 32,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "0fc2e935d3331f29e53301803602dd545a613d031009b68288db900691487752"
+        },
+        "PRJNA1149756": {
+          "file": "PRJNA1149756.json",
+          "sha256": "1d132cdc031b5a07fe4597ac4609a67eec14ca9b6ce499538255e6ff2e73e8cc",
+          "rows": 6,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "f78786e861a9b05ac77e1ee7982ea824013b7f5de94c604dc3981761c53e97de"
+        },
+        "PRJNA1159204": {
+          "file": "PRJNA1159204.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA1167699": {
+          "file": "PRJNA1167699.json",
+          "sha256": "2baf6acb7a85afe693e22c7b252afb15707587f4c7500ff60f001954fc034e0e",
+          "rows": 37,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "b492aeb566d07f5940d3c4024042ead0a15f4e9b44f89d02f6de72e585d89601"
+        },
+        "PRJNA1201748": {
+          "file": "PRJNA1201748.json",
+          "sha256": "017da0ace4b917bed72a5fc405f67b6f74436d72100f960be3eb96e6720d388d",
+          "rows": 12,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "437cfb4f1af4dc28743227e634c134fcd8f315263871a408d9eb695e93e1d597"
+        },
+        "PRJNA377118": {
+          "file": "PRJNA377118.json",
+          "sha256": "6547f8bb3745133544bde9f546fb7fa7565b1a0375b5ec049c64e9891997a985",
+          "rows": 96,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "5ee729b179493b8cc572af924fa71c8faab16b0c5150889d82465b1c0a48e699"
+        },
+        "PRJNA389599": {
+          "file": "PRJNA389599.json",
+          "sha256": "418e203f24e39715f10730ca6a276afbfbbef17104dfcacac468cf7bb78878a9",
+          "rows": 23,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "abfd83bdbac89d9cfcf2eda2e2e2fa2ff1d15208f9a07fd2d7f365a0d6355c46"
+        },
+        "PRJNA445839": {
+          "file": "prjna_PRJNA445839.json",
+          "sha256": "6d71ab903a51e2606be5bcd3358bb15783474e3d3409c0a0cd10c77c58b308ed",
+          "rows": 19,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "bfafc8e402ae117efbc30e54ebc3f2b8b2af80b8270dcfbfb05e195e19f84b3b"
+        },
+        "PRJNA529210": {
+          "file": "PRJNA529210.json",
+          "sha256": "3feed0d1ce40679468902b4995c90ae4f5e16a45e6e777f8e36b92d6440cd22e",
+          "rows": 12,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "858e64887e0658d3367490ee52e19ec3eddb4f226641ec241ba5feddf895d3da"
+        },
+        "PRJNA552797": {
+          "file": "PRJNA552797.json",
+          "sha256": "7805ce2e6cf37121b3984fc75d50bece7039e3a52288a582993ae1589a04b45b",
+          "rows": 2,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "cd2cf99c855a106c5ff1fc8cd24c9e9669d86ef289d90059d0aa062ed419898f"
+        },
+        "PRJNA776893": {
+          "file": "PRJNA776893.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA782548": {
+          "file": "PRJNA782548.json",
+          "sha256": "9ba3f4c9e2119b5a2508d9a8e910096a9b7f1bc9b26bb3e18c009f54413dd182",
+          "rows": 35,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "c1451a5cfa6e058958895ec3ccb0f5908003c66318bc1a3a555d4fcfeae12333"
+        },
+        "PRJNA795205": {
+          "file": "PRJNA795205.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA795806": {
+          "file": "PRJNA795806.json",
+          "sha256": "a3309ba51b130a39b5a1c61ad157683744947190499de923dcfc2c58b1c8931e",
+          "rows": 8,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "bdf78c7339b1dc51d0ace09d74fa035c0ba2528f48589e4a88e998eccf7933e5"
+        },
+        "PRJNA864617": {
+          "file": "PRJNA864617.json",
+          "sha256": "67b32f25fe8b69a0144e917d94c4c14a145aec616c5607ce3d3fa2d75a1ff2f4",
+          "rows": 16,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "a14056aa566c3102f10b3c65f89dc9b84790daf21226abd33219920b8af7369e"
+        },
+        "PRJNA877669": {
+          "file": "PRJNA877669.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA882338": {
+          "file": "PRJNA882338.json",
+          "sha256": "72bd126dbf714ae3c30c2874b0ef1865683eaaa3312fa6d41c638905e5aedf69",
+          "rows": 6,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "0f8139d22758955861a03b9f8fcb68c07e1f308fc4d48542f07c3649a9fc7d38"
+        },
+        "PRJNA886695": {
+          "file": "prjna_PRJNA886695.json",
+          "sha256": "1533d399a29f88c5db57dba70f0076e12eac68d2a62e98aa7e0568be84d48b1d",
+          "rows": 49,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "5bf1302944c89260e7d1b8ee5a526660da8ffd88cead458db1d3dc942ee8f342"
+        },
+        "PRJNA926515": {
+          "file": "PRJNA926515.json",
+          "sha256": "436a502574e378862ceb6237c20e7bb3b230b5af01a6665b858ee3486d46fd84",
+          "rows": 8,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "61edc6fac19a1c6f444ec2244cfb7176e346a06b85fadeae1f7faaddf3d215cb"
+        },
+        "PRJNA941919": {
+          "file": "prjna_PRJNA941919.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "PRJNA951052": {
+          "file": "PRJNA951052.json",
+          "sha256": "ace865df457d15a1e07a5bb3413b254d83271a6dee6bc0bc55325d78ec733ceb",
+          "rows": 4,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "a993bf3e780f8fa8e98f6251151e693cd4980e50c9e4fdc7477fc4b8b1eb163e"
+        },
+        "PRJNA956834": {
+          "file": "PRJNA956834.json",
+          "sha256": "d975497ac2ed2ecec60324f1af228ce96d54ae010832f1e59f6ea099c4f94eaf",
+          "rows": 12,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "9686149068ab335aa9b1b75a4c81b63c77e79a696c7d44e84439dbe5886c4584"
+        },
+        "PRJNA971658": {
+          "file": "PRJNA971658.json",
+          "sha256": "25b560d7fa6921558bd33acd0a769da985ead08998cf74261b51ed7a8a4d12e7",
+          "rows": 234,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "71290cf274ce1c16ca5dd2bcd1d456ff793cb009f5e3e94bc19d77d9bdb9c275"
+        },
+        "PRJNA982126": {
+          "file": "PRJNA982126.json",
+          "sha256": "2ba33ca0557f1bb5b7ba88d67f9d0093c7185a36ec51fe2b7bd9372d3e001d6d",
+          "rows": 0,
+          "complete_under_limit": true,
+          "relation_status": "EXPLICIT_NO_INDEXED_ENA_READ_RUN_LINK",
+          "identifier_sha256": "b251b55e47d8fd1f705f79307de07798dfac487b209597b01dd6c19034d26c6d"
+        },
+        "SRP100786": {
+          "file": "sra_SRP100786.json",
+          "sha256": "6547f8bb3745133544bde9f546fb7fa7565b1a0375b5ec049c64e9891997a985",
+          "rows": 96,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "5ee729b179493b8cc572af924fa71c8faab16b0c5150889d82465b1c0a48e699"
+        },
+        "SRP108787": {
+          "file": "sra_SRP108787.json",
+          "sha256": "decf1052b35b132685461ee421ce1ed06e0983b04a82cce6702650dee62353a9",
+          "rows": 23,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "abfd83bdbac89d9cfcf2eda2e2e2fa2ff1d15208f9a07fd2d7f365a0d6355c46"
+        },
+        "SRP136539": {
+          "file": "srp_SRP136539.json",
+          "sha256": "6d71ab903a51e2606be5bcd3358bb15783474e3d3409c0a0cd10c77c58b308ed",
+          "rows": 19,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "bfafc8e402ae117efbc30e54ebc3f2b8b2af80b8270dcfbfb05e195e19f84b3b"
+        },
+        "SRP189490": {
+          "file": "sra_SRP189490.json",
+          "sha256": "3feed0d1ce40679468902b4995c90ae4f5e16a45e6e777f8e36b92d6440cd22e",
+          "rows": 12,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "858e64887e0658d3367490ee52e19ec3eddb4f226641ec241ba5feddf895d3da"
+        },
+        "SRP213106": {
+          "file": "sra_SRP213106.json",
+          "sha256": "7805ce2e6cf37121b3984fc75d50bece7039e3a52288a582993ae1589a04b45b",
+          "rows": 2,
+          "complete_under_limit": true,
+          "relation_status": "INDEXED_LINKS",
+          "identifier_sha256": "cd2cf99c855a106c5ff1fc8cd24c9e9669d86ef289d90059d0aa062ed419898f"
+        }
+      }
     }
   },
   "identifier_overlap": {
@@ -75,49 +456,41 @@
     "geo_samples": [],
     "pubmed": [],
     "pmc": [],
-    "ena": {
+    "ena_sra": {
       "study_accession": [],
       "secondary_study_accession": [],
       "sample_accession": [],
       "run_accession": []
     }
   },
-  "coverage_gaps": {
-    "base_series_without_pubmed_link": [
-      "GSE186963",
-      "GSE189320",
-      "GSE210175",
-      "GSE212865",
-      "GSE223481",
-      "GSE228684",
-      "GSE229937",
-      "GSE247134",
-      "GSE248047",
-      "GSE262638",
-      "GSE267066",
-      "GSE278521",
-      "GSE285174",
-      "GSE95435",
-      "GSE99787"
-    ],
-    "base_bioprojects_with_empty_or_limit_reaching_ena": [
-      "PRJNA1035495",
-      "PRJNA1036265",
-      "PRJNA1086513",
-      "PRJNA1092683",
-      "PRJNA1159204",
-      "PRJNA776893",
-      "PRJNA795205",
-      "PRJNA877669",
-      "PRJNA982126"
-    ],
-    "candidate_series_without_pubmed_link": [],
-    "candidate_ena_complete": true
+  "candidate_relation_status": {
+    "publication_complete": true,
+    "pmc_complete": true,
+    "ena_sra_complete": true,
+    "raw_files": {
+      "PRJNA1103770": {
+        "file": "PRJNA1103770.json",
+        "sha256": "8d6e6fa57b8f3fbe9aaaf49fc8a4fed6f413d3870760aedb5ff1b235c612ea8d",
+        "rows": 15,
+        "complete_under_limit": true,
+        "relation_status": "INDEXED_LINKS",
+        "identifier_sha256": "f1f546cfb49bfe4b8079066cca10b7aa44f454a741e655dcec2acf8775454805"
+      },
+      "SRP503574": {
+        "file": "sra_SRP503574.json",
+        "sha256": "d0d1f3fcd10b1bdf0183a5900565eb9fca1a8b00972db79adcfbac5626c31b42",
+        "rows": 15,
+        "complete_under_limit": true,
+        "relation_status": "INDEXED_LINKS",
+        "identifier_sha256": "f1f546cfb49bfe4b8079066cca10b7aa44f454a741e655dcec2acf8775454805"
+      }
+    }
   },
-  "decision": "BLOCKED_INCOMPLETE_BASE_COMPONENT_LINEAGE",
-  "decision_reason": "Base publication and ENA/SRA lineage is incomplete, so no candidate can establish the required disjointness from every component.",
+  "decision": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION",
+  "decision_reason": "Every required official identifier relation returned a complete status (indexed or explicit no-indexed-link), the candidate relations are complete, and all exact identifier intersections are zero.",
   "limitations": [
-    "Identifier-only source queries establish known-link overlap only. No title, summary, outcome, label, ranking, or prediction was accessed.",
-    "Undisclosed reused cohorts and source-of-source links would remain a separate limitation even after complete known identifiers."
-  ]
+    "Known-identifier disjointness does not prove absence of undisclosed reused cohorts, source-of-source links, or external mirrors.",
+    "No holdout scientific content, labels, predictions, ranks, or scores were accessed."
+  ],
+  "raw_identifier_response_directory": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\replacement_holdout_identifier_lineage_20260907"
 }

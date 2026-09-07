@@ -1,0 +1,38 @@
+{
+  "protocol_id": "EP-20260907-1",
+  "reservation_version": "v3_complete_official_relation_status",
+  "status": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION",
+  "selected_accession": "GSE264666",
+  "selection_rule": "First primary catalog family after disqualified GSE282859 whose exact series, BioProject/repository alias, GEO sample, GDS-linked PubMed/PMC, and complete ENA/SRA identifier relations have zero intersection with every development, transfer, challenge, retired, and prior-reserved component.",
+  "audit": {
+    "path": "fallback_identifier_lineage_audit.json",
+    "sha256": "CD7FBCE7A784E1E134B02E8993D3EE7C7CFA1193FA62F75D4E6320A0AA9F9271",
+    "decision": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION"
+  },
+  "identifier_lineage": {
+    "series": ["GSE246318", "GSE264666"],
+    "bioproject": ["PRJNA1103770"],
+    "geo_samples": ["GSM8395208", "GSM8395209", "GSM8395210"],
+    "pubmed": ["39613875"],
+    "pmc": ["11634783"],
+    "sra": ["SRP503574"]
+  },
+  "verification": {
+    "all_exact_identifier_intersections_zero": true,
+    "candidate_publication_pmc_complete": true,
+    "candidate_ena_sra_complete": true,
+    "base_official_relation_errors": 0,
+    "base_official_relation_truncations": 0
+  },
+  "sealed_evaluation_state": {
+    "title_summary_outcome_status": "UNINSPECTED",
+    "label_status": "UNINSPECTED",
+    "prediction_status": "NOT_RUN",
+    "ranking_status": "NOT_RUN",
+    "execution_requires": "Explicit lead authorization for one-time final holdout execution"
+  },
+  "limitations": [
+    "Known-identifier disjointness does not prove absence of undisclosed reused cohorts, source-of-source links, or external mirrors.",
+    "No scientific content was used to select or reserve this candidate."
+  ]
+}

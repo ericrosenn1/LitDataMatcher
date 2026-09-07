@@ -1,16 +1,17 @@
 {
   "protocol_id": "EP-20260907-1",
-  "status": "FINAL_HOLDOUT_BLOCKED_INCOMPLETE_BASE_COMPONENT_LINEAGE",
+  "status": "REPLACEMENT_PRIMARY_HOLDOUT_RESERVED_PENDING_ONE_TIME_FINAL_AUTHORIZATION",
   "frozen_before_tuning": true,
   "base_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
   "development": ["GSE193336", "GSE128885", "GSE99787", "GSE133844", "GSE95435"],
-  "primary_holdout": [],
+  "primary_holdout": ["GSE264666"],
   "retired_primary_holdout": ["GSE112372"],
   "disqualified_primary_holdout": ["GSE282859"],
-  "fallback_candidate_not_reserved": ["GSE264666"],
+  "fallback_candidate_not_reserved": [],
+  "replacement_reservation": "final_holdout_reservation_v3.json",
   "transfer_holdout": ["GSE214695", "GSE226875"],
   "grouping": "connected publication/version/study/cohort/mirror/source-of-source families",
   "label_origin": "source_determined",
   "expert_labels_available": false,
-  "untouched_status": "GSE112372 detailed metadata was exposed and is retired from untouched-holdout status. GSE282859 is DISQUALIFIED_INCOMPLETE_LINEAGE because publication/version and ENA/SRA separation could not be established. Identifier-only fallback candidate GSE264666 has no known overlap but cannot be reserved because 15 base series lack linked PubMed metadata and 9 base BioProjects have empty or limit-reaching ENA results. No title/summary/outcome field, label, prediction, or rank was inspected for either candidate. No final holdout may run until complete base-component lineage exists."
+  "untouched_status": "GSE112372 detailed metadata was exposed and is retired from untouched-holdout status. GSE282859 remains DISQUALIFIED_INCOMPLETE_LINEAGE. Versioned identifier-only audit v3 closes the previously reported relation gaps: successful official empty GDS->PubMed, PubMed->PMC, and ENA read-run responses are explicit no-indexed-link results; no error or 1000-record truncation remains. GSE264666 is reserved only at the identifier-lineage level, with no title/summary/outcome field, label, prediction, rank, or score inspected. One-time final execution requires explicit lead authorization."
 }

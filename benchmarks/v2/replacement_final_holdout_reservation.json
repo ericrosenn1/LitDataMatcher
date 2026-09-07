@@ -50,7 +50,7 @@
   ],
   "disqualification": {
     "reason": "Publication/version and ENA/SRA separation were unresolved at preparation, and the frozen protocol disallows a proven-independent claim when overlap is unknown.",
-    "superseded_by": "fallback_identifier_lineage_audit.json, whose first fallback candidate is blocked because the base comparison components have incomplete identifier lineage."
+    "superseded_by": "final_holdout_reservation_v3.json and fallback_identifier_lineage_audit.json, which reserve GSE264666 after complete official identifier-relation statuses were recorded."
   },
   "sealed_evaluation_state": {
     "prediction_status": "NOT_RUN",

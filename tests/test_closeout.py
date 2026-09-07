@@ -52,7 +52,7 @@ def test_historical_partial_run_is_not_a_designated_final_failure(tmp_path):
 
 
 def test_tampered_declared_artifact_fails_final_run_integrity(tmp_path):
-    run_dir = tmp_path / "data" / "runs" / "candidate"
+    run_dir = tmp_path / "data" / "runs" / "final-real-run-01"
     artifact = run_dir / "inferences.jsonl"
     artifact.parent.mkdir(parents=True)
     artifact.write_text('{"actual":"content"}\n', encoding="utf-8")
@@ -61,7 +61,8 @@ def test_tampered_declared_artifact_fails_final_run_integrity(tmp_path):
         {
             "execution_status": "PASS",
             "failures": [],
-            "evaluation": {"split_role": "FINAL_HOLDOUT", "holdout_exposed_to_tuning": False},
+            "run_id": "final-real-run-01",
+            "evaluation": {"split_role": "VALIDATION", "holdout_exposed_to_tuning": False},
             "commands": [{"exit_code": 0, "log_reference": "inferences.jsonl"}],
             "artifacts": [
                 {
@@ -90,7 +91,7 @@ def test_audit_output_is_deterministic_for_unchanged_evidence(tmp_path):
 def test_designated_final_pass_supersedes_historical_partial_runs(tmp_path):
     data = tmp_path / "data"
     _write(data / "runs" / "old" / "RUN_MANIFEST.json", {"execution_status": "PARTIAL"})
-    _final_run(data, "final", source_disjointness=None)
+    _final_run(data, "final-real-run-01", source_disjointness=None, final_integrated=True)
 
     report = run_closeout_audit(data, tmp_path / "source")
 
@@ -171,7 +172,7 @@ def test_refinement_metrics_require_structured_comparable_methods(tmp_path):
     }
 
 
-def _final_run(data, name, source_disjointness):
+def _final_run(data, name, source_disjointness, *, final_integrated=False):
     run = data / "runs" / name
     inference = run / "inferences.jsonl"
     inference.parent.mkdir(parents=True)
@@ -188,7 +189,7 @@ def _final_run(data, name, source_disjointness):
     )
     payload = inference.read_bytes()
     evaluation = {
-        "split_role": "FINAL_HOLDOUT",
+        "split_role": "VALIDATION" if final_integrated else "FINAL_HOLDOUT",
         "holdout_exposed_to_tuning": False,
     }
     if source_disjointness is not None:
@@ -196,6 +197,7 @@ def _final_run(data, name, source_disjointness):
     _write(
         run / "RUN_MANIFEST.json",
         {
+            "run_id": name,
             "execution_status": "PASS",
             "failures": [],
             "evaluation": evaluation,
@@ -214,20 +216,21 @@ def _final_run(data, name, source_disjointness):
 
 def _reservation(source):
     _write(
-        source / "benchmarks" / "v2" / "replacement_final_holdout_reservation.json",
+        source / "benchmarks" / "v2" / "final_holdout_reservation_v3.json",
         {
-            "reservation_status": "PREPARED_NOT_AUTHORIZED_FOR_EXECUTION",
+            "status": "RESERVED_PENDING_ONE_TIME_FINAL_HOLDOUT_AUTHORIZATION",
             "selected_accession": "GSE282859",
-            "exact_overlap_audit": {
-                "against_excluded_known_families": {
-                    "series_overlap": [],
-                    "bioproject_overlap": [],
-                    "publication_overlap": [],
-                    "geo_sample_overlap": [],
-                    "ena_overlap": [],
-                }
+            "verification": {
+                "all_exact_identifier_intersections_zero": True,
+                "candidate_publication_pmc_complete": True,
+                "candidate_ena_sra_complete": True,
+                "base_official_relation_errors": 0,
+                "base_official_relation_truncations": 0,
             },
-            "sealed_evaluation_state": {"prediction_status": "NOT_RUN"},
+            "sealed_evaluation_state": {
+                "prediction_status": "NOT_RUN",
+                "ranking_status": "NOT_RUN",
+            },
         },
     )
 

@@ -7,7 +7,7 @@ import pytest
 import requests
 import numpy as np
 
-from litdatamatcher.acquisition_v2 import DeferredRetry, SnapshotClient, StageLease, align_same_study_partitions, parse_article, parse_series_matrix, profile_capabilities
+from litdatamatcher.acquisition_v2 import DeferredRetry, SnapshotClient, StageLease, align_same_study_partitions, parse_article, parse_series_matrix, profile_capabilities, sync_targeted_studies
 
 
 class Response:
@@ -193,3 +193,23 @@ def test_exact_alignment_preserves_values_and_missingness_and_rejects_invalid():
         align_same_study_partitions([p1], ["a", "b"], ["s1", "s2"])
     with pytest.raises(ValueError, match="feature"):
         align_same_study_partitions([p1, {**p2, "feature_ids": ["c", "b"]}], ["a", "b"], ["s1", "s2"])
+
+
+def test_targeted_acquisition_does_not_contaminate_catalog_and_propagates_reserve(tmp_path, monkeypatch):
+    def fixture_get(client, url, params=None):
+        if params:
+            accession = params["acc"]
+            raw = f"!Series_geo_accession = {accession}\n!Series_title = Fixture explicitly synthetic\n!Series_pubmed_id = 12345\n!Series_sample_organism = Homo sapiens\n".encode()
+        else:
+            raw = b"<html>no matrix files</html>"
+        return raw, {"sha256": "fixture", "object_path": "fixture"}
+    monkeypatch.setattr(SnapshotClient, "get", fixture_get)
+    catalog = tmp_path / "catalog"
+    catalog.mkdir()
+    (catalog / "studies.jsonl").write_text("source-selected-marker", encoding="utf-8")
+    records, report = sync_targeted_studies(tmp_path, ["GSE112372", "GSE42"])
+    assert report["status"] == "PASS" and report["source_selected_coverage_increment"] == 0
+    assert all(r["reserved_evaluation"] == ["final_primary_holdout"] for r in records)
+    assert (catalog / "studies.jsonl").read_text() == "source-selected-marker"
+    with pytest.raises(ValueError, match="valid GSE"):
+        sync_targeted_studies(tmp_path, ["../../unsafe"])

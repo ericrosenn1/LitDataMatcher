@@ -612,3 +612,81 @@ def audit_offline_recovery(root):
     write_json(root / "catalog" / "acquisition_offline_recovery.json", report)
     write_json(root / "catalog" / "source_object_manifest.json", objects)
     return report
+
+
+@stage_lease("datasets")
+def sync_targeted_studies(root, accessions, offline=False, refresh=False, *, family_budget=30):
+    """Explicit accession acquisition with a separate catalog and reserve closure.
+
+    Related series metadata is followed under a fixed family budget. It is not
+    added to the source-selected evaluation or acquisition coverage denominator.
+    """
+    seeds = sorted(set(accessions))
+    if not seeds or any(not isinstance(x, str) or not re.fullmatch(r"GSE[1-9]\d*", x) for x in seeds):
+        raise ValueError("targeted acquisition requires valid GSE study accessions")
+    if len(seeds) > family_budget:
+        raise ValueError("seed accessions exceed family budget")
+    root = Path(root)
+    client = SnapshotClient(root / "snapshots" / "datasets", offline=offline, refresh=refresh)
+    records, failures, queue, seen, edges = [], [], seeds.copy(), set(), []
+    while queue and len(seen) < family_budget:
+        accession = queue.pop(0)
+        if accession in seen:
+            continue
+        seen.add(accession)
+        try:
+            raw, meta = client.get("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi", {"acc": accession, "targ": "self", "form": "text", "view": "full"})
+            fields = soft_fields(raw.decode("utf-8"), "!Series_")
+            if fields.get("geo_accession") != [accession]:
+                raise ValueError("source accession identity mismatch or missing record")
+            related = sorted(set(re.findall(r"\bGSE\d+\b", " ".join(fields.get("relation", [])))))
+            aliases = sorted(set(re.findall(r"\b(?:PRJNA\d+|SRP\d+|ERP\d+|PRJEB\d+)\b", " ".join(fields.get("relation", [])))))
+            for relative in related:
+                edges.append([accession, relative])
+                if relative not in seen and relative not in queue:
+                    queue.append(relative)
+            organisms = fields.get("sample_organism", [])
+            record = {"schema_version": VERSION, "dataset_id": accession, "title": " ".join(fields.get("title", [])), "summary": " ".join(fields.get("summary", [])), "organism": organisms[0] if len(organisms) == 1 else organisms or None, "assay": "; ".join(fields.get("type", [])) or None, "source": "GEO", "source_locator": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=" + accession, "source_snapshot": meta, "series_snapshot": meta, "series_metadata": fields, "study_lineage": sorted(set([accession] + related + aliases)), "repository_aliases": aliases, "related_series": related, "publication_ids": fields.get("pubmed_id", []), "selection": "explicit_accession" if accession in seeds else "linked_family_metadata", "counts_toward_source_selected_coverage": False, "sample_count_reported": len(fields.get("sample_id", [])), "processed_availability": "uninspected", "access_status": "public", "samples": []}
+            profile_capabilities(record, [])
+            # Family expansion is metadata-only; explicit seed samples are profiled.
+            if accession in seeds and record["sample_count_reported"] <= 250:
+                try:
+                    prefix = accession[:-3] + "nnn" if len(accession) > 6 else "GSEnnn"
+                    url = f"https://ftp.ncbi.nlm.nih.gov/geo/series/{prefix}/{accession}/matrix/"
+                    listing, _ = client.get(url)
+                    files = sorted(set(re.findall(r'href="([^"/]+series_matrix[^"/]*\.txt\.gz)"', listing.decode())))
+                    for filename in files[:3]:
+                        raw_matrix, matrix_meta = client.get(url + filename)
+                        samples, inspection = parse_series_matrix(raw_matrix, accession)
+                        inspection.update({"source_snapshot": matrix_meta, "source_url": url + filename})
+                        record.setdefault("processed_inspections", []).append(inspection)
+                        profile_capabilities(record, record["samples"] + [s for s in samples if s["sample_id"] not in {v["sample_id"] for v in record["samples"]}])
+                        record["processed_availability"] = "inspected" if inspection["status"] == "PASS" else "metadata_matrix_only"
+                except (ValueError, RuntimeError, OSError, requests.RequestException) as exc:
+                    failures.append({"id": accession, "stage": "profile", "error": str(exc)})
+            records.append(record)
+        except (ValueError, RuntimeError, OSError, requests.RequestException) as exc:
+            failures.append({"id": accession, "stage": "series", "error": str(exc)})
+    # Conservative transitive closure through series, project, sample and PMID.
+    labels = {r["dataset_id"]: set(r["study_lineage"] + r["series_metadata"].get("sample_id", []) + ["PMID:" + p for p in r["publication_ids"]]) for r in records}
+    changed = True
+    while changed:
+        changed = False
+        for key in labels:
+            union = set().union(*(v for v in labels.values() if v.intersection(labels[key])))
+            if union != labels[key]:
+                labels[key] = union
+                changed = True
+    closure = []
+    for record in records:
+        family = labels[record["dataset_id"]]
+        reserved = sorted({value for key, value in RESERVED_STUDIES.items() if key in family})
+        record["reserved_evaluation"] = reserved or None
+        record["dependence_group"] = min(x for x in family if re.fullmatch(r"GSE\d+", x))
+        record["family_publication_ids"] = sorted(x[5:] for x in family if x.startswith("PMID:"))
+        closure.append({"dataset_id": record["dataset_id"], "reserved_evaluation": reserved, "linked_identifiers": sorted(family)})
+    write_jsonl(root / "catalog" / "targeted_studies.jsonl", records)
+    found = {r["dataset_id"] for r in records}
+    report = {"schema_version": VERSION, "seeds": seeds, "seed_records_found": len(set(seeds).intersection(found)), "family_records": len(records), "family_budget": family_budget, "unvisited_series": sorted(set(queue) - seen), "source_selected_coverage_increment": 0, "closure": closure, "failures": failures, "events": client.events, "offline": offline, "limitations": ["Closure covers explicit series/BioProject/sample/publication links within the finite family budget; undisclosed reused cohorts and publication versions remain unresolved."], "status": "PASS" if set(seeds).issubset(found) and not (set(queue) - seen) else "FAIL"}
+    write_json(root / "catalog" / "targeted_acquisition.json", report)
+    return records, report

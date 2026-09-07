@@ -1,0 +1,13 @@
+{
+  "protocol_id": "EP-20260907-1",
+  "status": "FROZEN_RESERVATIONS_LINKAGE_CLOSURE_PENDING",
+  "frozen_before_tuning": true,
+  "base_commit": "0e1943d415949c6e2e302e3c2594a7049ea1ab20",
+  "development": ["GSE193336", "GSE128885", "GSE99787", "GSE133844", "GSE95435"],
+  "primary_holdout": ["GSE112372"],
+  "transfer_holdout": ["GSE214695", "GSE226875"],
+  "grouping": "connected publication/version/study/cohort/mirror/source-of-source families",
+  "label_origin": "source_determined",
+  "expert_labels_available": false,
+  "untouched_status": "Discovery metadata only seen; predictions and detailed labels not inspected. Full linkage closure and exposure audit required before final claim."
+}

@@ -116,6 +116,11 @@ def build_parser() -> argparse.ArgumentParser:
     dataset_search.add_argument(
         "--cache-dir", default="local/http_cache", help="HTTP cache directory."
     )
+    dataset_search.add_argument(
+        "--offline",
+        action="store_true",
+        help="Replay cached responses only; fail before a network request on a cache miss.",
+    )
 
     # Pipeline commands create the canonical run artifacts.
     run = subparsers.add_parser("run", help="Run the full pipeline on a JSONL literature file.")
@@ -282,7 +287,7 @@ def main(argv: list[str] | None = None) -> int:
         write_jsonl(args.out, rows)
         metrics = {"rows": len(rows), "out": args.out, "sources": args.source}
     elif args.command == "dataset-search":
-        client = cached_client(args.cache_dir)
+        client = cached_client(args.cache_dir, offline=args.offline)
         records = search_dataset_sources(args.query, args.source, client=client, limit=args.limit)
         write_jsonl(args.out, [record.to_dict() for record in records])
         metrics = {"records": len(records), "out": args.out, "sources": args.source}

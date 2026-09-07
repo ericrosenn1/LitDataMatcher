@@ -235,7 +235,7 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "source_type": "clinicaltrials",
         "category": "registry_metadata",
         "content_scope": "trial registry metadata",
-        "acquisition_method": "clinicaltrials_api",
+        "acquisition_method": "clinicaltrials_v2_api",
         "native_id_fields": ["nct_id"],
         "strengths": ["intervention, condition, design, and outcome metadata"],
         "limitations": ["not patient-level data", "reuse rights require study-specific review"],

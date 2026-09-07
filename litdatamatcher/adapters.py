@@ -294,70 +294,34 @@ class CrossrefLiteratureAdapter:
 
 @dataclass(slots=True)
 class ClinicalTrialsDatasetAdapter:
-    """ClinicalTrials.gov registry metadata adapter, not patient-level data access."""
+    """ClinicalTrials.gov study-metadata adapter, never a participant-data downloader."""
 
     client: CachedHttpClient
     name: str = "clinicaltrials"
 
     def search(self, query: str) -> list[DatasetRecord]:
-        """Search ClinicalTrials.gov and normalize study records as datasets."""
+        """Search and normalize bounded study metadata with explicit design caveats."""
 
         data = self.client.get_json(
             "https://clinicaltrials.gov/api/v2/studies",
             params={"query.term": query, "pageSize": 25, "format": "json"},
         )
-        records: list[DatasetRecord] = []
+        response_metadata = _client_response_metadata(self.client)
+        records_by_id: dict[str, DatasetRecord] = {}
         for study in data.get("studies", []):
-            protocol = study.get("protocolSection", {})
-            identification = protocol.get("identificationModule", {})
-            description = protocol.get("descriptionModule", {})
-            design = protocol.get("designModule", {})
-            outcomes = protocol.get("outcomesModule", {})
-            title = (
-                identification.get("briefTitle")
-                or identification.get("officialTitle")
-                or identification.get("nctId")
-                or "Clinical trial"
-            )
-            variables = [
-                {"name": "treatment", "category": "clinical", "completeness": 0.8},
-                {"name": "outcome", "category": "clinical", "completeness": 0.8},
-            ]
-            if outcomes.get("primaryOutcomes"):
-                variables.append({"name": "disease_activity", "category": "phenotype", "completeness": 0.55})
-            dataset_id = identification.get("nctId", "")
-            source_url = f"https://clinicaltrials.gov/study/{dataset_id}"
-            provenance = remote_source_provenance(
-                source_type="clinicaltrials",
-                source_url=source_url,
-                adapter_name=self.name,
-                acquisition_method="clinicaltrials_api",
-                content_scope="study_metadata",
-                raw_record_id=dataset_id,
-                limitations=["ClinicalTrials.gov metadata does not guarantee individual-level data access."],
-                next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("clinicaltrials")},
-            ).to_dict()
-            records.append(
-                classify_dataset_record(
-                    {
-                        "dataset_id": dataset_id,
-                        "title": title,
-                        "source": "ClinicalTrials.gov",
-                        "description": description.get("briefSummary", ""),
-                        "url": source_url,
-                        "variables": variables,
-                        "populations": ["human"],
-                        "assay_types": ["clinical registry"],
-                        "sample_size": design.get("enrollmentInfo", {}).get("count", 0),
-                        "license": "public domain US government work",
-                        "access_type": "public",
-                        "quality_score": 0.72,
-                        "metadata": _metadata_with_provenance(study, provenance),
-                    }
-                )
-            )
-        return records
+            if not isinstance(study, dict):
+                continue
+            record = _clinicaltrials_record(study, response_metadata=response_metadata)
+            if record is None:
+                continue
+            existing = records_by_id.get(record.dataset_id)
+            if existing is None or _clinicaltrials_version(record) > _clinicaltrials_version(existing):
+                if existing is not None:
+                    _append_clinical_version(record, existing)
+                records_by_id[record.dataset_id] = record
+            else:
+                _append_clinical_version(existing, record)
+        return list(records_by_id.values())
 
 
 @dataclass(slots=True)
@@ -494,6 +458,224 @@ class MGnifyDatasetAdapter:
                 )
             )
         return records
+
+
+def _clinicaltrials_record(
+    study: JsonDict, *, response_metadata: JsonDict
+) -> DatasetRecord | None:
+    """Normalize one ClinicalTrials.gov v2 study without implying data access."""
+
+    protocol = study.get("protocolSection", {})
+    if not isinstance(protocol, dict):
+        return None
+    identification = _clinical_module(protocol, "identificationModule")
+    dataset_id = str(identification.get("nctId", "") or "").strip().upper()
+    if not re.fullmatch(r"NCT\d{8}", dataset_id):
+        return None
+    title = _first_text(identification, "briefTitle", "officialTitle", default=dataset_id)
+    status = _clinical_module(protocol, "statusModule")
+    design = _clinical_module(protocol, "designModule")
+    conditions = _string_list(_clinical_module(protocol, "conditionsModule").get("conditions", []))
+    arms_module = _clinical_module(protocol, "armsInterventionsModule")
+    outcomes_module = _clinical_module(protocol, "outcomesModule")
+    eligibility = _clinical_module(protocol, "eligibilityModule")
+    study_type = str(design.get("studyType", "UNKNOWN") or "UNKNOWN").upper()
+    interventions = _clinical_interventions(arms_module.get("interventions", []))
+    arms = _clinical_arms(arms_module.get("armGroups", []))
+    primary_outcomes = _clinical_outcomes(outcomes_module.get("primaryOutcomes", []))
+    secondary_outcomes = _clinical_outcomes(outcomes_module.get("secondaryOutcomes", []))
+    other_outcomes = _clinical_outcomes(outcomes_module.get("otherOutcomes", []))
+    enrollment = design.get("enrollmentInfo", {})
+    enrollment = enrollment if isinstance(enrollment, dict) else {}
+    version_time = _clinical_date(status, "lastUpdatePostDateStruct", "lastUpdateSubmitDate", "studyFirstPostDateStruct")
+    source_url = f"https://clinicaltrials.gov/study/{dataset_id}"
+    observational = study_type == "OBSERVATIONAL"
+    variables = _clinical_variables(
+        conditions=conditions,
+        interventions=interventions,
+        arms=arms,
+        primary_outcomes=primary_outcomes,
+        secondary_outcomes=[*secondary_outcomes, *other_outcomes],
+        eligibility=eligibility,
+        study_type=study_type,
+    )
+    limitations = [
+        "ClinicalTrials.gov metadata does not establish individual-level data access or analysis readiness.",
+        "Enrollment is registry metadata and is not treated as an analyzed sample count.",
+    ]
+    if observational:
+        limitations.append("Observational study metadata is not interpreted as perturbational evidence.")
+    provenance = remote_source_provenance(
+        source_type="clinicaltrials",
+        source_url=source_url,
+        adapter_name="clinicaltrials",
+        adapter_version="clinicaltrials_v2_studies",
+        retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
+        acquisition_method="clinicaltrials_v2_api",
+        content_scope="study_registry_metadata",
+        raw_record_id=dataset_id,
+        limitations=limitations,
+        next_handoff="dataset matching",
+        metadata={
+            "source_profile": source_profile("clinicaltrials"),
+            "cache_snapshot": response_metadata,
+            "study_version_time": version_time,
+        },
+    ).to_dict()
+    metadata = _metadata_with_provenance(study, provenance)
+    metadata.update(
+        {
+            "study_type": study_type,
+            "overall_status": str(status.get("overallStatus", "UNKNOWN") or "UNKNOWN"),
+            "study_version_time": version_time,
+            "conditions": conditions,
+            "interventions": interventions,
+            "comparators": [arm for arm in arms if "COMPARATOR" in str(arm.get("type", ""))],
+            "arms_groups": arms,
+            "primary_outcomes": primary_outcomes,
+            "secondary_outcomes": secondary_outcomes,
+            "other_outcomes": other_outcomes,
+            "eligibility_population": {
+                "sex": str(eligibility.get("sex", "UNKNOWN") or "UNKNOWN"),
+                "minimum_age": str(eligibility.get("minimumAge", "UNKNOWN") or "UNKNOWN"),
+                "maximum_age": str(eligibility.get("maximumAge", "UNKNOWN") or "UNKNOWN"),
+                "healthy_volunteers": eligibility.get("healthyVolunteers", "UNKNOWN"),
+                "criteria": str(eligibility.get("eligibilityCriteria", "") or ""),
+            },
+            "phase": _string_list(design.get("phases", [])),
+            "enrollment": {
+                "count": _optional_nonnegative_int(enrollment.get("count")),
+                "unit": "participants",
+                "type": str(enrollment.get("type", "UNKNOWN") or "UNKNOWN"),
+                "interpretation": "registry enrollment; not analyzed sample count",
+            },
+            "design": {
+                "allocation": _nested_text(design, "designInfo", "allocation"),
+                "intervention_model": _nested_text(design, "designInfo", "interventionModel"),
+                "observational_model": _nested_text(design, "designInfo", "observationalModel"),
+                "time_perspective": _nested_text(design, "designInfo", "timePerspective"),
+            },
+            "causal_interpretation": "NOT_PERTURBATIONAL" if observational else "REGISTRY_METADATA_ONLY",
+            "access_status": "PUBLIC_REGISTRY_METADATA",
+            "missingness": _clinical_missingness(
+                conditions, interventions, primary_outcomes, eligibility, enrollment
+            ),
+        }
+    )
+    return classify_dataset_record(
+        {
+            "dataset_id": dataset_id,
+            "title": title,
+            "source": "ClinicalTrials.gov",
+            "description": _first_text(_clinical_module(protocol, "descriptionModule"), "briefSummary", "detailedDescription"),
+            "url": source_url,
+            "variables": variables,
+            "populations": _clinical_population(eligibility),
+            "organisms": ["human"],
+            "assay_types": ["clinical study registry metadata"],
+            "sample_size": 0,
+            "license": "public registry metadata; source-specific reuse review required",
+            "access_type": "public registry metadata; participant data availability unknown",
+            "quality_score": 0.7,
+            "metadata": metadata,
+        }
+    )
+
+
+def _clinical_module(protocol: JsonDict, name: str) -> JsonDict:
+    value = protocol.get(name, {})
+    return dict(value) if isinstance(value, dict) else {}
+
+
+def _clinical_interventions(value: object) -> list[JsonDict]:
+    rows: list[JsonDict] = []
+    for item in value if isinstance(value, list) else []:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "") or "").strip()
+        if name:
+            rows.append({"name": name, "type": str(item.get("type", "UNKNOWN") or "UNKNOWN"), "description": str(item.get("description", "") or "")})
+    return rows
+
+
+def _clinical_arms(value: object) -> list[JsonDict]:
+    rows: list[JsonDict] = []
+    for item in value if isinstance(value, list) else []:
+        if not isinstance(item, dict):
+            continue
+        label = str(item.get("label", "") or "").strip()
+        if label:
+            rows.append({"label": label, "type": str(item.get("type", "UNKNOWN") or "UNKNOWN"), "description": str(item.get("description", "") or ""), "intervention_names": _string_list(item.get("interventionNames", []))})
+    return rows
+
+
+def _clinical_outcomes(value: object) -> list[JsonDict]:
+    rows: list[JsonDict] = []
+    for item in value if isinstance(value, list) else []:
+        if not isinstance(item, dict):
+            continue
+        measure = str(item.get("measure", "") or "").strip()
+        if measure:
+            rows.append({"measure": measure, "time_frame": str(item.get("timeFrame", "UNKNOWN") or "UNKNOWN"), "description": str(item.get("description", "") or "")})
+    return rows
+
+
+def _clinical_variables(**fields: object) -> list[JsonDict]:
+    variables: list[JsonDict] = []
+    for name, category, values in (
+        ("condition", "phenotype", fields["conditions"]),
+        ("intervention", "clinical", fields["interventions"]),
+        ("study_arm", "study_design_feature", fields["arms"]),
+        ("outcome", "clinical", [*fields["primary_outcomes"], *fields["secondary_outcomes"]]),
+        ("eligibility_criteria", "metadata", [fields["eligibility"]]),
+    ):
+        variables.append({"name": name, "category": category, "observed_count": 0, "completeness": 0.8 if values else 0.0})
+    variables.append({"name": "study_type", "category": "study_design_feature", "observed_count": 0, "completeness": 1.0})
+    if any(item.get("time_frame") not in {"", "UNKNOWN"} for item in [*fields["primary_outcomes"], *fields["secondary_outcomes"]]):
+        variables.append({"name": "timepoint", "category": "temporal_structure", "observed_count": 0, "completeness": 0.65})
+    return variables
+
+
+def _clinical_date(status: JsonDict, *names: str) -> str:
+    for name in names:
+        value = status.get(name, {})
+        if isinstance(value, dict) and str(value.get("date", "") or "").strip():
+            return str(value["date"])
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return "UNKNOWN"
+
+
+def _nested_text(payload: JsonDict, module: str, name: str) -> str:
+    nested = payload.get(module, {})
+    return str(nested.get(name, "UNKNOWN") or "UNKNOWN") if isinstance(nested, dict) else "UNKNOWN"
+
+
+def _optional_nonnegative_int(value: object) -> int | None:
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return number if number >= 0 else None
+
+
+def _clinical_population(eligibility: JsonDict) -> list[str]:
+    return ["human", f"sex:{eligibility.get('sex', 'UNKNOWN') or 'UNKNOWN'}", f"age:{eligibility.get('minimumAge', 'UNKNOWN') or 'UNKNOWN'} to {eligibility.get('maximumAge', 'UNKNOWN') or 'UNKNOWN'}"]
+
+
+def _clinical_missingness(conditions: list[str], interventions: list[JsonDict], outcomes: list[JsonDict], eligibility: JsonDict, enrollment: JsonDict) -> JsonDict:
+    return {"conditions": "PRESENT" if conditions else "MISSING", "interventions": "PRESENT" if interventions else "MISSING", "outcomes": "PRESENT" if outcomes else "MISSING", "eligibility": "PRESENT" if eligibility.get("eligibilityCriteria") else "MISSING", "enrollment": "PRESENT" if _optional_nonnegative_int(enrollment.get("count")) is not None else "MISSING"}
+
+
+def _clinicaltrials_version(record: DatasetRecord) -> str:
+    return str(record.metadata.get("study_version_time", "") or "")
+
+
+def _append_clinical_version(selected: DatasetRecord, discarded: DatasetRecord) -> None:
+    versions = selected.metadata.setdefault("alternate_versions", [])
+    version = _clinicaltrials_version(discarded)
+    if version and version not in versions:
+        versions.append(version)
 
 
 DATASET_ADAPTERS = {
@@ -938,6 +1120,18 @@ def _first_text(payload: JsonDict, *keys: str, default: str = "") -> str:
         if str(value or "").strip():
             return str(value).strip()
     return default
+
+
+def _string_list(value: object) -> list[str]:
+    """Normalize a source list while preserving nonblank values and order."""
+
+    values = value if isinstance(value, list) else [value]
+    out: list[str] = []
+    for item in values:
+        text = str(item or "").strip()
+        if text and text not in out:
+            out.append(text)
+    return out
 
 
 def _first_int(payload: JsonDict, *keys: str) -> int:

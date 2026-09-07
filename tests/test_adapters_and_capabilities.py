@@ -3,6 +3,7 @@ import json
 import pytest
 
 from litdatamatcher.adapters import (
+    ClinicalTrialsDatasetAdapter,
     CrossrefLiteratureAdapter,
     EuropePMCLiteratureAdapter,
     GEODatasetAdapter,
@@ -163,6 +164,57 @@ def test_geo_dataset_adapter_normalizes_dataset_records():
     assert records[0].source == "GEO"
     assert records[0].sample_size == 42
     assert any(variable.name == "transcriptomics" for variable in records[0].variables)
+
+
+def test_clinicaltrials_adapter_preserves_registry_design_without_sample_claims():
+    study = {
+        "protocolSection": {
+            "identificationModule": {"nctId": "NCT01234567", "briefTitle": "Active treatment study"},
+            "statusModule": {"overallStatus": "RECRUITING", "lastUpdatePostDateStruct": {"date": "2026-01-02"}},
+            "descriptionModule": {"briefSummary": "Registry summary."},
+            "conditionsModule": {"conditions": ["Inflammatory bowel disease"]},
+            "designModule": {"studyType": "INTERVENTIONAL", "phases": ["PHASE2"], "enrollmentInfo": {"count": 120, "type": "ESTIMATED"}, "designInfo": {"allocation": "RANDOMIZED", "interventionModel": "PARALLEL"}},
+            "armsInterventionsModule": {"armGroups": [{"label": "Placebo", "type": "PLACEBO_COMPARATOR", "interventionNames": ["Placebo"]}], "interventions": [{"name": "Drug A", "type": "DRUG"}]},
+            "outcomesModule": {"primaryOutcomes": [{"measure": "Clinical remission", "timeFrame": "Week 12"}]},
+            "eligibilityModule": {"sex": "ALL", "minimumAge": "18 Years", "maximumAge": "65 Years", "healthyVolunteers": False, "eligibilityCriteria": "Eligible adults."},
+        }
+    }
+    record = ClinicalTrialsDatasetAdapter(FakeClient([{"studies": [study]}])).search("ibd")[0]
+
+    assert record.dataset_id == "NCT01234567"
+    assert record.sample_size == 0
+    assert record.metadata["enrollment"]["count"] == 120
+    assert record.metadata["enrollment"]["interpretation"] == "registry enrollment; not analyzed sample count"
+    assert record.metadata["study_type"] == "INTERVENTIONAL"
+    assert record.metadata["primary_outcomes"][0]["time_frame"] == "Week 12"
+    assert record.metadata["comparators"][0]["label"] == "Placebo"
+    assert record.metadata["eligibility_population"]["sex"] == "ALL"
+    assert any(variable.name == "timepoint" for variable in record.variables)
+
+
+def test_clinicaltrials_observational_and_duplicate_versions_remain_nonperturbational():
+    def study(version, status):
+        return {"protocolSection": {"identificationModule": {"nctId": "NCT76543210", "briefTitle": "Observational cohort"}, "statusModule": {"overallStatus": status, "lastUpdatePostDateStruct": {"date": version}}, "designModule": {"studyType": "OBSERVATIONAL", "enrollmentInfo": {"count": "20"}}, "conditionsModule": {}, "armsInterventionsModule": {}, "outcomesModule": {}, "eligibilityModule": {}}}
+
+    record = ClinicalTrialsDatasetAdapter(FakeClient([{"studies": [study("2024-01-01", "COMPLETED"), study("2025-01-01", "RECRUITING"), {"protocolSection": {"identificationModule": {"nctId": "bad"}}}]}])).search("cohort")[0]
+
+    assert record.metadata["causal_interpretation"] == "NOT_PERTURBATIONAL"
+    assert record.metadata["overall_status"] == "RECRUITING"
+    assert record.metadata["alternate_versions"] == ["2024-01-01"]
+    assert record.metadata["missingness"]["outcomes"] == "MISSING"
+
+
+def test_dataset_search_cli_replays_clinicaltrials_cache_offline(tmp_path, capsys, monkeypatch):
+    cache = CachedHttpClient(cache_dir=tmp_path / "cache")
+    url = "https://clinicaltrials.gov/api/v2/studies"
+    params = {"query.term": "study", "pageSize": 25, "format": "json"}
+    cache._cache_path(url, params).write_text(json.dumps({"studies": [{"protocolSection": {"identificationModule": {"nctId": "NCT11111111", "briefTitle": "Cached study"}, "designModule": {"studyType": "OBSERVATIONAL"}}}]}), encoding="utf-8")
+    out = tmp_path / "records.jsonl"
+    monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
+
+    assert main(["dataset-search", "--query", "study", "--source", "clinicaltrials", "--cache-dir", str(cache.cache_dir), "--offline", "--out", str(out)]) == 0
+    assert read_jsonl(out)[0]["metadata"]["causal_interpretation"] == "NOT_PERTURBATIONAL"
+    assert json.loads(capsys.readouterr().out)["records"] == 1
 
 
 def test_mgnify_dataset_adapter_normalizes_json_api_rows():

@@ -143,3 +143,37 @@ Freeze the module during qualification so source-code cache invalidation does no
 turn the replay step into a second fresh run. Preserve every rejected attempt.
 Only after actual fresh source-supported inference, replay, retrieval and proposal
 checks pass should the new candidate be declared qualified.
+
+## Executed qualification: Qwen2.5-7B-Instruct, 2026-09-07 07:49 EDT
+
+The recorded downloader completed before qualification and wrote
+`C:/Codex/LitDataMatcher-v2/data/models/Qwen2.5-7B-Instruct/a09a35458c702b33eeacc393d103063234e8bc28/MODEL_MANIFEST.json`.
+Its four safetensor shards and eight associated files are manifest-tracked. The
+original launcher PID 17832 and child PID 63448 had exited; no download was
+restarted.
+
+With the implementation frozen at `839b86d`, the documented qualifier was run in
+the private runtime environment with `PYTHONPATH` set to this checkout (the
+environment intentionally does not install the editable package). It passed on
+Windows native CUDA/BF16 using `torch==2.11.0+cu128`, CUDA 12.8, and the NVIDIA
+GeForce RTX 5090. The exact report is
+`C:/Codex/LitDataMatcher-v2/data/runtime-qualification/qualified_7b_pass1.json`
+(SHA-256 `2ea4cecf6f5823326d8ee3fb1683415d3a89d7bb90dc92c1992d9cc3750f3a7c`), for
+input `qualification_document2.json` (SHA-256
+`eb14a398f867b1ecf6beb4b0881eb938caf9f82492ad645bc146692ba3e80930`).
+
+Fresh local inference accepted one source-guarded claim in 58.905 seconds; the
+subsequent run was a checksummed cache replay. The accepted PMID42455795 span
+matched the normalized input exactly, retained `negated: true`, `direction:
+no_change`, and `status: direct_experiment`, thereby meeting the negation/source
+role challenge. Pretrained MiniLM retrieval ranked the source record first. The
+qualification audit hook blocked `socket.connect`, and the model report records
+`local_files_only: true`. Requirement proposals were retained as review-required
+or explicit unknowns, not promoted to hard filters. This is a smoke qualification,
+not an expert-calibrated extraction-quality claim or held-out evaluation.
+
+Post-run focused validation passed: `28 passed` for
+`tests/test_semantic_runtime.py`, and Ruff passed for the owned runtime module,
+scripts, and test using the workspace development Python. The prior 1.5B
+negation/future-work abstention remains preserved as failure evidence; the 7B
+candidate was not weakened to match it.

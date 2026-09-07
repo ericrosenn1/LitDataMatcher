@@ -4,7 +4,7 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-07T14:15:00Z",
+  "updated_at": "2026-09-07T16:10:00Z",
   "execution_status": "RUNNING",
   "product_status": "HARDENED_ALPHA_COMPLETE",
   "automation_status": "DISABLED_AT_COMPLETION_RUNTIME_UNVERIFIED",
@@ -66,7 +66,10 @@
       "id": "W05",
       "name": "Literature acquisition and parsing",
       "status": "VALIDATED",
-      "evidence": []
+      "evidence": [
+        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\alpha_baseline_non_regression.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\qualification_receipt.json"
+      ]
     },
     {
       "id": "W06",
@@ -115,14 +118,14 @@
   },
   "blockers": [],
   "next_action": {
-    "description": "PHASE_2 planning only: preserve the V2.0-HARDENED-ALPHA baseline, enumerate bounded next milestones, and obtain/record any needed scientific decisions before implementation. Do not rerun the sealed holdout.",
+    "description": "Continue V2.1-MULTISOURCE from the frozen alpha baseline: extend source-specific version/retraction review only after a bounded scientific decision, while preserving cached offline replay and never rerunning the sealed holdout.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "python -m litdatamatcher.v2 doctor --root C:\\Codex\\LitDataMatcher-v2\\data; git -C C:\\Codex\\LitDataMatcher-v2\\lead status --short",
+    "command": "C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe scripts\\v2\\validate_alpha_baseline.py --source C:\\Codex\\LitDataMatcher-v2\\lead --data C:\\Codex\\LitDataMatcher-v2\\data --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\alpha_baseline_non_regression.json; C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe -m litdatamatcher.cli literature-search --query microbiome --source europepmc --limit 1 --cache-dir C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\http_cache --offline --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\continuation_europepmc_offline.jsonl; C:\\Codex\\LitDataMatcher-v2\\runtime-env\\Scripts\\python.exe -m litdatamatcher.cli literature-search --query microbiome --source crossref --limit 1 --cache-dir C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\http_cache --offline --out C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\continuation_crossref_offline.jsonl",
     "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "4ff864390695483cc08553bced46d19d9e4bf17b",
-    "last_verified_remote_commit": "4ff864390695483cc08553bced46d19d9e4bf17b",
+    "last_source_commit": "3a3d734a5a6f2dd1580bcc7fa51d21515b08aa41",
+    "last_verified_remote_commit": "3a3d734a5a6f2dd1580bcc7fa51d21515b08aa41",
     "push_pending": false
   },
   "milestones": {
@@ -130,5 +133,5 @@
     "hardened_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03",
     "final_holdout_run": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run"
   },
-  "stop_reason": "V2.0-HARDENED-ALPHA baseline frozen at commit 5747cbea2ae65c8570280d0e53f77bfabc968712; live project continues in PHASE_2 planning. Alpha supervisor remains PAUSED."
+  "stop_reason": "V2.0-HARDENED-ALPHA baseline frozen at commit 5747cbea2ae65c8570280d0e53f77bfabc968712; V2.1-MULTISOURCE tranche validated at source commit 3a3d734a5a6f2dd1580bcc7fa51d21515b08aa41. Alpha supervisor remains PAUSED."
 }

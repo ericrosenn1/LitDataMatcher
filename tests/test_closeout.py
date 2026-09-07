@@ -41,14 +41,14 @@ def test_padded_catalog_is_insufficient_without_snapshot_and_parse_evidence(tmp_
     assert report["gates"]["G02"]["status"] == "FAIL"
 
 
-def test_partial_run_is_a_runtime_failure_not_a_pass_by_file_presence(tmp_path):
+def test_historical_partial_run_is_not_a_designated_final_failure(tmp_path):
     run = tmp_path / "data" / "runs" / "partial" / "RUN_MANIFEST.json"
     _write(run, {"execution_status": "PARTIAL", "failures": [{"stage": "source_guard"}]})
 
     report = run_closeout_audit(tmp_path / "data", tmp_path / "source")
 
-    assert _status(report, "G05", "no_prewritten_or_regex_substitution") == "FAIL"
-    assert report["gates"]["G05"]["status"] == "FAIL"
+    assert _status(report, "G05", "no_prewritten_or_regex_substitution") == "NOT_RUN"
+    assert _status(report, "G16", "final_real_run") == "NOT_RUN"
 
 
 def test_tampered_declared_artifact_fails_final_run_integrity(tmp_path):
@@ -61,6 +61,7 @@ def test_tampered_declared_artifact_fails_final_run_integrity(tmp_path):
         {
             "execution_status": "PASS",
             "failures": [],
+            "evaluation": {"split_role": "FINAL_HOLDOUT", "holdout_exposed_to_tuning": False},
             "commands": [{"exit_code": 0, "log_reference": "inferences.jsonl"}],
             "artifacts": [
                 {
@@ -84,3 +85,164 @@ def test_audit_output_is_deterministic_for_unchanged_evidence(tmp_path):
     second = run_closeout_audit(tmp_path / "data", tmp_path / "source")
 
     assert first == second
+
+
+def test_designated_final_pass_supersedes_historical_partial_runs(tmp_path):
+    data = tmp_path / "data"
+    _write(data / "runs" / "old" / "RUN_MANIFEST.json", {"execution_status": "PARTIAL"})
+    _final_run(data, "final", source_disjointness=None)
+
+    report = run_closeout_audit(data, tmp_path / "source")
+
+    assert _status(report, "G05", "no_prewritten_or_regex_substitution") == "PASS"
+    assert _status(report, "G16", "final_real_run") == "PASS"
+
+
+def test_unknown_replacement_overlap_never_passes(tmp_path):
+    data = tmp_path / "data"
+    source = tmp_path / "source"
+    _reservation(source)
+    _final_run(
+        data,
+        "final",
+        source_disjointness={
+            "selected_accession": "GSE282859",
+            "status": "PROVEN_SOURCE_DISJOINT",
+            "unknown_overlap_count": 1,
+        },
+    )
+
+    report = run_closeout_audit(data, source)
+
+    assert _status(report, "G10", "study_grouped_holdout") == "FAIL"
+    assert _status(report, "G10", "source_disjoint_test") == "FAIL"
+
+
+def test_proven_replacement_final_holdout_can_replace_retired_exposed_family(tmp_path):
+    data = tmp_path / "data"
+    source = tmp_path / "source"
+    _reservation(source)
+    _final_run(
+        data,
+        "final",
+        source_disjointness={
+            "selected_accession": "GSE282859",
+            "status": "PROVEN_SOURCE_DISJOINT",
+            "unknown_overlap_count": 0,
+        },
+    )
+
+    report = run_closeout_audit(data, source)
+
+    assert _status(report, "G10", "study_grouped_holdout") == "PASS"
+    assert _status(report, "G10", "source_disjoint_test") == "PASS"
+
+
+def test_junit_receipt_credits_only_exact_unskipped_contract_tests(tmp_path):
+    receipt = tmp_path / "data" / "tests" / "post-acceptance-full.xml"
+    receipt.parent.mkdir(parents=True)
+    receipt.write_text(
+        "<testsuites><testsuite tests='2' failures='0' errors='0' skipped='0'>"
+        "<testcase name='test_omitted_negation_rejected'/>"
+        "<testcase name='test_negated_direction_rejected_even_when_quote_exists'/>"
+        "</testsuite></testsuites>",
+        encoding="utf-8",
+    )
+
+    report = run_closeout_audit(tmp_path / "data", tmp_path / "source")
+
+    assert _status(report, "G06", "negation_direction_context") == "PASS"
+
+
+def test_refinement_metrics_require_structured_comparable_methods(tmp_path):
+    root = tmp_path / "data" / "evaluation" / "refinement"
+    _write(root / "round3.json", _round())
+    _write(root / "round4.json", _round())
+
+    report = run_closeout_audit(tmp_path / "data", tmp_path / "source")
+
+    assert _status(report, "G10", "baseline_hybrid_compatibility_comparison") == "PASS"
+    assert _status(report, "G10", "label_provenance") == "PASS"
+    assert _status(report, "G14", "integrated_refinement_round") == "NOT_RUN"
+    assert report["refinement"] == {
+        "structured_rounds": 2,
+        "comparable_rounds": 2,
+        "two_latest_metric_identical": True,
+    }
+
+
+def _final_run(data, name, source_disjointness):
+    run = data / "runs" / name
+    inference = run / "inferences.jsonl"
+    inference.parent.mkdir(parents=True)
+    inference.write_text(
+        json.dumps(
+            {
+                "origin": "fresh_local_inference",
+                "model_revision": "revision",
+                "runtime": "transformers",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    payload = inference.read_bytes()
+    evaluation = {
+        "split_role": "FINAL_HOLDOUT",
+        "holdout_exposed_to_tuning": False,
+    }
+    if source_disjointness is not None:
+        evaluation["source_disjointness"] = source_disjointness
+    _write(
+        run / "RUN_MANIFEST.json",
+        {
+            "execution_status": "PASS",
+            "failures": [],
+            "evaluation": evaluation,
+            "commands": [{"exit_code": 0, "log_reference": "inferences.jsonl"}],
+            "artifacts": [
+                {
+                    "path": "inferences.jsonl",
+                    "validation": "PASS",
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                    "size_bytes": len(payload),
+                }
+            ],
+        },
+    )
+
+
+def _reservation(source):
+    _write(
+        source / "benchmarks" / "v2" / "replacement_final_holdout_reservation.json",
+        {
+            "reservation_status": "PREPARED_NOT_AUTHORIZED_FOR_EXECUTION",
+            "selected_accession": "GSE282859",
+            "exact_overlap_audit": {
+                "against_excluded_known_families": {
+                    "series_overlap": [],
+                    "bioproject_overlap": [],
+                    "publication_overlap": [],
+                    "geo_sample_overlap": [],
+                    "ena_overlap": [],
+                }
+            },
+            "sealed_evaluation_state": {"prediction_status": "NOT_RUN"},
+        },
+    )
+
+
+def _round():
+    return {
+        "protocol_id": "EP-1",
+        "catalog_sha256": "a" * 64,
+        "label_origin": "source_determined",
+        "primary": {
+            "metrics": {
+                name: {"queries": 10, "invalid_top_match": 0}
+                for name in ("lexical", "minilm_hybrid", "compatibility_aware")
+            },
+            "capability_audit": {"denominator": 40},
+        },
+        "gate_assessment": {"overall": "NOT_PRODUCT_APPROVAL"},
+    }

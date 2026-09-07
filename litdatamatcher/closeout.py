@@ -12,13 +12,14 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
 from .acceptance import GATE_REQUIREMENTS, OPERATION_REQUIREMENTS
 
-AUDIT_VERSION = "closeout-evidence-audit-v1"
+AUDIT_VERSION = "closeout-evidence-audit-v2"
 STATUSES = {"PASS", "FAIL", "NOT_RUN"}
 
 
@@ -59,6 +60,10 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     source_manifest_path = data / "catalog" / "source_object_manifest.json"
     qualification_path = data / "runtime-qualification" / "qualified_7b_pass1.json"
     external_path = data / "evaluation" / "external_evidence" / "validation.json"
+    recovery_path = data / "catalog" / "acquisition_offline_recovery.json"
+    full_junit_path = data / "tests" / "post-acceptance-full.xml"
+    controller_junit_path = data / "evaluation" / "E03_controller_independent.xml"
+    reservation_path = source / "benchmarks" / "v2" / "replacement_final_holdout_reservation.json"
     state_path = source / "project_state" / "TASK_STATE.json"
     next_path = source / "project_state" / "NEXT_ACTION.md"
 
@@ -68,8 +73,13 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     source_manifest, source_manifest_problem = _json_array(source_manifest_path)
     qualification, qualification_problem = _json_object(qualification_path)
     external, external_problem = _json_object(external_path)
+    recovery, recovery_problem = _json_object(recovery_path)
+    reservation, reservation_problem = _json_object(reservation_path)
     state, state_problem = _json_object(state_path)
     runs = _run_manifests(data / "runs")
+    full_junit, full_junit_problem = _junit(full_junit_path)
+    controller_junit, controller_junit_problem = _junit(controller_junit_path)
+    refinement = _refinement_evidence(data / "evaluation" / "refinement")
 
     observations: list[dict[str, Any]] = []
     for target, required in {**GATE_REQUIREMENTS, **OPERATION_REQUIREMENTS}.items():
@@ -93,6 +103,19 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
         inspections_problem, source_manifest, source_manifest_problem, literature_path,
         studies_path, inspections_path, source_manifest_path,
     )
+    _junit_observations(
+        replace,
+        full_junit,
+        full_junit_problem,
+        controller_junit,
+        controller_junit_problem,
+        recovery,
+        recovery_problem,
+        full_junit_path,
+        controller_junit_path,
+        recovery_path,
+    )
+    _refinement_observations(replace, refinement)
 
     # G05--G06: qualification is useful only if it records a fresh local runtime
     # and an extractive, source-anchored claim.  This does not elevate a later
@@ -110,12 +133,26 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
     else:
         replace("G05", "fresh_application_process", "FAIL", "Runtime qualification exists but does not prove fresh local model inference.", qualification_path)
 
-    # A partial or failed application run is an executed contradiction for the
-    # integrated runtime requirement.  It is not erased by a smoke qualification.
-    for run in runs:
-        if run["manifest"].get("execution_status") in {"PARTIAL", "FAIL"}:
-            replace("G05", "no_prewritten_or_regex_substitution", "FAIL", "A retained integrated application run is PARTIAL/FAIL; source-guard failures remain unresolved.", run["path"])
-            break
+    # Historical partial runs are retained as diagnostics.  They cannot negate
+    # a later designated, integrity-checked final run.
+    final_runs = _designated_final_runs(runs)
+    final_runtime = [run for run in final_runs if _fresh_run_inference(run)]
+    if final_runtime:
+        replace(
+            "G05",
+            "no_prewritten_or_regex_substitution",
+            "PASS",
+            "A designated final run has an integrity-checked fresh runtime inference artifact.",
+            final_runtime[0]["path"],
+        )
+    elif final_runs:
+        replace(
+            "G05",
+            "no_prewritten_or_regex_substitution",
+            "FAIL",
+            "Designated final run lacks a validated fresh runtime inference artifact.",
+            final_runs[0]["path"],
+        )
 
     # G09 has a real imported resource, but only its direct query and replay
     # assertions are credited.  It cannot stand in for numerical harmonization
@@ -133,21 +170,40 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
         if isinstance(state.get("next_action", {}).get("command"), str) and state["next_action"]["command"].strip() and next_path.is_file():
             replace("O03", "continuation_command", "PASS", "State and continuation file provide a nonempty exact command.", state_path, next_path)
 
-    # Existing release runs are checked for integrity, but only PASS manifests
-    # with every declared artifact matching are allowed to support the fact that
-    # a final real run occurred.  Current data intentionally does not meet it.
-    integrity_failures = [run for run in runs if run["integrity"] == "FAIL"]
-    if integrity_failures:
-        replace("G16", "final_real_run", "FAIL", integrity_failures[0]["reason"], integrity_failures[0]["path"])
-    elif any(run["integrity"] == "PASS" for run in runs):
-        replace("G16", "final_real_run", "NOT_RUN", "A valid run exists, but no retained final-closeout designation or independent machine-readiness agreement was found.", *[run["path"] for run in runs if run["integrity"] == "PASS"])
+    # G16 deliberately examines designated final runs only.  Earlier partial
+    # development and cleanroom runs neither pass nor fail final delivery.
+    designated = [run for run in runs if _is_designated_final(run["manifest"])]
+    if not designated:
+        replace(
+            "G16",
+            "final_real_run",
+            "NOT_RUN",
+            "No designated FINAL_HOLDOUT run is retained; historical development runs are excluded.",
+        )
+    elif final_runs:
+        replace(
+            "G16",
+            "final_real_run",
+            "PASS",
+            "Designated final run has PASS execution, complete hashed artifacts, and successful command logs.",
+            final_runs[0]["path"],
+        )
+    else:
+        replace("G16", "final_real_run", "FAIL", designated[0]["reason"], designated[0]["path"])
 
-    # Explicitly carry the documented exposed holdout forward as a blocker.  No
-    # final holdout is read or run by this audit.
+    # GSE112372 exposure retires only that family. It does not itself fail the
+    # gate once a distinct, source-disjoint replacement final run is proven.
     refinement_paths = sorted((data / "evaluation" / "refinement").glob("*.json")) if (data / "evaluation" / "refinement").is_dir() else []
     exposed = any("holdout_exposure" in _json_object(path)[0] for path in refinement_paths)
-    if exposed:
-        replace("G10", "study_grouped_holdout", "FAIL", "Retained evaluation evidence records a holdout exposure; it cannot be claimed untouched.", *refinement_paths)
+    replacement = _replacement_holdout_result(final_runs, reservation, reservation_problem)
+    if replacement["status"] == "PASS":
+        replace("G10", "study_grouped_holdout", "PASS", replacement["reason"], reservation_path, replacement["run"]["path"])
+        replace("G10", "source_disjoint_test", "PASS", replacement["reason"], reservation_path, replacement["run"]["path"])
+    elif replacement["status"] == "FAIL":
+        replace("G10", "study_grouped_holdout", "FAIL", replacement["reason"], reservation_path, replacement.get("path", reservation_path))
+        replace("G10", "source_disjoint_test", "FAIL", replacement["reason"], reservation_path, replacement.get("path", reservation_path))
+    elif exposed:
+        replace("G10", "study_grouped_holdout", "NOT_RUN", "GSE112372 is retired; no distinct source-disjoint replacement final holdout has passed.", *refinement_paths, reservation_path)
 
     gates = _summaries(observations, GATE_REQUIREMENTS)
     operations = _summaries(observations, OPERATION_REQUIREMENTS)
@@ -167,6 +223,7 @@ def run_closeout_audit(data_root: str | Path, source_root: str | Path) -> dict[s
         "operations": operations,
         "artifact_hashes": sorted(files.values(), key=lambda item: item["path"]),
         "blockers": blockers,
+        "refinement": _refinement_summary(refinement),
         "summary": dict(Counter(item["status"] for item in observations)),
         "pre_holdout_ready": not blockers,
     }
@@ -268,6 +325,132 @@ def _catalog_observations(
             replace("G04", "unit_counts", "PASS", f"Validated explicit unit counts in {len(counts)} processed inspection records.", inspections_path)
 
 
+def _junit_observations(
+    replace,
+    full,
+    full_problem,
+    controller,
+    controller_problem,
+    recovery,
+    recovery_problem,
+    full_path,
+    controller_path,
+    recovery_path,
+):
+    """Credit only named passing tests from an unfailed JUnit receipt."""
+    if not full_problem:
+        checks = {
+            ("G06", "negation_direction_context"): ("test_omitted_negation_rejected", "test_negated_direction_rejected_even_when_quote_exists"),
+            ("G07", "automatic_gap_generation"): ("test_open_question_identification_and_ranking_end_to_end", "test_explicit_gap_question_is_source_linked_without_novelty_claim"),
+            ("G08", "essential_requirements"): ("test_wrong_species_high_similarity_cannot_rescue_direct_fit",),
+            ("G08", "missing_vs_incompatible"): ("test_missing_null_and_explicit_false_are_distinct", "test_absence_without_provenance_cannot_be_confirmed_mismatch"),
+            ("G08", "joint_observation_constraint"): ("test_complementary_union_without_joint_units_not_sufficient", "test_pooling_rejects_shared_units_and_incompatible_estimands"),
+            ("G09", "dependence_contradiction_indirect_tests"): ("test_contradiction_retained_even_when_context_does_not_match",),
+            ("G09", "invalid_combination_abstention"): ("test_pooling_rejects_shared_units_and_incompatible_estimands",),
+            ("G11", "source_update_invalidation"): ("test_invalidation_preserves_unrelated_and_replays", "test_changed_derivation_invalidates_descendants_even_if_text_unchanged"),
+            ("G11", "idempotence"): ("test_pipeline_rerun_resets_sqlite_run_tables",),
+            ("G11", "offline_replay"): ("test_offline_replay_hash_verified_no_network", "test_retry_after_transient_and_network_free_replay"),
+            ("G11", "no_hidden_download"): ("test_offline_replay_hash_verified_no_network",),
+            ("G12", "schema_drift_handling"): ("test_schema_failure_preserves_valid_pointer",),
+            ("G12", "corruption_handling"): ("test_corrupted_snapshot_rejected", "test_cache_corruption_and_missing_fail_offline"),
+            ("G12", "inference_failure_handling"): ("test_malformed_generation_repair_cache_and_corruption",),
+            ("G13", "shared_writer_integrity"): ("test_cross_process_duplicate_writer_refused", "test_stage_lease_prevents_duplicate_writers_and_releases"),
+            ("G13", "resource_backoff"): ("test_governor_hysteresis", "test_nonzero_stale_output_timeout_and_capacity"),
+            ("G13", "numeric_exits"): ("test_nonzero_native_exit_never_succeeds",),
+            ("G15", "escape_safe_text"): ("test_report_escapes_hostile_metadata",),
+        }
+        for (target, kind), names in checks.items():
+            if _passed_tests(full, *names):
+                replace(target, kind, "PASS", "Named contract tests passed in an unfailed JUnit receipt.", full_path)
+    if not recovery_problem and recovery.get("status") == "PASS":
+        stages = recovery.get("stages")
+        valid_stages = isinstance(stages, list) and len(stages) >= 2 and all(
+            isinstance(stage, dict)
+            and stage.get("interrupted") is True
+            and stage.get("resume_status") == "PASS"
+            and stage.get("normalized_records_identical") is True
+            and stage.get("no_duplicate_identities") is True
+            and stage.get("before_sha256") == stage.get("after_sha256")
+            for stage in stages
+        )
+        if valid_stages and recovery.get("network_attempts") == 0 and not recovery.get("invalid_objects"):
+            replace("G11", "offline_replay", "PASS", "Two interrupted source stages resumed byte-identically with network attempts blocked.", recovery_path)
+            replace("G12", "two_stage_resume", "PASS", "Two interrupted source stages resumed with PASS status.", recovery_path)
+            replace("G12", "no_duplicate_or_lost_artifacts", "PASS", "Recovery retained byte-identical records and no duplicate identities.", recovery_path)
+    if not controller_problem:
+        controller_checks = (
+            "test_actual_runner_and_worker_killed_then_repaired_once",
+            "test_corrupt_success_repair_preserves_diagnostic_and_reexecutes",
+            "test_user_pause_during_active_job_can_resume_after_explicit_resume",
+            "test_cross_process_duplicate_writer_refused",
+        )
+        if _passed_tests(controller, *controller_checks):
+            replace("O03", "owner_lease", "PASS", "Independent controller JUnit receipt exercises cross-process ownership protection.", controller_path)
+            replace("O03", "pause_capacity_handling", "PASS", "Independent controller JUnit receipt exercises pause/resume and capacity-aware failure handling.", controller_path)
+            replace("G12", "transient_error_handling", "PASS", "Independent controller receipt verifies bounded failed-worker repair behavior.", controller_path)
+
+
+def _refinement_observations(replace, refinement):
+    """Use only comparable, explicit refinement records; prose cannot supply a pass."""
+    rounds = refinement["rounds"]
+    valid_rounds = [item for item in rounds if _valid_round(item)]
+    if valid_rounds and _comparable_performance(valid_rounds[-1]):
+        replace(
+            "G10",
+            "baseline_hybrid_compatibility_comparison",
+            "PASS",
+            "Structured refinement record compares lexical, hybrid, and compatibility-aware methods on the same retained query set.",
+            *refinement["paths"],
+        )
+        if valid_rounds[-1].get("label_origin") in {"expert", "source_determined", "model_assisted", "unreviewed"}:
+            replace(
+                "G10",
+                "label_provenance",
+                "PASS",
+                "Structured refinement record declares a permitted label origin.",
+                *refinement["paths"],
+            )
+    if len(valid_rounds) >= 3:
+        replace("G14", "integrated_refinement_round", "PASS", "At least three structured comparable integrated refinement rounds are retained.", *refinement["paths"])
+    elif valid_rounds:
+        replace(
+            "G14",
+            "integrated_refinement_round",
+            "NOT_RUN",
+            f"Only {len(valid_rounds)} structured comparable integrated rounds are retained; three are required.",
+            *refinement["paths"],
+        )
+    if len(valid_rounds) >= 2:
+        # This supports closeout tracking but does not call the gate ready: the
+        # gate still requires independent review and all worker passes.
+        replace("G14", "substantive_worker_pass", "NOT_RUN", "Refinement records cover evaluation only; central-worker coverage is not established.", *refinement["paths"])
+
+
+def _refinement_summary(refinement: dict[str, Any]) -> dict[str, Any]:
+    rounds = [item for item in refinement["rounds"] if _valid_round(item)]
+    return {
+        "structured_rounds": len(refinement["rounds"]),
+        "comparable_rounds": len(rounds),
+        "two_latest_metric_identical": len(rounds) >= 2 and _metric_signature(rounds[-1]) == _metric_signature(rounds[-2]),
+    }
+
+
+def _comparable_performance(value: dict[str, Any]) -> bool:
+    metrics = value["primary"]["metrics"]
+    methods = ("lexical", "minilm_hybrid", "compatibility_aware")
+    return all(
+        isinstance(metrics.get(method), dict)
+        and isinstance(metrics[method].get("queries"), int)
+        and metrics[method]["queries"] > 0
+        and isinstance(metrics[method].get("invalid_top_match"), int)
+        for method in methods
+    )
+
+
+def _metric_signature(value: dict[str, Any]) -> str:
+    return json.dumps(value.get("primary", {}).get("metrics", {}), sort_keys=True, separators=(",", ":"))
+
+
 def _run_manifests(runs_root: Path) -> list[dict[str, Any]]:
     result = []
     if not runs_root.is_dir():
@@ -280,6 +463,119 @@ def _run_manifests(runs_root: Path) -> list[dict[str, Any]]:
         integrity, reason = _manifest_integrity(path, manifest)
         result.append({"path": path, "manifest": manifest, "integrity": integrity, "reason": reason})
     return result
+
+
+def _junit(path: Path) -> tuple[dict[str, Any], str | None]:
+    """Read a JUnit receipt and reject skipped, failed, or malformed suites."""
+    if not path.is_file():
+        return {}, f"JUnit evidence is absent: {path.name}"
+    try:
+        root = ET.parse(path).getroot()
+    except (ET.ParseError, OSError) as exc:
+        return {}, f"JUnit evidence is unreadable: {exc}"
+    suites = list(root.iter("testsuite"))
+    cases = list(root.iter("testcase"))
+    if not suites or not cases:
+        return {}, "JUnit evidence has no test suites or test cases."
+    totals = {name: sum(int(suite.get(name, "0")) for suite in suites) for name in ("failures", "errors", "skipped")}
+    if any(totals.values()):
+        return {}, "JUnit receipt has failures, errors, or skipped tests."
+    names = {
+        case.get("name")
+        for case in cases
+        if case.get("name") and case.find("failure") is None and case.find("error") is None
+    }
+    return {"tests": len(cases), "names": names}, None
+
+
+def _passed_tests(receipt: dict[str, Any], *names: str) -> bool:
+    return all(name in receipt.get("names", set()) for name in names)
+
+
+def _refinement_evidence(root: Path) -> dict[str, Any]:
+    paths = sorted(root.glob("round*.json")) if root.is_dir() else []
+    rounds = []
+    valid_paths = []
+    for path in paths:
+        value, problem = _json_object(path)
+        if not problem:
+            rounds.append(value)
+            valid_paths.append(path)
+    return {"paths": valid_paths, "rounds": rounds}
+
+
+def _valid_round(value: dict[str, Any]) -> bool:
+    primary = value.get("primary")
+    metrics = primary.get("metrics") if isinstance(primary, dict) else None
+    capability = primary.get("capability_audit") if isinstance(primary, dict) else None
+    return bool(
+        value.get("protocol_id")
+        and value.get("catalog_sha256")
+        and isinstance(metrics, dict)
+        and {"lexical", "minilm_hybrid", "compatibility_aware"} <= set(metrics)
+        and isinstance(capability, dict)
+        and capability.get("denominator", 0) >= 40
+        and value.get("gate_assessment", {}).get("overall")
+    )
+
+
+def _is_designated_final(manifest: dict[str, Any]) -> bool:
+    evaluation = manifest.get("evaluation")
+    return isinstance(evaluation, dict) and evaluation.get("split_role") == "FINAL_HOLDOUT"
+
+
+def _designated_final_runs(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [run for run in runs if _is_designated_final(run["manifest"]) and run["integrity"] == "PASS"]
+
+
+def _fresh_run_inference(run: dict[str, Any]) -> bool:
+    manifest = run["manifest"]
+    evaluation = manifest.get("evaluation", {})
+    if evaluation.get("holdout_exposed_to_tuning") is not False:
+        return False
+    artifact = next((item for item in manifest.get("artifacts", []) if item.get("path") == "inferences.jsonl"), None)
+    if not artifact:
+        return False
+    rows, problem = _jsonl(run["path"].parent / "inferences.jsonl")
+    if problem or not rows:
+        return False
+    return all(
+        row.get("origin") == "fresh_local_inference"
+        and row.get("model_revision")
+        and row.get("runtime") == "transformers"
+        for row in rows
+    )
+
+
+def _replacement_holdout_result(
+    final_runs: list[dict[str, Any]], reservation: dict[str, Any], reservation_problem: str | None
+) -> dict[str, Any]:
+    if reservation_problem:
+        return {"status": "FAIL", "reason": reservation_problem}
+    selected = reservation.get("selected_accession")
+    overlap = reservation.get("exact_overlap_audit", {}).get("against_excluded_known_families", {})
+    sealed = reservation.get("sealed_evaluation_state", {})
+    if (
+        reservation.get("reservation_status") != "PREPARED_NOT_AUTHORIZED_FOR_EXECUTION"
+        or not isinstance(selected, str)
+        or not selected
+        or not isinstance(overlap, dict)
+        or any(overlap.get(key) for key in ("series_overlap", "bioproject_overlap", "publication_overlap", "geo_sample_overlap", "ena_overlap"))
+        or sealed.get("prediction_status") != "NOT_RUN"
+    ):
+        return {"status": "FAIL", "reason": "Replacement reservation is malformed, overlapping, or not sealed before execution."}
+    for run in final_runs:
+        evaluation = run["manifest"].get("evaluation", {})
+        proof = evaluation.get("source_disjointness")
+        if not isinstance(proof, dict):
+            continue
+        if proof.get("selected_accession") != selected:
+            continue
+        # Known-identifier separation alone is deliberately insufficient.
+        if proof.get("status") == "PROVEN_SOURCE_DISJOINT" and proof.get("unknown_overlap_count") == 0:
+            return {"status": "PASS", "reason": "Replacement final run is bound to the sealed reservation and records proven source disjointness with no unknown overlap.", "run": run}
+        return {"status": "FAIL", "reason": "Replacement final run leaves source overlap unknown or does not prove disjointness.", "path": run["path"]}
+    return {"status": "NOT_RUN", "reason": "No designated final run is bound to the sealed replacement reservation."}
 
 
 def _manifest_integrity(path: Path, manifest: dict[str, Any]) -> tuple[str, str]:

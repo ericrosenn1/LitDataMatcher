@@ -265,6 +265,31 @@
         },
         "holdout_exposed_to_tuning": {
           "type": "boolean"
+        },
+        "source_disjointness": {
+          "type": "object",
+          "required": [
+            "status",
+            "selected_accession",
+            "unknown_overlap_count"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PROVEN_SOURCE_DISJOINT",
+                "NOT_PROVEN"
+              ]
+            },
+            "selected_accession": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unknown_overlap_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
@@ -424,6 +449,40 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "evaluation": {
+            "properties": {
+              "split_role": {
+                "const": "FINAL_HOLDOUT"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evaluation": {
+            "required": [
+              "source_disjointness"
+            ],
+            "properties": {
+              "source_disjointness": {
+                "properties": {
+                  "status": {
+                    "const": "PROVEN_SOURCE_DISJOINT"
+                  },
+                  "unknown_overlap_count": {
+                    "const": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {

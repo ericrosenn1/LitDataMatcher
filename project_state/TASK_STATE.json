@@ -5,8 +5,8 @@
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
   "updated_at": "2026-09-07T14:15:00Z",
-  "execution_status": "COMPLETE",
-  "product_status": "HARDENED_ALPHA_READY",
+  "execution_status": "RUNNING",
+  "product_status": "HARDENED_ALPHA_COMPLETE",
   "automation_status": "DISABLED_AT_COMPLETION_RUNTIME_UNVERIFIED",
   "calibration_status": "SOURCE_ASSISTED_EVALUATION",
   "source": {
@@ -24,8 +24,8 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "COMPLETE",
-  "manual_pause": true,
+  "current_phase": "PHASE_2",
+  "manual_pause": false,
   "stop_requested": false,
   "capacity": {
     "status": "AVAILABLE",
@@ -115,9 +115,9 @@
   },
   "blockers": [],
   "next_action": {
-    "description": "COMPLETE: retain frozen validated artifacts. Continue only under the strict Terra/High ceiling; never rerun the sealed holdout.",
+    "description": "PHASE_2 planning only: preserve the V2.0-HARDENED-ALPHA baseline, enumerate bounded next milestones, and obtain/record any needed scientific decisions before implementation. Do not rerun the sealed holdout.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\lead",
-    "command": "python -m litdatamatcher.v2 closeout-audit --root C:\\Codex\\LitDataMatcher-v2\\data --source-root C:\\Codex\\LitDataMatcher-v2\\lead --out C:\\Codex\\LitDataMatcher-v2\\data\\release\\FINAL_CLOSEOUT_AUDIT.json; python scripts/v2/validate_delivery.py --source C:\\Codex\\LitDataMatcher-v2\\lead --data C:\\Codex\\LitDataMatcher-v2\\data --release C:\\Codex\\LitDataMatcher-v2\\data\\release --cleanroom C:\\Codex\\LitDataMatcher-v2\\data\\releases\\0.2.0-hardened-alpha-final2\\cleanroom_validation.json --final-run C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03 --holdout-run C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run --independent-review C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\independent\\final_review.json --worker-evidence C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\worker_refinement.json --out C:\\Codex\\LitDataMatcher-v2\\data\\release\\DELIVERY_VALIDATION.json",
+    "command": "python -m litdatamatcher.v2 doctor --root C:\\Codex\\LitDataMatcher-v2\\data; git -C C:\\Codex\\LitDataMatcher-v2\\lead status --short",
     "command_tested": true
   },
   "checkpoint": {
@@ -130,5 +130,5 @@
     "hardened_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03",
     "final_holdout_run": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run"
   },
-  "stop_reason": "HARDENED_ALPHA_READY: strict execution ceiling corrected; frozen final run, untouched holdout, release archives, deterministic validation, and supervisor-paused closeout retained."
+  "stop_reason": "V2.0-HARDENED-ALPHA baseline frozen at commit 5747cbea2ae65c8570280d0e53f77bfabc968712; live project continues in PHASE_2 planning. Alpha supervisor remains PAUSED."
 }

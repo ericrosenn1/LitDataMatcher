@@ -11,13 +11,13 @@ questions from text, normalizing their data requirements, discovering relevant
 public datasets, and ranking the most plausible question-dataset pairs for
 expert review.
 
-The current implementation is a local research-software scaffold and
-deterministic pipeline foundation. It is offline and reproducible by default,
-produces auditable JSONL/SQLite artifacts, and is organized into explicit
-scientific nodes that can be independently tested, benchmarked, replaced, or
-extended. It is not yet a validated biomedical discovery engine, not yet
-calibrated on a large expert-labeled corpus, and not yet validated at scale on
-large PMC/database corpora.
+Version 0.2.0 adds the local v2 alpha: real Europe PMC/PMC, GEO/ENA and UniProt
+acquisition; source-guarded local model extraction; typed experimental
+requirements; dependence-aware evidence; pretrained retrieval; a corrective
+controller; HTML review; and strict machine acceptance validation. Start with
+[`docs/v2/START_HERE.md`](docs/v2/START_HERE.md). It remains an engineering
+alpha with source-assisted evaluation, not an expert-calibrated biomedical
+discovery engine.
 
 ## What It Does Today
 

@@ -1,0 +1,14 @@
+{
+  "schema_version": "2.0",
+  "data_root": "C:/path/to/litdatamatcher-data",
+  "run_output": "C:/path/to/litdatamatcher-data/runs/new-run-id",
+  "extractor_model_dir": "C:/path/to/Qwen2.5-7B-Instruct",
+  "embedding_model_dir": "C:/path/to/all-MiniLM-L6-v2",
+  "device": "cuda",
+  "paid_api_enabled": false,
+  "network_mode": "OFFLINE",
+  "limits": {
+    "documents": 3,
+    "chunks_per_document": 2
+  }
+}

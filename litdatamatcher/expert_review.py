@@ -146,3 +146,20 @@ def agreement_and_adjudication(labels: list[dict]) -> dict:
             if not same:
                 adjudication.append({"review_item_id": item_id, "dimension": dimension, "labels_by_reviewer": {reviewer_a: reviewer_values[reviewer_a], reviewer_b: reviewer_values[reviewer_b]}, "status": "PENDING_ADJUDICATION"})
     return {"status": REVIEW_STATUS, "pairwise_comparisons": pairs, "observed_agreement": sum(pair["agreement"] for pair in pairs) / len(pairs) if pairs else None, "adjudication_records": adjudication, "limitations": "Descriptive categorical agreement only; no expert consensus, kappa interpretation, calibration, or gold label is claimed."}
+
+
+def finalize_adjudication(packet: dict, labels: list[dict], decisions: list[dict], *, policy_id: str) -> dict:
+    """Accept explicit adjudicator decisions while preserving blind agreement summaries."""
+    agreement = agreement_and_adjudication(labels)
+    item_provenance = {item["review_item_id"]: {"question_source_spans": item.get("question_source_spans", []), "dataset_provenance": item.get("dataset", {}).get("source_provenance", [])} for item in packet.get("items", [])}
+    pending = {(row["review_item_id"], dimension) for row in agreement["adjudication_records"] for dimension in [row["dimension"]]}
+    accepted, invalid = [], []
+    for decision in decisions:
+        key = (str(decision.get("review_item_id", "")), str(decision.get("dimension", "")))
+        if key not in pending or not str(decision.get("adjudicator_id", "")).strip() or not str(decision.get("decision", "")).strip() or not str(decision.get("rationale", "")).strip():
+            invalid.append({"decision": decision, "reason": "missing_or_nonpending_adjudication"}); continue
+        if any(token in decision for token in ("reviewer_id", "reviewer_identity", "score", "rank")):
+            invalid.append({"decision": decision, "reason": "reviewer_or_model_leakage"}); continue
+        accepted.append({"review_item_id": key[0], "dimension": key[1], "decision": str(decision["decision"]), "rationale": str(decision["rationale"]), "policy_id": policy_id, "provenance": item_provenance.get(key[0], {})})
+    unresolved = [record for record in agreement["adjudication_records"] if (record["review_item_id"], record["dimension"]) not in {(row["review_item_id"], row["dimension"]) for row in accepted}]
+    return {"status": "ADJUDICATED" if not unresolved and accepted else "PENDING_EXPERT_REVIEW", "agreement_status": "NOT_COMPUTABLE" if agreement["observed_agreement"] is None else ("LOW_AGREEMENT" if agreement["observed_agreement"] < 0.8 else "DESCRIPTIVE_AGREEMENT"), "reviewer_blind_agreement": [{k:v for k,v in row.items() if k not in {"reviewer_a","reviewer_b"}} for row in agreement["pairwise_comparisons"]], "accepted_decisions": accepted, "unresolved": unresolved, "invalid_decisions": invalid, "calibration_eligibility": "ADJUDICATED_POLICY_LABELS_ONLY" if accepted and not unresolved else "PENDING_EXPERT_REVIEW"}

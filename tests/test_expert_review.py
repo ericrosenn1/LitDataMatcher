@@ -5,6 +5,7 @@ from litdatamatcher.expert_review import (
     agreement_and_adjudication,
     build_blinded_review_packet,
     validate_review_labels,
+    finalize_adjudication,
 )
 
 
@@ -53,3 +54,17 @@ def test_label_validation_and_adjudication_keep_expert_review_pending():
     assert agreement["status"] == REVIEW_STATUS
     assert agreement["observed_agreement"] == 0.5
     assert agreement["adjudication_records"][0]["dimension"] == "relevance"
+
+
+def test_adjudication_is_blind_explicit_and_calibration_gated():
+    packet = build_blinded_review_packet([source_determined_record()], ["a", "b"])["packet"]
+    item = packet["items"][0]["review_item_id"]
+    labels = validate_review_labels(packet, [{"reviewer_id":"a","review_item_id":item,"labels":{"relevance":"relevant"}}, {"reviewer_id":"b","review_item_id":item,"labels":{"relevance":"not_relevant"}}])["valid_labels"]
+    pending = finalize_adjudication(packet, labels, [], policy_id="p1")
+    assert pending["agreement_status"] == "LOW_AGREEMENT"
+    assert pending["calibration_eligibility"] == "PENDING_EXPERT_REVIEW"
+    done = finalize_adjudication(packet, labels, [{"review_item_id":item,"dimension":"relevance","adjudicator_id":"chair","decision":"relevant","rationale":"source evidence"}], policy_id="p1")
+    assert done["status"] == "ADJUDICATED"
+    assert not done["reviewer_blind_agreement"][0].keys() & {"reviewer_a","reviewer_b"}
+    leaked = finalize_adjudication(packet, labels, [{"review_item_id":item,"dimension":"relevance","adjudicator_id":"chair","decision":"relevant","rationale":"x","reviewer_id":"a"}], policy_id="p1")
+    assert leaked["invalid_decisions"][0]["reason"] == "reviewer_or_model_leakage"

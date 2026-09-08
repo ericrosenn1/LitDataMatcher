@@ -105,3 +105,14 @@ def test_maximum_semantic_score_cannot_rescue_adapter_contract_mismatch():
     )
     assert ranked[0]["assessment"]["compatibility_status"] == "INCOMPATIBLE"
     assert ranked[0]["is_qualified"] is False
+
+
+def test_cross_modal_feature_normalization_and_units_remain_fail_closed():
+    protein = {"dataset_id": "protein", "assay_types": ["proteomics"], "organisms": ["Homo sapiens"], "metadata": {"omics_contract": {"feature_type": "protein", "feature_unit": "peptide_intensity", "quantification": "label_free", "normalization": "median_scaled"}, "dependence": {"donor_links": "AMBIGUOUS_NOT_INFERRED", "technical_run_count": 8}}, "capabilities": {}}
+    metabolite = {"assay_types": ["metabolomics"], "organisms": ["Homo sapiens"], "metadata": {"omics_contract": {"feature_type": "metabolite", "normalization": "UNKNOWN"}}}
+    assert modality_contract(protein)["modality"] == ["proteomics"]
+    assert modality_contract(metabolite)["normalization"] == "UNKNOWN"
+    assert compatibility("bulk_transcriptomics", "Homo sapiens", protein) == "INCOMPATIBLE"
+    assert assess_requirements([{"field": "feature_type", "expected": "metabolite"}], protein)["eligibility"] == "NOT_QUALIFIED"
+    assert assess_requirements([{"field": "normalization", "expected": "log2"}], protein)["eligibility"] == "NOT_QUALIFIED"
+    assert assess_requirements([{"field": "biological_sample_count", "expected": 8}], protein)["eligibility"] == "REQUIRES_INSPECTION"

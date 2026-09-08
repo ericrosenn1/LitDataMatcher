@@ -190,6 +190,12 @@ def _contract_requirement_status(field, expected, contract):
         observed = contract.get("organisms", [])
         if observed and str(expected).casefold() not in {str(x).casefold() for x in observed}:
             return "MISMATCH"
+    if field in {"feature_type", "feature_unit", "quantification", "normalization"}:
+        observed = str(contract.get(field, "UNKNOWN") or "UNKNOWN")
+        if observed == "UNKNOWN":
+            return "UNKNOWN"
+        if str(expected).casefold() != observed.casefold():
+            return "MISMATCH"
     if field in {
         "biological_sample",
         "biological_sample_count",

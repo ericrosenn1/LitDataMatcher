@@ -22,6 +22,7 @@ def modality_contract(record: JsonDict) -> JsonDict:
     families = sorted(name for name, values in MODALITY_FAMILIES.items() if assays & values)
     metadata = record.get("metadata", {}) if isinstance(record.get("metadata"), dict) else {}
     dependence = metadata.get("dependence", {}) if isinstance(metadata.get("dependence"), dict) else {}
+    omics = metadata.get("omics_contract", {}) if isinstance(metadata.get("omics_contract"), dict) else {}
     return {
         "modality": families or ["UNKNOWN"],
         "organism": "OBSERVED" if record.get("organisms") else "UNKNOWN",
@@ -31,6 +32,11 @@ def modality_contract(record: JsonDict) -> JsonDict:
         "specimen": "OBSERVED" if metadata.get("specimen") or metadata.get("biome") else "UNKNOWN",
         "biological_unit": "UNKNOWN" if dependence.get("donor_links") == "AMBIGUOUS_NOT_INFERRED" else "OBSERVED",
         "technical_units": int(dependence.get("technical_run_count", 0) or 0),
+        "feature_type": str(omics.get("feature_type", "UNKNOWN") or "UNKNOWN"),
+        "feature_unit": str(omics.get("feature_unit", "UNKNOWN") or "UNKNOWN"),
+        "quantification": str(omics.get("quantification", "UNKNOWN") or "UNKNOWN"),
+        "normalization": str(omics.get("normalization", "UNKNOWN") or "UNKNOWN"),
+        "metadata_availability": str(omics.get("metadata_availability", "UNKNOWN") or "UNKNOWN"),
         "access": str(record.get("access_type", "unknown") or "unknown"),
     }
 

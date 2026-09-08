@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -11,7 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from litdatamatcher.data_plane import atomic_json
-from litdatamatcher.scale_benchmark import run_local_benchmark
+from litdatamatcher.scale_benchmark import compare_benchmark_baseline, run_local_benchmark
 
 
 def main() -> None:
@@ -19,8 +20,14 @@ def main() -> None:
     parser.add_argument("--root", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--count", type=int, default=32)
+    parser.add_argument("--baseline", default=None)
     args = parser.parse_args()
-    atomic_json(args.out, run_local_benchmark(args.root, args.count))
+    receipt = run_local_benchmark(args.root, args.count)
+    if args.baseline:
+        receipt["baseline_comparison"] = compare_benchmark_baseline(
+            receipt, json.loads(Path(args.baseline).read_text(encoding="utf-8"))
+        )
+    atomic_json(args.out, receipt)
 
 
 if __name__ == "__main__":

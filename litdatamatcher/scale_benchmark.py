@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import platform
 import shutil
 import time
@@ -50,7 +51,9 @@ def run_local_benchmark(root: str | Path, count: int = 32) -> dict:
 
     # A process interruption after a committed half-index must leave a reopenable
     # catalog; the resumed pass supplies only the missing deterministic records.
-    recovery_root = root / "recovery_catalog"
+    # A versioned fixture namespace prevents a prior benchmark receipt from
+    # masquerading as the interrupted half-index in this measurement.
+    recovery_root = root / "recovery_catalog_contract_v2"
     recovery = Catalog(recovery_root)
     midpoint = max(1, count // 2)
     for record in records[:midpoint]:
@@ -102,3 +105,26 @@ def validate_benchmark_receipt(receipt: dict) -> bool:
     measurements = receipt.get("measurements", {})
     required = ["catalog_ingestion", "index_query", "matching", "evidence_compilation"]
     return all(type(measurements.get(key, {}).get("seconds")) is float and measurements[key]["seconds"] >= 0 for key in required) and type(measurements.get("memory_peak_bytes")) is int and measurements["memory_peak_bytes"] >= 0
+
+
+def compare_benchmark_baseline(receipt: dict, baseline: dict) -> dict:
+    """Compare the same bounded fixture with explicit, regression-safe tolerances."""
+    required = {"fixture", "hardware", "backend", "measurements", "tolerances"}
+    if not required <= set(baseline) or not validate_benchmark_receipt(receipt):
+        return {"status": "INVALID_BASELINE_OR_RECEIPT"}
+    if baseline["fixture"].get("input_digest") != receipt["fixture"].get("input_digest") or baseline["backend"] != receipt["backend"]:
+        return {"status": "INCOMPARABLE_FIXTURE_OR_BACKEND"}
+    if baseline["hardware"].get("cpu_count") != receipt["hardware"].get("cpu_count"):
+        return {"status": "INCOMPARABLE_HARDWARE"}
+    tolerance = baseline["tolerances"]
+    if receipt["measurements"]["cache_hit"].get("replay_used_existing_manifest") is not True:
+        return {"status": "FAIL_CACHE_MISS"}
+    recovery = receipt["measurements"]["recovery"]
+    if recovery.get("recovered_index_count") != receipt["fixture"].get("record_count") or not recovery.get("interrupted_cache_ignored"):
+        return {"status": "FAIL_RECOVERY"}
+    regressions = []
+    for name, baseline_seconds in baseline["measurements"].items():
+        observed = receipt["measurements"].get(name, {}).get("seconds")
+        if type(baseline_seconds) is not float or type(observed) is not float or observed > baseline_seconds * tolerance["max_latency_multiplier"]:
+            regressions.append(name)
+    return {"status": "PASS" if not regressions else "FAIL_PERFORMANCE_REGRESSION", "regressions": regressions, "tolerances": tolerance, "scope": "bounded fixture comparison only; not a production-scale claim"}

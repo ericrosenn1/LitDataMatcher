@@ -46,3 +46,7 @@ Local identifier contracts now preserve candidate sets and source/mapping state 
 ## Cross-source adversarial checkpoint
 
 The integrated local regression receipt at `C:\Codex\LitDataMatcher-v2\data\phase2\cross_source_adversarial\receipt.json` composes lifecycle, adapters, modality/unit, normalization, requirement, evidence-dependence, and review masking guards with a deterministic input hash.
+
+## V2.5 performance baseline checkpoint
+
+The bounded 32-record fixture has a stored comparison baseline with explicit tolerance and incomparable hardware/backend/fixture outcomes. The executed local PASS receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_5_scale\benchmark_comparison_receipt.json`; it is not a production-scale claim.

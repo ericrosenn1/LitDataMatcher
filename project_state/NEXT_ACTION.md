@@ -42,3 +42,7 @@ Matching now exposes expanded machine-readable compatibility status while preser
 ## Entity normalization checkpoint
 
 Local identifier contracts now preserve candidate sets and source/mapping state across major entity classes. Only unambiguous exact/synonym IDs participate in requirement matching; ambiguity, deprecation, orthology, unresolved values, and source failures remain unknown/reviewable.
+
+## Cross-source adversarial checkpoint
+
+The integrated local regression receipt at `C:\Codex\LitDataMatcher-v2\data\phase2\cross_source_adversarial\receipt.json` composes lifecycle, adapters, modality/unit, normalization, requirement, evidence-dependence, and review masking guards with a deterministic input hash.

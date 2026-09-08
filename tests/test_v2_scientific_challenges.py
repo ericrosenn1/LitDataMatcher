@@ -10,7 +10,7 @@ import pytest
 
 from litdatamatcher.scientific_v2 import (
     assess_requirements, combine_effects, compile_evidence, dependence_groups,
-    propose_combination, rank_candidates,
+    evidence_relation_graph, propose_combination, rank_candidates,
 )
 
 
@@ -126,6 +126,40 @@ def test_copied_paper_geo_graph_do_not_become_independent_votes():
     assert len(result["evidence_items"]) == 3
     assert len(result["dependence_groups"]) == 1
     assert result["independent_support_count"] is None
+    assert result["known_dependence_edge_count"] >= 1
+    assert {edge["relation_type"] for edge in result["relation_graph"]["edges"]} & {
+        "same_underlying_evidence", "derivative_evidence"
+    }
+
+
+def test_relation_graph_preserves_explicit_scientific_classifications_without_inference():
+    relation_types = [
+        "replicated_evidence", "orthogonal_evidence", "direct_perturbational_evidence",
+        "associative_evidence", "mechanistic_evidence", "indirect_evidence",
+        "contradictory_evidence", "incompatible_evidence", "unknown_dependence",
+    ]
+    anchor = evidence("anchor", source_id="PMID:anchor", study_id="study-anchor")
+    rows = [anchor]
+    for index, relation_type in enumerate(relation_types):
+        row = evidence(
+            f"kind-{index}", source_id=f"source-{index}", study_id=f"study-{index}",
+            publication_id=f"PMID:{index}",
+        )
+        row["relation_assertions"] = [{
+            "target_evidence_id": "anchor", "relation_type": relation_type,
+            "source_locator": f"fixture:{relation_type}",
+        }]
+        rows.append(row)
+    graph = evidence_relation_graph(rows)
+    assert {edge["relation_type"] for edge in graph["edges"]} == set(relation_types)
+    assert len(dependence_groups(rows)) == len(rows)
+
+
+def test_relation_graph_rejects_unlocated_or_unknown_relation_assertions():
+    row = evidence("child", source_id="child", study_id="child-study")
+    row["relation_assertions"] = [{"target_evidence_id": "missing", "relation_type": "replicated_evidence", "source_locator": "fixture"}]
+    with pytest.raises(ValueError, match="unknown evidence ID"):
+        evidence_relation_graph([evidence("anchor", source_id="anchor", study_id="anchor-study"), row])
 
 
 def test_unknown_lineage_does_not_assert_independence():

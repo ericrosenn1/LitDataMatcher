@@ -204,20 +204,144 @@ def rank_candidates(
     )
 
 
-def dependence_groups(items: list[dict]) -> list[dict]:
-    """Connected components of known shared study/cohort/publication/copy lineage.
+RELATION_TYPES = frozenset(
+    {
+        "same_underlying_evidence",
+        "derivative_evidence",
+        "duplicated_cohort",
+        "replicated_evidence",
+        "orthogonal_evidence",
+        "direct_perturbational_evidence",
+        "associative_evidence",
+        "mechanistic_evidence",
+        "indirect_evidence",
+        "contradictory_evidence",
+        "incompatible_evidence",
+        "unknown_dependence",
+    }
+)
+DEPENDENCE_LINK_TYPES = frozenset(
+    {"same_underlying_evidence", "derivative_evidence", "duplicated_cohort"}
+)
 
-    Distinct components mean no *known* overlap, not proven independence.
-    """
+
+def _unique_evidence(items: list[dict]) -> list[dict]:
+    """Return a deterministic evidence universe, rejecting identity conflicts."""
     unique = {}
     for item in items:
         eid = item["evidence_id"]
         if eid in unique and digest(unique[eid]) != digest(item):
             raise ValueError("Conflicting evidence identity")
         unique[eid] = item
-    rows = list(unique.values())
+    return [unique[eid] for eid in sorted(unique)]
+
+
+def _lineage_value(field: str, value: object) -> str:
+    value = str(value).strip()
+    if field == "publication_id":
+        value = re.sub(r"^PMID[:\\s]*", "", value, flags=re.I)
+    return value.casefold()
+
+
+def evidence_relation_graph(items: list[dict]) -> dict:
+    """Build an auditable graph of declared and exact-lineage evidence relations.
+
+    Automatic edges are limited to exact shared identifiers and explicit
+    source-of-source references. Scientific relation types such as replication
+    or mechanism must be source-located declarations; they are never inferred
+    from matching prose, authors, or topic similarity.
+    """
+    rows = _unique_evidence(items)
+    ids = {row["evidence_id"] for row in rows}
+    edges: dict[tuple[str, str, str, str], dict] = {}
+
+    def add(source: str, target: str, relation_type: str, basis: str, locator: str) -> None:
+        if relation_type not in RELATION_TYPES:
+            raise ValueError(f"Unsupported evidence relation type: {relation_type}")
+        if source not in ids or target not in ids:
+            raise ValueError("Evidence relation references an unknown evidence ID")
+        if source == target:
+            return
+        if basis == "declared_relation" and not str(locator).strip():
+            raise ValueError("Evidence relation requires a source locator")
+        left, right = sorted((source, target))
+        key = (left, right, relation_type, basis)
+        edges.setdefault(
+            key,
+            {
+                "source_evidence_id": left,
+                "target_evidence_id": right,
+                "relation_type": relation_type,
+                "basis": basis,
+                "source_locator": str(locator),
+            },
+        )
+
+    seen: dict[tuple[str, str], str] = {}
+    for row in rows:
+        for field, relation_type in (
+            ("cohort_id", "duplicated_cohort"),
+            ("study_id", "same_underlying_evidence"),
+            ("publication_id", "same_underlying_evidence"),
+            ("source_id", "same_underlying_evidence"),
+        ):
+            if row.get(field):
+                key = (field, _lineage_value(field, row[field]))
+                if key in seen:
+                    add(
+                        row["evidence_id"],
+                        seen[key],
+                        relation_type,
+                        f"shared_{field}",
+                        str(row.get("source_locator", "") or f"{row['evidence_id']}:{field}"),
+                    )
+                else:
+                    seen[key] = row["evidence_id"]
+        for value in row.get("primary_publication_ids", []):
+            key = ("publication_id", _lineage_value("publication_id", value))
+            if key in seen:
+                add(
+                    row["evidence_id"],
+                    seen[key],
+                    "derivative_evidence",
+                    "primary_publication_id",
+                    str(row.get("source_locator", "") or f"{row['evidence_id']}:primary_publication_ids"),
+                )
+            else:
+                seen[key] = row["evidence_id"]
+        source_of_source = str(row.get("source_of_source", "")).strip()
+        if source_of_source:
+            for candidate in rows:
+                if source_of_source in {
+                    str(candidate.get("evidence_id", "")),
+                    str(candidate.get("source_id", "")),
+                    str(candidate.get("study_id", "")),
+                }:
+                    add(
+                        row["evidence_id"],
+                        candidate["evidence_id"],
+                        "derivative_evidence",
+                        "source_of_source",
+                        str(row.get("source_locator", "") or f"{row['evidence_id']}:source_of_source"),
+                    )
+        for assertion in row.get("relation_assertions", []):
+            if not isinstance(assertion, dict):
+                raise ValueError("Evidence relation assertion must be an object")
+            add(
+                row["evidence_id"],
+                str(assertion.get("target_evidence_id", "")),
+                str(assertion.get("relation_type", "")),
+                "declared_relation",
+                str(assertion.get("source_locator", "")),
+            )
+    return {"schema_version": "evidence_relation_graph_v1", "nodes": sorted(ids), "edges": sorted(edges.values(), key=lambda x: (x["source_evidence_id"], x["target_evidence_id"], x["relation_type"], x["basis"]))}
+
+
+def dependence_groups(items: list[dict]) -> list[dict]:
+    """Connected known-dependence components; separation never proves independence."""
+    rows = _unique_evidence(items)
     parent = list(range(len(rows)))
-    seen = {}
+    positions = {row["evidence_id"]: index for index, row in enumerate(rows)}
 
     def find(i):
         while parent[i] != i:
@@ -225,24 +349,11 @@ def dependence_groups(items: list[dict]) -> list[dict]:
             i = parent[i]
         return i
 
-    for i, item in enumerate(rows):
-        keys = []
-        for field in ["study_id", "cohort_id", "publication_id"]:
-            if item.get(field):
-                value = item[field]
-                if field == "publication_id":
-                    value = re.sub(r"^PMID[:\s]*", "", str(value), flags=re.I)
-                keys.append((field, value))
-        for value in item.get("primary_publication_ids", []):
-            keys.append(("publication_id", re.sub(r"^PMID[:\s]*", "", str(value), flags=re.I)))
-        for sid in [item.get("source_id"), item.get("source_of_source")]:
-            if sid:
-                keys.append(("source", sid))
-        for key in keys:
-            if key in seen:
-                parent[find(i)] = find(seen[key])
-            else:
-                seen[key] = i
+    for edge in evidence_relation_graph(rows)["edges"]:
+        if edge["relation_type"] in DEPENDENCE_LINK_TYPES:
+            parent[find(positions[edge["source_evidence_id"]])] = find(
+                positions[edge["target_evidence_id"]]
+            )
     groups = {}
     for i, item in enumerate(rows):
         groups.setdefault(find(i), []).append(item["evidence_id"])
@@ -281,6 +392,7 @@ def compile_evidence(
     unique = {
         x["evidence_id"]: x for x in sorted(included + context, key=lambda x: x["evidence_id"])
     }
+    relation_graph = evidence_relation_graph(included + context)
     groups = dependence_groups(included + context)
     scope = question.get("conditions", {})
     direct = [
@@ -314,7 +426,12 @@ def compile_evidence(
         "gap_status": gap,
         "search_coverage": search_coverage,
         "evidence_items": list(unique.values()),
+        "relation_graph": relation_graph,
         "dependence_groups": groups,
+        "known_dependence_edge_count": sum(
+            edge["relation_type"] in DEPENDENCE_LINK_TYPES
+            for edge in relation_graph["edges"]
+        ),
         "independent_support_count": None,
         "contradictory_evidence_ids": sorted({x["evidence_id"] for x in contradictions}),
         "integration_mode": "EVIDENCE_SYNTHESIS" if included else "CONTEXT_ONLY_OR_UNRESOLVED",

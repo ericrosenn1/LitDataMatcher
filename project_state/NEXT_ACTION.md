@@ -38,3 +38,7 @@ Normalized multi-source literature metadata now retains lifecycle/version/retrac
 ## Requirement formalization checkpoint
 
 Matching now exposes expanded machine-readable compatibility status while preserving existing eligibility: exact/directly answerable/partial/indirect/additional-data/incompatible/unknown. Field-level observations and provenance remain authoritative; absent metadata is not incompatibility.
+
+## Entity normalization checkpoint
+
+Local identifier contracts now preserve candidate sets and source/mapping state across major entity classes. Only unambiguous exact/synonym IDs participate in requirement matching; ambiguity, deprecation, orthology, unresolved values, and source failures remain unknown/reviewable.

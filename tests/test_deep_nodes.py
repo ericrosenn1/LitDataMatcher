@@ -9,6 +9,7 @@ from litdatamatcher.ontology import (
     explain_variable_match,
     infer_concepts_from_text,
     normalize_variable_name,
+    normalize_entity,
 )
 from litdatamatcher.ranking import rank_matches
 from litdatamatcher.review import (
@@ -46,6 +47,14 @@ def _demo_matches():
 def test_ontology_normalizes_synonyms():
     assert normalize_variable_name("antimicrobial exposure") == "antibiotic_exposure"
     assert normalize_variable_name("RNA-seq") == "transcriptomics"
+
+
+def test_entity_contract_preserves_ambiguity_deprecation_and_source_failure():
+    assert normalize_entity("p53", "gene_protein")["candidates"] == ["HGNC:11998"]
+    assert normalize_entity("cd3", "gene_protein")["status"] == "AMBIGUOUS"
+    assert normalize_entity("gut", "tissue_cell_type")["status"] == "AMBIGUOUS"
+    assert normalize_entity("HGNC:OLDTP53", "gene_protein")["status"] == "DEPRECATED"
+    assert normalize_entity("TP53", "gene_protein", source_available=False)["status"] == "SOURCE_UNAVAILABLE"
 
 
 def test_ontology_handles_noisy_variable_names_and_empty_requirements():

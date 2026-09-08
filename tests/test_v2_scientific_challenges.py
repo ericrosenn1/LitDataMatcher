@@ -132,6 +132,12 @@ def test_orthology_is_not_identity():
     assert assess_requirements([requirement()],profile)["eligibility"] == "REQUIRES_INSPECTION"
 
 
+def test_unambiguous_entity_ids_match_but_ambiguous_tissue_stays_unknown():
+    profile = dataset(); profile["capabilities"] = {"species": capability("human"), "tissue": capability("gut")}
+    assert assess_requirements([requirement("species", "Homo sapiens")], profile)["eligibility"] == "DIRECT_FIT"
+    assert assess_requirements([requirement("tissue", "gut")], profile)["eligibility"] == "REQUIRES_INSPECTION"
+
+
 def test_copied_paper_geo_graph_do_not_become_independent_votes():
     paper=evidence()
     geo=evidence("geo",source_id="GSE128885")

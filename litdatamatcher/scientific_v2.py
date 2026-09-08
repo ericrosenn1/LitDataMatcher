@@ -14,6 +14,7 @@ from typing import Any
 
 from .data_plane import digest
 from .modality_contract import modality_contract
+from .ontology import normalize_entity
 from .schemas import stable_id
 
 
@@ -117,7 +118,14 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             status = "UNKNOWN"
         else:
             values = cap.value if isinstance(cap.value, list) else [cap.value]
-            status = "MATCH" if any(_equivalent(req.expected, v) for v in values) else "MISMATCH"
+            category = _entity_category(req.field)
+            mappings = [(normalize_entity(str(req.expected), category), normalize_entity(str(value), category)) for value in values] if category else []
+            if any(left["status"] == right["status"] == "RESOLVED" and left["candidates"] == right["candidates"] for left, right in mappings):
+                status = "MATCH"
+            elif any(left["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"} or right["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"} for left, right in mappings):
+                status = "UNKNOWN"
+            else:
+                status = "MATCH" if any(_equivalent(req.expected, v) for v in values) else "MISMATCH"
         assessments.append(dict(asdict(req), status=status, observation=asdict(cap)))
     essentials = [x for x in assessments if x["essential"]]
     if not essentials:
@@ -192,6 +200,10 @@ def _contract_requirement_status(field, expected, contract):
     } and contract.get("biological_unit") == "UNKNOWN":
         return "UNKNOWN"
     return ""
+
+
+def _entity_category(field: str) -> str:
+    return {"species": "organism", "organism": "organism", "assay": "assay", "modality": "assay", "tissue": "tissue_cell_type", "cell_type": "tissue_cell_type", "gene": "gene_protein", "protein": "gene_protein", "disease": "disease_condition", "condition": "disease_condition", "intervention": "intervention_chemical", "chemical": "intervention_chemical", "experimental_condition": "experimental_condition", "comparator": "experimental_condition"}.get(str(field).casefold(), "")
 
 
 def rank_candidates(

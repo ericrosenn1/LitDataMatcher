@@ -294,7 +294,12 @@ def test_score_question_dataset_returns_stable_assessment_payload():
         question, dataset
     )
 
-    assert set(assessments) == {"feasibility", "governance", "capability_support"}
+    assert set(assessments) == {
+        "feasibility",
+        "governance",
+        "capability_support",
+        "modality_contract",
+    }
     assert {"overall", "variable_coverage", "recommended_design"} <= set(
         assessments["feasibility"]
     )
@@ -303,6 +308,9 @@ def test_score_question_dataset_returns_stable_assessment_payload():
     )
     assert {"direct_capabilities", "missing_capabilities", "answerability_class"} <= set(
         assessments["capability_support"]
+    )
+    assert {"status", "contract", "required_modality"} <= set(
+        assessments["modality_contract"]
     )
 
 

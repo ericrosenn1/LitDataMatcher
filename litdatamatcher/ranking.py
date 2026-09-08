@@ -7,6 +7,7 @@ from typing import Iterable
 
 from .feasibility import assess_pair_feasibility
 from .governance import assess_governance
+from .modality_contract import compatibility, modality_contract
 from .schemas import (
     DatasetRecord,
     EvidenceSynthesis,
@@ -21,6 +22,37 @@ from .text import extract_domain_terms, lexical_similarity
 
 ScoreQuestionDatasetResult = tuple[MatchScore, list[str], list[str], JsonDict]
 PROXY_CAPABILITY_CATEGORIES = {"derived_or_proxy_capability"}
+
+
+def _modality_ranking_eligibility(question: QuestionCandidate, dataset: DatasetRecord) -> JsonDict:
+    """Apply only explicit question constraints before admitting a ranked match.
+
+    Free-text terms and population labels are deliberately not treated as
+    modality or organism requirements.  Those require a declared contract in
+    ``QuestionCandidate.metadata`` and otherwise remain review signals.
+    """
+
+    metadata = question.metadata if isinstance(question.metadata, dict) else {}
+    required_modality = str(metadata.get("required_modality", "") or "")
+    required_organism = str(metadata.get("required_organism", "") or "")
+    contract = modality_contract(dataset.to_dict())
+    if required_modality or required_organism:
+        status = compatibility(required_modality, required_organism, dataset.to_dict())
+    else:
+        status = "NOT_REQUESTED"
+    requires_biological_units = any(
+        key in metadata
+        for key in ("minimum_biological_samples", "minimum_donors", "minimum_independent_units")
+    )
+    if requires_biological_units and contract["biological_unit"] == "UNKNOWN":
+        status = "UNKNOWN" if status != "INCOMPATIBLE" else status
+    return {
+        "status": status,
+        "required_modality": required_modality or "NOT_REQUESTED",
+        "required_organism": required_organism or "NOT_REQUESTED",
+        "requires_biological_units": requires_biological_units,
+        "contract": contract,
+    }
 
 
 def capability_support_summary(
@@ -103,6 +135,7 @@ def score_question_dataset(
     # Feasibility carries the structured question-to-dataset contract checks.
     variable_overlap, missing = _variable_overlap(question, dataset)
     feasibility_assessment = assess_pair_feasibility(question, dataset)
+    contract_eligibility = _modality_ranking_eligibility(question, dataset)
     governance = assess_governance(dataset)
     # Lexical relevance is a deterministic fallback until semantic embeddings are added.
     semantic_relevance = max(
@@ -191,6 +224,7 @@ def score_question_dataset(
         "feasibility": feasibility_assessment.to_dict(),
         "governance": governance.to_dict(),
         "capability_support": capability_support,
+        "modality_contract": contract_eligibility,
     }
     return score, rationale, missing, assessments
 
@@ -210,6 +244,10 @@ def rank_matches(
         for dataset in datasets:
             # Every positive-scoring pair becomes a reviewable MatchCandidate.
             score, rationale, missing, assessments = score_question_dataset(question, dataset, synthesis)
+            # A declared incompatible modality/organism cannot be rescued by
+            # lexical or semantic relevance. Unknown remains reviewable.
+            if assessments["modality_contract"]["status"] == "INCOMPATIBLE":
+                continue
             if score.combined <= 0:
                 continue
             matches.append(

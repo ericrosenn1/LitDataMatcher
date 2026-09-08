@@ -13,6 +13,7 @@ from datetime import date
 from typing import Any
 
 from .data_plane import digest
+from .modality_contract import modality_contract
 from .schemas import stable_id
 
 
@@ -86,6 +87,12 @@ def _equivalent(expected, observed):
 
 
 def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
+    contract = dataset.get("modality_contract")
+    if not isinstance(contract, dict):
+        # Adapter-shaped records can be evaluated directly as well as through
+        # the V2 normalizer.  Derive only the conservative observed/unknown
+        # facts; no inferred synonym or sample-unit mapping is introduced.
+        contract = modality_contract(dataset)
     assessments = []
     for raw in requirements:
         req = ExperimentalRequirement(**raw)
@@ -95,7 +102,10 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             if raw_cap
             else ObservedCapability(None, "unknown", reason="not reported")
         )
-        if cap.status == "unknown":
+        contract_status = _contract_requirement_status(req.field, req.expected, contract)
+        if contract_status:
+            status = contract_status
+        elif cap.status == "unknown":
             status = "UNKNOWN"
         elif cap.status == "absent":
             status = "MISMATCH"
@@ -138,6 +148,29 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
         "adequacy_reason": "Requires estimand, variance, effect-size and design-specific power assessment",
         "availability": dataset.get("availability", "UNKNOWN"),
     }
+
+
+def _contract_requirement_status(field, expected, contract):
+    """Apply hard adapter modality/unit facts before any semantic capability match."""
+    field = str(field).casefold()
+    if field in {"modality", "assay", "assay_modality"}:
+        modalities = contract.get("modality", ["UNKNOWN"])
+        if modalities != ["UNKNOWN"] and str(expected) not in modalities:
+            return "MISMATCH"
+    if field in {"organism", "species"}:
+        observed = contract.get("organisms", [])
+        if observed and str(expected).casefold() not in {str(x).casefold() for x in observed}:
+            return "MISMATCH"
+    if field in {
+        "biological_sample",
+        "biological_sample_count",
+        "donor",
+        "donor_count",
+        "independent_unit",
+        "independent_unit_count",
+    } and contract.get("biological_unit") == "UNKNOWN":
+        return "UNKNOWN"
+    return ""
 
 
 def rank_candidates(

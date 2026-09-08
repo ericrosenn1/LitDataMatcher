@@ -25,6 +25,9 @@ def modality_contract(record: JsonDict) -> JsonDict:
     return {
         "modality": families or ["UNKNOWN"],
         "organism": "OBSERVED" if record.get("organisms") else "UNKNOWN",
+        # Preserve the observed values so downstream eligibility can reject an
+        # explicit, incompatible organism without inventing a synonym mapping.
+        "organisms": [str(item) for item in record.get("organisms", []) if str(item).strip()],
         "specimen": "OBSERVED" if metadata.get("specimen") or metadata.get("biome") else "UNKNOWN",
         "biological_unit": "UNKNOWN" if dependence.get("donor_links") == "AMBIGUOUS_NOT_INFERRED" else "OBSERVED",
         "technical_units": int(dependence.get("technical_run_count", 0) or 0),

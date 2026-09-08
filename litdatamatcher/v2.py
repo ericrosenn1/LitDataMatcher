@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from .data_plane import Catalog, atomic_json, atomic_write, digest
+from .modality_contract import modality_contract
 from .schemas import stable_id
 from .scientific_v2 import compile_evidence, discover_cross_document_gaps, rank_candidates
 
@@ -54,6 +55,7 @@ def normalize_dataset(record):
         }
         caps[key] = value
     result["capabilities"] = caps
+    result["modality_contract"] = modality_contract(record)
     result["availability"] = record.get("access_status", "UNKNOWN")
     result["migration"] = {
         "from": record.get("schema_version"),

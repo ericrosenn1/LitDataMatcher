@@ -13,3 +13,9 @@ def test_planner_never_queries_unsupported_wrong_or_unknown_routes():
     assert r["selected_sources"]==[]
     assert [x["status"] for x in r["decisions"]]==["NOT_QUALIFIED","UNKNOWN","NOT_QUALIFIED"]
     assert not any(x["query_permitted"] for x in r["decisions"])
+
+
+def test_access_license_missing_conflicting_and_restricted_are_fail_closed():
+    r=plan_sources({"required_access_class":"public_metadata"},[{"name":"missing","supported":True,"modalities":[],"access":"public","metadata_completeness":"OBSERVED"},{"name":"conflict","supported":True,"modalities":[],"access":"public","license":"CC0","terms_context":"fixture","license_conflict":True,"metadata_completeness":"OBSERVED"},{"name":"embargo","supported":True,"modalities":[],"access":"embargoed","license":"CC0","terms_context":"fixture","metadata_completeness":"OBSERVED"}])
+    assert [x["status"] for x in r["decisions"]]==["NOT_QUALIFIED"]*3
+    assert not any(x["query_permitted"] for x in r["decisions"])

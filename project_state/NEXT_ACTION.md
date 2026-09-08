@@ -26,3 +26,7 @@ The bounded evidence-compiler contract tranche is validated locally: exact share
 ## V2.4 expert-review checkpoint
 
 The review machinery is `PENDING_EXPERT_REVIEW`, not calibrated or expert-validated. Versioned packets preserve source spans/provenance while masking ranking/model fields and reviewer identity. Strict categorical labels, descriptive agreement, and pending-adjudication records are ready for real expert input. The deterministic zero-label infrastructure receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_4_expert_review\packet_receipt.json`.
+
+## V2.5 scale/recovery checkpoint
+
+Bounded local scale instrumentation is validated at `C:\Codex\LitDataMatcher-v2\data\phase2\v2_5_scale\benchmark_receipt.json`. It measures only the declared synthetic fixture and records its host/backend/limit provenance, throughput/latency, memory/disk, cache replay, and reopen/resume. It performs no network acquisition, model inference, LLM context loading, or production-scale claim.

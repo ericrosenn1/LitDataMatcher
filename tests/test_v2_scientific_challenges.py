@@ -113,6 +113,20 @@ def test_optional_missing_field_preserves_useful_partial_result():
     assert result["eligibility"] == "PARTIAL_FIT"
 
 
+def test_expanded_requirement_statuses_preserve_unknown_and_evidence_type():
+    exact = dataset()
+    assert assess_requirements([requirement()], exact)["compatibility_status"] == "EXACT_FIT"
+    exact["evidence_classification"] = ["direct_perturbational_evidence"]
+    assert assess_requirements([requirement()], exact)["compatibility_status"] == "DIRECTLY_ANSWERABLE"
+    indirect = dataset(); indirect["capabilities"]["species"]["mapping_type"] = "ortholog"
+    assert assess_requirements([requirement()], indirect)["compatibility_status"] == "INDIRECT_SUPPORT"
+    missing = dataset(); missing["capabilities"] = {}
+    assert assess_requirements([requirement()], missing)["compatibility_status"] == "UNKNOWN"
+    wrong = dataset(species="Mus musculus")
+    assert assess_requirements([requirement()], wrong)["compatibility_status"] == "INCOMPATIBLE"
+    assert assess_requirements([], dataset())["compatibility_status"] == "REQUIRES_ADDITIONAL_DATA"
+
+
 def test_orthology_is_not_identity():
     profile=dataset();profile["capabilities"]["species"]["mapping_type"]="ortholog"
     assert assess_requirements([requirement()],profile)["eligibility"] == "REQUIRES_INSPECTION"

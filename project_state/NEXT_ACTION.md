@@ -34,3 +34,7 @@ Bounded local scale instrumentation is validated at `C:\Codex\LitDataMatcher-v2\
 ## Literature integrity checkpoint
 
 Normalized multi-source literature metadata now retains lifecycle/version/retraction state, source snapshots/statuses, full-text unknowns, dedup lineage, and deterministic derivation invalidation. Retrieval/schema failures remain unknown. Corrected, retracted, versioned, or cross-source duplicate metadata cannot silently become evidence or independent support. The synthetic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\literature_integrity\receipt.json`.
+
+## Requirement formalization checkpoint
+
+Matching now exposes expanded machine-readable compatibility status while preserving existing eligibility: exact/directly answerable/partial/indirect/additional-data/incompatible/unknown. Field-level observations and provenance remain authoritative; absent metadata is not incompatibility.

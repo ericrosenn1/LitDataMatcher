@@ -147,7 +147,28 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
         "statistical_adequacy": "UNKNOWN",
         "adequacy_reason": "Requires estimand, variance, effect-size and design-specific power assessment",
         "availability": dataset.get("availability", "UNKNOWN"),
+        "compatibility_status": _compatibility_status(assessments, dataset),
     }
+
+
+def _compatibility_status(assessments: list[dict], dataset: dict) -> str:
+    """Map field-level evidence to expanded V2.6 vocabulary without inference."""
+    essential = [item for item in assessments if item["essential"]]
+    if any(item["status"] == "MISMATCH" for item in essential):
+        return "INCOMPATIBLE"
+    if not essential:
+        return "REQUIRES_ADDITIONAL_DATA"
+    mapping_types = {item["observation"]["mapping_type"] for item in assessments}
+    if mapping_types - {"exact", "synonym"} or any(item["observation"]["status"] == "derived" for item in assessments):
+        return "INDIRECT_SUPPORT"
+    if any(item["status"] == "UNKNOWN" for item in essential):
+        return "UNKNOWN"
+    if any(item["status"] != "MATCH" for item in assessments):
+        return "PARTIAL_FIT"
+    evidence = set(dataset.get("evidence_classification", []))
+    if "direct_perturbational_evidence" in evidence:
+        return "DIRECTLY_ANSWERABLE"
+    return "EXACT_FIT"
 
 
 def _contract_requirement_status(field, expected, contract):

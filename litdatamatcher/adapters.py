@@ -14,7 +14,7 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
@@ -30,6 +30,45 @@ class LiteratureSourceAdapter(Protocol):
 
     def search_literature(self, query: str, limit: int = 25) -> list[dict]:
         """Return literature records with title, abstract, doi, and source_id."""
+
+
+def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonDict, *, extract_items: Callable[[JsonDict], object], cursor_field: str, cursor_param: str, initial_cursor: str | None = None, max_pages: int = 4) -> JsonDict:
+    """Read a bounded cursor sequence without claiming a partial universe is complete."""
+    cursor = initial_cursor
+    seen_cursors: set[str] = set()
+    items: list[JsonDict] = []
+    pages: list[JsonDict] = []
+    for page_index in range(max_pages):
+        params = dict(base_params)
+        if cursor is not None:
+            params[cursor_param] = cursor
+        try:
+            payload = client.get_json(url, params=params)
+        except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
+            return _pagination_result(items, pages, "ERROR", error=type(exc).__name__)
+        if not isinstance(payload, dict):
+            return _pagination_result(items, pages, "SCHEMA_DRIFT", error="payload_not_object")
+        page_items = extract_items(payload)
+        if not isinstance(page_items, list) or not all(isinstance(item, dict) for item in page_items):
+            return _pagination_result(items, pages, "SCHEMA_DRIFT", error="items_not_object_list")
+        cache_lineage = _client_response_metadata(client)
+        next_cursor = payload.get(cursor_field)
+        next_cursor = str(next_cursor).strip() if next_cursor is not None else ""
+        pages.append({"page_index": page_index, "request_scope": {"url": url, "params": params}, "returned_items": len(page_items), "cursor_in": cursor or "", "cursor_out": next_cursor, "cache_lineage": cache_lineage})
+        items.extend(page_items)
+        if not next_cursor:
+            return _pagination_result(items, pages, "COMPLETE")
+        if next_cursor in seen_cursors or next_cursor == cursor:
+            return _pagination_result(items, pages, "REPEATED_CURSOR")
+        seen_cursors.add(next_cursor)
+        cursor = next_cursor
+    return _pagination_result(items, pages, "TRUNCATED_PAGE_LIMIT")
+
+
+def _pagination_result(items: list[JsonDict], pages: list[JsonDict], status: str, *, error: str = "") -> JsonDict:
+    """Return explicit pagination/candidate-universe state for downstream provenance."""
+    complete = status == "COMPLETE"
+    return {"items": items, "pagination": {"schema_version": "adapter_pagination_v1", "status": status, "candidate_universe_status": "COMPLETE_CANDIDATE_UNIVERSE" if complete else "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE", "completed": complete, "pages_requested": len(pages), "returned_items": len(items), "pages": pages, "error": error or None}}
 
 
 @dataclass(slots=True)
@@ -162,13 +201,17 @@ class EuropePMCLiteratureAdapter:
     def search_literature(self, query: str, limit: int = 25) -> list[dict]:
         """Search Europe PMC core records without requesting article bodies."""
 
-        data = self.client.get_json(
-            "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
-            params={"query": query, "format": "json", "resultType": "core", "pageSize": min(max(1, limit), 100)},
+        page_size = min(max(1, limit), 100)
+        result = _bounded_cursor_pages(
+            self.client, "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            {"query": query, "format": "json", "resultType": "core", "pageSize": page_size},
+            extract_items=lambda payload: payload.get("resultList", {}).get("result", []) if isinstance(payload.get("resultList"), dict) else None,
+            cursor_field="nextCursorMark", cursor_param="cursorMark", initial_cursor="*",
+            max_pages=max(1, min(4, (limit + page_size - 1) // page_size)),
         )
         response_metadata = _client_response_metadata(self.client)
         rows: list[dict] = []
-        for item in data.get("resultList", {}).get("result", []):
+        for item in result["items"]:
             if not isinstance(item, dict):
                 continue
             source = str(item.get("source", "") or "").strip().upper()
@@ -196,6 +239,7 @@ class EuropePMCLiteratureAdapter:
                     "source_profile": source_profile("europepmc"),
                     "source_database": source,
                     "cache_snapshot": response_metadata,
+                    "pagination": result["pagination"],
                 },
             ).to_dict()
             rows.append(
@@ -217,6 +261,7 @@ class EuropePMCLiteratureAdapter:
                         "first_publication_date": str(item.get("firstPublicationDate", "") or ""),
                         "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
                         "source_provenance": provenance,
+                        "pagination": result["pagination"],
                     },
                 }
             )
@@ -303,19 +348,21 @@ class ClinicalTrialsDatasetAdapter:
     def search(self, query: str) -> list[DatasetRecord]:
         """Search and normalize bounded study metadata with explicit design caveats."""
 
-        data = self.client.get_json(
-            "https://clinicaltrials.gov/api/v2/studies",
-            params={"query.term": query, "pageSize": 25, "format": "json"},
+        result = _bounded_cursor_pages(
+            self.client, "https://clinicaltrials.gov/api/v2/studies",
+            {"query.term": query, "pageSize": 25, "format": "json"},
+            extract_items=lambda payload: payload.get("studies"),
+            cursor_field="nextPageToken", cursor_param="pageToken", max_pages=4,
         )
         response_metadata = _client_response_metadata(self.client)
-        response_metadata = _client_response_metadata(self.client)
         records_by_id: dict[str, DatasetRecord] = {}
-        for study in data.get("studies", []):
+        for study in result["items"]:
             if not isinstance(study, dict):
                 continue
             record = _clinicaltrials_record(study, response_metadata=response_metadata)
             if record is None:
                 continue
+            record.metadata["pagination"] = result["pagination"]
             existing = records_by_id.get(record.dataset_id)
             if existing is None or _clinicaltrials_version(record) > _clinicaltrials_version(existing):
                 if existing is not None:

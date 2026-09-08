@@ -12,6 +12,7 @@ from litdatamatcher.adapters import (
     GEODatasetAdapter,
     MGnifyDatasetAdapter,
     PubMedLiteratureAdapter,
+    _bounded_cursor_pages,
     search_dataset_sources,
     search_literature_sources,
 )
@@ -39,6 +40,66 @@ class FakeClient:
     def get_text(self, url, params=None, **kwargs):
         self.calls.append((url, params or {}))
         return self.payloads.pop(0)
+
+
+def _paginate(client, *, max_pages=4):
+    return _bounded_cursor_pages(
+        client,
+        "https://fixture.invalid/paged",
+        {"query": "fixture", "page_size": 1},
+        extract_items=lambda payload: payload.get("items"),
+        cursor_field="next",
+        cursor_param="cursor",
+        max_pages=max_pages,
+    )
+
+
+def test_cursor_pagination_records_complete_multi_page_request_and_cache_lineage():
+    client = FakeClient([{"items": [{"id": "one"}], "next": "token-2"}, {"items": [{"id": "two"}]}])
+    result = _paginate(client)
+    pagination = result["pagination"]
+    assert [item["id"] for item in result["items"]] == ["one", "two"]
+    assert pagination["status"] == "COMPLETE"
+    assert pagination["candidate_universe_status"] == "COMPLETE_CANDIDATE_UNIVERSE"
+    assert pagination["pages"][1]["request_scope"]["params"]["cursor"] == "token-2"
+
+
+def test_cursor_pagination_repeated_token_and_truncation_are_partial_not_complete():
+    repeated = _paginate(FakeClient([{"items": [{"id": "one"}], "next": "again"}, {"items": [{"id": "two"}], "next": "again"}]))
+    truncated = _paginate(FakeClient([{"items": [], "next": "two"}, {"items": [], "next": "three"}]), max_pages=2)
+    for result, status in ((repeated, "REPEATED_CURSOR"), (truncated, "TRUNCATED_PAGE_LIMIT")):
+        assert result["pagination"]["status"] == status
+        assert result["pagination"]["completed"] is False
+        assert result["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+
+
+def test_cursor_pagination_schema_drift_and_offline_replay_are_explicit(tmp_path, monkeypatch):
+    drift = _paginate(FakeClient([{"items": "not-a-list"}]))
+    assert drift["pagination"]["status"] == "SCHEMA_DRIFT"
+    assert drift["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+
+    cached = CachedHttpClient(cache_dir=tmp_path)
+    url = "https://fixture.invalid/paged"
+    first = {"query": "fixture", "page_size": 1}
+    second = {**first, "cursor": "token-2"}
+    cached._cache_path(url, first).write_text(json.dumps({"items": [{"id": "one"}], "next": "token-2"}), encoding="utf-8")
+    cached._cache_path(url, second).write_text(json.dumps({"items": [{"id": "two"}]}), encoding="utf-8")
+    monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
+    replay = _paginate(CachedHttpClient(cache_dir=tmp_path, offline=True))
+    assert replay["pagination"]["status"] == "COMPLETE"
+    assert all(page["cache_lineage"]["cache_status"] == "cache_hit" for page in replay["pagination"]["pages"])
+
+
+def test_cursor_pagination_fetch_error_is_partial_not_a_clean_empty_result():
+    class ErrorClient:
+        def get_json(self, url, params=None):
+            raise RuntimeError("fixture retrieval failure")
+
+    result = _paginate(ErrorClient())
+    assert result["items"] == []
+    assert result["pagination"]["status"] == "ERROR"
+    assert result["pagination"]["error"] == "RuntimeError"
+    assert result["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
 
 
 def test_pubmed_literature_adapter_normalizes_esummary_rows():

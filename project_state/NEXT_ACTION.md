@@ -58,3 +58,7 @@ The provenance-complete dossier template is validated with a deterministic sourc
 ## V2.1 cache-refresh checkpoint
 
 Optional adapter JSON cache entries now have an explicit `refresh=True` path. A cached entry is replaced only after a successful response, while refresh lineage records old and new content SHA-256 values; failed refresh leaves the prior entry replayable offline. The synthetic deterministic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_cache_refresh\receipt.json`. This does not claim source completeness, retrieve any source, or alter bounded pagination semantics.
+
+## V2.1 pagination checkpoint
+
+Europe PMC literature and ClinicalTrials.gov repository adapters now carry a bounded cursor contract: each page records exact request scope, input/output cursor, returned item count, and cache lineage. Only a terminal cursor yields `COMPLETE_CANDIDATE_UNIVERSE`; repeated tokens, bounded truncation, schema drift, and retrieval errors yield `PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE`. The synthetic deterministic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_pagination\receipt.json`. No live pages were enumerated.

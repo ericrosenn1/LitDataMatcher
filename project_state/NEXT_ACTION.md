@@ -50,3 +50,7 @@ The integrated local regression receipt at `C:\Codex\LitDataMatcher-v2\data\phas
 ## V2.5 performance baseline checkpoint
 
 The bounded 32-record fixture has a stored comparison baseline with explicit tolerance and incomparable hardware/backend/fixture outcomes. The executed local PASS receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_5_scale\benchmark_comparison_receipt.json`; it is not a production-scale claim.
+
+## V2.6 dossier checkpoint
+
+The provenance-complete dossier template is validated with a deterministic source-assisted receipt at `C:\Codex\LitDataMatcher-v2\data\phase2\v2_6_dossier\receipt.json`. It retains scope, compatibility/missingness, dependence and contradiction context while prohibiting global novelty and expert-validation claims.

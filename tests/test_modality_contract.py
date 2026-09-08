@@ -116,3 +116,11 @@ def test_cross_modal_feature_normalization_and_units_remain_fail_closed():
     assert assess_requirements([{"field": "feature_type", "expected": "metabolite"}], protein)["eligibility"] == "NOT_QUALIFIED"
     assert assess_requirements([{"field": "normalization", "expected": "log2"}], protein)["eligibility"] == "NOT_QUALIFIED"
     assert assess_requirements([{"field": "biological_sample_count", "expected": 8}], protein)["eligibility"] == "REQUIRES_INSPECTION"
+
+
+def test_temporal_design_contract_rejects_explicit_mismatch_and_preserves_unknown():
+    longitudinal = {"dataset_id":"long","assay_types":["proteomics"],"organisms":["Homo sapiens"],"metadata":{"temporal_contract":{"design":"longitudinal","baseline_timing":"pre_intervention","followup_window":"week_12","intervention_timing":"day_0","repeated_measure_unit":"participant_visit"}},"capabilities":{}}
+    cross = {"dataset_id":"cross","assay_types":["proteomics"],"organisms":["Homo sapiens"],"metadata":{"temporal_contract":{"design":"cross_sectional"}},"capabilities":{}}
+    assert assess_requirements([{"field":"temporal_design","expected":"longitudinal"}], cross)["eligibility"] == "NOT_QUALIFIED"
+    assert assess_requirements([{"field":"baseline_timing","expected":"pre_intervention"}], cross)["eligibility"] == "REQUIRES_INSPECTION"
+    assert assess_requirements([{"field":"followup_window","expected":"baseline"}], longitudinal)["eligibility"] == "NOT_QUALIFIED"

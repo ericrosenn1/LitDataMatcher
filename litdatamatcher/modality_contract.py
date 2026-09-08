@@ -23,6 +23,7 @@ def modality_contract(record: JsonDict) -> JsonDict:
     metadata = record.get("metadata", {}) if isinstance(record.get("metadata"), dict) else {}
     dependence = metadata.get("dependence", {}) if isinstance(metadata.get("dependence"), dict) else {}
     omics = metadata.get("omics_contract", {}) if isinstance(metadata.get("omics_contract"), dict) else {}
+    temporal = metadata.get("temporal_contract", {}) if isinstance(metadata.get("temporal_contract"), dict) else {}
     return {
         "modality": families or ["UNKNOWN"],
         "organism": "OBSERVED" if record.get("organisms") else "UNKNOWN",
@@ -37,6 +38,11 @@ def modality_contract(record: JsonDict) -> JsonDict:
         "quantification": str(omics.get("quantification", "UNKNOWN") or "UNKNOWN"),
         "normalization": str(omics.get("normalization", "UNKNOWN") or "UNKNOWN"),
         "metadata_availability": str(omics.get("metadata_availability", "UNKNOWN") or "UNKNOWN"),
+        "temporal_design": str(temporal.get("design", "UNKNOWN") or "UNKNOWN"),
+        "baseline_timing": str(temporal.get("baseline_timing", "UNKNOWN") or "UNKNOWN"),
+        "followup_window": str(temporal.get("followup_window", "UNKNOWN") or "UNKNOWN"),
+        "intervention_timing": str(temporal.get("intervention_timing", "UNKNOWN") or "UNKNOWN"),
+        "repeated_measure_unit": str(temporal.get("repeated_measure_unit", "UNKNOWN") or "UNKNOWN"),
         "access": str(record.get("access_type", "unknown") or "unknown"),
     }
 

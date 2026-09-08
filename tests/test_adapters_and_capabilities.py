@@ -1,6 +1,8 @@
 import json
+from hashlib import sha256
 
 import pytest
+import requests
 
 from litdatamatcher.adapters import (
     ClinicalTrialsDatasetAdapter,
@@ -139,6 +141,45 @@ def test_cached_http_client_offline_replays_and_fails_closed_on_miss(tmp_path, m
     assert offline.get_json(url, params=params) == {"message": "cached"}
     with pytest.raises(FileNotFoundError, match="offline cache missing"):
         offline.get_json(url, params={"query": "missing"})
+
+
+def test_cached_http_client_refresh_replaces_only_after_success_and_records_lineage(tmp_path, monkeypatch):
+    client = CachedHttpClient(cache_dir=tmp_path)
+    url = "https://example.test/works"
+    params = {"query": "one"}
+    path = client._cache_path(url, params)
+    path.write_text('{"message":"old"}', encoding="utf-8")
+    old_sha256 = sha256(path.read_bytes()).hexdigest()
+
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"message": "new"}
+
+    monkeypatch.setattr("requests.get", lambda *args, **kwargs: Response())
+    assert client.get_json(url, params, refresh=True) == {"message": "new"}
+    assert client.last_response_metadata["cache_status"] == "live_refreshed"
+    assert client.last_response_metadata["replaced_cache_content_sha256"] == old_sha256
+    new_sha256 = client.last_response_metadata["cache_content_sha256"]
+    assert new_sha256 != old_sha256
+    assert CachedHttpClient(cache_dir=tmp_path, offline=True).get_json(url, params) == {"message": "new"}
+
+
+def test_cached_http_client_failed_refresh_preserves_prior_entry(tmp_path, monkeypatch):
+    client = CachedHttpClient(cache_dir=tmp_path)
+    url = "https://example.test/works"
+    params = {"query": "one"}
+    path = client._cache_path(url, params)
+    path.write_text('{"message":"preserved"}', encoding="utf-8")
+    monkeypatch.setattr(
+        "requests.get",
+        lambda *args, **kwargs: (_ for _ in ()).throw(requests.RequestException("offline")),
+    )
+    with pytest.raises(RuntimeError, match="HTTP JSON request failed"):
+        client.get_json(url, params, refresh=True, retries=0)
+    assert CachedHttpClient(cache_dir=tmp_path, offline=True).get_json(url, params) == {"message": "preserved"}
 
 
 def test_geo_dataset_adapter_normalizes_dataset_records():

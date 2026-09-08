@@ -54,18 +54,21 @@ class CachedHttpClient:
         params: dict | None = None,
         *,
         use_cache: bool = True,
+        refresh: bool = False,
         retries: int = 2,
     ) -> dict:
-        """Fetch JSON with retry and cache support."""
+        """Fetch JSON with replayable cache support and explicit successful refresh."""
 
         path = self._cache_path(url, params, suffix=".json")
-        if use_cache and path.exists():
+        if use_cache and not refresh and path.exists():
             # Cached/mock payloads are reproducible fixtures, not live validation.
             self._record_cache_response(path, "cache_hit")
             return json.loads(path.read_text(encoding="utf-8"))
         if self.offline:
-            raise FileNotFoundError(f"offline cache missing: {url}")
+            operation = "offline refresh unavailable" if refresh else "offline cache missing"
+            raise FileNotFoundError(f"{operation}: {url}")
 
+        replaced_sha256 = _file_sha256(path) if refresh and path.exists() else ""
         last_error: Exception | None = None
         for attempt in range(retries + 1):
             try:
@@ -81,7 +84,11 @@ class CachedHttpClient:
                 data = response.json()
                 if use_cache:
                     path.write_text(json.dumps(data, sort_keys=True), encoding="utf-8")
-                    self._record_cache_response(path, "live_cached")
+                    self._record_cache_response(
+                        path,
+                        "live_refreshed" if replaced_sha256 else "live_cached",
+                        replaced_sha256=replaced_sha256,
+                    )
                 return data
             except (requests.RequestException, ValueError) as exc:
                 last_error = exc
@@ -130,8 +137,10 @@ class CachedHttpClient:
                     time.sleep(0.5 * (attempt + 1))
         raise RuntimeError(f"HTTP text request failed for {url}: {last_error}")
 
-    def _record_cache_response(self, path: Path, cache_status: str) -> None:
-        """Expose a stable cached-response timestamp for adapter provenance."""
+    def _record_cache_response(
+        self, path: Path, cache_status: str, *, replaced_sha256: str = ""
+    ) -> None:
+        """Expose cache identity and refresh lineage for adapter provenance."""
 
         timestamp = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(
             timespec="seconds"
@@ -139,8 +148,11 @@ class CachedHttpClient:
         self.last_response_metadata = {
             "cache_path": str(path),
             "cache_status": cache_status,
+            "cache_content_sha256": _file_sha256(path),
             "retrieval_time_utc": timestamp,
         }
+        if replaced_sha256:
+            self.last_response_metadata["replaced_cache_content_sha256"] = replaced_sha256
 
     def post_file_text(
         self,

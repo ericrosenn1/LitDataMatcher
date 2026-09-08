@@ -1,7 +1,7 @@
 from litdatamatcher.modality_contract import compatibility, modality_contract
 from litdatamatcher.ranking import rank_matches, score_question_dataset
 from litdatamatcher.schemas import DatasetRecord, DatasetVariable, QuestionCandidate
-from litdatamatcher.scientific_v2 import assess_requirements
+from litdatamatcher.scientific_v2 import assess_requirements, rank_candidates
 from litdatamatcher.v2 import normalize_dataset
 
 
@@ -86,3 +86,22 @@ def test_ranking_excludes_explicit_contract_mismatch_but_keeps_unknown_reviewabl
     assert assessment["modality_contract"]["status"] == "INCOMPATIBLE"
     matches = rank_matches([question], [incompatible, unknown])
     assert [match.dataset.dataset_id for match in matches] == ["unknown"]
+
+
+def test_maximum_semantic_score_cannot_rescue_adapter_contract_mismatch():
+    dataset = {
+        "dataset_id": "ENA:wrong-modality",
+        "modality_contract": {
+            "modality": ["sequencing_genomics"],
+            "organisms": ["Homo sapiens"],
+            "biological_unit": "UNKNOWN",
+        },
+        "capabilities": {},
+    }
+    ranked = rank_candidates(
+        [{"field": "modality", "expected": "bulk_transcriptomics"}],
+        [dataset],
+        {"ENA:wrong-modality": 1.0},
+    )
+    assert ranked[0]["assessment"]["compatibility_status"] == "INCOMPATIBLE"
+    assert ranked[0]["is_qualified"] is False

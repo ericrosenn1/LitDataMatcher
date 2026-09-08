@@ -18,6 +18,7 @@ from typing import Protocol
 
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
+from .literature_integrity import consolidate_literature_rows
 from .provenance import remote_source_provenance, source_profile
 from .schemas import DatasetRecord, JsonDict
 
@@ -898,8 +899,16 @@ def search_literature_sources(
 
     rows: list[JsonDict] = []
     seen: dict[str, JsonDict] = {}
+    source_statuses = []
     for adapter in build_literature_adapters(source_names, client=client):
-        for row in adapter.search_literature(query, limit=limit):
+        try:
+            adapter_rows = adapter.search_literature(query, limit=limit)
+            source_statuses.append({"source": adapter.name, "status": "OBSERVED"})
+        except (KeyError, TypeError, ValueError, OSError):
+            # A source/schema problem is unknown, never an implicit clean result.
+            adapter_rows = []
+            source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE"})
+        for row in adapter_rows:
             key = _literature_identity(row)
             if key in seen:
                 _merge_literature_duplicate(seen[key], row)
@@ -907,8 +916,8 @@ def search_literature_sources(
             seen[key] = row
             rows.append(row)
             if len(rows) >= limit:
-                return rows
-    return rows
+                return consolidate_literature_rows(rows, source_statuses)
+    return consolidate_literature_rows(rows, source_statuses)
 
 
 def cached_client(cache_dir: str | Path | None = None, *, offline: bool = False) -> CachedHttpClient:

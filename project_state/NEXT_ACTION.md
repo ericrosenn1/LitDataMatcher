@@ -30,3 +30,7 @@ The review machinery is `PENDING_EXPERT_REVIEW`, not calibrated or expert-valida
 ## V2.5 scale/recovery checkpoint
 
 Bounded local scale instrumentation is validated at `C:\Codex\LitDataMatcher-v2\data\phase2\v2_5_scale\benchmark_receipt.json`. It measures only the declared synthetic fixture and records its host/backend/limit provenance, throughput/latency, memory/disk, cache replay, and reopen/resume. It performs no network acquisition, model inference, LLM context loading, or production-scale claim.
+
+## Literature integrity checkpoint
+
+Normalized multi-source literature metadata now retains lifecycle/version/retraction state, source snapshots/statuses, full-text unknowns, dedup lineage, and deterministic derivation invalidation. Retrieval/schema failures remain unknown. Corrected, retracted, versioned, or cross-source duplicate metadata cannot silently become evidence or independent support. The synthetic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\literature_integrity\receipt.json`.

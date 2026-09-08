@@ -28,9 +28,9 @@
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
-    "status": "AVAILABLE",
-    "verified_reset_at": "2026-09-14T17:09:23-04:00",
-    "source": "supported get_usage_limits: shared 7-day Codex bucket, 17 percent used / 83 percent remaining. Conservative window-start estimate: 17 / 5.8264 = 2.9177 percentage points per hour; 162.1736 hours to reset projects 490.18 percent total and exhaustion at 2026-09-08T18:19:05Z. Account-level bucket is authoritative; per-thread/subagent/supervisor attribution and rolling series are unavailable. Verdict UNSUSTAINABLE: sole Terra Medium reasoning worker, no concurrent reasoning workers."
+    "status": "DUTY_CYCLED",
+    "verified_reset_at": "2026-09-15T00:49:42-04:00",
+    "source": "Supported shared Codex weekly telemetry: Terra Medium consumed 3 percentage points in 0.501061 h (5.9873 pp/h; UNSUSTAINABLE) and one Terra Low worker consumed 1 point in 0.497894 h (2.00846 pp/h; UNSUSTAINABLE). At 2026-09-08T01:50:57-04:00, 96 percent remained with a safety-adjusted target of 0.45994 pp/h. Terra Low is the lowest supported practical effort; restrict to one worker, no subagents, and a 22.90 percent duty cycle (at most 13.74 minutes active per hour, then at least 46.26 minutes idle). The shared account-level bucket is authoritative; separate per-thread, subagent, and supervisor attribution is unavailable. Full policy: project_state/BUDGET_POLICY.md."
   },
   "workstreams": [
     {
@@ -128,8 +128,8 @@
     "command_tested": true
   },
   "checkpoint": {
-    "last_source_commit": "772331f6cc3f5a1de57964b913f6a5a937ba7cd9",
-    "last_verified_remote_commit": "772331f6cc3f5a1de57964b913f6a5a937ba7cd9",
+    "last_source_commit": "2b1a82017c01d40c2e6818bbbb30bb3edb5f15b7",
+    "last_verified_remote_commit": "63e218b28a605b6aa884b843e63341ab684a53d9",
     "push_pending": false
   },
   "milestones": {

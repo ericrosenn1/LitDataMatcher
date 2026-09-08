@@ -22,3 +22,7 @@ Do not restart acquisition, download application models, rebuild validated artif
 ## V2.3 evidence compiler checkpoint
 
 The bounded evidence-compiler contract tranche is validated locally: exact shared study/cohort/publication/source identifiers and explicit source-of-source paths form auditable known-dependence edges; source-located assertions retain replication, orthogonal, direct perturbational, associative, mechanistic, indirect, contradictory, incompatible, and unknown-dependence classifications without inferring them from text. Only same-underlying, derivative, and duplicated-cohort edges join a known-dependence group. The deterministic receipt is under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_3_evidence_compiler\contract_receipt.json`. Frozen alpha and sealed holdout evidence remain untouched.
+
+## V2.4 expert-review checkpoint
+
+The review machinery is `PENDING_EXPERT_REVIEW`, not calibrated or expert-validated. Versioned packets preserve source spans/provenance while masking ranking/model fields and reviewer identity. Strict categorical labels, descriptive agreement, and pending-adjudication records are ready for real expert input. The deterministic zero-label infrastructure receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_4_expert_review\packet_receipt.json`.

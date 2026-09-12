@@ -176,11 +176,19 @@ def test_crossref_adapter_skips_missing_doi_and_preserves_update_metadata():
     assert rows[0]["version_relationships"]["is-correction-of"][0]["id"] == "10.2/original"
 
 
-def test_literature_search_merges_cross_source_doi_and_version_relations():
+@pytest.mark.parametrize(
+    ("relation_key", "expected_lifecycle"),
+    [
+        ("is-correction-of", "CORRECTED_REQUIRES_VERSION_REVIEW"),
+        ("is-retracted-by", "RETRACTED"),
+        ("is-version-of", "VERSIONED_REQUIRES_VERSION_REVIEW"),
+    ],
+)
+def test_literature_search_merges_cross_source_doi_and_lifecycle_relations(relation_key, expected_lifecycle):
     client = FakeClient(
         [
             {"resultList": {"result": [{"source": "MED", "id": "123", "doi": "10.3/shared", "title": "Shared"}]}},
-            {"message": {"items": [{"DOI": "10.3/shared", "title": ["Shared"], "relation": {"is-version-of": [{"id": "10.3/old"}]}}]}},
+            {"message": {"items": [{"DOI": "10.3/shared", "title": ["Shared"], "relation": {relation_key: [{"id": "10.3/old"}]}}]}},
         ]
     )
 
@@ -188,7 +196,9 @@ def test_literature_search_merges_cross_source_doi_and_version_relations():
 
     assert len(rows) == 1
     assert rows[0]["metadata"]["alternate_source_ids"] == ["crossref:10.3/shared"]
-    assert rows[0]["metadata"]["version_relationships"]["crossref"]["is-version-of"][0]["id"] == "10.3/old"
+    assert rows[0]["metadata"]["version_relationships"]["crossref"][relation_key][0]["id"] == "10.3/old"
+    assert rows[0]["metadata"]["literature_integrity"]["lifecycle_status"] == expected_lifecycle
+    assert rows[0]["metadata"]["literature_integrity"]["evidence_eligibility"] == "INELIGIBLE_REQUIRES_VERSION_REVIEW"
 
 
 def test_cached_http_client_offline_replays_and_fails_closed_on_miss(tmp_path, monkeypatch):

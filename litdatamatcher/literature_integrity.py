@@ -12,7 +12,7 @@ def _relations(row: JsonDict) -> dict:
 
 
 def _lifecycle(relations: dict) -> str:
-    keys = " ".join(str(key).casefold() for key in relations)
+    keys = " ".join(_lifecycle_relation_keys(relations))
     if "retract" in keys:
         return "RETRACTED"
     if "correction" in keys or "update" in keys:
@@ -20,6 +20,22 @@ def _lifecycle(relations: dict) -> str:
     if "version" in keys:
         return "VERSIONED_REQUIRES_VERSION_REVIEW"
     return "ACTIVE_METADATA_ONLY"
+
+
+def _lifecycle_relation_keys(relations: dict) -> list[str]:
+    """Return direct relation keys, including one source-scoped relation level.
+
+    DOI merges retain alternate-source relations as ``{source: {relation: ...}}``.
+    Only relation names at those two contract levels are lifecycle signals: arbitrary
+    deeper metadata must not be interpreted as a correction or retraction.
+    """
+
+    keys: list[str] = []
+    for name, value in relations.items():
+        keys.append(str(name).casefold())
+        if isinstance(value, dict):
+            keys.extend(str(nested_name).casefold() for nested_name in value)
+    return keys
 
 
 def consolidate_literature_rows(rows: list[JsonDict], source_statuses: list[JsonDict] | None = None) -> list[JsonDict]:

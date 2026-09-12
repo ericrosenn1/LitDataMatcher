@@ -29,3 +29,29 @@ def test_missing_fulltext_and_source_failure_remain_unknown_and_invalidate():
     invalidation = invalidate_affected_derivations(old, new, ["claim:1", "claim:1", "question:1"])
     assert invalidation["status"] == "INVALIDATED"
     assert invalidation["derivation_ids"] == ["claim:1", "question:1"]
+
+
+def test_source_scoped_relations_drive_lifecycle_but_unrelated_nested_metadata_does_not():
+    base = {"source_id": "pubmed:1", "source": "pubmed", "metadata": {"alternate_source_ids": ["crossref:10/x"]}}
+    correction = consolidate_literature_rows([{
+        **base,
+        "metadata": {**base["metadata"], "version_relationships": {"crossref": {"is-correction-of": [{"id": "10/original"}]}}},
+    }])[0]
+    retraction = consolidate_literature_rows([{
+        **base,
+        "metadata": {**base["metadata"], "version_relationships": {"crossref": {"is-retracted-by": [{"id": "10/retraction"}]}}},
+    }])[0]
+    version = consolidate_literature_rows([{
+        **base,
+        "metadata": {**base["metadata"], "version_relationships": {"crossref": {"is-version-of": [{"id": "10/previous"}]}}},
+    }])[0]
+    unrelated = consolidate_literature_rows([{
+        **base,
+        "metadata": {**base["metadata"], "version_relationships": {"crossref": {"unrelated_mapping": {"is-retracted-by": [{"id": "not-a-relation"}]}}}},
+    }])[0]
+
+    assert correction["metadata"]["literature_integrity"]["lifecycle_status"] == "CORRECTED_REQUIRES_VERSION_REVIEW"
+    assert retraction["metadata"]["literature_integrity"]["lifecycle_status"] == "RETRACTED"
+    assert version["metadata"]["literature_integrity"]["lifecycle_status"] == "VERSIONED_REQUIRES_VERSION_REVIEW"
+    assert unrelated["metadata"]["literature_integrity"]["lifecycle_status"] == "ACTIVE_METADATA_ONLY"
+    assert correction["metadata"]["literature_integrity"]["derivation_invalidation_key"] != retraction["metadata"]["literature_integrity"]["derivation_invalidation_key"]

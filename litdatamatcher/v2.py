@@ -181,6 +181,39 @@ def explicit_unresolved_questions(document: dict, view: dict) -> list[dict]:
     return questions
 
 
+def deduplicate_questions(questions: list[dict]) -> list[dict]:
+    """Merge repeated extraction of one source span, retaining every provenance."""
+    unique = {}
+    for item in questions:
+        span = item.get("evidence_span", {})
+        document_id = item.get("source_document_id")
+        statement = item.get("question", item.get("text"))
+        source_bound = (
+            item.get("origin") != "user" and bool(document_id)
+            and type(span.get("start")) is int and type(span.get("end")) is int
+            and 0 <= span["start"] < span["end"] and isinstance(statement, str)
+            and statement == span.get("text") and len(statement) == span["end"] - span["start"]
+        )
+        key = (
+            ("source_span", document_id, span["start"], span["end"], statement,
+             digest(item.get("requirements", [])), digest(item.get("conditions", {})))
+            if source_bound else ("question_id", item["question_id"])
+        )
+        if key not in unique:
+            unique[key] = dict(item)
+            continue
+        previous = unique[key]
+        if not source_bound:
+            # Explicit questions have caller-owned identity and constraints.
+            continue
+        records = previous.get("source_question_records", [dict(previous)]) + item.get("source_question_records", [dict(item)])
+        records = list({digest(record): record for record in records}.values())
+        previous["source_question_records"] = records
+        previous["extraction_origins"] = sorted({record["origin"] for record in records if record.get("origin")})
+        previous["original_question_ids"] = sorted({record["question_id"] for record in records})
+    return list(unique.values())
+
+
 def rebase_runtime_item(item: dict, document: dict, view: dict, view_id: str) -> dict:
     """Map a view-local runtime record to stable parent-document coordinates."""
     result = dict(item)
@@ -511,7 +544,7 @@ def analyze(
                     **({"source_document_id": question_source_id, "source_relation": "caller-declared source context; no direct-answer claim"} if question_source_id else {}),
                 },
             )
-        questions = list({q["question_id"]: q for q in questions}.values())
+        questions = deduplicate_questions(questions)
         index = PretrainedSemanticIndex(embedding_dir, device=device)
         if datasets:
             index.fit(

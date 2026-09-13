@@ -1,27 +1,27 @@
 {
   "schema_version": 1,
   "campaign": "FINAL_AUTONOMOUS_COMPLETION",
-  "status": "RUNNING_REAL_EVALUATION_AND_CLOSEOUT",
-  "updated_at": "2026-09-13T22:02:28.363232+00:00",
+  "status": "RUNNING_FINAL_REGRESSION_PACKAGE_ACCEPTANCE",
+  "updated_at": "2026-09-13T23:15:10.628490+00:00",
   "scope": "Full intended project completion, or all machine-resolvable requirements complete with only a proven irreducible external gate.",
   "request": "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md",
   "request_sha256": "1c0966ba0f2c1ce50656af530ce05788cfb42e4ea3cfced35a45e8a0e4b190d6",
   "starting_functional_commit": "40921e58ca8a33e9de35847a116c324ec7d71500",
   "starting_verified_remote": "a4ee398cd8f30d275a8d151a46ffb13ef283392d",
-  "unfinished_stage": "REAL_CASES_SCALE_REVIEW_PACKAGE_AND_FINAL_ACCEPTANCE",
+  "unfinished_stage": "QUESTION_IDENTITY_PACKAGE_METADATA_REPAIR_THEN_FINAL_VALIDATION",
   "expert_labels_gate_classification": "OPTIONAL_EXPERT_VALIDATED_CALIBRATED_STATUS; NOT_MANDATORY_FOR_SOFTWARE_COMPLETE",
   "next_permitted_reasoning_at": null,
   "reasoning_concurrency": "purposeful scoped native reviewers and isolated writers authorized",
   "subagents": "authorized when useful",
   "supervisor": "PAUSED",
-  "resume_worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-campaign-20260913",
+  "resume_worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-closeout-repairs-20260913",
   "resume_steps": [
-    "Inspect live agents, isolated writer ownership and new receipts; do not duplicate workers.",
-    "Continue real cases from data/final_campaign_20260913; preserve acquisition/snapshots and inference cache.",
-    "Integrate benchmark and validator commits under canonical integration lease; repair independent findings.",
-    "Run final full suite, protected hash validation, build versioned distribution, clean install and offline CLI smoke.",
-    "Bind requirement matrix and final ledger to actual receipts; pass final machine validator and independent review.",
-    "Create verified compact handoff, reconcile COMPLETE state, commit/push and verify remote."
+    "Observe live native agents/processes and preserve writer leases before resuming.",
+    "Integrate root question-identity fix and validator metadata fix; validate independent controls.",
+    "Run final full/focused tests and scale derivative; replay corrected six cases from preserved canonicalLF inference cache.",
+    "Build new0.3.0 derivative, isolated wheel install with cached GPU dependencies, installed CLI offline end-to-end.",
+    "Bind final receipts to74-row matrix and final ledger; pass technical and independent review.",
+    "Create verified handoff, confirm supervisorpaused and workersstopped, reconcileCOMPLETEonlyafterallgates, commit/push/liveverifyremote."
   ],
   "matrix_created": true,
   "new_tests_run": true,
@@ -50,8 +50,8 @@
   "owner_override_sha256": "e08b2b8d0ee97fc66f905e29c315e1d53516f0f52df9ab8300b5a5a60f82aa4f",
   "owner_override_attachment_sha256": "6c7b699652e931131d8041fb643ab9abdfab7f0874e45517942236ef4db16bc5",
   "active_campaign_started_at": "2026-09-13T21:13:52.824294+00:00",
-  "last_verified_remote": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
-  "requirements_matrix": "docs/v2/final_audit/REQUIREMENT_SCOPE_REVIEW.json",
+  "last_verified_remote": "a356a27885bb34b398e72f11666aa832f25a59c0",
+  "requirements_matrix": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json",
   "completed_this_campaign": [
     "owner policy committed and pushed",
     "74-row governing scope matrix with expert gate adjudication",
@@ -64,10 +64,27 @@
     "65 real PRIDE and Metabolomics Workbench studies qualified with offline replay"
   ],
   "active_work": {
-    "lead": "real local application cases, durable state, package/install and final evidence integration",
-    "final_contract_audit": "strict final validator and mutation tests",
-    "final_requirements_audit": "real 1600/552 progressive scale, retrieval ablations, actual interruption/resume",
-    "final_offline_repair": "independent adversarial final functional review"
+    "root": "deduplicate source questions, final package/install/offline ledger and closure",
+    "final_contract_audit": "repair Windows metadata parsing in final validator; final native gate check",
+    "final_requirements_audit": "bind final74-row matrix to actual receipts",
+    "final_offline_repair": "independent question-identity and finalcase/package review"
   },
-  "scientific_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW; NOT_CALIBRATED"
+  "scientific_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW; NOT_CALIBRATED",
+  "current_evidence": {
+    "root": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913",
+    "full_suite_before_final_repairs": {
+      "passed": 628,
+      "junit": "closeout/full_suite.xml"
+    },
+    "focused_before_final_repairs": {
+      "passed": 143,
+      "junit": "closeout/focused_suite.xml"
+    },
+    "corrected_cases": "closeout/case_fresh/CASE_EXECUTION.json",
+    "corrected_case_contract": "requirements_matrix/CASE_REQUIREMENT_CORRECTION.json",
+    "scientific_claims": "2 accepted claims across6 cases;4 source context only; source_guard rejections retained; no expert accuracy/calibration claim",
+    "prior_build": "release_0.3.0/dist built but metadata validator rejected CRLF; preserve and build newderivative afterrepair",
+    "inference_cache": "real_cases_v3/inference_cache; preserve; exact canonicalLF runtime matches final source",
+    "scale": "closeout/scale_real/BENCHMARK_RECEIPT.json needs current-source derivative after question repair, not input reacquisition"
+  }
 }

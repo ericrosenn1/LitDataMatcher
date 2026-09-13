@@ -12,6 +12,12 @@ All 13 expanded acquisition partitions replayed offline, and the omics supplemen
 
 The benchmark's 17 source-derived metadata questions contain genuine observed fits, wrong-organism/wrong-modality cases and unjudged records. Compatibility-aware methods produced zero confirmed-invalid top results; lexical and MiniLM retrieval produced two and three respectively. The questions derive from the same catalog, and the reference vocabulary is bounded: this is not held-out biological answerability or calibrated scientific accuracy. See the exact receipts and limitations in [the benchmark report](final_audit/PHASE2_BENCHMARK_RESULT.md).
 
+Eight real UniProt entries now have qualified records, exact source-derived alias queries and network-denied replay: INS, APP, MAPT, MTOR, PDCD1, TREX1, TREM2 and CD274. The receipt retains the actual accessions, release, source/license snapshots and hashes. These queries provide reference context; they do not establish pathways, experimental design or independent biological support.
+
+The new six-case execution used unchanged real abstracts across four domains and produced six selected dossiers. Two model claims passed the source guards; four cases retained source context only, and all six native runs remain `PARTIAL`. The audit then found a real case-validation defect: five questions used only a human-species requirement and the environmental question used only modality. Those contracts omitted the question-specific measurements. A source-bound correction proposes 23 minimal requirements from exact passages, with no domain-imputed species. Corrected replay and independent review remain pending. Earlier runs and model outputs are preserved; source context is never promoted to structured extraction accuracy.
+
+The independent functional review closed six reproduced findings, including the loss of explicit retraction signals, with 45 adversarial and 174 related checks on its recorded source fingerprints. That review does not approve later case-contract changes, the final package or installation. These are component counts, not the current full-suite count.
+
 ## Qualified scope and interpretation
 
 | Area | Supported scope | Limit that remains visible |
@@ -73,7 +79,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Report generation failed.' }
 
 Use a new output directory for each new run. The `--fresh` flag explicitly requests fresh model execution rather than eligible inference-cache reuse; `--device cuda` requires a qualified compatible GPU runtime. A requirement JSON is an array of records such as `{"field":"species","expected":"Homo sapiens","essential":true,"source_locator":"the user's explicit question"}`. Essential requirements must come from the user or a justified scientific contract; model field proposals require review before becoming hard filters.
 
-Inspect `RUN_MANIFEST.json`, source/inference coverage, retained failures, `questions.jsonl`, `matches.jsonl`, `evidence_bundles.jsonl` and the rendered report before interpreting results. Dossiers retain missing requirements, provenance, dependence and ranking rationale. Empty or rejected model output must remain an abstention or partial result. Neither the historical alpha acceptance nor the CPU metadata benchmark certifies the pending six-case final execution.
+Inspect `RUN_MANIFEST.json`, source/inference coverage, retained failures, `questions.jsonl`, `matches.jsonl`, `evidence_bundles.jsonl` and the rendered report before interpreting results. Dossiers retain missing requirements, provenance, dependence and ranking rationale. Empty or rejected model output must remain an abstention or partial result. Required variables, outcomes and experimental conditions need an explicit source-supported contract; a species-only `EXACT_FIT` result is not an adequate assessment of a biomarker or treatment-response question. The six-case correction remains open until its new derivative replay and review pass.
 
 ## Final acceptance and roadmap
 
@@ -81,7 +87,7 @@ The release remains pending until actual final receipts establish the current fu
 
 Further work should follow demonstrated need:
 
-1. Resolve the current source/runtime/case findings and finish the final artifact and review gates. Recent source/schema and model-abstention findings mean that a campaign-wide no-further-gain claim is not yet justified by this draft.
+1. Resolve the case requirement defect with exact source-bound variables and a cached-inference replay on the unchanged sources and catalog. Inspect partial/unknown and no-fit outcomes rather than forcing positive matches. Complete the final artifact and review gates; this open defect prevents a campaign-wide no-further-gain claim.
 2. Obtain genuine blinded expert judgments when available. Define the target outcome, study/cohort grouping and validation protocol before fitting calibration. The new machinery makes this possible; it supplies neither human judgment nor a scientifically justified probability model.
 3. Qualify additional repositories or ontologies when they enable a specific question class with inspectable measurements, controls, units and lineage. Existing rights/lineage/access decisions for cadmus, interaction_finder, OptimusKG, PrimeKG, SNACKKSS and Reactome remain evidence-based component dispositions. Source-count growth alone is not the objective.
 4. Extend source-qualified identifiers and modality vocabularies only from actual source contracts. Preserve ambiguous/unmapped fields until evidence supports a mapping. Broad graph imports or apparent matches should not replace measured sample-level compatibility.

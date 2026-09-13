@@ -1,7 +1,7 @@
 {
   "schema_version": "final_requirements_matrix_v1",
   "status": "DRAFT_PENDING_FINAL_RECEIPTS",
-  "created_at_utc": "2026-09-13T22:37:55.783935+00:00",
+  "created_at_utc": "2026-09-13T23:06:22.178022+00:00",
   "source_inventory_reference": {
     "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-release-matrix-20260913\\docs\\v2\\final_audit\\REQUIREMENT_SCOPE_REVIEW.json",
     "sha256": "e5fc8e570e659db83e59bc8c461eda5e0349f8d014b8fb84e9586395c423b5f6",
@@ -9,7 +9,8 @@
     "scope": "Original immutable 74-row audit copied without ID/source/scope/mandatory-flag changes",
     "evidence_kind": "SOURCE_OR_DOCUMENTATION"
   },
-  "source_commit": "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
+  "source_commit": "849b76adae986b57ea41d2cda527295c3ca9b6de",
+  "documentation_writer_base_commit": "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
   "additional_reviewed_source_commit": "d84e439bb35362784073fb80392aa990d587d35a",
   "purpose": "Final-campaign derivative inventory. Component successes are scoped; missing final case/install/regression/acceptance/review/operational evidence remains pending.",
   "classification_vocabulary": [
@@ -134,8 +135,8 @@
   "requirement_count": 74,
   "classification_counts": {
     "COMPLETE_VALIDATED": 31,
-    "COMPLETE_NEEDS_FINAL_REGRESSION": 20,
-    "MACHINE_COMPLETABLE_REMAINING": 15,
+    "COMPLETE_NEEDS_FINAL_REGRESSION": 22,
+    "MACHINE_COMPLETABLE_REMAINING": 13,
     "OPTIONAL_FUTURE_VALIDATION": 2,
     "NOT_APPLICABLE": 3,
     "SUPERSEDED": 3
@@ -176,15 +177,50 @@
   ],
   "mandatory_external_human_blocker_proven": false,
   "software_completion_claimed": false,
+  "case_scope_decision": {
+    "original_alpha_gate_G12": "Failure recovery; not a new scientific case-class gate",
+    "original_alpha_six_case_classes": "build_spec/09:26 already required direct, partial/unknown, no-fit, changed gap, contradictory/indirect and lineage/integration coverage for the frozen hardened alpha",
+    "phase2_requirement": "Attachment L:320-339 separately requires new real examples, multiple domains/modalities and fully auditable high-ranked opportunities; it does not repeat a numerical extraction or six-class floor",
+    "current_case_defect": "Minimal one-field contracts omit the scientific variables. Correction and independent review remain mandatory; context-only outputs cannot be substituted for structured extraction accuracy.",
+    "evidence": [
+      {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\PROTOCOL.json",
+        "sha256": "119510b94419f1a412df5d3975696866af703f2dd60e3375b7ae3246b78b9505",
+        "size_bytes": 5676,
+        "scope": "Six unchanged source-selected questions; prior one-field contracts remain preserved as deficient development evidence",
+        "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+      },
+      {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+        "sha256": "02fa24123b9e639fcc76a8c509090dda02484af01493d42f4d97f36f56f664e6",
+        "size_bytes": 9189,
+        "scope": "Six real four-domain runs: two accepted model claims, four source-context-only cases, all native PARTIAL; inadequate requirements remain an open defect",
+        "evidence_kind": "EXECUTED_RECEIPT"
+      },
+      {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+        "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+        "size_bytes": 23156,
+        "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
+        "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+      },
+      {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+        "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+        "size_bytes": 27115,
+        "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+        "evidence_kind": "EXECUTED_RECEIPT"
+      }
+    ]
+  },
   "pending_final_receipts": [
-    "fresh real case outputs and scoped partial/abstention disposition",
-    "expanded UniProt source panel and offline replay",
+    "corrected real-case requirements, cached-inference replay and independent scoped disposition",
     "assembled full/focused/adversarial regression",
     "existing performance fixture comparison",
     "final wheel/sdist/source archive integrity",
     "outside-checkout clean install and installed offline smoke",
     "final acceptance ledger/validator",
-    "final independent source/artifact review",
+    "final independent runtime/case/artifact review",
     "lead state/push/remote/worker closeout"
   ],
   "requirements": [
@@ -1645,14 +1681,14 @@
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\adapters.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\adapters.py",
           "sha256": "6095a101fa9e025980209bc11cf8f8f1242e3dd6a9f6cd32b7da2a057b6fd734",
           "size_bytes": 70167,
           "scope": "Bounded source adapters and current provider lifecycle/schema-error handling",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -1679,7 +1715,8 @@
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "513a1dcd08e434f70773a2f55e0ab717e19a9a7c",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -1778,7 +1815,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\modality_contract.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\modality_contract.py",
           "sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
           "size_bytes": 5994,
           "scope": "Eight typed metadata families including declared CRISPR/RNAi screens; no raw screen/GWAS qualification claim",
@@ -1806,7 +1843,8 @@
         "772331f6cc3f5a1de57964b913f6a5a937ba7cd9",
         "62c94e7888de7c9d322a0a71727b92649032c565",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -1883,21 +1921,21 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\modality_contract.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\modality_contract.py",
           "sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
           "size_bytes": 5994,
           "scope": "Eight typed metadata families including declared CRISPR/RNAi screens; no raw screen/GWAS qualification claim",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\scientific_v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\scientific_v2.py",
           "sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
           "size_bytes": 26358,
           "scope": "Explicit measurement contracts, eligibility, unknowns, dependence and compiler implementation",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -1928,7 +1966,8 @@
         "19e3a2b1098b774ca7b169f1cadde72c13c9d732",
         "6c762e207c0905955a079917b24e9e7c3cf891c0",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -1997,56 +2036,73 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\semantic_runtime.py",
-          "sha256": "85bf159d99097d03c4fa38c368580209b4856a0901bb2dee722f70b9a2f1c76b",
-          "size_bytes": 30892,
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\semantic_runtime.py",
+          "sha256": "4d5243c5b28622a3efde48ebf115117ec3644c7401a8435d6c5622dfe092cc1e",
+          "size_bytes": 30829,
           "scope": "Local source-guarded extraction and scoped source boundary repair; code alone does not prove final case success",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\v2.py",
-          "sha256": "7f3a2041c9d20772184568d2b64335e54c5ed5705ca1cd42af462c1f7f167163",
-          "size_bytes": 39859,
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\v2.py",
+          "sha256": "beb21a46f49f1270ce056a12bb7e253902f6bcca051059a4216f12f6b2eab0af",
+          "size_bytes": 41839,
           "scope": "Integration and source provenance/heading pipeline; final case execution still requires a receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\PROTOCOL.json",
+          "sha256": "119510b94419f1a412df5d3975696866af703f2dd60e3375b7ae3246b78b9505",
+          "size_bytes": 5676,
+          "scope": "Six unchanged source-selected questions; prior one-field contracts remain preserved as deficient development evidence",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases\\PROTOCOL.json",
-          "sha256": "c623934ce98a14908ba3ff268523f7039ec51ffd899b783fba2ac6166a2266a4",
-          "size_bytes": 5658,
-          "scope": "Predeclared six real abstract-assisted cases in four domains; protocol existence is not run success",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+          "sha256": "02fa24123b9e639fcc76a8c509090dda02484af01493d42f4d97f36f56f664e6",
+          "size_bytes": 9189,
+          "scope": "Six real four-domain runs: two accepted model claims, four source-context-only cases, all native PARTIAL; inadequate requirements remain an open defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+          "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+          "size_bytes": 23156,
+          "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+          "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+          "size_bytes": 27115,
+          "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
           "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "63f02c0bd1ec04ad9cec5bfc3ade9e4b0f7bd955",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Validate fresh source-supported cases and their legitimate abstention/partial dispositions after parser/runtime repair; retain bounded cross-document coverage and no global novelty claim.",
+      "remaining_action": "Replay unchanged source/model/candidate evidence under the 23 source-bound proposed requirements, independently review the corrected partial/unknown outcomes, and retain accepted-claim/rejection counts. Do not claim expanded extraction precision/recall without its denominator.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2063,7 +2119,7 @@
           "last_path_commit": "63f02c0bd1ec04ad9cec5bfc3ade9e4b0f7bd955"
         }
       ],
-      "finding": "Source-span extraction, explicit user requirements and scoped evidence/gap machinery are implemented. The first new six-case attempt failed; source-heading/Unicode boundary repairs are documented without claiming a successful replacement run.",
+      "finding": "Fresh_run3 executed six real cases and accepted two model claims; all native runs remain PARTIAL with source-guard rejections. Four cases contain explicitly unasserted source context only. Five one-field species contracts omitted the scientific measurements; this is an unresolved case-validation defect, not a limitation cured by prose.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -2105,14 +2161,14 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\ontology.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\ontology.py",
           "sha256": "dd798f58b7e22aa14cd77cf35a88177606200a19ea2ed170b9691f57ab1e6dd3",
           "size_bytes": 10177,
           "scope": "Bounded category-qualified canonical IDs, source vocabulary, ambiguity and unresolved states",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\TAXONOMY_QUALIFICATION.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\TAXONOMY_QUALIFICATION.md",
           "sha256": "320ca03cb6c45dfafb755760d3c0776095e820e1ec1f1e9aabe94397708f5539",
           "size_bytes": 1299,
           "scope": "Three primary-source taxonomy snapshot hashes and exact-name correction; not cross-species biological equivalence",
@@ -2133,26 +2189,44 @@
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\reference_panel\\REFERENCE_QUALIFICATION.json",
+          "sha256": "cb95a9fd4183aa8f722e2e2949a150a7a9948b14e86db65b1696ac61a6c8c4c6",
+          "size_bytes": 6446,
+          "scope": "Eight real UniProt entries, exact source-derived alias queries and network-denied replay; reference context only",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+          "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+          "size_bytes": 27115,
+          "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
-        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\entity_normalization\\alpha_baseline_guard.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\entity_normalization\\alpha_baseline_guard.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\reference_panel\\REFERENCE_QUALIFICATION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "5747cbea2ae65c8570280d0e53f77bfabc968712",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Bind final ontology/category/ambiguity regression and new bounded UniProt panel receipt when available. Preserve context/UNKNOWN for unqualified phenotype/pathway mappings; no every-ontology importer gate is inferred.",
+      "remaining_action": "Retain actual panel/ontology evidence and bind final assembled-source regression. Preserve context/UNKNOWN for unqualified phenotype/pathway mappings; no every-ontology importer gate is inferred.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2169,7 +2243,7 @@
           "last_path_commit": "98e6e95ad924caafdd1b7ec5c373e27aef57b923"
         }
       ],
-      "finding": "Bounded HGNC/MONDO/CHEBI/CL/UBERON/EFO/NCBITaxon/UniProt identifiers, qualified canonical-ID reuse and ambiguity are implemented. Three real taxonomy snapshots justify exact new species mappings. Precise phenotype/pathway matching is deferred where source mappings and graph rights/lineage remain unqualified.",
+      "finding": "Bounded HGNC/MONDO/CHEBI/CL/UBERON/EFO/NCBITaxon/UniProt identifiers, qualified canonical-ID reuse and ambiguity are implemented. Three primary taxonomy snapshots and eight real UniProt entries with exact alias queries/replay are qualified. Precise phenotype/pathway matching remains deferred where mappings and graph rights/lineage are unqualified.",
       "disposition": "BOUNDED_QUALIFIED_IDS_WITH_EVIDENCED_SOURCE_LIMITS"
     },
     {
@@ -2218,7 +2292,7 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\scientific_v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\scientific_v2.py",
           "sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
           "size_bytes": 26358,
           "scope": "Explicit measurement contracts, eligibility, unknowns, dependence and compiler implementation",
@@ -2239,35 +2313,53 @@
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases\\PROTOCOL.json",
-          "sha256": "c623934ce98a14908ba3ff268523f7039ec51ffd899b783fba2ac6166a2266a4",
-          "size_bytes": 5658,
-          "scope": "Predeclared six real abstract-assisted cases in four domains; protocol existence is not run success",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\reference_panel\\REFERENCE_QUALIFICATION.json",
+          "sha256": "cb95a9fd4183aa8f722e2e2949a150a7a9948b14e86db65b1696ac61a6c8c4c6",
+          "size_bytes": 6446,
+          "scope": "Eight real UniProt entries, exact source-derived alias queries and network-denied replay; reference context only",
+          "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\dossier_integration.xml",
-          "sha256": "d50ac03c4ec17319a9b5a1608f7c0dcc613dc190f8cda0576421e56afb1d5089",
-          "size_bytes": 8654,
-          "scope": "Executed 61 focused dossier/integration checks; fixtures do not establish six new real cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+          "sha256": "02fa24123b9e639fcc76a8c509090dda02484af01493d42f4d97f36f56f664e6",
+          "size_bytes": 9189,
+          "scope": "Six real four-domain runs: two accepted model claims, four source-context-only cases, all native PARTIAL; inadequate requirements remain an open defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+          "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+          "size_bytes": 27115,
+          "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
           "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_3_evidence_compiler\\contract_receipt.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\dossier_integration.xml"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\reference_panel\\REFERENCE_QUALIFICATION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "b72fa9b3b5dc0752e9a8ea9ec9b030d4237ea1bf",
         "513a1dcd08e434f70773a2f55e0ab717e19a9a7c",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Attach the expanded qualified UniProt context panel and executed real evidence bundles/dossiers; preserve all unknown dependence and source-of-source links.",
+      "remaining_action": "Bind final compiler regressions and corrected real-case dossier review. Preserve source-of-source links, no independence inference and explicit named graph nonadoption.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2289,7 +2381,7 @@
           "last_path_commit": "513a1dcd08e434f70773a2f55e0ab717e19a9a7c"
         }
       ],
-      "finding": "Expanded relation/lineage machinery distinguishes 12 evidence relations; graph components never establish independent experiments. Named graph nonadoption has source/license/lineage evidence. New context-panel and real case execution remain pending.",
+      "finding": "Expanded relation/lineage machinery distinguishes 12 evidence relations. Eight real UniProt records were imported, queried by exact aliases and replayed offline. New real dossiers retain source context, provenance and unknown dependence; graph components never establish independent experiments.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -2331,28 +2423,28 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\scientific_v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\scientific_v2.py",
           "sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
           "size_bytes": 26358,
           "scope": "Explicit measurement contracts, eligibility, unknowns, dependence and compiler implementation",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\modality_contract.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\modality_contract.py",
           "sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
           "size_bytes": 5994,
           "scope": "Eight typed metadata families including declared CRISPR/RNAi screens; no raw screen/GWAS qualification claim",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\litdatamatcher\\v2.py",
-          "sha256": "7f3a2041c9d20772184568d2b64335e54c5ed5705ca1cd42af462c1f7f167163",
-          "size_bytes": 39859,
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\v2.py",
+          "sha256": "beb21a46f49f1270ce056a12bb7e253902f6bcca051059a4216f12f6b2eab0af",
+          "size_bytes": 41839,
           "scope": "Integration and source provenance/heading pipeline; final case execution still requires a receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -2366,29 +2458,53 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+          "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+          "size_bytes": 23156,
+          "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+          "sha256": "02fa24123b9e639fcc76a8c509090dda02484af01493d42f4d97f36f56f664e6",
+          "size_bytes": 9189,
+          "scope": "Six real four-domain runs: two accepted model claims, four source-context-only cases, all native PARTIAL; inadequate requirements remain an open defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+          "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+          "size_bytes": 27115,
+          "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
           "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\requirement_formalization\\alpha_baseline_guard.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "5747cbea2ae65c8570280d0e53f77bfabc968712",
         "fa78d135e22320198ac00b334ba64e533655b661",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Validate final case requirements and subsystem regressions on assembled source; no metadata-only match may claim statistical answerability.",
+      "remaining_action": "Validate the explicit corrected case requirements and reranked outcomes plus final subsystem regression. Preserve UNKNOWN for absent variables and do not infer statistical answerability from metadata.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2405,7 +2521,7 @@
           "last_path_commit": "fa78d135e22320198ac00b334ba64e533655b661"
         }
       ],
-      "finding": "Explicit measurement/design/temporal/feature/unit contracts and hard eligibility are implemented. Model proposals do not silently become essential requirements; current repair preserves mixed-vocabulary unknowns.",
+      "finding": "Explicit measurement/design/temporal/feature/unit contracts and hard eligibility are implemented. The new case audit found that one-field contracts allowed misleading EXACT_FIT outcomes; source-bound contract correction remains required. Model proposals do not silently become essential requirements.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -2510,7 +2626,8 @@
         "d04ba5c9418d53219d464c90bff08242d48246f1",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -2615,7 +2732,8 @@
         "c25eeabf605178a48ac4a6fdc3aa312182b65ce3",
         "3c386941c07d7da46ee642051e943606c0ec642c",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
@@ -2728,7 +2846,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
@@ -2789,7 +2908,7 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -2800,6 +2919,13 @@
           "sha256": "687f43fcdd8c342a887a29cf887ffb99c0a0ada4649410ab7ae5fa720645baf9",
           "size_bytes": 1404,
           "scope": "Preserved older independent adversarial failure; lead repairs do not constitute final independent approval",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
@@ -2822,12 +2948,20 @@
           "size_bytes": 39120,
           "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+          "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+          "size_bytes": 23156,
+          "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\cross_source_adversarial\\receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
@@ -2836,12 +2970,13 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Bind final repaired-source adversarial/full regression and independent findings disposition without counting fixtures as biological validation.",
+      "remaining_action": "Bind final assembled-source regression and later case/package review, including the inadequate-contract repair. Fixtures remain engineering evidence, not biological validation.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2857,7 +2992,7 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "Historical adversarial suites plus new independent source/schema/biological-unit findings drove targeted repairs. Earlier red artifacts remain preserved; final green and independent closure must be supplied.",
+      "finding": "Six independent functional findings, including lifecycle loss, were reproduced and fixed; 45 independent adversarial and 174 related tests passed. Earlier red artifacts remain preserved. A later real-case requirement defect is separately open.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -2906,17 +3041,31 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases\\PROTOCOL.json",
-          "sha256": "c623934ce98a14908ba3ff268523f7039ec51ffd899b783fba2ac6166a2266a4",
-          "size_bytes": 5658,
-          "scope": "Predeclared six real abstract-assisted cases in four domains; protocol existence is not run success",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\PROTOCOL.json",
+          "sha256": "119510b94419f1a412df5d3975696866af703f2dd60e3375b7ae3246b78b9505",
+          "size_bytes": 5676,
+          "scope": "Six unchanged source-selected questions; prior one-field contracts remain preserved as deficient development evidence",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+          "sha256": "02fa24123b9e639fcc76a8c509090dda02484af01493d42f4d97f36f56f664e6",
+          "size_bytes": 9189,
+          "scope": "Six real four-domain runs: two accepted model claims, four source-context-only cases, all native PARTIAL; inadequate requirements remain an open defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+          "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+          "size_bytes": 27115,
+          "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+          "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+          "size_bytes": 23156,
+          "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -2930,6 +3079,8 @@
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_6_dossier\\receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\dossier_integration.xml"
       ],
       "relevant_commits": [
@@ -2937,12 +3088,13 @@
         "673c2d9d323437cc34dbb1271ceefe56ca8ac6fa",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Require actual successful or justified scoped partial/abstention case receipts with auditable dossiers and preserved failures. A protocol, template or installation cannot close this row.",
+      "remaining_action": "Execute the source-bound contract correction using cached inference and unchanged source/candidate identities; independently review legitimate unknown/partial or no-fit results. The alpha six-class dossier floor remains frozen, while Phase2 separately requires new scientific breadth and adequate auditable requirements.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2964,7 +3116,7 @@
           "recorded_source_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "Six new real abstracts in four domains and 552 candidate IDs are predeclared. The initial run had zero accepted claims/dossiers and is preserved; source-boundary/model abstention refinement remains active.",
+      "finding": "Six unchanged new source questions in four domains have executed against 552 candidate IDs with six selected auditable dossiers. Two claims passed guards and four cases retained context only; all native runs are PARTIAL. Five species-only contracts and the environmental modality-only contract omit question-specific variables, so the new case requirement is not yet validated.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -3020,7 +3172,7 @@
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -3035,7 +3187,8 @@
         "6fb4db64b98d46ef0b1580049a51a48437c0a3e7",
         "aa9a97b101ea76c7c3e81279b98aa7f5ae3b5aa6",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
@@ -3162,7 +3315,8 @@
         "5747cbea2ae65c8570280d0e53f77bfabc968712",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -3267,7 +3421,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -3275,8 +3429,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -3303,7 +3457,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "0a5a5484eb05fb8c4f18df3965de7c1a043c18e2",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -4171,7 +4326,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4249,7 +4405,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4268,7 +4424,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4346,7 +4503,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4365,7 +4522,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4443,7 +4601,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4462,7 +4620,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4512,8 +4671,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -4531,7 +4690,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -4616,7 +4776,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4637,7 +4797,8 @@
         "3a3d734a5a6f2dd1580bcc7fa51d21515b08aa41",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4727,7 +4888,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4746,7 +4907,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4835,7 +4997,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4855,7 +5017,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4945,7 +5108,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4965,7 +5128,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5033,7 +5197,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5084,9 +5249,16 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "README.md",
+          "sha256": "e3b35640bb0cdf893a64721faaa1bf4881e0f9455d75091f68b3c99dd690b734",
+          "size_bytes": 18128,
+          "scope": "Current 0.3.0 entry point, preserved alpha and explicit pending case/final-acceptance limits",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -5105,7 +5277,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5155,9 +5328,16 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "README.md",
+          "sha256": "e3b35640bb0cdf893a64721faaa1bf4881e0f9455d75091f68b3c99dd690b734",
+          "size_bytes": 18128,
+          "scope": "Current 0.3.0 entry point, preserved alpha and explicit pending case/final-acceptance limits",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -5175,7 +5355,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5219,9 +5400,16 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "README.md",
+          "sha256": "e3b35640bb0cdf893a64721faaa1bf4881e0f9455d75091f68b3c99dd690b734",
+          "size_bytes": 18128,
+          "scope": "Current 0.3.0 entry point, preserved alpha and explicit pending case/final-acceptance limits",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -5239,7 +5427,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5336,7 +5525,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5440,7 +5630,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5498,9 +5689,16 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "README.md",
+          "sha256": "e3b35640bb0cdf893a64721faaa1bf4881e0f9455d75091f68b3c99dd690b734",
+          "size_bytes": 18128,
+          "scope": "Current 0.3.0 entry point, preserved alpha and explicit pending case/final-acceptance limits",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -5519,7 +5717,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5582,16 +5781,37 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\SNAPSHOT.json",
+          "sha256": "342b43b0264254f5e8b730cb6fdf9af8bfbaa2f8fdc6b02881e31e11feddd3f8",
+          "size_bytes": 2977,
+          "scope": "Immutable exact Git blob snapshots from assembled source849b76a for derivative evidence references",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
+          "sha256": "02fa24123b9e639fcc76a8c509090dda02484af01493d42f4d97f36f56f664e6",
+          "size_bytes": 9189,
+          "scope": "Six real four-domain runs: two accepted model claims, four source-context-only cases, all native PARTIAL; inadequate requirements remain an open defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+          "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+          "size_bytes": 23156,
+          "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
@@ -5599,18 +5819,21 @@
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Obtain the actual final independent review of final source/artifacts/receipts and resolve all in-scope critical/high findings.",
+      "remaining_action": "Bind the final runtime/case/artifact follow-up and resolve all in-scope critical/high findings before overall closeout.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -5626,7 +5849,7 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "Independent adversarial findings exist and repairs are documented. These do not certify the final assembled matrix, cases, install or release package.",
+      "finding": "Independent functional review PASS_WITH_LIMITATIONS closes six findings with 45 adversarial and 174 related tests. Its exact source fingerprint and declared independence are recorded. Later model cases, corrected requirements, matrix and delivery artifacts are outside that approval.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -5669,7 +5892,7 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-repair2-20260913\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -5702,13 +5925,36 @@
           "size_bytes": 39120,
           "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
+          "size_bytes": 24933,
+          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CASE_REQUIREMENT_CORRECTION.json",
+          "sha256": "bf570832e313f9b6b9a1b0983cb4e35909a3b512b5685400b2257334a21c2e54",
+          "size_bytes": 23156,
+          "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
+          "sha256": "1b9787bf58c80720f6d7b280e486b43e13d0bc3a7f814b87424cf72500126a66",
+          "size_bytes": 27115,
+          "scope": "120 actual source/case/reference/functional-review hash checks and six native dossier/source-context inspections; identifies the one-field contract defect",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220110Z\\BENCHMARK_RECEIPT.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -5716,12 +5962,13 @@
         "687ac2fea657a77d014f3563607ed53a3f7f42d3",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": true,
-      "remaining_action": "Attach the final green focused/integration receipt and independently reconciled finding dispositions, including case abstention/partial outcomes.",
+      "remaining_action": "Attach corrected-case replay and independent disposition plus assembled-source regression. Preserve every prior failed or deficient run.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -5744,7 +5991,7 @@
           "last_path_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "Lead d84e439 documents targeted source/schema/biological-unit/canonical-ID/mixed-assay/parser repairs. New case execution and final independent green closure remain to be evidenced.",
+      "finding": "Independent functional review verifies six targeted repairs. The current source-bound case audit adds a real inadequate-requirement defect; two accepted claims and context-only outputs do not resolve it.",
       "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
     },
     {
@@ -5793,8 +6040,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5813,7 +6060,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5874,8 +6122,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5894,7 +6142,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5944,8 +6193,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5963,7 +6212,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -6012,8 +6262,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6031,7 +6281,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -6154,8 +6405,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "470062d10c2a854c497bce95899fdf2339634c921cd27bdafa3af4f4d5025c83",
-          "size_bytes": 13422,
+          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
+          "size_bytes": 15179,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6173,7 +6424,8 @@
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-        "d84e439bb35362784073fb80392aa990d587d35a"
+        "d84e439bb35362784073fb80392aa990d587d35a",
+        "849b76adae986b57ea41d2cda527295c3ca9b6de"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,

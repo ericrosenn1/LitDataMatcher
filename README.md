@@ -11,13 +11,17 @@ questions from text, normalizing their data requirements, discovering relevant
 public datasets, and ranking the most plausible question-dataset pairs for
 expert review.
 
-Version 0.2.0 adds the local v2 alpha: real Europe PMC/PMC, GEO/ENA and UniProt
-acquisition; source-guarded local model extraction; typed experimental
-requirements; dependence-aware evidence; pretrained retrieval; a corrective
-controller; HTML review; and strict machine acceptance validation. Start with
-[`docs/v2/START_HERE.md`](docs/v2/START_HERE.md). It remains an engineering
-alpha with source-assisted evaluation, not an expert-calibrated biomedical
-discovery engine.
+Version 0.3.0 extends the local v2 pipeline with qualified multisource metadata,
+typed experimental requirements, source-linked dossiers, strict review and
+calibration contracts, and measured local retrieval and recovery. The completed
+hardened-alpha artifacts and sealed evaluation remain preserved. See the
+[0.3.0 release, installation and scope notes](docs/v2/RELEASE_0.3.0.md) and the
+[current acceptance matrix](docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.md).
+Final campaign acceptance is pending. New scientific cases include partial
+extraction and source-context-only outputs; their requirement correction and
+review remain open. Rankings are uncalibrated review priorities, and metadata
+fit does not establish scientific answerability, independence or causality.
+Real expert validation remains explicitly pending.
 
 ## What It Does Today
 

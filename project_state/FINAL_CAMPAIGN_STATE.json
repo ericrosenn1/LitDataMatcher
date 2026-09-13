@@ -5,7 +5,7 @@
   "updated_at": "2026-09-13T20:53:58.211964+00:00",
   "scope": "Full intended project completion, or all machine-resolvable requirements complete with only a proven irreducible external gate.",
   "request": "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md",
-  "request_sha256": "64487f76a0556ce868479bfaff5e8a86795ea1a275be38a420180681d779cfcf",
+  "request_sha256": "1c0966ba0f2c1ce50656af530ce05788cfb42e4ea3cfced35a45e8a0e4b190d6",
   "starting_functional_commit": "40921e58ca8a33e9de35847a116c324ec7d71500",
   "starting_verified_remote": "a4ee398cd8f30d275a8d151a46ffb13ef283392d",
   "unfinished_stage": "REQUIREMENTS_TO_EVIDENCE_MATRIX_NOT_STARTED",
@@ -33,5 +33,7 @@
   },
   "full_project_completion_proven": false,
   "human_only_gate_proven": false,
-  "background_execution_claimed": false
+  "background_execution_claimed": false,
+  "source_attachment_sha256": "64487f76a0556ce868479bfaff5e8a86795ea1a275be38a420180681d779cfcf",
+  "request_hash_scope": "Committed UTF-8 request blob; Git normalizes CRLF to LF. Source attachment hash is retained separately."
 }

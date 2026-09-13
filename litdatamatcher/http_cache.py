@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from hashlib import sha1, sha256
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from urllib.parse import urlencode
 
 import requests
@@ -59,11 +60,13 @@ class CachedHttpClient:
     ) -> dict:
         """Fetch JSON with replayable cache support and explicit successful refresh."""
 
+        self.last_response_metadata = {}
         path = self._cache_path(url, params, suffix=".json")
         if use_cache and not refresh and path.exists():
             # Cached/mock payloads are reproducible fixtures, not live validation.
-            self._record_cache_response(path, "cache_hit")
-            return json.loads(path.read_text(encoding="utf-8"))
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.last_response_metadata = self._cache_response_metadata(path, "cache_hit")
+            return data
         if self.offline:
             operation = "offline refresh unavailable" if refresh else "offline cache missing"
             raise FileNotFoundError(f"{operation}: {url}")
@@ -83,9 +86,9 @@ class CachedHttpClient:
                 response.raise_for_status()
                 data = response.json()
                 if use_cache:
-                    path.write_text(json.dumps(data, sort_keys=True), encoding="utf-8")
-                    self._record_cache_response(
+                    self._write_cache_response(
                         path,
+                        json.dumps(data, sort_keys=True),
                         "live_refreshed" if replaced_sha256 else "live_cached",
                         replaced_sha256=replaced_sha256,
                     )
@@ -106,11 +109,13 @@ class CachedHttpClient:
     ) -> str:
         """Fetch text/XML with retry and cache support."""
 
+        self.last_response_metadata = {}
         path = self._cache_path(url, params, suffix=".txt")
         if use_cache and path.exists():
             # Text cache covers XML and TEI intermediates as well as plain text responses.
-            self._record_cache_response(path, "cache_hit")
-            return path.read_text(encoding="utf-8")
+            text = path.read_text(encoding="utf-8")
+            self.last_response_metadata = self._cache_response_metadata(path, "cache_hit")
+            return text
         if self.offline:
             raise FileNotFoundError(f"offline cache missing: {url}")
 
@@ -128,8 +133,7 @@ class CachedHttpClient:
                 response.raise_for_status()
                 text = response.text
                 if use_cache:
-                    path.write_text(text, encoding="utf-8")
-                    self._record_cache_response(path, "live_cached")
+                    self._write_cache_response(path, text, "live_cached")
                 return text
             except requests.RequestException as exc:
                 last_error = exc
@@ -137,22 +141,43 @@ class CachedHttpClient:
                     time.sleep(0.5 * (attempt + 1))
         raise RuntimeError(f"HTTP text request failed for {url}: {last_error}")
 
-    def _record_cache_response(
+    def _cache_response_metadata(
         self, path: Path, cache_status: str, *, replaced_sha256: str = ""
-    ) -> None:
-        """Expose cache identity and refresh lineage for adapter provenance."""
+    ) -> dict[str, str]:
+        """Build cache identity and refresh lineage before publishing provenance."""
 
         timestamp = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(
             timespec="seconds"
         ).replace("+00:00", "Z")
-        self.last_response_metadata = {
+        metadata = {
             "cache_path": str(path),
             "cache_status": cache_status,
             "cache_content_sha256": _file_sha256(path),
             "retrieval_time_utc": timestamp,
         }
         if replaced_sha256:
-            self.last_response_metadata["replaced_cache_content_sha256"] = replaced_sha256
+            metadata["replaced_cache_content_sha256"] = replaced_sha256
+        return metadata
+
+    def _write_cache_response(
+        self, path: Path, text: str, cache_status: str, *, replaced_sha256: str = ""
+    ) -> None:
+        """Promote a complete response and its metadata without truncating prior cache."""
+
+        with NamedTemporaryFile(
+            dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+        ) as handle:
+            temporary_path = Path(handle.name)
+        try:
+            temporary_path.write_text(text, encoding="utf-8")
+            metadata = self._cache_response_metadata(
+                temporary_path, cache_status, replaced_sha256=replaced_sha256
+            )
+            metadata["cache_path"] = str(path)
+            temporary_path.replace(path)
+            self.last_response_metadata = metadata
+        finally:
+            temporary_path.unlink(missing_ok=True)
 
     def post_file_text(
         self,
@@ -166,13 +191,18 @@ class CachedHttpClient:
     ) -> str:
         """POST a local file and cache the returned text by file digest and form data."""
 
+        self.last_response_metadata = {}
         file_path = Path(file_path)
         payload_data = {key: str(value) for key, value in (data or {}).items()}
         digest = _file_sha256(file_path)
         cache_params = {"file_sha256": digest, "file_name": file_path.name, **payload_data}
         path = self._cache_path(url, cache_params, suffix=".txt")
         if use_cache and path.exists():
-            return path.read_text(encoding="utf-8")
+            text = path.read_text(encoding="utf-8")
+            self.last_response_metadata = self._cache_response_metadata(path, "cache_hit")
+            return text
+        if self.offline:
+            raise FileNotFoundError(f"offline cache missing: {url}")
 
         last_error: Exception | None = None
         mime_type = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
@@ -191,7 +221,7 @@ class CachedHttpClient:
                 response.raise_for_status()
                 text = response.text
                 if use_cache:
-                    path.write_text(text, encoding="utf-8")
+                    self._write_cache_response(path, text, "live_cached")
                 return text
             except requests.RequestException as exc:
                 last_error = exc

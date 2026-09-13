@@ -174,8 +174,16 @@ def test_source_passage_retains_known_publication_date_for_temporal_guard():
         compile_evidence({"question_id": "fixture-q", "proposition_id": "fixture-proposition"}, [item], "2026-09-13", [])
 
 
-@pytest.mark.parametrize("analyze_status,expected_exit", [("PASS", 0), ("FAIL", 1)])
-def test_case_controller_never_reports_pass_for_failed_analysis_outputs(tmp_path, monkeypatch, analyze_status, expected_exit):
+@pytest.mark.parametrize("analyze_status,failure_stages,expected_exit", [
+    ("PASS", [], 0),
+    ("FAIL", ["artifact_validation"], 1),
+    ("PARTIAL", ["source_guard"], 0),
+    ("PARTIAL", ["inference"], 1),
+    ("PARTIAL", ["source_guard", "inference"], 1),
+    ("PARTIAL", ["runtime"], 1),
+    ("PARTIAL", ["artifact_validation"], 1),
+])
+def test_case_controller_never_reports_pass_for_failed_analysis_outputs(tmp_path, monkeypatch, analyze_status, failure_stages, expected_exit):
     spec = importlib.util.spec_from_file_location("runtime_review_case_controller", Path(__file__).parents[1] / "scripts/v2/run_final_cases.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -209,7 +217,11 @@ def test_case_controller_never_reports_pass_for_failed_analysis_outputs(tmp_path
 
     def injected_analysis(case_root, run, *args, **kwargs):
         write_rows(run / "scientific_dossiers.jsonl", [dossier])
-        (run / "RUN_MANIFEST.json").write_text(json.dumps({"execution_status": analyze_status}), encoding="utf-8")
+        failures = [{"stage": stage, "description": "Synthetic controller failure probe"} for stage in failure_stages]
+        for failure in failures:
+            if failure["stage"] == "source_guard":
+                failure["rejections"] = [{"index": 0, "kind": "claim", "reason": "Synthetic source guard rejection"}]
+        (run / "RUN_MANIFEST.json").write_text(json.dumps({"execution_status": analyze_status, "failures": failures}), encoding="utf-8")
         return {"status": analyze_status, "run": str(run)}
 
     monkeypatch.setattr(module, "analyze", injected_analysis)

@@ -17,11 +17,13 @@ calibration contracts, and measured local retrieval and recovery. The completed
 hardened-alpha artifacts and sealed evaluation remain preserved. See the
 [0.3.0 release, installation and scope notes](docs/v2/RELEASE_0.3.0.md) and the
 [current acceptance matrix](docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.md).
-Final campaign acceptance is pending. New scientific cases include partial
-extraction and source-context-only outputs; their requirement correction and
-review remain open. Rankings are uncalibrated review priorities, and metadata
-fit does not establish scientific answerability, independence or causality.
-Real expert validation remains explicitly pending.
+Source-linked dossiers retain partial extraction and source-context-only
+outputs when the model cannot produce accepted claims. Exact source passages
+support typed requirements, and missing capability evidence remains unknown.
+Consult the acceptance matrix for the tested revision and validation receipts.
+Rankings are uncalibrated review priorities; metadata fit does not establish
+scientific answerability, independence or causality. Real expert validation
+remains explicitly pending.
 
 ## What It Does Today
 

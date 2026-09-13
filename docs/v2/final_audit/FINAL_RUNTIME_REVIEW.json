@@ -1,0 +1,387 @@
+{
+  "schema_version": "final_runtime_review_v1",
+  "status": "PASS_WITH_LIMITATIONS",
+  "reviewed_at_utc": "2026-09-13T23:03:18.040989+00:00",
+  "reviewer_id": "/root/final_offline_repair",
+  "implementer_id": "/root",
+  "expert_status": "PENDING_EXPERT_REVIEW",
+  "reviewed_commit": "8001e7e64e8cbf7ba24b2a1b2119a745a28dc1c0",
+  "baseline_commit": "bbe5c28868bfc7e564ec0906174642c7f22f7dbf",
+  "authoritative_root_repair_commit": "108cf4c85c9be663a2ed0d5bbba83abc7761d638",
+  "scope": "Prompt v2.3, strict complete JSON fence handling, explicit selected-source question context, extractive role/field guard, deterministic unasserted source context, and case status propagation.",
+  "source_fingerprint": {
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\source_fingerprint.json",
+    "sha256": "ab6cf8280d78f98503e0ffb5dc447801c7bdc4def31a6d4f95a0669c6c2bb8b2",
+    "size_bytes": 4248
+  },
+  "source_fingerprint_digest": "459fca8416c81f1482365647fbebdc39fa2be80c538c0d4a7a1a58899e330569",
+  "finding_counts": {
+    "total": 4,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "low": 0,
+    "unresolved": 0
+  },
+  "findings": [
+    {
+      "id": "RFR01",
+      "severity": "MEDIUM",
+      "title": "Explicit synthesis could be asserted as a current experiment",
+      "path": "litdatamatcher/semantic_runtime.py",
+      "repro": "test_explicit_review_findings_cannot_be_promoted_to_current_experiments",
+      "baseline_failures": 2,
+      "fix_commit": "d2487ecbb2b8dd44286538ad45ec258959159793",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_initial_repro.json",
+          "sha256": "877d0b0cbf0b211b38090e165adadf86ad413aed965da53c7349ed74240d009b",
+          "size_bytes": 1656
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        }
+      ],
+      "real_observation": "fresh_run2 metabolic_1 accepted a meta-analysis finding as direct_experiment; fresh_run3 retains that exact finding as background."
+    },
+    {
+      "id": "RFR02",
+      "severity": "MEDIUM",
+      "title": "Undeclared model novelty and expert fields survived the source guard",
+      "path": "litdatamatcher/semantic_runtime.py",
+      "repro": "test_extra_scientific_claim_fields_cannot_bypass_source_guard",
+      "baseline_failures": 2,
+      "fix_commit": "d2487ecbb2b8dd44286538ad45ec258959159793",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_initial_repro.json",
+          "sha256": "877d0b0cbf0b211b38090e165adadf86ad413aed965da53c7349ed74240d009b",
+          "size_bytes": 1656
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        }
+      ]
+    },
+    {
+      "id": "RFR03",
+      "severity": "MEDIUM",
+      "title": "Retrieved source context lost known publication date and bypassed temporal exclusion",
+      "path": "litdatamatcher/v2.py",
+      "repro": "test_source_passage_retains_known_publication_date_for_temporal_guard",
+      "baseline_failures": 1,
+      "fix_commit": "15902b557c19a9a9729cd42d350105b7fe1c30d5",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\source_context_and_controller.json",
+          "sha256": "a23113724712f049892ef045512b29986fea2c9e92f922c0a724199f413fffe4",
+          "size_bytes": 1680
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        }
+      ]
+    },
+    {
+      "id": "RFR04",
+      "severity": "HIGH",
+      "title": "Case export could report PASS despite failed analysis execution",
+      "path": "scripts/v2/run_final_cases.py",
+      "repro": "test_case_controller_never_reports_pass_for_failed_analysis_outputs",
+      "baseline_failures": 1,
+      "repair_extension_failures": 4,
+      "fix_commits": [
+        "15902b557c19a9a9729cd42d350105b7fe1c30d5",
+        "108cf4c85c9be663a2ed0d5bbba83abc7761d638"
+      ],
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\source_context_and_controller.json",
+          "sha256": "a23113724712f049892ef045512b29986fea2c9e92f922c0a724199f413fffe4",
+          "size_bytes": 1680
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\controller_partial_repro.json",
+          "sha256": "e7b4493174909887fe08aefbf7815e1a080e2ef570fbd63933295ee994568b66",
+          "size_bytes": 1665
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        }
+      ],
+      "accepted_contract": "Native/analyze status must agree. PASS has no failures. PARTIAL has a nonempty failures list containing only source_guard entries with recorded rejections. Inference, runtime, artifact and mixed-stage failures cannot certify a case export."
+    }
+  ],
+  "validation_runs": [
+    {
+      "started_at": "2026-09-13T22:57:28.923377+00:00",
+      "finished_at": "2026-09-13T22:57:30.799924+00:00",
+      "command": [
+        "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_final_runtime_followup.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "offline_review_guard",
+        "--junitxml=C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.xml"
+      ],
+      "cwd": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-runtime-review-20260913",
+      "exit_code": 0,
+      "python": "3.12.13",
+      "source_commit": "8001e7e64e8cbf7ba24b2a1b2119a745a28dc1c0",
+      "test_file_sha256": "5e20f7c5b1148cbd3a62820404a69a06e720b76537093cd221c68a470c2fe4f7",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "29",
+        "time": "1.266",
+        "timestamp": "2026-09-13T18:57:29.462944-04:00",
+        "hostname": "RicksRig"
+      },
+      "log": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.log",
+        "sha256": "c2d871562b2fa0c02e95fde1458fcfd7ee7f58c9b51d93bfda0cbce141d2c2a5"
+      },
+      "junit": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.xml",
+        "sha256": "f33a0576099c99f4223a7813ddbded5f93dca4b5a1ea46ef2b42976b08cc05bd"
+      },
+      "network_guard": {
+        "guard": "requests.Session.request/socket.create_connection/socket.connect/socket.connect_ex",
+        "blocked_attempts": 0,
+        "external_connections": 0,
+        "pytest_exit": 0
+      }
+    },
+    {
+      "started_at": "2026-09-13T22:57:31.220364+00:00",
+      "finished_at": "2026-09-13T22:57:32.368353+00:00",
+      "command": [
+        "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_semantic_runtime.py",
+        "tests/test_final_case_parsing.py",
+        "tests/test_v2_integration_contracts.py",
+        "tests/test_final_independent_review.py",
+        "tests/test_final_scientific_integration.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "offline_review_guard",
+        "--junitxml=C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_related_regressions.xml"
+      ],
+      "cwd": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-runtime-review-20260913",
+      "exit_code": 0,
+      "python": "3.12.13",
+      "source_commit": "8001e7e64e8cbf7ba24b2a1b2119a745a28dc1c0",
+      "test_file_sha256": "5e20f7c5b1148cbd3a62820404a69a06e720b76537093cd221c68a470c2fe4f7",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "100",
+        "time": "0.528",
+        "timestamp": "2026-09-13T18:57:31.765755-04:00",
+        "hostname": "RicksRig"
+      },
+      "log": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_related_regressions.log",
+        "sha256": "cc7fd9f8f7dcdcf593e8add05af6aa3452df8d899e8256071c16092a741516ae"
+      },
+      "junit": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_related_regressions.xml",
+        "sha256": "685035437e26c8aaa7b394b36261293a575192cca094015e4938dd56875e4453"
+      },
+      "network_guard": {
+        "guard": "requests.Session.request/socket.create_connection/socket.connect/socket.connect_ex",
+        "blocked_attempts": 0,
+        "external_connections": 0,
+        "pytest_exit": 0
+      }
+    }
+  ],
+  "passed_tests": 129,
+  "real_case_review": {
+    "fresh_run2": {
+      "inspection": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\fresh_run2_inspection.json",
+        "sha256": "4f4542fbd5677a4d56aaa05b0b966560d97e9babc64e49ca664c76c070bae661",
+        "size_bytes": 22297
+      },
+      "source_commit": "bbe5c28868bfc7e564ec0906174642c7f22f7dbf",
+      "status": "FAIL",
+      "cases": 6,
+      "accepted_claims": 2,
+      "cases_with_claims": 2,
+      "exported_cases": 2
+    },
+    "fresh_run3": {
+      "inspection": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\fresh_run3_inspection.json",
+        "sha256": "f543a6da16a794965fb9de444e3f24e004d75a3131e42ad2c4bd5b0cb94f0613",
+        "size_bytes": 24830
+      },
+      "source_commit": "d2487ecbb2b8dd44286538ad45ec258959159793",
+      "status": "PASS",
+      "cases": 6,
+      "accepted_claims": 2,
+      "cases_with_claims": 2,
+      "source_context_only_cases": 4,
+      "exported_cases": 6,
+      "individual_dossiers": 90,
+      "native_status_counts": {
+        "PARTIAL": 6
+      },
+      "failure_stage_counts": {
+        "source_guard": 9
+      },
+      "final_scientific_case_contract_ready": false,
+      "per_case": [
+        {
+          "case_id": "neurologic_1",
+          "document_id": "europepmc:MED:39068545",
+          "accepted_claims": 0,
+          "dossiers": 20,
+          "native_status": "PARTIAL",
+          "extraction_summary": [
+            {
+              "accepted_model_claims": 0,
+              "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+              "source_context_items": 2,
+              "status": "SOURCE_CONTEXT_ONLY"
+            }
+          ]
+        },
+        {
+          "case_id": "neurologic_2",
+          "document_id": "europepmc:MED:39775804",
+          "accepted_claims": 1,
+          "dossiers": 10,
+          "native_status": "PARTIAL",
+          "extraction_summary": [
+            {
+              "accepted_model_claims": 1,
+              "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+              "source_context_items": 2,
+              "status": "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS"
+            }
+          ]
+        },
+        {
+          "case_id": "cancer_1",
+          "document_id": "europepmc:MED:41288129",
+          "accepted_claims": 0,
+          "dossiers": 10,
+          "native_status": "PARTIAL",
+          "extraction_summary": [
+            {
+              "accepted_model_claims": 0,
+              "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+              "source_context_items": 1,
+              "status": "SOURCE_CONTEXT_ONLY"
+            }
+          ]
+        },
+        {
+          "case_id": "cancer_2",
+          "document_id": "europepmc:MED:41321030",
+          "accepted_claims": 0,
+          "dossiers": 10,
+          "native_status": "PARTIAL",
+          "extraction_summary": [
+            {
+              "accepted_model_claims": 0,
+              "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+              "source_context_items": 1,
+              "status": "SOURCE_CONTEXT_ONLY"
+            }
+          ]
+        },
+        {
+          "case_id": "environmental_1",
+          "document_id": "europepmc:MED:41387121",
+          "accepted_claims": 0,
+          "dossiers": 10,
+          "native_status": "PARTIAL",
+          "extraction_summary": [
+            {
+              "accepted_model_claims": 0,
+              "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+              "source_context_items": 1,
+              "status": "SOURCE_CONTEXT_ONLY"
+            }
+          ]
+        },
+        {
+          "case_id": "metabolic_1",
+          "document_id": "europepmc:MED:40810985",
+          "accepted_claims": 1,
+          "dossiers": 30,
+          "native_status": "PARTIAL",
+          "extraction_summary": [
+            {
+              "accepted_model_claims": 1,
+              "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+              "source_context_items": 2,
+              "status": "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "accepted_claim_revalidation": {
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\accepted_claim_revalidation.json",
+    "sha256": "953610c32bb73ca8d41f9a770a784d64219dab6a0cd6fc8fb2db4c68fe7fa452",
+    "size_bytes": 1686
+  },
+  "limitations": [
+    "This is an independent bounded functional runtime review, not assembled-package certification, expert adjudication, or evidence of extraction precision/recall.",
+    "The preserved fresh_run3 has six exported cases but only two accepted model claims; four cases contain source context only. All six native statuses are PARTIAL due exclusively to explicit source_guard rejections.",
+    "All inspected fresh_run3 evidence bundles remain CONTEXT_ONLY_OR_UNRESOLVED with insufficient-coverage. Retrieved passages are background, inconclusive, NOT_ASSERTED, and do not answer the question or establish novelty.",
+    "The species-only case requirements in fresh_run3 are insufficient to certify final experimental fit. Root is preparing a separate source-backed requirement derivative and cache replay. That derivative and the assembled package require later independent review; no future result is certified here.",
+    "The richer six dossier classes belong to the preserved original G12 evidence. The new six-case source-assisted example set does not independently demonstrate those classes or expanded extraction quality.",
+    "The fresh_run2 failure remains preserved (two claims/two exports out of six). The earlier zero-claim attempt is preserved separately under real_cases and is not replaced by the source-context export result.",
+    "Real-case receipts retain their actual d2487ec source commit; later app-only repairs are validated separately. Current accepted-claim fields were revalidated read-only against the same runtime source after line-ending normalization, with no new model inference. Exact execution bytes c1fdeb3c10c705a3b74e6e552a274133eca014cd74e74adba487ada86ac0dd23 differ from reviewer LF bytes 4d5243c5b28622a3efde48ebf115117ec3644c7401a8435d6c5622dfe092cc1e; mixed line endings fully explain the difference, and the exact executed source is retained.",
+    "Python network transports and model entry points were denied for independent runtime fixtures. The real-case receipt reports a Python audit hook with one intentional blocked probe and zero unexpected requests; it does not claim a native-library firewall.",
+    "No model weights, caches, source inputs, shared corpora, frozen alpha, sealed holdout, calibration labels or scientific acceptance thresholds were changed by this reviewer."
+  ],
+  "final_assembly_contract": {
+    "schema_version": "final_independent_review_v1",
+    "status": "PASS",
+    "source_commit": "full final assembled source SHA, after actual review",
+    "source_fingerprint": "final source_snapshot digest string",
+    "reviewer_id": "nonempty and different from implementer_id",
+    "implementer_id": "nonempty",
+    "report": {
+      "path": "actual final reviewed report",
+      "sha256": "report hash",
+      "size_bytes": "report size"
+    },
+    "expert_status": "PENDING_EXPERT_REVIEW",
+    "findings": "Critical/high/P0/P1 findings require FIXED_VALIDATED or DISMISSED_WITH_EVIDENCE with evidence refs",
+    "binding_status": "PENDING_SEPARATE_FINAL_ASSEMBLED_REVIEW"
+  }
+}

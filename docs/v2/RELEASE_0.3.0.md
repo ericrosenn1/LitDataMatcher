@@ -18,6 +18,8 @@ The new six-case execution used unchanged real abstracts across four domains and
 
 The independent functional review closed six reproduced findings, including the loss of explicit retraction signals, with 45 adversarial and 174 related checks on its recorded source fingerprints. That review does not approve later case-contract changes, the final package or installation. These are component counts, not the current full-suite count.
 
+The subsequent `b42f7b4` checkpoint passed 628 unique full-suite tests and 143 focused runtime/review/validator checks, with no failures, errors or skips. The unchanged 32-record performance fixture and three real omics replay partitions also passed. Its repeated real scale measurement reached 17.19 ms warmed FTS p95, 0.0437 seconds per 1,000 candidate assessments and 1.178 GiB sampled peak RSS. These source-bound results remain preserved while later case fixes receive their own regression. The benchmark recorded mixed-line-ending runtime bytes; both those bytes and the canonical Git version are retained with an explicit CRLF-to-LF equality check, while their raw fingerprints remain distinct.
+
 ## Qualified scope and interpretation
 
 | Area | Supported scope | Limit that remains visible |
@@ -83,11 +85,11 @@ Inspect `RUN_MANIFEST.json`, source/inference coverage, retained failures, `ques
 
 ## Final acceptance and roadmap
 
-The release remains pending until actual final receipts establish the current full suite, changed-path/adversarial regression, completed real-case disposition, comparable fixture performance, package integrity, outside-checkout clean installation, installed offline smoke, machine acceptance, independent review and lead closeout/remote state. Preserved component passes support those gates but cannot replace them. The matrix keeps operational and scientific-validation statuses separate.
+The release remains pending until actual final receipts establish regression for the latest functional repairs, completed real-case disposition, package integrity, outside-checkout clean installation, installed offline smoke, machine acceptance, independent review and lead closeout/remote state. The recorded full/focused suites and fixture/real performance passes support their exact source checkpoints. The matrix keeps operational and scientific-validation statuses separate.
 
 Further work should follow demonstrated need:
 
-1. Resolve the case requirement defect with exact source-bound variables and a cached-inference replay on the unchanged sources and catalog. Inspect partial/unknown and no-fit outcomes rather than forcing positive matches. Complete the final artifact and review gates; this open defect prevents a campaign-wide no-further-gain claim.
+1. Resolve the case requirement defect with exact source-bound variables and revalidation on the unchanged sources and catalog. The first corrected run removes species-only exact-fit outcomes; review also found that an explicit observational study was still unknown against a randomized-trial requirement. A narrow source-qualified design guard and final replay remain required. Inspect partial/unknown and no-fit outcomes without forcing positive matches. These repairs and the final artifact/review gates remain current work.
 2. Obtain genuine blinded expert judgments when available. Define the target outcome, study/cohort grouping and validation protocol before fitting calibration. The new machinery makes this possible; it supplies neither human judgment nor a scientifically justified probability model.
 3. Qualify additional repositories or ontologies when they enable a specific question class with inspectable measurements, controls, units and lineage. Existing rights/lineage/access decisions for cadmus, interaction_finder, OptimusKG, PrimeKG, SNACKKSS and Reactome remain evidence-based component dispositions. Source-count growth alone is not the objective.
 4. Extend source-qualified identifiers and modality vocabularies only from actual source contracts. Preserve ambiguous/unmapped fields until evidence supports a mapping. Broad graph imports or apparent matches should not replace measured sample-level compatibility.

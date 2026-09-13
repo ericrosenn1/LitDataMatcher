@@ -1,7 +1,7 @@
 {
   "schema_version": "final_requirements_matrix_v1",
   "status": "DRAFT_PENDING_FINAL_RECEIPTS",
-  "created_at_utc": "2026-09-13T23:06:22.178022+00:00",
+  "created_at_utc": "2026-09-13T23:19:54.948796+00:00",
   "source_inventory_reference": {
     "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-release-matrix-20260913\\docs\\v2\\final_audit\\REQUIREMENT_SCOPE_REVIEW.json",
     "sha256": "e5fc8e570e659db83e59bc8c461eda5e0349f8d014b8fb84e9586395c423b5f6",
@@ -9,7 +9,8 @@
     "scope": "Original immutable 74-row audit copied without ID/source/scope/mandatory-flag changes",
     "evidence_kind": "SOURCE_OR_DOCUMENTATION"
   },
-  "source_commit": "849b76adae986b57ea41d2cda527295c3ca9b6de",
+  "source_commit": "b42f7b461520609d31a62011c15da7c66f45e679",
+  "source_fingerprint": "25cc1a5d62cc66621cb0547a55982766c1fe9128ebe6f92e02e6ee9b094772ba",
   "documentation_writer_base_commit": "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
   "additional_reviewed_source_commit": "d84e439bb35362784073fb80392aa990d587d35a",
   "purpose": "Final-campaign derivative inventory. Component successes are scoped; missing final case/install/regression/acceptance/review/operational evidence remains pending.",
@@ -134,35 +135,26 @@
   },
   "requirement_count": 74,
   "classification_counts": {
-    "COMPLETE_VALIDATED": 31,
-    "COMPLETE_NEEDS_FINAL_REGRESSION": 22,
+    "COMPLETE_VALIDATED": 40,
+    "COMPLETE_NEEDS_FINAL_REGRESSION": 13,
     "MACHINE_COMPLETABLE_REMAINING": 13,
     "OPTIONAL_FUTURE_VALIDATION": 2,
     "NOT_APPLICABLE": 3,
     "SUPERSEDED": 3
   },
   "blocking_requirement_ids": [
-    "PHASE2.A",
     "PHASE2.B",
     "PHASE2.C",
     "PHASE2.D",
-    "PHASE2.E",
     "PHASE2.F",
     "PHASE2.G",
-    "PHASE2.H",
     "PHASE2.K",
     "PHASE2.L",
     "PHASE2.N",
     "PHASE2.O",
-    "FINAL.FOCUSED",
-    "FINAL.INTEGRATION",
-    "FINAL.FULL_SUITE",
     "FINAL.DIFF_CHECK",
     "FINAL.OFFLINE",
     "FINAL.DETERMINISM",
-    "FINAL.CROSS_SOURCE",
-    "FINAL.RECOVERY",
-    "FINAL.PERFORMANCE",
     "FINAL.PACKAGE",
     "FINAL.CLEAN_INSTALL",
     "FINAL.CLI_SMOKE",
@@ -214,9 +206,8 @@
     ]
   },
   "pending_final_receipts": [
-    "corrected real-case requirements, cached-inference replay and independent scoped disposition",
-    "assembled full/focused/adversarial regression",
-    "existing performance fixture comparison",
+    "corrected real-case requirements, qualified clinical-design handling and independent scoped disposition",
+    "regression for any subsequent functional repair",
     "final wheel/sdist/source archive integrity",
     "outside-checkout clean install and installed offline smoke",
     "final acceptance ledger/validator",
@@ -1681,14 +1672,14 @@
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\adapters.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\adapters.py",
           "sha256": "6095a101fa9e025980209bc11cf8f8f1242e3dd6a9f6cd32b7da2a057b6fd734",
           "size_bytes": 70167,
           "scope": "Bounded source adapters and current provider lifecycle/schema-error handling",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -1700,6 +1691,48 @@
           "size_bytes": 15500,
           "scope": "Executed 103 source-contract tests at the earlier integrated checkpoint",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -1707,7 +1740,12 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded\\ACQUISITION_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded\\OFFLINE_REPLAY.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -1716,12 +1754,13 @@
         "513a1dcd08e434f70773a2f55e0ab717e19a9a7c",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Bind final source lifecycle/schema-failure regression and all named-source qualification/investigation dispositions to actual final receipts.",
+      "blocks_project_completion": false,
+      "remaining_action": "None within this qualified source/ontology/evaluation scope. Later functional edits require affected regression; stronger scientific or expert outcomes retain their own pending status.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -1744,8 +1783,8 @@
           "last_path_commit": "513a1dcd08e434f70773a2f55e0ab717e19a9a7c"
         }
       ],
-      "finding": "Real EPMC expansion, durable record lineage, historical Crossref/PMC qualification and source-scoped PubMed/OpenAlex/Crossref repairs now exist. Named-source qualification remains bounded, never a complete-world corpus.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Real EPMC expansion, durable record lineage, historical Crossref/PMC qualification and source-scoped PubMed/OpenAlex/Crossref repairs now exist. Named-source qualification remains bounded, never a complete-world corpus. The assembled b42f7b4 full suite passed 628 tests; 143 focused checks also passed. The exact source/receipt audit is retained.",
+      "disposition": "IMPLEMENTED_VALIDATED_WITH_EXPLICIT_SOURCE_LIMITS"
     },
     {
       "id": "PHASE2.B",
@@ -1815,7 +1854,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\modality_contract.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\modality_contract.py",
           "sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
           "size_bytes": 5994,
           "scope": "Eight typed metadata families including declared CRISPR/RNAi screens; no raw screen/GWAS qualification claim",
@@ -1827,6 +1866,41 @@
           "size_bytes": 5658,
           "scope": "Predeclared six real abstract-assisted cases in four domains; protocol existence is not run success",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
@@ -1835,7 +1909,12 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_mgnify\\qualification_receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded\\ACQUISITION_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded\\OFFLINE_REPLAY.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\omics_qualification\\QUALIFICATION.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\omics_qualification\\QUALIFICATION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -1844,7 +1923,8 @@
         "62c94e7888de7c9d322a0a71727b92649032c565",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -1921,21 +2001,21 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\modality_contract.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\modality_contract.py",
           "sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
           "size_bytes": 5994,
           "scope": "Eight typed metadata families including declared CRISPR/RNAi screens; no raw screen/GWAS qualification claim",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\scientific_v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\scientific_v2.py",
           "sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
           "size_bytes": 26358,
           "scope": "Explicit measurement contracts, eligibility, unknowns, dependence and compiler implementation",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -1954,12 +2034,52 @@
           "size_bytes": 39120,
           "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_2_cross_modal\\receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\omics_qualification\\QUALIFICATION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -1967,7 +2087,8 @@
         "6c762e207c0905955a079917b24e9e7c3cf891c0",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -2036,14 +2157,14 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\semantic_runtime.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\semantic_runtime.py",
           "sha256": "4d5243c5b28622a3efde48ebf115117ec3644c7401a8435d6c5622dfe092cc1e",
           "size_bytes": 30829,
           "scope": "Local source-guarded extraction and scoped source boundary repair; code alone does not prove final case success",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\v2.py",
           "sha256": "beb21a46f49f1270ce056a12bb7e253902f6bcca051059a4216f12f6b2eab0af",
           "size_bytes": 41839,
           "scope": "Integration and source provenance/heading pipeline; final case execution still requires a receipt",
@@ -2078,7 +2199,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
@@ -2089,7 +2210,7 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2097,7 +2218,8 @@
         "63f02c0bd1ec04ad9cec5bfc3ade9e4b0f7bd955",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -2161,14 +2283,14 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\ontology.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\ontology.py",
           "sha256": "dd798f58b7e22aa14cd77cf35a88177606200a19ea2ed170b9691f57ab1e6dd3",
           "size_bytes": 10177,
           "scope": "Bounded category-qualified canonical IDs, source vocabulary, ambiguity and unresolved states",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\TAXONOMY_QUALIFICATION.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\TAXONOMY_QUALIFICATION.md",
           "sha256": "320ca03cb6c45dfafb755760d3c0776095e820e1ec1f1e9aabe94397708f5539",
           "size_bytes": 1299,
           "scope": "Three primary-source taxonomy snapshot hashes and exact-name correction; not cross-species biological equivalence",
@@ -2203,30 +2325,78 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\entity_normalization\\alpha_baseline_guard.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\reference_panel\\REFERENCE_QUALIFICATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "5747cbea2ae65c8570280d0e53f77bfabc968712",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Retain actual panel/ontology evidence and bind final assembled-source regression. Preserve context/UNKNOWN for unqualified phenotype/pathway mappings; no every-ontology importer gate is inferred.",
+      "blocks_project_completion": false,
+      "remaining_action": "None within this qualified source/ontology/evaluation scope. Later functional edits require affected regression; stronger scientific or expert outcomes retain their own pending status.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2243,8 +2413,8 @@
           "last_path_commit": "98e6e95ad924caafdd1b7ec5c373e27aef57b923"
         }
       ],
-      "finding": "Bounded HGNC/MONDO/CHEBI/CL/UBERON/EFO/NCBITaxon/UniProt identifiers, qualified canonical-ID reuse and ambiguity are implemented. Three primary taxonomy snapshots and eight real UniProt entries with exact alias queries/replay are qualified. Precise phenotype/pathway matching remains deferred where mappings and graph rights/lineage are unqualified.",
-      "disposition": "BOUNDED_QUALIFIED_IDS_WITH_EVIDENCED_SOURCE_LIMITS"
+      "finding": "Bounded HGNC/MONDO/CHEBI/CL/UBERON/EFO/NCBITaxon/UniProt identifiers, qualified canonical-ID reuse and ambiguity are implemented. Three primary taxonomy snapshots and eight real UniProt entries with exact alias queries/replay are qualified. Precise phenotype/pathway matching remains deferred where mappings and graph rights/lineage are unqualified. The assembled b42f7b4 full suite passed 628 tests; 143 focused checks also passed. The exact source/receipt audit is retained.",
+      "disposition": "IMPLEMENTED_VALIDATED_WITH_EXPLICIT_SOURCE_LIMITS"
     },
     {
       "id": "PHASE2.F",
@@ -2292,7 +2462,7 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\scientific_v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\scientific_v2.py",
           "sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
           "size_bytes": 26358,
           "scope": "Explicit measurement contracts, eligibility, unknowns, dependence and compiler implementation",
@@ -2334,10 +2504,45 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
@@ -2346,7 +2551,12 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\reference_panel\\REFERENCE_QUALIFICATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2354,7 +2564,8 @@
         "513a1dcd08e434f70773a2f55e0ab717e19a9a7c",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -2423,28 +2634,28 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\scientific_v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\scientific_v2.py",
           "sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
           "size_bytes": 26358,
           "scope": "Explicit measurement contracts, eligibility, unknowns, dependence and compiler implementation",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\modality_contract.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\modality_contract.py",
           "sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
           "size_bytes": 5994,
           "scope": "Eight typed metadata families including declared CRISPR/RNAi screens; no raw screen/GWAS qualification claim",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\litdatamatcher\\v2.py",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\litdatamatcher\\v2.py",
           "sha256": "beb21a46f49f1270ce056a12bb7e253902f6bcca051059a4216f12f6b2eab0af",
           "size_bytes": 41839,
           "scope": "Integration and source provenance/heading pipeline; final case execution still requires a receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -2479,10 +2690,45 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
@@ -2491,7 +2737,12 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2499,7 +2750,8 @@
         "fa78d135e22320198ac00b334ba64e533655b661",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -2611,6 +2863,48 @@
           "size_bytes": 7922,
           "scope": "Descriptive scorecard, source/expert provenance, separate fitted/validated scopes and pending real calibration",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -2618,7 +2912,12 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\validation\\FINAL_BENCHMARK_VERIFICATION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2627,12 +2926,13 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Bind final ranking/calibration-contract regression. Retain scoped source metrics and explicit pending expert/protocol-dependent stronger outcomes; do not tune the sealed holdout or fabricate labels.",
+      "blocks_project_completion": false,
+      "remaining_action": "None within this qualified source/ontology/evaluation scope. Later functional edits require affected regression; stronger scientific or expert outcomes retain their own pending status.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -2660,8 +2960,8 @@
           "recorded_source_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "Real source-determined retrieval/compatibility benchmark reports P@k/R@k/MRR/nDCG, ablations, full denominators and unjudged cases. Calibration machinery fits and separately validates a declared protocol; no real expert calibration exists. Scientific significance/novelty/independence probabilities are not inferred from heuristic scores.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Real source-determined retrieval/compatibility benchmark reports P@k/R@k/MRR/nDCG, ablations, full denominators and unjudged cases. Calibration machinery fits and separately validates a declared protocol; no real expert calibration exists. Scientific significance/novelty/independence probabilities are not inferred from heuristic scores. The assembled b42f7b4 full suite passed 628 tests; 143 focused checks also passed. The exact source/receipt audit is retained.",
+      "disposition": "IMPLEMENTED_VALIDATED_WITH_EXPLICIT_SOURCE_LIMITS"
     },
     {
       "id": "PHASE2.I",
@@ -2721,11 +3021,51 @@
           "size_bytes": 7922,
           "scope": "Descriptive scorecard, source/expert provenance, separate fitted/validated scopes and pending real calibration",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_4_expert_review\\packet_receipt.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2733,7 +3073,8 @@
         "3c386941c07d7da46ee642051e943606c0ec642c",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
@@ -2833,6 +3174,41 @@
           "size_bytes": 3363,
           "scope": "Executed 22 focused benchmark/omics/modality tests before later final-source repair",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
@@ -2841,13 +3217,19 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220110Z\\BENCHMARK_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\validation\\FINAL_BENCHMARK_VERIFICATION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\validation\\benchmark_taxonomy_repair_tests.xml"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\validation\\benchmark_taxonomy_repair_tests.xml",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
@@ -2908,7 +3290,7 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -2922,7 +3304,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
@@ -2955,23 +3337,64 @@
           "size_bytes": 23156,
           "scope": "23 exact-source-bound minimal requirements for the six unchanged questions; model-assisted protocol proposal, not expert labels or executed correction",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\cross_source_adversarial\\receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -3089,7 +3512,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -3172,15 +3596,55 @@
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -3188,7 +3652,8 @@
         "aa9a97b101ea76c7c3e81279b98aa7f5ae3b5aa6",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
@@ -3299,6 +3764,41 @@
           "size_bytes": 5658,
           "scope": "Predeclared six real abstract-assisted cases in four domains; protocol existence is not run success",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+          "sha256": "0724324bcdb9e3a05ab0abd7d10d376092d67cccf14d247863c27d021e4de79d",
+          "size_bytes": 1705,
+          "scope": "Three real omics partitions replayed identically on final source, zero unexpected network requests and one blocked control probe",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
@@ -3308,7 +3808,12 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded\\ACQUISITION_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\omics_qualification\\QUALIFICATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\validation\\FINAL_BENCHMARK_VERIFICATION.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\validation\\FINAL_BENCHMARK_VERIFICATION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\OMICS_REPLAY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -3316,7 +3821,8 @@
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -3421,7 +3927,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -3429,8 +3935,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -3458,7 +3964,8 @@
         "0a5a5484eb05fb8c4f18df3965de7c1a043c18e2",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -4327,7 +4834,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4370,67 +4878,52 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-          "sha256": "17cef090f907997bdc51560083358277a20c0dfe92a2437b41eef3a0dcca763d",
-          "size_bytes": 2214,
-          "scope": "Executed cache repair: 49 focused +65 related tests, zero guarded network calls and preserved keys/atomic writes",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-          "sha256": "5d0780ceaf9c120cb52b1c8a94247c04ab3d53ae73938aafd2d5a9869eb1ecdf",
-          "size_bytes": 5293,
-          "scope": "Executed 60 focused/integration checks for strict review/adjudication and fitted-calibration machinery; no real expert labels",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-          "sha256": "128744c929b05320fa2e02f34c9c7882dde1be7cdd8bb2f786cfb6a653e365f3",
-          "size_bytes": 15500,
-          "scope": "Executed 103 source-contract tests at the earlier integrated checkpoint",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-          "sha256": "28b389a5a8dcaca54f81f69fbd0618f79c727452f1843cfe6a65ed23e72ecfd7",
-          "size_bytes": 39120,
-          "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Attach actual final source-bound commands/counts/exits and applicable new-path replay/recovery results; preserve successful scientific artifacts.",
+      "blocks_project_completion": false,
+      "remaining_action": "None for this executed source checkpoint. Any subsequent functional repair must be linked to its affected/final regression before overall acceptance.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -4441,8 +4934,8 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "Executed component checkpoints are available, including offline/cache, expanded source, pipeline, calibration and real benchmark evidence. They are not a complete regression receipt for the assembled final source.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Current b42f7b4 functional fingerprint25cc1a5 passed 628 full-suite tests and 143 focused runtime/review/validator tests, all unique with zero failures/errors/skips. Exact commands, logs and JUnit hashes are retained.",
+      "disposition": "EXECUTED_SOURCE_BOUND_REGRESSION"
     },
     {
       "id": "FINAL.INTEGRATION",
@@ -4468,67 +4961,52 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-          "sha256": "17cef090f907997bdc51560083358277a20c0dfe92a2437b41eef3a0dcca763d",
-          "size_bytes": 2214,
-          "scope": "Executed cache repair: 49 focused +65 related tests, zero guarded network calls and preserved keys/atomic writes",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-          "sha256": "5d0780ceaf9c120cb52b1c8a94247c04ab3d53ae73938aafd2d5a9869eb1ecdf",
-          "size_bytes": 5293,
-          "scope": "Executed 60 focused/integration checks for strict review/adjudication and fitted-calibration machinery; no real expert labels",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-          "sha256": "128744c929b05320fa2e02f34c9c7882dde1be7cdd8bb2f786cfb6a653e365f3",
-          "size_bytes": 15500,
-          "scope": "Executed 103 source-contract tests at the earlier integrated checkpoint",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-          "sha256": "28b389a5a8dcaca54f81f69fbd0618f79c727452f1843cfe6a65ed23e72ecfd7",
-          "size_bytes": 39120,
-          "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Attach actual final source-bound commands/counts/exits and applicable new-path replay/recovery results; preserve successful scientific artifacts.",
+      "blocks_project_completion": false,
+      "remaining_action": "None for this executed source checkpoint. Any subsequent functional repair must be linked to its affected/final regression before overall acceptance.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -4539,8 +5017,8 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "Executed component checkpoints are available, including offline/cache, expanded source, pipeline, calibration and real benchmark evidence. They are not a complete regression receipt for the assembled final source.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Current b42f7b4 functional fingerprint25cc1a5 passed 628 full-suite tests and 143 focused runtime/review/validator tests, all unique with zero failures/errors/skips. Exact commands, logs and JUnit hashes are retained.",
+      "disposition": "EXECUTED_SOURCE_BOUND_REGRESSION"
     },
     {
       "id": "FINAL.FULL_SUITE",
@@ -4566,67 +5044,52 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-          "sha256": "17cef090f907997bdc51560083358277a20c0dfe92a2437b41eef3a0dcca763d",
-          "size_bytes": 2214,
-          "scope": "Executed cache repair: 49 focused +65 related tests, zero guarded network calls and preserved keys/atomic writes",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-          "sha256": "5d0780ceaf9c120cb52b1c8a94247c04ab3d53ae73938aafd2d5a9869eb1ecdf",
-          "size_bytes": 5293,
-          "scope": "Executed 60 focused/integration checks for strict review/adjudication and fitted-calibration machinery; no real expert labels",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-          "sha256": "128744c929b05320fa2e02f34c9c7882dde1be7cdd8bb2f786cfb6a653e365f3",
-          "size_bytes": 15500,
-          "scope": "Executed 103 source-contract tests at the earlier integrated checkpoint",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-          "sha256": "28b389a5a8dcaca54f81f69fbd0618f79c727452f1843cfe6a65ed23e72ecfd7",
-          "size_bytes": 39120,
-          "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Attach actual final source-bound commands/counts/exits and applicable new-path replay/recovery results; preserve successful scientific artifacts.",
+      "blocks_project_completion": false,
+      "remaining_action": "None for this executed source checkpoint. Any subsequent functional repair must be linked to its affected/final regression before overall acceptance.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -4637,8 +5100,8 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "Executed component checkpoints are available, including offline/cache, expanded source, pipeline, calibration and real benchmark evidence. They are not a complete regression receipt for the assembled final source.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Current b42f7b4 functional fingerprint25cc1a5 passed 628 full-suite tests and 143 focused runtime/review/validator tests, all unique with zero failures/errors/skips. Exact commands, logs and JUnit hashes are retained.",
+      "disposition": "EXECUTED_SOURCE_BOUND_REGRESSION"
     },
     {
       "id": "FINAL.DIFF_CHECK",
@@ -4671,8 +5134,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -4691,7 +5154,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -4776,7 +5240,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4798,7 +5262,8 @@
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4888,7 +5353,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -4908,7 +5373,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -4962,68 +5428,53 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-          "sha256": "17cef090f907997bdc51560083358277a20c0dfe92a2437b41eef3a0dcca763d",
-          "size_bytes": 2214,
-          "scope": "Executed cache repair: 49 focused +65 related tests, zero guarded network calls and preserved keys/atomic writes",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-          "sha256": "5d0780ceaf9c120cb52b1c8a94247c04ab3d53ae73938aafd2d5a9869eb1ecdf",
-          "size_bytes": 5293,
-          "scope": "Executed 60 focused/integration checks for strict review/adjudication and fitted-calibration machinery; no real expert labels",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+          "sha256": "030169516c01369fe44a9c0079c2fd43b43dc5697089520325c228ea4b015a97",
+          "size_bytes": 1691,
+          "scope": "143 runtime/review/final-validator focused tests passed on the same b42f7b4 functional fingerprint",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-          "sha256": "128744c929b05320fa2e02f34c9c7882dde1be7cdd8bb2f786cfb6a653e365f3",
-          "size_bytes": 15500,
-          "scope": "Executed 103 source-contract tests at the earlier integrated checkpoint",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-          "sha256": "28b389a5a8dcaca54f81f69fbd0618f79c727452f1843cfe6a65ed23e72ecfd7",
-          "size_bytes": 39120,
-          "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\cross_source_adversarial\\receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Attach actual final source-bound commands/counts/exits and applicable new-path replay/recovery results; preserve successful scientific artifacts.",
+      "blocks_project_completion": false,
+      "remaining_action": "None for this executed source checkpoint. Any subsequent functional repair must be linked to its affected/final regression before overall acceptance.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -5039,8 +5490,8 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "Executed component checkpoints are available, including offline/cache, expanded source, pipeline, calibration and real benchmark evidence. They are not a complete regression receipt for the assembled final source.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Current b42f7b4 functional fingerprint25cc1a5 passed 628 full-suite tests and 143 focused runtime/review/validator tests, all unique with zero failures/errors/skips. Exact commands, logs and JUnit hashes are retained.",
+      "disposition": "EXECUTED_SOURCE_BOUND_REGRESSION"
     },
     {
       "id": "FINAL.RECOVERY",
@@ -5073,68 +5524,54 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-          "sha256": "17cef090f907997bdc51560083358277a20c0dfe92a2437b41eef3a0dcca763d",
-          "size_bytes": 2214,
-          "scope": "Executed cache repair: 49 focused +65 related tests, zero guarded network calls and preserved keys/atomic writes",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-          "sha256": "5d0780ceaf9c120cb52b1c8a94247c04ab3d53ae73938aafd2d5a9869eb1ecdf",
-          "size_bytes": 5293,
-          "scope": "Executed 60 focused/integration checks for strict review/adjudication and fitted-calibration machinery; no real expert labels",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real.command.json",
+          "sha256": "d812355957bbbcc881b1f89118466b9a98a7c7066497a54ccd1814bd7833d80a",
+          "size_bytes": 2370,
+          "scope": "Executed current benchmark command, zero exit and unchanged normalized functional source fingerprint",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-          "sha256": "52715e707f6f92b7c63eaa848798c7892fea0a2f9e2507ad9fbc5d9b960738f3",
-          "size_bytes": 12456,
-          "scope": "Executed 89 earlier pipeline integration tests; historical checkpoint, not final-source acceptance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+          "sha256": "8f903c991dad3bbb872f96bc8bf1f4cb758a46d635047279de38ea47f0bffae5",
+          "size_bytes": 1539,
+          "scope": "628 unique tests passed without failures/errors/skips on b42f7b4 fingerprint25cc1a5; exact command and JUnit hashes retained",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-          "sha256": "128744c929b05320fa2e02f34c9c7882dde1be7cdd8bb2f786cfb6a653e365f3",
-          "size_bytes": 15500,
-          "scope": "Executed 103 source-contract tests at the earlier integrated checkpoint",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
           "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-          "sha256": "28b389a5a8dcaca54f81f69fbd0618f79c727452f1843cfe6a65ed23e72ecfd7",
-          "size_bytes": 39120,
-          "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
-          "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
-          "size_bytes": 2011,
-          "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_5_scale\\benchmark_comparison_receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\calibration_repair\\green_after.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\pipeline_integration_final.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\expanded_source_contracts.xml",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Attach actual final source-bound commands/counts/exits and applicable new-path replay/recovery results; preserve successful scientific artifacts.",
+      "blocks_project_completion": false,
+      "remaining_action": "None for the validated recovery scope. Keep frozen historical recovery evidence and native final child receipts unchanged.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -5150,8 +5587,8 @@
           "recorded_source_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "Executed component checkpoints are available, including offline/cache, expanded source, pipeline, calibration and real benchmark evidence. They are not a complete regression receipt for the assembled final source.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "The final-source real benchmark again committed276 catalog records in a child exiting71, then a separate child resumed only276. Exact552 IDs/payloads and no duplicate records/versions passed; current full suite covers other affected recovery paths.",
+      "disposition": "EXECUTED_REAL_SEPARATE_PROCESS_RECOVERY"
     },
     {
       "id": "FINAL.PERFORMANCE",
@@ -5176,34 +5613,60 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-          "sha256": "28b389a5a8dcaca54f81f69fbd0618f79c727452f1843cfe6a65ed23e72ecfd7",
-          "size_bytes": 39120,
-          "scope": "Executed 1600/552 progressive CPU benchmark, 17 source-metadata questions, real separate-process recovery; scoped pre-d84 source",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\SCALE_FIXTURE.json",
+          "sha256": "7bc38442ba74315eb10ca58d683307a63d93640a87fd1efc93f80461ea4cc8e9",
+          "size_bytes": 1541,
+          "scope": "32-record synthetic fixture comparison PASS against unchanged 10x latency tolerance; separate from real-data scale",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-phase2-benchmark-20260913\\docs\\v2\\final_audit\\PHASE2_BENCHMARK_RESULT.md",
-          "sha256": "2ea0ae2b7110fbe28283398ad75a8abb58ced25816e4fecd063bbef13bee7a52",
-          "size_bytes": 9442,
-          "scope": "Exact metadata metrics, denominators, source hashes, preserved failure and limits",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_fixture.command.json",
+          "sha256": "cd5bf4b2d1891cf314948b3ab62d709d2293c33f8d1b6a1a711d8744f792998d",
+          "size_bytes": 1826,
+          "scope": "Actual existing-baseline fixture comparison command on b42f7b4",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+          "sha256": "bd2beefe191574b6c6ebc5de87b30ba9b409425583ae8da20aa37b9de0f92f73",
+          "size_bytes": 39053,
+          "scope": "Final-source real 1600/552 scale, source-derived metadata rankings and separate-process recovery PASS; explicit mixed-EOL runtime bridge applies",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real.command.json",
+          "sha256": "d812355957bbbcc881b1f89118466b9a98a7c7066497a54ccd1814bd7833d80a",
+          "size_bytes": 2370,
+          "scope": "Executed current benchmark command, zero exit and unchanged normalized functional source fingerprint",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json",
+          "sha256": "9395007552ce410ce31da1d1abccbfc4c1ff34d1e11faa9e10c42d684eefd2ae",
+          "size_bytes": 8973,
+          "scope": "37 current receipt/artifact checks, unique JUnit denominators, source snapshots and explicit byte-preserving EOL bridge",
+          "evidence_kind": "EXECUTED_RECEIPT"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_5_scale\\benchmark_comparison_receipt.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\SCALE_FIXTURE.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_fixture.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CLOSEOUT_CHECKPOINT_b42f7b4.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Run the lightweight existing fixture comparison on assembled final source with unchanged baseline/tolerance, and retain both fixture and real-scale scopes.",
+      "blocks_project_completion": false,
+      "remaining_action": "None for the measured workload. Preserve fixture/real scopes, all denominators and the native receipt plus explicit mixed-EOL source bridge.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -5213,8 +5676,8 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "New real scale passes its predeclared workload bounds. It is not numerically comparable to the historical 32-record fixture/backend baseline.",
-      "disposition": "IMPLEMENTED_SCOPE_REQUIRES_FINAL_EVIDENCE"
+      "finding": "Existing 32-record synthetic fixture passes the unchanged baseline/tolerance. The distinct real 1600/552 benchmark also passes predeclared bounds: FTS p95 .0171925s, matching .0436773s/1000 and sampled RSS1265168384 bytes.",
+      "disposition": "EXECUTED_FIXED_BASELINE_AND_REAL_SCALE"
     },
     {
       "id": "FINAL.PACKAGE",
@@ -5249,8 +5712,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5278,7 +5741,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5328,8 +5792,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5356,7 +5820,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5400,8 +5865,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5428,7 +5893,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5526,7 +5992,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5631,7 +6098,8 @@
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5689,8 +6157,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5718,7 +6186,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -5781,17 +6250,17 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\SNAPSHOT.json",
-          "sha256": "342b43b0264254f5e8b730cb6fdf9af8bfbaa2f8fdc6b02881e31e11feddd3f8",
-          "size_bytes": 2977,
-          "scope": "Immutable exact Git blob snapshots from assembled source849b76a for derivative evidence references",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\SNAPSHOT.json",
+          "sha256": "31d8d750fef6f32c66ad3ddce22b49d72cdc381475d0f007cfa6332ee800107b",
+          "size_bytes": 5354,
+          "scope": "Exact b42f7b4 Git blobs plus retained mixed-EOL runtime bytes and explicit CRLF-to-LF equivalence; raw fingerprints remain distinct",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -5810,8 +6279,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
@@ -5820,7 +6289,7 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\real_cases_v2\\fresh_run3\\CASE_EXECUTION.json"
       ],
       "relevant_commits": [
@@ -5828,7 +6297,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -5892,7 +6362,7 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\FINAL_REPAIR_NOTES.md",
           "sha256": "2a79746d7436cf3d1ced1d6da6624d286863ca68daf479ada136cd3798cf6ce8",
           "size_bytes": 2011,
           "scope": "Lead repair d84e439: lifecycle/errors, unknown semantics, exact canonical IDs, typed screen family and preserved failed cases",
@@ -5927,7 +6397,7 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
           "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
           "size_bytes": 24933,
           "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
@@ -5953,7 +6423,7 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\offline_repair\\self_audit.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220110Z\\BENCHMARK_RECEIPT.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\scale\\run_20260913T220705Z\\BENCHMARK_RECEIPT.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_849b76a\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\CURRENT_EVIDENCE_INSPECTION.json"
       ],
       "relevant_commits": [
@@ -5963,7 +6433,8 @@
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "mandatory_for_software_complete": true,
@@ -6040,8 +6511,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6061,7 +6532,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -6122,8 +6594,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6143,7 +6615,8 @@
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -6193,8 +6666,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6213,7 +6686,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -6262,8 +6736,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6282,7 +6756,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,
@@ -6405,8 +6880,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "519cee720c7da3be3489b9ffb70bce35aa4365d954042802b20a53e85e2bb335",
-          "size_bytes": 15179,
+          "sha256": "551911d1cf785e6fccd88ef3c772426ca9e11ea66fc6c11cdbe0a9b95291218c",
+          "size_bytes": 16066,
           "scope": "Draft use, scope, future roadmap and explicit pending final gates; not an executed release receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6425,7 +6900,8 @@
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
         "d84e439bb35362784073fb80392aa990d587d35a",
-        "849b76adae986b57ea41d2cda527295c3ca9b6de"
+        "849b76adae986b57ea41d2cda527295c3ca9b6de",
+        "b42f7b461520609d31a62011c15da7c66f45e679"
       ],
       "classification": "MACHINE_COMPLETABLE_REMAINING",
       "mandatory_for_software_complete": true,

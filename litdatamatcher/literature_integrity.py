@@ -7,8 +7,10 @@ from .schemas import JsonDict, stable_id
 
 
 def _relations(row: JsonDict) -> dict:
-    value = row.get("version_relationships") or row.get("metadata", {}).get("version_relationships", {})
-    return value if isinstance(value, dict) else {}
+    primary = row.get("version_relationships", {})
+    merged = row.get("metadata", {}).get("version_relationships", {})
+    return {**(primary if isinstance(primary, dict) else {}),
+            **(merged if isinstance(merged, dict) else {})}
 
 
 def _lifecycle(relations: dict) -> str:
@@ -48,9 +50,17 @@ def consolidate_literature_rows(rows: list[JsonDict], source_statuses: list[Json
         source_ids = [str(record.get("source_id", "")), *map(str, alternates)]
         provenance = [record.get("source_provenance", {}), *list(metadata.get("alternate_source_provenance", []) or [])]
         snapshots = []
-        for source_id, item in zip(source_ids, provenance, strict=False):
+        if "merged_source_records" in metadata:
+            # Pair each source identity with its own provenance, including an
+            # explicit unknown when a duplicate did not supply provenance.
+            members = [record, *metadata["merged_source_records"]]
+            source_ids = list(dict.fromkeys(str(member.get("source_id", "")) for member in members))
+            pairs = [(str(member.get("source_id", "")), member.get("source_provenance", {})) for member in members]
+        else:
+            pairs = list(zip(source_ids, provenance, strict=False))
+        for source_id, item in pairs:
             item = item if isinstance(item, dict) else {}
-            snapshots.append({"source_id": source_id, "source_type": str(item.get("source_type", record.get("source", "unknown"))), "retrieval_time_utc": str(item.get("retrieval_time_utc", "")), "status": "OBSERVED"})
+            snapshots.append({"source_id": source_id, "source_type": str(item.get("source_type", "unknown")), "retrieval_time_utc": str(item.get("retrieval_time_utc", "")), "status": "OBSERVED" if item else "UNKNOWN"})
         relations = _relations(record)
         lifecycle = _lifecycle(relations)
         fulltext = record.get("fulltext_status")

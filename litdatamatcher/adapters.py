@@ -11,6 +11,7 @@ decide how much text or dataset detail can be used.
 from __future__ import annotations
 
 import re
+from copy import deepcopy
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
@@ -176,6 +177,7 @@ class PubMedLiteratureAdapter:
                     "abstract": abstract,
                     "doi": doi,
                     "pmid": uid,
+                    "pmcid": xml_item.get("pmcid", "") or _article_id(article_ids, "pmc"),
                     "source": self.name,
                     "year": xml_item.get("year") or _pubdate_year(item.get("pubdate", "")),
                     "source_provenance": provenance,
@@ -945,8 +947,10 @@ def search_literature_sources(
     """Search named live literature metadata sources."""
 
     rows: list[JsonDict] = []
-    seen: dict[str, JsonDict] = {}
+    seen: dict[str, list[JsonDict]] = {}
     source_statuses = []
+    if limit <= 0:
+        return []
     for adapter in build_literature_adapters(source_names, client=client):
         try:
             adapter_rows = adapter.search_literature(query, limit=limit)
@@ -955,15 +959,37 @@ def search_literature_sources(
             # A source/schema problem is unknown, never an implicit clean result.
             adapter_rows = []
             source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE"})
-        for row in adapter_rows:
-            key = _literature_identity(row)
-            if key in seen:
-                _merge_literature_duplicate(seen[key], row)
+        for original in adapter_rows:
+            row = deepcopy(original)
+            keys = _literature_identity_keys(row)
+            candidates = {id(candidate): candidate for key in keys for candidate in seen.get(key, [])}
+            duplicate = next(iter(candidates.values())) if len(candidates) == 1 else None
+            conflicts = []
+            for candidate in candidates.values():
+                fields = _identifier_conflicts(candidate, row)
+                if fields or len(candidates) > 1:
+                    issue = {"status": "CONFLICTING_IDENTIFIERS" if fields else "AMBIGUOUS_SHARED_IDENTIFIER",
+                             "source_ids": [candidate.get("source_id", ""), row.get("source_id", "")],
+                             "fields": fields}
+                    candidate.setdefault("metadata", {}).setdefault("identifier_conflicts", []).append(deepcopy(issue))
+                    conflicts.append(issue)
+            if conflicts:
+                row.setdefault("metadata", {})["identifier_conflicts"] = conflicts
+            # DOI retains its established precedence; conflicting secondary IDs
+            # are disclosed but do not override an exact DOI match.
+            if duplicate is not None and (not conflicts or keys[0].startswith("doi:")):
+                _merge_literature_duplicate(duplicate, row)
+                for key in keys:
+                    bucket = seen.setdefault(key, [])
+                    if not any(item is duplicate for item in bucket):
+                        bucket.append(duplicate)
                 continue
-            seen[key] = row
-            rows.append(row)
-            if len(rows) >= limit:
-                return consolidate_literature_rows(rows, source_statuses)
+            if len(rows) < limit:
+                for key in keys:
+                    seen.setdefault(key, []).append(row)
+                rows.append(row)
+        # Continue bounded source queries even when output is full, so later
+        # sources can contribute identifiers, provenance and lifecycle notices.
     return consolidate_literature_rows(rows, source_statuses)
 
 
@@ -974,10 +1000,52 @@ def cached_client(cache_dir: str | Path | None = None, *, offline: bool = False)
 
 
 def _literature_identity(row: JsonDict) -> str:
-    """Use DOI first so the same work from separate sources is merged."""
+    """Preferred exact identity; an empty result must never be a shared key."""
+
+    return next(iter(_literature_identity_keys(row)), "")
+
+
+def _publication_identifier(value: object, kind: str) -> str:
+    """Normalize declared ASCII accessions only, never descriptive text."""
+
+    if kind == "pmid" and type(value) is int:
+        value = str(value)
+    if not isinstance(value, str):
+        return ""
+    token = value.strip().upper()
+    pattern = r"[0-9]+" if kind == "pmid" else r"PMC[0-9]+"
+    if not re.fullmatch(pattern, token):
+        return ""
+    number = (token if kind == "pmid" else token[3:]).lstrip("0")
+    return (number if kind == "pmid" else "PMC" + number) if number else ""
+
+
+def _literature_identity_keys(row: JsonDict) -> list[str]:
+    """DOI exclusively, else exact PMID/PMCID, else a scoped native ID."""
 
     doi = _normalize_doi(row.get("doi", ""))
-    return f"doi:{doi}" if doi else str(row.get("source_id", "") or row.get("title", "")).strip().lower()
+    if doi:
+        return [f"doi:{doi}"]
+    keys = [f"{kind}:{value}" for kind in ("pmid", "pmcid")
+            if (value := _publication_identifier(row.get(kind), kind))]
+    if keys:
+        return keys
+    source_id, source = row.get("source_id"), row.get("source")
+    if isinstance(source_id, str) and source_id.strip() and isinstance(source, str) and source.strip():
+        # Length-prefix the namespace so punctuation cannot create collisions.
+        source = source.strip().casefold()
+        return [f"source:{len(source)}:{source}:{source_id.strip()}"]
+    return []
+
+
+def _identifier_conflicts(existing: JsonDict, incoming: JsonDict) -> list[str]:
+    """Retain constraints declared by every member of an existing group."""
+
+    members = [existing, *existing.get("metadata", {}).get("merged_source_records", [])]
+    return [kind for kind in ("pmid", "pmcid")
+            if (value := _publication_identifier(incoming.get(kind), kind))
+            and any((other := _publication_identifier(member.get(kind), kind)) and other != value
+                    for member in members)]
 
 
 def _client_response_metadata(client: object) -> JsonDict:
@@ -988,9 +1056,10 @@ def _client_response_metadata(client: object) -> JsonDict:
 
 
 def _merge_literature_duplicate(existing: JsonDict, duplicate: JsonDict) -> None:
-    """Preserve cross-source identifiers and version relations on a DOI merge."""
+    """Preserve source records and lifecycle relations on an exact-ID merge."""
 
     metadata = existing.setdefault("metadata", {})
+    metadata.setdefault("merged_source_records", []).append(deepcopy(duplicate))
     alternate_ids = metadata.setdefault("alternate_source_ids", [])
     duplicate_id = str(duplicate.get("source_id", "") or "")
     if duplicate_id and duplicate_id != existing.get("source_id") and duplicate_id not in alternate_ids:
@@ -998,7 +1067,14 @@ def _merge_literature_duplicate(existing: JsonDict, duplicate: JsonDict) -> None
     relations = metadata.setdefault("version_relationships", {})
     incoming = duplicate.get("version_relationships") or duplicate.get("metadata", {}).get("version_relationships", {})
     if isinstance(incoming, dict):
-        relations.setdefault(str(duplicate.get("source", "") or "unknown"), incoming)
+        scoped = relations.setdefault(str(duplicate.get("source", "") or "unknown"), {})
+        for name, value in incoming.items():
+            if name not in scoped:
+                scoped[name] = deepcopy(value)
+            elif scoped[name] != value:
+                old = scoped[name] if isinstance(scoped[name], list) else [scoped[name]]
+                new = value if isinstance(value, list) else [value]
+                scoped[name] = old + [deepcopy(item) for item in new if item not in old]
     provenances = metadata.setdefault("alternate_source_provenance", [])
     provenance = duplicate.get("source_provenance", {})
     if provenance and provenance not in provenances:

@@ -172,8 +172,15 @@ def execute(args):
         run = out / case["case_id"]
         result = analyze(root, run, args.model, args.embeddings, question=case["question"], requirements=case["requirements"], limit=1, chunks=protocol["chunks"], fresh=not args.replay, device="cuda", topic=case["case_id"], question_source_id=case["document_id"])
         manifest = json.loads((run / "RUN_MANIFEST.json").read_text(encoding="utf-8"))
-        accepted_statuses = {"PASS", "PARTIAL"}
-        analysis_valid = result.get("status") in accepted_statuses and manifest.get("execution_status") in accepted_statuses
+        status = manifest.get("execution_status")
+        failures = manifest.get("failures", [])
+        analysis_valid = result.get("status") == status and (
+            (status == "PASS" and not failures)
+            or (
+                status == "PARTIAL" and bool(failures)
+                and all(f.get("stage") == "source_guard" and f.get("rejections") for f in failures)
+            )
+        )
         run_dossiers = read_rows(run / "scientific_dossiers.jsonl")
         if not analysis_valid:
             result["case_validation"] = "FAIL_ANALYSIS_EXECUTION"

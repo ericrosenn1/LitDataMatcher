@@ -110,7 +110,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--source",
         nargs="+",
         default=["clinicaltrials"],
-        choices=["clinicaltrials", "ena", "geo", "mgnify"],
+        choices=["clinicaltrials", "ena", "geo", "mgnify", "pride", "metabolomicsworkbench"],
         help="Live dataset source adapter(s) to query.",
     )
     dataset_search.add_argument("--limit", type=int, default=25, help="Maximum rows to write.")

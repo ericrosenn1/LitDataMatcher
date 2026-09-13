@@ -5,6 +5,7 @@ from copy import deepcopy
 
 import pytest
 
+from litdatamatcher.adapters import EuropePMCLiteratureAdapter
 from litdatamatcher.cli import main
 from litdatamatcher.literature_integrity import (
     consolidate_literature_rows,
@@ -70,3 +71,20 @@ def test_retrieval_timestamp_change_alone_is_not_scientific_invalidation():
     after = deepcopy(raw)
     after["source_provenance"]["retrieval_time_utc"] = "2026-09-13T00:00:00Z"
     assert invalidate_affected_derivations(consolidate_literature_rows([raw])[0], consolidate_literature_rows([after])[0], ["claim-1"])["status"] == "UNCHANGED"
+
+
+@pytest.mark.parametrize("kind,expected", [("Comment in", "ACTIVE_METADATA_ONLY"), ("Erratum in", "CORRECTED_REQUIRES_VERSION_REVIEW"), ("Retraction in", "RETRACTED"), ("Expression of concern in", "FLAGGED_REQUIRES_SOURCE_REVIEW"), ("unrecognized notice", "FLAGGED_REQUIRES_SOURCE_REVIEW")])
+def test_europepmc_notice_type_drives_lifecycle_instead_of_container_name(kind, expected):
+    row = {"source_id": "europepmc:MED:1", "version_relationships": {"commentCorrection": [{"type": kind, "id": "2"}]}}
+    assert consolidate_literature_rows([row])[0]["metadata"]["literature_integrity"]["lifecycle_status"] == expected
+
+
+def test_each_literature_record_points_to_its_own_response_page():
+    class Pages:
+        last_response_metadata = {}
+        def get_json(self, url, params):
+            second = params["cursorMark"] != "*"
+            self.last_response_metadata = {"cache_content_sha256": ("b" if second else "a") * 64, "retrieval_time_utc": "2026-09-13T00:00:00Z"}
+            return {"resultList": {"result": [{"id": "2" if second else "1", "source": "MED", "title": "fixture"}]}, **({} if second else {"nextCursorMark": "page2"})}
+    rows = EuropePMCLiteratureAdapter(Pages()).search_literature("fixture", 101)
+    assert [row["source_provenance"]["metadata"]["cache_snapshot"]["cache_content_sha256"] for row in rows] == ["a" * 64, "b" * 64]

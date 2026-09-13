@@ -21,6 +21,7 @@ from typing import Protocol
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
 from .literature_integrity import consolidate_literature_rows
+from .omics_adapters import MetabolomicsWorkbenchDatasetAdapter, PRIDEDatasetAdapter
 from .provenance import remote_source_provenance, source_profile
 from .schemas import DatasetRecord, JsonDict
 
@@ -85,6 +86,15 @@ def _pagination_result(items: list[JsonDict], pages: list[JsonDict], status: str
     """Return explicit pagination/candidate-universe state for downstream provenance."""
     complete = status == "COMPLETE"
     return {"items": items, "pagination": {"schema_version": "adapter_pagination_v1", "status": status, "candidate_universe_status": "COMPLETE_CANDIDATE_UNIVERSE" if complete else "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE", "completed": complete, "pages_requested": len(pages), "returned_items": len(items), "pages": pages, "error": error or None}}
+
+
+def _item_page_metadata(result: JsonDict, index: int, fallback: JsonDict) -> JsonDict:
+    offset = 0
+    for page in result["pagination"]["pages"]:
+        offset += page["returned_items"]
+        if index < offset:
+            return dict(page["cache_lineage"])
+    return fallback
 
 
 @dataclass(slots=True)
@@ -230,7 +240,8 @@ class EuropePMCLiteratureAdapter:
         self.last_search_status = result["pagination"]
         response_metadata = _client_response_metadata(self.client)
         rows: list[dict] = []
-        for item in result["items"]:
+        for item_index, item in enumerate(result["items"]):
+            response_metadata = _item_page_metadata(result, item_index, response_metadata)
             if not isinstance(item, dict):
                 continue
             source = str(item.get("source", "") or "").strip().upper()
@@ -377,7 +388,8 @@ class ClinicalTrialsDatasetAdapter:
         self.last_search_status = result["pagination"]
         response_metadata = _client_response_metadata(self.client)
         records_by_id: dict[str, DatasetRecord] = {}
-        for study in result["items"]:
+        for item_index, study in enumerate(result["items"]):
+            response_metadata = _item_page_metadata(result, item_index, response_metadata)
             if not isinstance(study, dict):
                 continue
             record = _clinicaltrials_record(study, response_metadata=response_metadata)
@@ -879,6 +891,8 @@ DATASET_ADAPTERS = {
     "ena": ENASRADatasetAdapter,
     "geo": GEODatasetAdapter,
     "mgnify": MGnifyDatasetAdapter,
+    "pride": PRIDEDatasetAdapter,
+    "metabolomicsworkbench": MetabolomicsWorkbenchDatasetAdapter,
 }
 
 LITERATURE_ADAPTERS = {

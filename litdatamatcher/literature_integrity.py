@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .data_plane import digest
 from .schemas import JsonDict, stable_id
 
@@ -21,6 +23,8 @@ def _lifecycle(relations: dict) -> str:
         return "CORRECTED_REQUIRES_VERSION_REVIEW"
     if "version" in keys:
         return "VERSIONED_REQUIRES_VERSION_REVIEW"
+    if "lifecycle_review" in keys:
+        return "FLAGGED_REQUIRES_SOURCE_REVIEW"
     return "ACTIVE_METADATA_ONLY"
 
 
@@ -33,10 +37,34 @@ def _lifecycle_relation_keys(relations: dict) -> list[str]:
     """
 
     keys: list[str] = []
+
+    def add(name, value):
+        if str(name).casefold() == "commentcorrection":
+            # Europe PMC's container also holds ordinary publication comments.
+            # Parse its explicit notice types instead of flagging the container.
+            if not isinstance(value, list):
+                keys.append("lifecycle_review")
+                return
+            for notice in value:
+                relation = re.sub(r"[^a-z]", "", str(notice.get("type", "")).casefold()) if isinstance(notice, dict) else ""
+                if relation in {"commentin", "commenton", "commentfor", "associatedpublication"}:
+                    continue
+                if relation.startswith("retraction"):
+                    keys.append("retracted")
+                elif relation.startswith(("erratum", "correction", "corrected", "update")):
+                    keys.append("correction")
+                elif relation.startswith(("republished", "reprint")):
+                    keys.append("version")
+                else:
+                    keys.append("lifecycle_review")
+        else:
+            keys.append(str(name).casefold())
+
     for name, value in relations.items():
-        keys.append(str(name).casefold())
+        add(name, value)
         if isinstance(value, dict):
-            keys.extend(str(nested_name).casefold() for nested_name in value)
+            for nested_name, nested_value in value.items():
+                add(nested_name, nested_value)
     return keys
 
 

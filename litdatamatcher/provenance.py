@@ -231,6 +231,22 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "review_caveats": ["Crossref rows support DOI-level linking and version review, not scientific evidence extraction by themselves."],
         "do_not_infer": ["full article evidence", "current retraction or correction status without source review"],
     },
+    "pride": {
+        "source_type": "pride", "category": "proteomics_metadata",
+        "content_scope": "bounded project metadata", "native_id_fields": ["accession"],
+        "strengths": ["declared organisms, protocols, instruments and file names"],
+        "limitations": ["no raw measurements or donor identity inspected; bounded first page"],
+        "review_caveats": ["Inspect source files and cohort lineage before analysis or pooling."],
+        "do_not_infer": ["sample independence", "processed alignment", "feature units"],
+    },
+    "metabolomicsworkbench": {
+        "source_type": "metabolomicsworkbench", "category": "metabolomics_metadata",
+        "content_scope": "bounded study summaries", "native_id_fields": ["study_id"],
+        "strengths": ["declared species, analysis type, source version and license when present"],
+        "limitations": ["reported samples are not independent donors; no measurements inspected"],
+        "review_caveats": ["Inspect factors, measurements, units, lineage and per-source reuse terms."],
+        "do_not_infer": ["sample independence", "controls", "aligned metabolite measurements"],
+    },
     "clinicaltrials": {
         "source_type": "clinicaltrials",
         "category": "registry_metadata",

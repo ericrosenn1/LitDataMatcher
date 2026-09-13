@@ -8,8 +8,8 @@ why two records matched, and later swap in larger external ontologies.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
@@ -131,7 +131,7 @@ ENTITY_CONTRACTS = {
     "disease_condition": {"crohn disease": ("MONDO:0005011", "exact"), "ibd": (("MONDO:0005011", "MONDO:0005101"), "ambiguous")},
     "intervention_chemical": {"lipopolysaccharide": ("CHEBI:16412", "exact"), "lps": ("CHEBI:16412", "synonym")},
     "tissue_cell_type": {"macrophage": ("CL:0000235", "exact"), "gut": (("UBERON:0001155", "UBERON:0002107"), "ambiguous")},
-    "organism": {"homo sapiens": ("NCBITaxon:9606", "exact"), "human": ("NCBITaxon:9606", "synonym"), "mus musculus": ("NCBITaxon:10090", "exact"), "mouse": ("NCBITaxon:10090", "synonym")},
+    "organism": {"homo sapiens": ("NCBITaxon:9606", "exact"), "human": ("NCBITaxon:9606", "synonym"), "homo sapiens (human)": ("NCBITaxon:9606", "synonym"), "mus musculus": ("NCBITaxon:10090", "exact"), "mouse": ("NCBITaxon:10090", "synonym"), "mus musculus (mouse)": ("NCBITaxon:10090", "synonym")},
     "assay": {"rna-seq": ("EFO:0002772", "exact"), "rna sequencing": ("EFO:0002772", "synonym")},
     "experimental_condition": {"lps": ("CHEBI:16412", "synonym"), "untreated": ("LDM:UNTREATED_CONTROL", "exact")},
 }

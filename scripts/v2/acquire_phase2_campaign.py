@@ -205,7 +205,7 @@ def acquire_rows(root, partition, protected, offline=False):
     pattern = re.compile(r"(?<![A-Z0-9])(?:" + "|".join(re.escape(value) for value in ids) + r")(?![A-Z0-9])", re.I)
     accepted, excluded = [], []
     for row in rows:
-        matches = sorted(set(pattern.findall(json.dumps(row, ensure_ascii=False))))
+        matches = sorted(set(pattern.findall(json.dumps(record_content(row), ensure_ascii=False))))
         if matches:
             excluded.append({"source_id": row.get("source_id", row.get("dataset_id")),
                              "reason": "KNOWN_PROTECTED_FAMILY_IDENTIFIER", "identifiers": matches})
@@ -221,6 +221,16 @@ def acquire_rows(root, partition, protected, offline=False):
                "coverage": "BOUNDED_SAMPLE_NOT_EXHAUSTIVE",
                "ena_grain": "Technical run rows grouped into studies; runs are not biological samples" if partition["source"] == "ena" else None}
     return accepted, receipt
+
+
+def record_content(value):
+    """Exclude request/provenance bookkeeping from protected record-ID matching."""
+    if isinstance(value, dict):
+        return {key: record_content(item) for key, item in value.items()
+                if key not in {"source_provenance", "pagination", "cache_snapshot"}}
+    if isinstance(value, list):
+        return [record_content(item) for item in value]
+    return value
 
 
 def identity(row, kind):
@@ -326,7 +336,7 @@ def strip_cache_status(value):
     return value
 
 
-def replay(root, plan):
+def deny_network():
     calls = []
     def denied(*args, **kwargs):
         calls.append("network boundary reached")
@@ -335,6 +345,46 @@ def replay(root, plan):
     socket.create_connection = denied
     socket.socket.connect = denied
     socket.socket.connect_ex = denied
+    return calls
+
+
+def repair_exclusions(root, plan):
+    """Repair only false query-provenance exclusions using existing offline snapshots."""
+    calls = deny_network()
+    changes = []
+    processing_commit = subprocess.check_output(["git", "-C", str(REPO), "rev-parse", "HEAD"], text=True).strip()
+    for partition in plan["partitions"]:
+        if partition["kind"] != "literature":
+            continue
+        folder = root / "partitions" / partition["id"]
+        prior = read_json(folder / "receipt.json")
+        rows, receipt = acquire_rows(root, partition, plan["protected"], offline=True)
+        if receipt["status"] != "ACQUIRED_BOUNDED":
+            raise ValueError("Offline exclusion repair unavailable: " + partition["id"])
+        attempt = folder / "attempts" / ("exclusion_repair_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ"))
+        write_jsonl(attempt / "records.jsonl", rows)
+        receipt.update({"completed_utc": now(), "source_commit": plan["source_commit"],
+                        "processing_commit": processing_commit, "processing_script_sha256": digest(Path(__file__).read_bytes()),
+                        "plan_sha256": digest((root / "PREDECLARED_PLAN.json").read_bytes()),
+                        "records_sha256": digest((attempt / "records.jsonl").read_bytes()),
+                        "repair": "Excluded query/provenance bookkeeping from identifier matching; request queries and family IDs unchanged"})
+        write_json(attempt / "receipt.json", receipt)
+        write_jsonl(folder / "records.jsonl", rows)
+        write_json(folder / "receipt.json", receipt)
+        changes.append({"partition": partition["id"], "before_rows": prior["accepted_rows"], "after_rows": len(rows),
+                        "before_sha256": prior["records_sha256"], "after_sha256": receipt["records_sha256"]})
+        summarize(root, plan)
+        print(json.dumps(changes[-1]), flush=True)
+    result = {"status": "PASS" if not calls else "FAIL", "verified_utc": now(), "processing_commit": processing_commit,
+              "network_guard_calls": len(calls), "changes": changes, "plan_unchanged": True,
+              "protected_inputs_unchanged": protected_inputs() == plan["protected"]}
+    write_json(root / "EXCLUSION_REPAIR.json", result)
+    summarize(root, plan, complete=True)
+    return 0 if result["status"] == "PASS" and result["protected_inputs_unchanged"] else 1
+
+
+def replay(root, plan):
+    calls = deny_network()
     checks = []
     for partition in plan["partitions"]:
         folder = root / "partitions" / partition["id"]
@@ -358,7 +408,7 @@ def replay(root, plan):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--mode", choices=("plan", "acquire", "replay"), default="plan")
+    parser.add_argument("--mode", choices=("plan", "acquire", "repair-exclusions", "replay"), default="plan")
     args = parser.parse_args()
     if args.root.resolve() != ROOT.resolve():
         parser.error("This bounded campaign writes only to its assigned expanded data root")
@@ -369,6 +419,8 @@ def main():
             return 0
         if args.mode == "acquire":
             return acquire(args.root, plan)
+        if args.mode == "repair-exclusions":
+            return repair_exclusions(args.root, plan)
         return replay(args.root, plan)
 
 

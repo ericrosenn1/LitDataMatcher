@@ -49,4 +49,11 @@ All remaining record content must agree. Coverage, truncation, source errors,
 counts, exclusions, and hashes remain explicit in acquisition receipts.
 Bounded samples never imply an exhaustive source universe.
 
-Execution status and final receipts will be recorded here after acquisition.
+All 13 live partitions returned successful bounded responses. A technical
+exclusion-filter error initially matched protected IDs embedded in negative
+search queries inside provenance. The correction excludes provenance/request
+bookkeeping from record-ID matching. Original attempt receipts and raw caches
+are preserved; only the four literature partitions are reprocessed offline.
+Queries, bounds, protected IDs, and dataset outputs remain unchanged.
+
+Final counts and replay receipts will be recorded after this bounded correction.

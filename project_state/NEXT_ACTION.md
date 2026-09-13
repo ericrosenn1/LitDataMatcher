@@ -1,3 +1,22 @@
+# Active final closeout campaign, 2026-09-13
+
+The full user request in `project_state/FINAL_CAMPAIGN_REQUEST_20260913.md`
+supersedes the bounded-task scope below. Exact continuation is in
+`project_state/FINAL_CAMPAIGN_STATE.json`. No final requirements matrix or
+expert-gate decision exists yet. The reported V2.4 dependency is a candidate
+gate to investigate against the governing specifications, not a proven reason
+to stop the project. Complete all machine-resolvable requirements, packaging,
+installation validation and adversarial review before final closeout.
+
+Current stop: mandatory policy idle. Earliest reasoning continuation:
+`2026-09-13T21:13:30Z`. No background worker or automation has been scheduled.
+Begin by checking the current policy, refreshing supported account telemetry
+for the changed workload, and constructing the requirements-to-evidence matrix.
+Use the assigned isolated final-campaign worktree; only the lead integrates and
+pushes. Preserve the sealed holdout and frozen alpha.
+
+The following section records the completed bounded task and prior context.
+
 # Current continuation
 
 Status: `RUNNING` / `HARDENED_ALPHA_COMPLETE`, current phase `PHASE_2`. Canonical lead: `C:\Codex\LitDataMatcher-v2\lead`; data/state: `C:\Codex\LitDataMatcher-v2\data`; branch: `codex/litdatamatcher-v2-build`.

@@ -52,8 +52,10 @@ def _content_version(row: JsonDict) -> dict:
     for key, value in (("source_snapshot", row.get("source_snapshot")),
                        ("fulltext_snapshot", row.get("fulltext_snapshot")),
                        ("cache_snapshot", snapshot)):
-        if isinstance(value, dict) and value.get("sha256"):
-            version[key] = value["sha256"]
+        if isinstance(value, dict):
+            content_hash = value.get("sha256") or value.get("cache_content_sha256")
+            if content_hash:
+                version[key] = content_hash
     return version
 
 

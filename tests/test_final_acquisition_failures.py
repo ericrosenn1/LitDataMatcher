@@ -43,7 +43,7 @@ def test_one_failed_source_preserves_useful_rows_and_reports_partial(tmp_path, m
     assert json.loads(output.read_text())["doi"] == "10.1234/fixture"
 
 
-@pytest.mark.parametrize("change", ["abstract", "snapshot", "alternate_abstract"])
+@pytest.mark.parametrize("change", ["abstract", "snapshot", "adapter_snapshot", "alternate_abstract"])
 def test_changed_literature_content_invalidates_derivations(change):
     raw = {"source_id": "pubmed:1", "abstract": "original", "source_provenance": {"metadata": {"cache_snapshot": {"sha256": "a" * 64}}}, "metadata": {"merged_source_records": [{"source_id": "europepmc:MED:1", "abstract": "original alternate"}]}}
     updated = deepcopy(raw)
@@ -51,6 +51,9 @@ def test_changed_literature_content_invalidates_derivations(change):
         updated["abstract"] = "changed result"
     elif change == "snapshot":
         updated["source_provenance"]["metadata"]["cache_snapshot"]["sha256"] = "b" * 64
+    elif change == "adapter_snapshot":
+        for row, value in ((raw, "a"), (updated, "b")):
+            row["source_provenance"]["metadata"]["cache_snapshot"] = {"cache_content_sha256": value * 64}
     else:
         updated["metadata"]["merged_source_records"][0]["abstract"] = "alternate correction"
     before = consolidate_literature_rows([raw])[0]

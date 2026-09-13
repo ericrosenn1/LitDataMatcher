@@ -1,0 +1,502 @@
+{
+  "schema_version": "final_independent_functional_review_v1",
+  "created_at": "2026-09-13T22:32:11.318376+00:00",
+  "status": "PASS_WITH_LIMITATIONS",
+  "review_base": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
+  "authoritative_root_fix_commit": "d84e439bb35362784073fb80392aa990d587d35a",
+  "validated_worktree_head": "f9ecd2a57df10aef8b8a5f9312efb6160461a1b2",
+  "source_fingerprint": {
+    "schema_version": "independent_review_source_fingerprint_v1",
+    "created_at": "2026-09-13T22:32:10.684845+00:00",
+    "review_base": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
+    "validated_worktree_head": "f9ecd2a57df10aef8b8a5f9312efb6160461a1b2",
+    "working_tree_status": "?? docs/v2/final_audit/INDEPENDENT_REVIEW.json\n?? docs/v2/final_audit/INDEPENDENT_REVIEW.md\n",
+    "files": [
+      {
+        "path": "pyproject.toml",
+        "size_bytes": 1438,
+        "working_file_sha256": "5d35b58b40fcd0f0c8d6bc4b6841f0551e388ca7021703ce4e6ceca5601bfb81",
+        "head_blob_sha256": "5d35b58b40fcd0f0c8d6bc4b6841f0551e388ca7021703ce4e6ceca5601bfb81",
+        "base_blob_sha256": "5d35b58b40fcd0f0c8d6bc4b6841f0551e388ca7021703ce4e6ceca5601bfb81"
+      },
+      {
+        "path": "litdatamatcher/v2.py",
+        "size_bytes": 39110,
+        "working_file_sha256": "f963b82cbafe7c340f357e94d2f3df21190126917390bc4a5661dba1654c3a11",
+        "head_blob_sha256": "f963b82cbafe7c340f357e94d2f3df21190126917390bc4a5661dba1654c3a11",
+        "base_blob_sha256": "261d9964f8c88e52e0961c4f33a84aac830f0d49da8152f0a94f3b5db0bc92cd"
+      },
+      {
+        "path": "litdatamatcher/modality_contract.py",
+        "size_bytes": 5994,
+        "working_file_sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
+        "head_blob_sha256": "a762989f2447a4075db84fdc2b948372118bed130fe9caf5691a21c3bb9b41f1",
+        "base_blob_sha256": "1ee1791aa9a396ec14607cbb72b352fe3751512e7ab0a6b390fa65123f8c6e4d"
+      },
+      {
+        "path": "litdatamatcher/scientific_v2.py",
+        "size_bytes": 26358,
+        "working_file_sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
+        "head_blob_sha256": "038ad17902f6ffcd3c0232cfaf487729d03cd1abf79c1debd88cb07c85a1d147",
+        "base_blob_sha256": "b82799770e4274aabd3171075bbff25998ef2a789735435fcf8a7d49c17c3299"
+      },
+      {
+        "path": "litdatamatcher/scientific_dossier.py",
+        "size_bytes": 4251,
+        "working_file_sha256": "3b7a74af58d40c61154c00405fd56a7f2000ba8578475f926dbdb99da66d8067",
+        "head_blob_sha256": "3b7a74af58d40c61154c00405fd56a7f2000ba8578475f926dbdb99da66d8067",
+        "base_blob_sha256": "3b7a74af58d40c61154c00405fd56a7f2000ba8578475f926dbdb99da66d8067"
+      },
+      {
+        "path": "litdatamatcher/semantic_runtime.py",
+        "size_bytes": 29547,
+        "working_file_sha256": "7c04c4432698cfc5a6a58804ce5ad43c146eb071f5c3636e59cc613049353e89",
+        "head_blob_sha256": "7c04c4432698cfc5a6a58804ce5ad43c146eb071f5c3636e59cc613049353e89",
+        "base_blob_sha256": "1e07b805128458da1bf29efb565eb9a0dc1d1ccb4a08a151a488bbc6eeaccc58"
+      },
+      {
+        "path": "litdatamatcher/adapters.py",
+        "size_bytes": 70167,
+        "working_file_sha256": "6095a101fa9e025980209bc11cf8f8f1242e3dd6a9f6cd32b7da2a057b6fd734",
+        "head_blob_sha256": "6095a101fa9e025980209bc11cf8f8f1242e3dd6a9f6cd32b7da2a057b6fd734",
+        "base_blob_sha256": "2f31ef1625e0769f54f0f7b0fdff5aa2129be9f133a2b8beb5681ab23e08fc2f"
+      },
+      {
+        "path": "litdatamatcher/omics_adapters.py",
+        "size_bytes": 7657,
+        "working_file_sha256": "0baf8cdfbc36106102c312bff45985d7525eaf375fa7a5922d1ed484f30fe5a2",
+        "head_blob_sha256": "0baf8cdfbc36106102c312bff45985d7525eaf375fa7a5922d1ed484f30fe5a2",
+        "base_blob_sha256": "0baf8cdfbc36106102c312bff45985d7525eaf375fa7a5922d1ed484f30fe5a2"
+      },
+      {
+        "path": "litdatamatcher/literature_integrity.py",
+        "size_bytes": 7448,
+        "working_file_sha256": "a1f4c993b4d5092a293bda816f39d5ebc68e1de52b77e3447aef05abe7c5f884",
+        "head_blob_sha256": "a1f4c993b4d5092a293bda816f39d5ebc68e1de52b77e3447aef05abe7c5f884",
+        "base_blob_sha256": "a1f4c993b4d5092a293bda816f39d5ebc68e1de52b77e3447aef05abe7c5f884"
+      },
+      {
+        "path": "litdatamatcher/ontology.py",
+        "size_bytes": 10177,
+        "working_file_sha256": "dd798f58b7e22aa14cd77cf35a88177606200a19ea2ed170b9691f57ab1e6dd3",
+        "head_blob_sha256": "dd798f58b7e22aa14cd77cf35a88177606200a19ea2ed170b9691f57ab1e6dd3",
+        "base_blob_sha256": "c4a5a7790678d3292856aa88416e77cf354f1bc798f441ebb3d1f6fd428c2607"
+      },
+      {
+        "path": "litdatamatcher/calibration_readiness.py",
+        "size_bytes": 15862,
+        "working_file_sha256": "8c5379c5085d8f65a6c816a614fc52dc158a1be6d30f0c76086ef8f2cb584734",
+        "head_blob_sha256": "8c5379c5085d8f65a6c816a614fc52dc158a1be6d30f0c76086ef8f2cb584734",
+        "base_blob_sha256": "8c5379c5085d8f65a6c816a614fc52dc158a1be6d30f0c76086ef8f2cb584734"
+      },
+      {
+        "path": "litdatamatcher/expert_review.py",
+        "size_bytes": 15126,
+        "working_file_sha256": "a34bee40abbe240bd3448bc614e79b538bbc999a7e3974492dcdb9b4c2629999",
+        "head_blob_sha256": "a34bee40abbe240bd3448bc614e79b538bbc999a7e3974492dcdb9b4c2629999",
+        "base_blob_sha256": "a34bee40abbe240bd3448bc614e79b538bbc999a7e3974492dcdb9b4c2629999"
+      },
+      {
+        "path": "litdatamatcher/acceptance.py",
+        "size_bytes": 31765,
+        "working_file_sha256": "eefbb1c02468d0d7cddd8f2375a89eda0adf28ae22476a8651f9e4e3324ee319",
+        "head_blob_sha256": "eefbb1c02468d0d7cddd8f2375a89eda0adf28ae22476a8651f9e4e3324ee319",
+        "base_blob_sha256": "eefbb1c02468d0d7cddd8f2375a89eda0adf28ae22476a8651f9e4e3324ee319"
+      },
+      {
+        "path": "litdatamatcher/data_plane.py",
+        "size_bytes": 7858,
+        "working_file_sha256": "edf854bd8e5f2dd488fe709227db32d85672bacf4fdd7c5c384225f79a898f4b",
+        "head_blob_sha256": "edf854bd8e5f2dd488fe709227db32d85672bacf4fdd7c5c384225f79a898f4b",
+        "base_blob_sha256": "edf854bd8e5f2dd488fe709227db32d85672bacf4fdd7c5c384225f79a898f4b"
+      },
+      {
+        "path": "tests/test_final_independent_review.py",
+        "size_bytes": 19408,
+        "working_file_sha256": "a077ee193341d0ca7f84a3d22e329a53e2529a59eb61ca8b4564b93c249ccba3",
+        "head_blob_sha256": "a077ee193341d0ca7f84a3d22e329a53e2529a59eb61ca8b4564b93c249ccba3",
+        "base_blob_sha256": null
+      }
+    ],
+    "aggregate_blob_sha256": "2dca5ac2b45b1ce9d97a6b3ce1fa58b2de300b0b9fdc4599f915a6b46cb24559",
+    "python310_syntax_parse": {
+      "status": "PASS",
+      "module_count": 67,
+      "modules": [
+        "__init__.py",
+        "acceptance.py",
+        "acquisition_v2.py",
+        "adapters.py",
+        "annotation_agreement.py",
+        "annotation_manifest.py",
+        "annotation_reports.py",
+        "annotation_splits.py",
+        "annotation_validation.py",
+        "annotations.py",
+        "artifact_validation.py",
+        "baseline_compare.py",
+        "calibration.py",
+        "calibration_readiness.py",
+        "capability_registry.py",
+        "catalog_dependence.py",
+        "cli.py",
+        "closeout.py",
+        "comparator_contract.py",
+        "contradiction_ledger.py",
+        "controller.py",
+        "covariate_contract.py",
+        "coverage_quality.py",
+        "cross_source_adversarial.py",
+        "data_plane.py",
+        "datasets.py",
+        "evaluation.py",
+        "expert_review.py",
+        "external_evidence.py",
+        "feasibility.py",
+        "governance.py",
+        "grobid.py",
+        "http_cache.py",
+        "ingestion.py",
+        "literature.py",
+        "literature_integrity.py",
+        "literature_xml.py",
+        "manifest_audit.py",
+        "manual_smoke.py",
+        "meta_analysis.py",
+        "modality_contract.py",
+        "negative_results.py",
+        "observability.py",
+        "omics_adapters.py",
+        "ontology.py",
+        "outcome_contract.py",
+        "pipeline.py",
+        "population_contract.py",
+        "provenance.py",
+        "provenance_dag.py",
+        "query_planning.py",
+        "ranking.py",
+        "recovery_contract.py",
+        "reporting.py",
+        "requirements_coverage.py",
+        "resources.py",
+        "review.py",
+        "review_queue.py",
+        "scale_benchmark.py",
+        "schemas.py",
+        "scientific_dossier.py",
+        "scientific_v2.py",
+        "semantic_runtime.py",
+        "storage.py",
+        "stress.py",
+        "text.py",
+        "v2.py"
+      ],
+      "limitation": "CPython 3.12 AST feature_version=3.10 syntax check only; no CPython 3.10 runtime installed."
+    }
+  },
+  "findings": [
+    {
+      "id": "IR-01",
+      "severity": "MEDIUM",
+      "title": "Declared Python 3.10 runtime uses a Python 3.11 hashing helper",
+      "path": "litdatamatcher/semantic_runtime.py:54 at f89d4b4",
+      "selectors": [
+        "declared_python310"
+      ],
+      "failure": "Removing hashlib.file_digest to emulate its absence on 3.10 raised AttributeError in _file_sha.",
+      "fix_required": "Hash model files incrementally with a standard hashlib object; preserve SHA256 bytes.",
+      "source": "https://docs.python.org/3.11/library/hashlib.html#hashlib.file_digest",
+      "test_cases": [
+        "test_declared_python310_support_does_not_require_python311_hash_helper"
+      ],
+      "test_count": 1,
+      "resolution": "VERIFIED_FIXED"
+    },
+    {
+      "id": "IR-02",
+      "severity": "MEDIUM",
+      "title": "Biological unit metadata crosses observed, unknown and absent states",
+      "path": "litdatamatcher/modality_contract.py; litdatamatcher/v2.py:41; litdatamatcher/scientific_v2.py:94",
+      "selectors": [
+        "missing_biological_unit",
+        "biological_unit_requires",
+        "biological_unit_repair"
+      ],
+      "failure": "Missing biological units were OBSERVED. First repair correctly restored UNKNOWN but hid explicit absence and computed the contract before legacy known-to-observed capability migration.",
+      "fix_required": "Require qualified source-located observations, preserve ambiguous donor links as unknown, preserve explicit absence, and derive the contract from normalized capabilities.",
+      "test_cases": [
+        "test_missing_biological_unit_metadata_remains_unknown_after_normalization",
+        "test_biological_unit_requires_qualified_observation[changes0-dependence0-OBSERVED]",
+        "test_biological_unit_requires_qualified_observation[changes1-dependence1-OBSERVED]",
+        "test_biological_unit_requires_qualified_observation[changes2-dependence2-UNKNOWN]",
+        "test_biological_unit_requires_qualified_observation[changes3-dependence3-UNKNOWN]",
+        "test_biological_unit_requires_qualified_observation[changes4-dependence4-UNKNOWN]",
+        "test_biological_unit_requires_qualified_observation[changes5-dependence5-UNKNOWN]",
+        "test_biological_unit_requires_qualified_observation[changes6-dependence6-UNKNOWN]",
+        "test_biological_unit_repair_preserves_explicit_absence_and_legacy_migration[observation0-NOT_QUALIFIED]",
+        "test_biological_unit_repair_preserves_explicit_absence_and_legacy_migration[observation1-DIRECT_FIT]"
+      ],
+      "test_count": 10,
+      "resolution": "VERIFIED_FIXED"
+    },
+    {
+      "id": "IR-03",
+      "severity": "HIGH",
+      "title": "Explicit provider retraction signals were discarded before lifecycle selection",
+      "path": "litdatamatcher/adapters.py:101,157,302,1251 at f89d4b4; litdatamatcher/literature_integrity.py",
+      "selectors": [
+        "pubmed_explicit_retraction",
+        "other_explicit_provider_retraction",
+        "ordinary_comment"
+      ],
+      "failure": "Three PubMed declared type/relation cases, OpenAlex is_retracted=true, and a Crossref update-to retraction notice all remained ACTIVE_METADATA_ONLY.",
+      "fix_required": "Retain typed source-scoped lifecycle relations and notice direction; include Crossref update-to in requested metadata. Ordinary comment citation prose must not itself be a lifecycle signal.",
+      "sources": [
+        "https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/230101/el-CommentsCorrections.html",
+        "https://help.openalex.org/data/works/attributes/",
+        "https://www.crossref.org/documentation/retrieve-metadata/retraction-watch/"
+      ],
+      "test_cases": [
+        "test_pubmed_explicit_retraction_metadata_blocks_downstream_evidence[summary_type]",
+        "test_pubmed_explicit_retraction_metadata_blocks_downstream_evidence[xml_type]",
+        "test_pubmed_explicit_retraction_metadata_blocks_downstream_evidence[xml_relation]",
+        "test_other_explicit_provider_retraction_signals_are_not_discarded[openalex]",
+        "test_other_explicit_provider_retraction_signals_are_not_discarded[crossref]",
+        "test_pubmed_ordinary_comment_does_not_inherit_retraction_from_citation_text"
+      ],
+      "test_count": 6,
+      "resolution": "VERIFIED_FIXED"
+    },
+    {
+      "id": "IR-04",
+      "severity": "MEDIUM",
+      "title": "PubMed EFetch failure was hidden behind successful summary metadata",
+      "path": "litdatamatcher/adapters.py:_pubmed_efetch_records and PubMedLiteratureAdapter",
+      "selectors": [
+        "pubmed_failed_efetch"
+      ],
+      "failure": "An injected missing EFetch cache returned a useful summary row with source status OBSERVED and no subrequest failure status.",
+      "fix_required": "Keep useful summary rows while recording a partial retrieval/schema failure for failed or malformed EFetch.",
+      "test_cases": [
+        "test_pubmed_failed_efetch_is_visible_even_when_summary_rows_are_retained"
+      ],
+      "test_count": 1,
+      "resolution": "VERIFIED_FIXED"
+    },
+    {
+      "id": "IR-05",
+      "severity": "MEDIUM",
+      "title": "Provider error objects became successful empty searches",
+      "path": "litdatamatcher/adapters.py:OpenAlex/PubMed/Crossref/MGnify/ENA source envelopes",
+      "selectors": [
+        "provider_error_objects",
+        "valid_empty_envelopes"
+      ],
+      "failure": "A provider error object yielded zero rows and OBSERVED for five adapter routes.",
+      "fix_required": "Validate required response envelopes and explicit error markers; distinguish genuine valid empty responses and preserve valid rows in an explicitly partial malformed response.",
+      "test_cases": [
+        "test_provider_error_objects_never_become_successful_empty_searches[openalex]",
+        "test_provider_error_objects_never_become_successful_empty_searches[pubmed]",
+        "test_provider_error_objects_never_become_successful_empty_searches[crossref]",
+        "test_provider_error_objects_never_become_successful_empty_searches[mgnify]",
+        "test_provider_error_objects_never_become_successful_empty_searches[ena]",
+        "test_valid_empty_envelopes_remain_successful_searches[openalex-payload0]",
+        "test_valid_empty_envelopes_remain_successful_searches[pubmed-payload1]",
+        "test_valid_empty_envelopes_remain_successful_searches[crossref-payload2]",
+        "test_valid_empty_envelopes_remain_successful_searches[mgnify-payload3]",
+        "test_valid_empty_envelopes_remain_successful_searches[ena-payload4]",
+        "test_valid_empty_envelopes_remain_successful_searches[europepmc-payload5]",
+        "test_valid_empty_envelopes_remain_successful_searches[clinicaltrials-payload6]"
+      ],
+      "test_count": 12,
+      "resolution": "VERIFIED_FIXED"
+    },
+    {
+      "id": "IR-06",
+      "severity": "MEDIUM",
+      "title": "Known canonical ontology identifiers failed their own normalization round trip",
+      "path": "litdatamatcher/ontology.py:normalize_entity; litdatamatcher/scientific_v2.py:_contract_requirement_status",
+      "selectors": [
+        "taxonomy_repair",
+        "qualified_assay_identifier"
+      ],
+      "failure": "Already-qualified NCBITaxon:9606/10090 became unresolved inputs, hiding exact human match and known mouse mismatch.",
+      "fix_required": "Recognize canonical identifiers already present in the category table; leave arbitrary IDs and unresolved spellings unknown.",
+      "test_cases": [
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[NCBITaxon:9606-human-DIRECT_FIT]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[NCBITaxon:10090-human-NOT_QUALIFIED]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[Homo sapiens (Human)-human-DIRECT_FIT]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[Mus musculus (Mouse)-human-NOT_QUALIFIED]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[Drosophila melanogaster (Fruit fly)-Drosophila melanogaster-DIRECT_FIT]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[synthetic unresolved organism-human-REQUIRES_INSPECTION]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[synthetic unresolved organism-synthetic unresolved organism-REQUIRES_INSPECTION]",
+        "test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics[Homo sapiens-synthetic unresolved organism-REQUIRES_INSPECTION]",
+        "test_qualified_assay_identifier_survives_precise_assay_guard[RNA-seq-EFO:0002772]",
+        "test_qualified_assay_identifier_survives_precise_assay_guard[EFO:0002772-RNA-seq]"
+      ],
+      "test_count": 10,
+      "resolution": "VERIFIED_FIXED"
+    }
+  ],
+  "finding_counts": {
+    "critical": 0,
+    "high": 1,
+    "medium": 5,
+    "low": 0,
+    "total": 6,
+    "unresolved": 0
+  },
+  "validation_runs": [
+    {
+      "started_at": "2026-09-13T22:31:31.761846+00:00",
+      "finished_at": "2026-09-13T22:31:33.347674+00:00",
+      "command": [
+        "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_final_independent_review.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "offline_review_guard",
+        "--junitxml=C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\independent_final_45.xml"
+      ],
+      "cwd": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-independent-review-20260913",
+      "exit_code": 0,
+      "python": "3.12.13",
+      "source_commit": "f9ecd2a57df10aef8b8a5f9312efb6160461a1b2",
+      "test_file_sha256": "a077ee193341d0ca7f84a3d22e329a53e2529a59eb61ca8b4564b93c249ccba3",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "45",
+        "time": "0.419",
+        "timestamp": "2026-09-13T18:31:32.554463-04:00",
+        "hostname": "RicksRig"
+      },
+      "log": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\independent_final_45.log",
+        "sha256": "0f92049207f024dfd3bccb130b6ebe2022b56ca1df294b3d93f4e7edb0c231b1"
+      },
+      "junit": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\independent_final_45.xml",
+        "sha256": "b39ee9db781048a96d9ad3eb723921064a6ce887258fa70337bb1a0c09181ace"
+      },
+      "network_guard": {
+        "guard": "requests.Session.request/socket.create_connection/socket.connect/socket.connect_ex",
+        "blocked_attempts": 0,
+        "external_connections": 0,
+        "pytest_exit": 0
+      },
+      "same_functional_source_blobs": true
+    },
+    {
+      "started_at": "2026-09-13T22:28:24.495044+00:00",
+      "finished_at": "2026-09-13T22:28:26.488267+00:00",
+      "command": [
+        "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_final_scientific_integration.py",
+        "tests/test_final_acquisition_failures.py",
+        "tests/test_final_calibration_contract.py",
+        "tests/test_calibration_readiness.py",
+        "tests/test_expert_review.py",
+        "tests/test_acceptance.py",
+        "tests/test_v2_integration_contracts.py",
+        "tests/test_modality_contract.py",
+        "tests/test_omics_adapters.py",
+        "tests/test_adapters_and_capabilities.py",
+        "tests/test_literature_identifiers.py",
+        "tests/test_final_case_parsing.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-p",
+        "offline_review_guard",
+        "--junitxml=C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\related_final.xml"
+      ],
+      "cwd": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-independent-review-20260913",
+      "exit_code": 0,
+      "python": "3.12.13",
+      "source_commit": "75c2ae6c269f5b166b3da8f0466d37cd9bca7f3a",
+      "test_file_sha256": "bca285cbc1c45d4e31edbb3a6a707315f6415ab0692ad35307324f41f806fd6c",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "174",
+        "time": "0.992",
+        "timestamp": "2026-09-13T18:28:25.390339-04:00",
+        "hostname": "RicksRig"
+      },
+      "log": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\related_final.log",
+        "sha256": "eb97a9ecbd473829b68aa60c81c6665ba2edd66e13377e18ca542b63e27063cf"
+      },
+      "junit": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\related_final.xml",
+        "sha256": "537d83f89504372467f15bae9388c71c66ad815ea43f3cd37c82b19d1ff09da6"
+      },
+      "network_guard": {
+        "guard": "requests.Session.request/socket.create_connection/socket.connect/socket.connect_ex",
+        "blocked_attempts": 0,
+        "external_connections": 0,
+        "pytest_exit": 0
+      },
+      "same_functional_source_blobs": true
+    }
+  ],
+  "limitations": [
+    "Fixtures establish program behavior, not scientific validity, expert calibration, or performance on real cases.",
+    "No sealed holdout, frozen evaluation, new acquisition, source corpus, model files, or GPU inference was executed or read by these tests.",
+    "The 3.10 compatibility probe removes the unavailable helper on Python 3.12.13; the AST grammar check covers 67 modules. No actual Python 3.10 interpreter was installed.",
+    "Ontology coverage remains limited to declared local identifiers and spellings. Unknown inputs remain unresolved.",
+    "Calibration provenance and declared pre-registration are externally supplied. Numerical validation does not authenticate reviewer credentials or turn synthetic fixture labels into expert evidence.",
+    "Review covers the recorded source fingerprints. Later model-case and package changes require the separate follow-up assigned by the lead.",
+    "All functional package module blobs match root d84e439. Only package-version declarations differ: reviewer 0.2.0 versus root 0.3.0 in __init__.py and pyproject.toml; requires-python remains >=3.10."
+  ],
+  "red_receipts": [
+    {
+      "name": "biological_repair_controls.xml",
+      "sha256": "f90ea93efd39ba72b93d4a9bfe78692c3b97b0867d98cd4e3fd54d36e55cca06"
+    },
+    {
+      "name": "bounded_review_2.xml",
+      "sha256": "df97c735d38a9ff2f35c94398fef4dadf6b7eb3573d28bc3fc51cbd12438f96e"
+    },
+    {
+      "name": "expanded_repro.xml",
+      "sha256": "b425a1bbce25ad6c3840109b1f4f5116bb95a9b43d9fdbd568fd2ec964311883"
+    },
+    {
+      "name": "independent_committed_red.xml",
+      "sha256": "18c8d6f6c8033539ac55db423eb0dd78fa73f5b52dc8fa14346b6b67353bb087"
+    },
+    {
+      "name": "initial_repro.xml",
+      "sha256": "ab0cc18749381a5cbfa6dda60e395c073661213ac5156cb1c5078ae4f42c20a8"
+    },
+    {
+      "name": "repair_rereview_1.xml",
+      "sha256": "aed05700651e7d4030e5cd366d1d871a33e03228f6b6b21147dba9fd9e0fd19f"
+    }
+  ],
+  "root_package_diff": "diff --git a/litdatamatcher/__init__.py b/litdatamatcher/__init__.py\nindex a302e1a..418c0ee 100644\n--- a/litdatamatcher/__init__.py\n+++ b/litdatamatcher/__init__.py\n@@ -50,4 +50,4 @@ __all__ = [\n     \"normalize_variable_name\",\n ]\n \n-__version__ = \"0.3.0\"\n+__version__ = \"0.2.0\"\ndiff --git a/pyproject.toml b/pyproject.toml\nindex 82476d5..452f46b 100644\n--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -4,7 +4,7 @@ build-backend = \"setuptools.build_meta\"\n \n [project]\n name = \"litdatamatcher\"\n-version = \"0.3.0\"\n+version = \"0.2.0\"\n description = \"A reproducible pipeline for extracting open scientific questions and ranking matching public datasets.\"\n readme = \"README.md\"\n requires-python = \">=3.10\"\n",
+  "scope": {
+    "core_writes": false,
+    "push": false,
+    "subdelegation": false,
+    "reviewer_authored_files": [
+      "tests/test_final_independent_review.py",
+      "docs/v2/final_audit/INDEPENDENT_REVIEW.md",
+      "docs/v2/final_audit/INDEPENDENT_REVIEW.json"
+    ]
+  }
+}

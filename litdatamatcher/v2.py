@@ -296,6 +296,7 @@ def evidence_from_source_view(document, view):
         "proposition_id": None, "role": "background", "direction": "inconclusive",
         "source_id": document["document_id"], "source_document_id": document["document_id"],
         "publication_id": document.get("pmid") or document.get("doi"),
+        "publication_date": document.get("publication_date"),
         "study_id": None, "cohort_id": None, "source_of_source": None,
         "measurement_type": "retrieved_text_context", "scope_match": "unresolved",
         "answers_question": False, "statement": view["text"], "evidence_span": span,

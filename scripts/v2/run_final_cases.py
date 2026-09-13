@@ -171,8 +171,13 @@ def execute(args):
         print(json.dumps({"stage": "starting", "case_id": case["case_id"], "mode": "cache_replay" if args.replay else "fresh"}), flush=True)
         run = out / case["case_id"]
         result = analyze(root, run, args.model, args.embeddings, question=case["question"], requirements=case["requirements"], limit=1, chunks=protocol["chunks"], fresh=not args.replay, device="cuda", topic=case["case_id"], question_source_id=case["document_id"])
+        manifest = json.loads((run / "RUN_MANIFEST.json").read_text(encoding="utf-8"))
+        accepted_statuses = {"PASS", "PARTIAL"}
+        analysis_valid = result.get("status") in accepted_statuses and manifest.get("execution_status") in accepted_statuses
         run_dossiers = read_rows(run / "scientific_dossiers.jsonl")
-        if not run_dossiers:
+        if not analysis_valid:
+            result["case_validation"] = "FAIL_ANALYSIS_EXECUTION"
+        elif not run_dossiers:
             result["case_validation"] = "FAIL_NO_SOURCE_LINKED_DOSSIER"
         else:
             dossier = run_dossiers[0]
@@ -190,7 +195,7 @@ def execute(args):
         print(json.dumps(summaries[-1]), flush=True)
         gc.collect()
     control = {"kind": "Python audit hook; no native-library firewall claim", "blocked_probe_count": probe_count, "unexpected_requests": len(blocked) - probe_count}
-    receipt = {"schema_version": "final_real_case_execution_v1", "started_at": started, "finished_at": datetime.now(timezone.utc).isoformat(), "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(), "protocol": file_ref(root / "PROTOCOL.json"), "dataset_catalog": file_ref(root / "catalog/studies.jsonl"), "mode": "cache_replay" if args.replay else "fresh_local_inference", "network_control": control, "cases": dossiers, "source_locators": locators, "observations": summaries, "status": "PASS" if len(dossiers) == 6 and control["unexpected_requests"] == 0 else "FAIL"}
+    receipt = {"schema_version": "final_real_case_execution_v1", "started_at": started, "finished_at": datetime.now(timezone.utc).isoformat(), "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(), "protocol": file_ref(root / "PROTOCOL.json"), "dataset_catalog": file_ref(root / "catalog/studies.jsonl"), "mode": "cache_replay" if args.replay else "fresh_local_inference", "network_control": control, "cases": dossiers, "source_locators": locators, "observations": summaries, "status": "PASS" if len(dossiers) == 6 and all(row["case_validation"] == "PASS_SOURCE_ASSISTED" for row in summaries) and control["unexpected_requests"] == 0 else "FAIL"}
     atomic_json(out / "CASE_EXECUTION.json", receipt)
     print(json.dumps({"status": receipt["status"], "dossiers": len(dossiers), "out": str(out)}), flush=True)
     return int(receipt["status"] != "PASS")

@@ -1,86 +1,15 @@
-# Active final autonomous campaign
+# Final autonomous completion campaign
 
-Owner authority: `project_state/OWNER_UNRESTRICTED_OVERRIDE_20260913.md`.
-Any available account Codex model/effort, current Astra/Max, continuous reasoning
-and useful scoped native reviewers/subagents are authorized. No previous model
-ceiling, duty cycle or dated waiting period applies. No separately billed API,
-credit expenditure, supervisor restart or schedule is authorized.
+Active authority: `OWNER_UNRESTRICTED_OVERRIDE_20260913.md`; any available first-party account Codex model/effort, continuous execution and useful scoped native workers are authorized. Standard speed; no separately billed API/credits, new schedules, or supervisor restart. Older budget and model restrictions are historical.
 
-Current stage: reconstruct the final requirements-to-evidence matrix, determine
-whether expert labels are mandatory, then complete all remaining machine work,
-packaging, installation validation and adversarial review. Exact campaign state:
-`project_state/FINAL_CAMPAIGN_STATE.json`. The full campaign request remains
-`project_state/FINAL_CAMPAIGN_REQUEST_20260913.md`. Historical bounded-task prose
-below does not establish the complete definition of done or active resource policy.
+Canonical lead: `C:\Codex\LitDataMatcher-v2\lead`, branch `codex/litdatamatcher-v2-build`. Root isolated writer: `C:\Codex\LitDataMatcher-v2\worktrees\final-campaign-20260913`. Shared final data: `C:\Codex\LitDataMatcher-v2\data\final_campaign_20260913`. Last verified pushed checkpoint: `f89d4b4ff64a80e3abca052556476b7bc83ec304`.
 
-The following section records the completed bounded task and prior context.
+The requirements audit is complete: `docs/v2/final_audit/REQUIREMENT_SCOPE_REVIEW.json` contains74 governing rows. Real expert labels are required for EXPERT_VALIDATED/CALIBRATED claims, and are not a mandatory software COMPLETE gate. Final machine acceptance remains unfinished.
 
-# Current continuation
+Acquisition is complete:1600 new literature records,487 study IDs, and65 omics study IDs. Thirteen expanded partitions and the omics snapshots replay offline. These are identifiers and metadata, not552 proven independent cohorts. Preserve all successful downloads and source snapshots.
 
-Status: `RUNNING` / `HARDENED_ALPHA_COMPLETE`, current phase `PHASE_2`. Canonical lead: `C:\Codex\LitDataMatcher-v2\lead`; data/state: `C:\Codex\LitDataMatcher-v2\data`; branch: `codex/litdatamatcher-v2-build`.
+Scoped active work is in `FINAL_CAMPAIGN_STATE.json`. Observe live agent/process ownership before resuming; do not duplicate writers. The root is preparing fresh local-model cases and package/install evidence; native workers own the final validator, real scale/recovery benchmark, and independent review. Integrate only under the canonical controller integration lease, inspect staged files, push without force and verify remote SHA.
 
-The one-time v4 final holdout at `data\evaluation\final_holdout_v4\run` passed and is sealed: do not rerun it. Preserve completed acquisition, local model qualification, release archives, and deterministic evidence. The supervisor remains PAUSED. The September 13 user correction permits any available model/effort as needed; one reasoning execution, zero subagents, Standard speed, no paid API/credits, and the existing duty cap still apply. Read the current section of `project_state/BUDGET_POLICY.md`, not its historical observations. No continuous sustainability claim is established for the changed profile.
+Remaining sequence: complete fresh case studies; integrate benchmark/validator; resolve valid review findings; final full suite and source checks; build new0.3.0 artifacts outside frozen release roots; clean install and offline CLI smoke; final matrix/acceptance/review; verified compact handoff; reconcile final state; commit/push and verify. Retain actual receipts and exact failed/resume commands if interrupted.
 
-Frozen V2.0-HARDENED-ALPHA baseline: source commit `5747cbea2ae65c8570280d0e53f77bfabc968712`; final3 wheel/sdist and acceptance evidence are retained under `C:\Codex\LitDataMatcher-v2\data\releases\0.2.0-hardened-alpha-final3` and `C:\Codex\LitDataMatcher-v2\data\acceptance`. The first bounded V2.1-MULTISOURCE tranche is complete at source commit `3a3d734a5a6f2dd1580bcc7fa51d21515b08aa41`: optional Europe PMC and Crossref metadata adapters retain stable identifiers, provenance timestamps, cache snapshots, DOI-based cross-source relations, and fail-closed offline cache replay. Qualification is limited to one metadata record per source under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_multisource`; it did not invoke acquisition or a full-text download.
-
-The ClinicalTrials.gov registry-metadata tranche is complete at source commit `1d230cefa4e2e0ff49f63dc7e672b60ea1a77e7f`. It preserves study status/type/version, conditions, interventions, comparators, outcomes/timepoints, eligibility, phase, enrollment unit, arms, access limits, explicit missingness, and cache provenance. Registry enrollment remains distinct from analyzed sample count, and observational records are `NOT_PERTURBATIONAL`. One-record live and byte-identical offline-cache replay evidence is under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_clinicaltrials`.
-
-The ENA/SRA tranche is complete at source commit `772331f6cc3f5a1de57964b913f6a5a937ba7cd9`. It groups bounded run metadata under a study while retaining stable study/sample/run/experiment IDs, secondary accessions, availability, version time, provenance, typed missingness, and explicit run-to-sample/dependence links. Technical runs are never counted as biological samples and donor links remain ambiguous. Evidence is under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_ena`.
-
-Exact PMID/PMCID reconciliation is COMPLETE at lead functional commit `40921e58ca8a33e9de35847a116c324ec7d71500`. The new contract in `docs/v2/LITERATURE_IDENTIFIERS.md` preserves DOI precedence, rejects invalid identities, keeps conflicting/ambiguous groups separate, retains source metadata/provenance, and propagates lifecycle notices. Offline CLI cache replay passes with both one-record and five-record limits. Targeted tests: 67 passed; full suite: 346 passed; zero failures/errors/skips. Seven frozen-alpha hashes match. Receipts: `C:\Codex\LitDataMatcher-v2\data\phase2\pmid_reconciliation_20260913`.
-
-The next already documented Phase 2 dependency is V2.4 real expert review: obtain actual labels for the existing versioned review packets, then use the existing validation/agreement/adjudication workflow. No expert labels were supplied for this bounded task; do not invent them or start a new implementation task merely to continue. The campaign remains incomplete. Before further reasoning, honor the next permitted time in BUDGET_POLICY.md and refresh telemetry when due. The command below is a verified regression command for later relevant changes, not an instruction to rerun successful evidence now.
-
-```powershell
-C:\Codex\LitDataMatcher-v2\env\Scripts\python.exe -m pytest -q tests\test_adapters_and_capabilities.py tests\test_literature_integrity.py tests\test_literature_identifiers.py
-```
-
-Do not restart acquisition, download application models, rebuild validated artifacts, rerun holdout scoring, or weaken scientific acceptance criteria.
-
-## V2.3 evidence compiler checkpoint
-
-The bounded evidence-compiler contract tranche is validated locally: exact shared study/cohort/publication/source identifiers and explicit source-of-source paths form auditable known-dependence edges; source-located assertions retain replication, orthogonal, direct perturbational, associative, mechanistic, indirect, contradictory, incompatible, and unknown-dependence classifications without inferring them from text. Only same-underlying, derivative, and duplicated-cohort edges join a known-dependence group. The deterministic receipt is under `C:\Codex\LitDataMatcher-v2\data\phase2\v2_3_evidence_compiler\contract_receipt.json`. Frozen alpha and sealed holdout evidence remain untouched.
-
-## V2.4 expert-review checkpoint
-
-The review machinery is `PENDING_EXPERT_REVIEW`, not calibrated or expert-validated. Versioned packets preserve source spans/provenance while masking ranking/model fields and reviewer identity. Strict categorical labels, descriptive agreement, and pending-adjudication records are ready for real expert input. The deterministic zero-label infrastructure receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_4_expert_review\packet_receipt.json`.
-
-## V2.4 calibration-readiness checkpoint
-
-The versioned scorecard contract separates retained source-determined labels, pending expert labels, excluded/ambiguous records, split family, label provenance, and calibration eligibility. Metrics and descriptive ablation denominators appear only for valid binary source-determined labels from one declared split family. Novelty, unresolvedness, and scientific significance never become calibrated dimensions. The receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_4_calibration_readiness\receipt.json`.
-
-## V2.5 scale/recovery checkpoint
-
-Bounded local scale instrumentation is validated at `C:\Codex\LitDataMatcher-v2\data\phase2\v2_5_scale\benchmark_receipt.json`. It measures only the declared synthetic fixture and records its host/backend/limit provenance, throughput/latency, memory/disk, cache replay, and reopen/resume. It performs no network acquisition, model inference, LLM context loading, or production-scale claim.
-
-## Literature integrity checkpoint
-
-Normalized multi-source literature metadata now retains lifecycle/version/retraction state, source snapshots/statuses, full-text unknowns, dedup lineage, and deterministic derivation invalidation. Retrieval/schema failures remain unknown. Corrected, retracted, versioned, or cross-source duplicate metadata cannot silently become evidence or independent support. The synthetic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\literature_integrity\receipt.json`.
-
-## Requirement formalization checkpoint
-
-Matching now exposes expanded machine-readable compatibility status while preserving existing eligibility: exact/directly answerable/partial/indirect/additional-data/incompatible/unknown. Field-level observations and provenance remain authoritative; absent metadata is not incompatibility.
-
-## Entity normalization checkpoint
-
-Local identifier contracts now preserve candidate sets and source/mapping state across major entity classes. Only unambiguous exact/synonym IDs participate in requirement matching; ambiguity, deprecation, orthology, unresolved values, and source failures remain unknown/reviewable.
-
-## Cross-source adversarial checkpoint
-
-The integrated local regression receipt at `C:\Codex\LitDataMatcher-v2\data\phase2\cross_source_adversarial\receipt.json` composes lifecycle, adapters, modality/unit, normalization, requirement, evidence-dependence, and review masking guards with a deterministic input hash.
-
-## V2.5 performance baseline checkpoint
-
-The bounded 32-record fixture has a stored comparison baseline with explicit tolerance and incomparable hardware/backend/fixture outcomes. The executed local PASS receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_5_scale\benchmark_comparison_receipt.json`; it is not a production-scale claim.
-
-## V2.6 dossier checkpoint
-
-The provenance-complete dossier template is validated with a deterministic source-assisted receipt at `C:\Codex\LitDataMatcher-v2\data\phase2\v2_6_dossier\receipt.json`. It retains scope, compatibility/missingness, dependence and contradiction context while prohibiting global novelty and expert-validation claims.
-
-## V2.1 cache-refresh checkpoint
-
-Optional adapter JSON cache entries now have an explicit `refresh=True` path. A cached entry is replaced only after a successful response, while refresh lineage records old and new content SHA-256 values; failed refresh leaves the prior entry replayable offline. The synthetic deterministic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_cache_refresh\receipt.json`. This does not claim source completeness, retrieve any source, or alter bounded pagination semantics.
-
-## V2.1 pagination checkpoint
-
-Europe PMC literature and ClinicalTrials.gov repository adapters now carry a bounded cursor contract: each page records exact request scope, input/output cursor, returned item count, and cache lineage. Only a terminal cursor yields `COMPLETE_CANDIDATE_UNIVERSE`; repeated tokens, bounded truncation, schema drift, and retrieval errors yield `PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE`. The synthetic deterministic receipt is `C:\Codex\LitDataMatcher-v2\data\phase2\v2_1_pagination\receipt.json`. No live pages were enumerated.
+Protected alpha source `5747cbea2ae65c8570280d0e53f77bfabc968712`, final3 artifacts, and sealed `evaluation/final_holdout_v4/run` must remain unchanged. Verify hashes only; never rerun/tune the sealed holdout. Preserve the original user's checkout/index/untracked files. The corrective supervisor is PAUSED and stays paused. No background reasoning is claimed after this task ends.

@@ -1,30 +1,30 @@
 {
   "schema_version": 1,
   "campaign": "FINAL_AUTONOMOUS_COMPLETION",
-  "status": "RUNNING_REQUIREMENTS_AUDIT",
-  "updated_at": "2026-09-13T21:13:52.824294+00:00",
+  "status": "RUNNING_REAL_EVALUATION_AND_CLOSEOUT",
+  "updated_at": "2026-09-13T22:02:28.363232+00:00",
   "scope": "Full intended project completion, or all machine-resolvable requirements complete with only a proven irreducible external gate.",
   "request": "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md",
   "request_sha256": "1c0966ba0f2c1ce50656af530ce05788cfb42e4ea3cfced35a45e8a0e4b190d6",
   "starting_functional_commit": "40921e58ca8a33e9de35847a116c324ec7d71500",
   "starting_verified_remote": "a4ee398cd8f30d275a8d151a46ffb13ef283392d",
-  "unfinished_stage": "REQUIREMENTS_TO_EVIDENCE_MATRIX_NOT_STARTED",
-  "expert_labels_gate_classification": "NOT_YET_DETERMINED_FROM_GOVERNING_SPECIFICATION",
+  "unfinished_stage": "REAL_CASES_SCALE_REVIEW_PACKAGE_AND_FINAL_ACCEPTANCE",
+  "expert_labels_gate_classification": "OPTIONAL_EXPERT_VALIDATED_CALIBRATED_STATUS; NOT_MANDATORY_FOR_SOFTWARE_COMPLETE",
   "next_permitted_reasoning_at": null,
   "reasoning_concurrency": "purposeful scoped native reviewers and isolated writers authorized",
   "subagents": "authorized when useful",
   "supervisor": "PAUSED",
   "resume_worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-campaign-20260913",
   "resume_steps": [
-    "Read the active unrestricted owner override, inspect live ownership, then continue immediately without model/duty restrictions.",
-    "Use supported telemetry only at major checkpoints; actual platform failure is a blocker, projected burn is not.",
-    "Read the finalized build and later Phase 2 scope specifications and existing acceptance evidence.",
-    "Build the requested machine-readable requirement classifications with exact source, receipt, commit and blocking status.",
-    "Determine whether real expert labels are mandatory for COMPLETE or only EXPERT_VALIDATED; do not infer this from stale NEXT_ACTION prose.",
-    "Execute remaining machine requirements, final package/install checks and adversarial review under the governing policy."
+    "Inspect live agents, isolated writer ownership and new receipts; do not duplicate workers.",
+    "Continue real cases from data/final_campaign_20260913; preserve acquisition/snapshots and inference cache.",
+    "Integrate benchmark and validator commits under canonical integration lease; repair independent findings.",
+    "Run final full suite, protected hash validation, build versioned distribution, clean install and offline CLI smoke.",
+    "Bind requirement matrix and final ledger to actual receipts; pass final machine validator and independent review.",
+    "Create verified compact handoff, reconcile COMPLETE state, commit/push and verify remote."
   ],
-  "matrix_created": false,
-  "new_tests_run": false,
+  "matrix_created": true,
+  "new_tests_run": true,
   "prior_validation": {
     "scope": "PMID/PMCID bounded task only",
     "targeted_passed": 67,
@@ -49,5 +49,25 @@
   "owner_override": "project_state/OWNER_UNRESTRICTED_OVERRIDE_20260913.md",
   "owner_override_sha256": "e08b2b8d0ee97fc66f905e29c315e1d53516f0f52df9ab8300b5a5a60f82aa4f",
   "owner_override_attachment_sha256": "6c7b699652e931131d8041fb643ab9abdfab7f0874e45517942236ef4db16bc5",
-  "active_campaign_started_at": "2026-09-13T21:13:52.824294+00:00"
+  "active_campaign_started_at": "2026-09-13T21:13:52.824294+00:00",
+  "last_verified_remote": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
+  "requirements_matrix": "docs/v2/final_audit/REQUIREMENT_SCOPE_REVIEW.json",
+  "completed_this_campaign": [
+    "owner policy committed and pushed",
+    "74-row governing scope matrix with expert gate adjudication",
+    "source modality and organism alias integration",
+    "all-source failure and cache invalidation propagation",
+    "atomic offline cache repair",
+    "source-scoped notice and per-page provenance repairs",
+    "strict expert adjudication and fitted-calibration contracts",
+    "1600 real literature and 487 study IDs acquired with 13-partition replay",
+    "65 real PRIDE and Metabolomics Workbench studies qualified with offline replay"
+  ],
+  "active_work": {
+    "lead": "real local application cases, durable state, package/install and final evidence integration",
+    "final_contract_audit": "strict final validator and mutation tests",
+    "final_requirements_audit": "real 1600/552 progressive scale, retrieval ablations, actual interruption/resume",
+    "final_offline_repair": "independent adversarial final functional review"
+  },
+  "scientific_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW; NOT_CALIBRATED"
 }

@@ -4,10 +4,10 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-13T21:13:52.824294+00:00",
+  "updated_at": "2026-09-13T22:02:28.363232+00:00",
   "execution_status": "RUNNING",
   "product_status": "HARDENED_ALPHA_COMPLETE",
-  "automation_status": "DISABLED_AT_COMPLETION_RUNTIME_UNVERIFIED",
+  "automation_status": "PAUSED_CONFIRMED_LOCAL_CONFIG",
   "calibration_status": "SOURCE_ASSISTED_EVALUATION",
   "source": {
     "repository": "ericrosenn1/LitDataMatcher",
@@ -122,14 +122,14 @@
   },
   "blockers": [],
   "next_action": {
-    "description": "Construct the governing final requirements-to-evidence matrix and determine the expert-label gate, then execute all machine-resolvable final campaign work.",
+    "description": "Complete fresh real case studies, progressive scale/recovery, final review, package/install and machine acceptance. Expert labels are optional for software completion.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-campaign-20260913",
-    "command": "",
+    "command": "See project_state/FINAL_CAMPAIGN_STATE.json",
     "command_tested": false
   },
   "checkpoint": {
-    "last_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500",
-    "last_verified_remote_commit": "65119299a0b26a884dd7c0193cd0115f23322f94",
+    "last_source_commit": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
+    "last_verified_remote_commit": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
     "push_pending": false
   },
   "milestones": {

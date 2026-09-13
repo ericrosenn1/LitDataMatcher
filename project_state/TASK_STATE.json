@@ -130,8 +130,8 @@
   },
   "checkpoint": {
     "last_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500",
-    "last_verified_remote_commit": "cbeafebe5b1f95e065ed126ccb1e0e41eb4e2d21",
-    "push_pending": true
+    "last_verified_remote_commit": "65119299a0b26a884dd7c0193cd0115f23322f94",
+    "push_pending": false
   },
   "milestones": {
     "functional_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\hardened-alpha-candidate-01",

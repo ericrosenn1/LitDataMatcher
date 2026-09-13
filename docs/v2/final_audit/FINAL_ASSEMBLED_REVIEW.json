@@ -1,0 +1,525 @@
+{
+  "schema_version": "final_independent_review_v1",
+  "status": "PASS",
+  "created_at_utc": "2026-09-13T23:52:29.408989+00:00",
+  "source_commit": "7bc86f8b81f33d00b8d40d7378e01d551b0266fa",
+  "source_fingerprint": "d3c546f9ffefaff42535b32314b32add73470be7e939682b158c877de166b028",
+  "reviewer_id": "/root/final_offline_repair",
+  "implementer_id": "/root",
+  "expert_status": "PENDING_EXPERT_REVIEW",
+  "report": {
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+    "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+    "size_bytes": 9120
+  },
+  "findings": [
+    {
+      "id": "IR-01",
+      "severity": "MEDIUM",
+      "title": "Declared Python 3.10 runtime uses a Python 3.11 hashing helper",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\initial.json",
+          "sha256": "c08162b29ef362708a2fbee7aeda81aa35bd53d627358464508c73687b38170a",
+          "size_bytes": 25435
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Retained red/repaired native review plus all 45 independent controls passing in the exact final-source 699-test suite."
+    },
+    {
+      "id": "IR-02",
+      "severity": "MEDIUM",
+      "title": "Biological unit metadata crosses observed, unknown and absent states",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\initial.json",
+          "sha256": "c08162b29ef362708a2fbee7aeda81aa35bd53d627358464508c73687b38170a",
+          "size_bytes": 25435
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Retained red/repaired native review plus all 45 independent controls passing in the exact final-source 699-test suite."
+    },
+    {
+      "id": "IR-03",
+      "severity": "HIGH",
+      "title": "Explicit provider retraction signals were discarded before lifecycle selection",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\initial.json",
+          "sha256": "c08162b29ef362708a2fbee7aeda81aa35bd53d627358464508c73687b38170a",
+          "size_bytes": 25435
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Retained red/repaired native review plus all 45 independent controls passing in the exact final-source 699-test suite."
+    },
+    {
+      "id": "IR-04",
+      "severity": "MEDIUM",
+      "title": "PubMed EFetch failure was hidden behind successful summary metadata",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\initial.json",
+          "sha256": "c08162b29ef362708a2fbee7aeda81aa35bd53d627358464508c73687b38170a",
+          "size_bytes": 25435
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Retained red/repaired native review plus all 45 independent controls passing in the exact final-source 699-test suite."
+    },
+    {
+      "id": "IR-05",
+      "severity": "MEDIUM",
+      "title": "Provider error objects became successful empty searches",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\initial.json",
+          "sha256": "c08162b29ef362708a2fbee7aeda81aa35bd53d627358464508c73687b38170a",
+          "size_bytes": 25435
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Retained red/repaired native review plus all 45 independent controls passing in the exact final-source 699-test suite."
+    },
+    {
+      "id": "IR-06",
+      "severity": "MEDIUM",
+      "title": "Known canonical ontology identifiers failed their own normalization round trip",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\initial.json",
+          "sha256": "c08162b29ef362708a2fbee7aeda81aa35bd53d627358464508c73687b38170a",
+          "size_bytes": 25435
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Retained red/repaired native review plus all 45 independent controls passing in the exact final-source 699-test suite."
+    },
+    {
+      "id": "RFR01",
+      "severity": "MEDIUM",
+      "title": "Explicit synthesis could be asserted as a current experiment",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_initial_repro.json",
+          "sha256": "877d0b0cbf0b211b38090e165adadf86ad413aed965da53c7349ed74240d009b",
+          "size_bytes": 1656
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\runtime.json",
+          "sha256": "8bd0005eda9e527a5907062898cd60d1e62fca577a9989235a1c2866e2c0ee3e",
+          "size_bytes": 22869
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "fix_commit": "d2487ecbb2b8dd44286538ad45ec258959159793"
+    },
+    {
+      "id": "RFR02",
+      "severity": "MEDIUM",
+      "title": "Undeclared model novelty and expert fields survived the source guard",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_initial_repro.json",
+          "sha256": "877d0b0cbf0b211b38090e165adadf86ad413aed965da53c7349ed74240d009b",
+          "size_bytes": 1656
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\runtime.json",
+          "sha256": "8bd0005eda9e527a5907062898cd60d1e62fca577a9989235a1c2866e2c0ee3e",
+          "size_bytes": 22869
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "fix_commit": "d2487ecbb2b8dd44286538ad45ec258959159793"
+    },
+    {
+      "id": "RFR03",
+      "severity": "MEDIUM",
+      "title": "Retrieved source context lost known publication date and bypassed temporal exclusion",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\source_context_and_controller.json",
+          "sha256": "a23113724712f049892ef045512b29986fea2c9e92f922c0a724199f413fffe4",
+          "size_bytes": 1680
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\runtime.json",
+          "sha256": "8bd0005eda9e527a5907062898cd60d1e62fca577a9989235a1c2866e2c0ee3e",
+          "size_bytes": 22869
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "fix_commit": "15902b557c19a9a9729cd42d350105b7fe1c30d5"
+    },
+    {
+      "id": "RFR04",
+      "severity": "HIGH",
+      "title": "Case export could report PASS despite failed analysis execution",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\source_context_and_controller.json",
+          "sha256": "a23113724712f049892ef045512b29986fea2c9e92f922c0a724199f413fffe4",
+          "size_bytes": 1680
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\controller_partial_repro.json",
+          "sha256": "e7b4493174909887fe08aefbf7815e1a080e2ef570fbd63933295ee994568b66",
+          "size_bytes": 1665
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\runtime_final_repro.json",
+          "sha256": "293c566c7c3689ae7a84db714a0a7b16308320b31e2eb5b9b22b6086105257b5",
+          "size_bytes": 1650
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\runtime.json",
+          "sha256": "8bd0005eda9e527a5907062898cd60d1e62fca577a9989235a1c2866e2c0ee3e",
+          "size_bytes": 22869
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ]
+    },
+    {
+      "id": "RFR05",
+      "severity": "MEDIUM",
+      "title": "The same source-span future-work question was exported twice under model and deterministic IDs",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_identity_observation.json",
+          "sha256": "31750901fae72c439268f7d44262daea071c8ef3c3f70ba67f42443873d943c0",
+          "size_bytes": 5218
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_identity_red.json",
+          "sha256": "23e06e3474c0234c39ed8600004f63a62a11dc2316fa4f3a2d477aae75e3ad9e",
+          "size_bytes": 1696
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_identity_final.json",
+          "sha256": "09e9237aa06834b67bfbb376b5e71db0b9652bc5291d86603861281ac11436b5",
+          "size_bytes": 1709
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\clinical_and_identity_final.json",
+          "sha256": "e6d2c3ecb4e3136598e375e6a045890794bf63e70b9498abc55f8bcc4c871a4c",
+          "size_bytes": 2764
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\identity_clinical.json",
+          "sha256": "c715d5911f448a6f69a8c6decf6e24e3e1f850aafb6c4980461265d102857525",
+          "size_bytes": 9900
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "fix_commit": "1a9502cfe04ced4bc06fb4f4abdd0782e7808de8"
+    },
+    {
+      "id": "RFR06",
+      "severity": "MEDIUM",
+      "title": "Source-declared observational and nonrandomized designs remained unknown against a randomized-trial requirement",
+      "status": "FIXED_VALIDATED",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\clinical_design_red_bound.json",
+          "sha256": "181fef5bee963717dd0cd41fd99fc9a8ea302ab6d9c42f4b627ad707ae59ba53",
+          "size_bytes": 1926
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\clinical_and_identity_final.json",
+          "sha256": "e6d2c3ecb4e3136598e375e6a045890794bf63e70b9498abc55f8bcc4c871a4c",
+          "size_bytes": 2764
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_clinical_readonly_revalidation.json",
+          "sha256": "c49fca4c52703fe6b86fd7764b4619e57eefdf19569b55d89aa6b42774a07e49",
+          "size_bytes": 2584
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\native_reviews\\identity_clinical.json",
+          "sha256": "c715d5911f448a6f69a8c6decf6e24e3e1f850aafb6c4980461265d102857525",
+          "size_bytes": 9900
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "fix_commit": "7c27a3133b70e256f62286d2e9b258061e767e75"
+    },
+    {
+      "id": "RFR07",
+      "severity": "MEDIUM",
+      "title": "Qualified acquired publication date was lost before the as-of evidence guard",
+      "status": "FIXED_VALIDATED",
+      "fix_commit": "7bc86f8b81f33d00b8d40d7378e01d551b0266fa",
+      "original_fix_commit": "14129ed1759eeba9a3157071a611392c07136fa0",
+      "evidence": [
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\acquired_date_red.json",
+          "sha256": "3873fe3758c9b31137c4e8c27a80824eeba268b27da23381d1c98531f039e34f",
+          "size_bytes": 970
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\acquired_date_green_delivery.json",
+          "sha256": "29b127ca7c43d02fa468023eaec393ccb6cb2b6b1f6c72901349c5167664c680",
+          "size_bytes": 981
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\acquired_date_actual_green.json",
+          "sha256": "d9796baa4cf79580468f5dfa82bca1dbae094c5976906de36f922bf752af9c7f",
+          "size_bytes": 5173
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\case_replay_delivery_corrected_inspection.json",
+          "sha256": "8b6a0d334e366df95998eb39709e037e249492f6d4e73d6c9a4e517bbc20fa48",
+          "size_bytes": 19567
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+          "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+          "size_bytes": 100741
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
+          "sha256": "f2b71719aee2b8585c01fa4c9312a0a4b21d4f780a0990627c0f45fd93f8c2c4",
+          "size_bytes": 1576
+        }
+      ],
+      "validation_basis": "Actual MED39775804 red-before/green-after probe; 64 independent actual-record/boundary checks across six context items and two claims; 28 final temporal controls; dates retained throughout final exported dossier evidence. Exact source=europepmc plus valid full ISO metadata.first_publication_date only, with field/locator provenance; explicit date precedence and unknown boundaries preserved."
+    }
+  ],
+  "finding_counts": {
+    "total": 13,
+    "critical": 0,
+    "high": 2,
+    "medium": 11,
+    "unresolved": 0
+  },
+  "validation": {
+    "delivery_checks": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\ASSEMBLED_DELIVERY_CHECKS.json",
+      "sha256": "8401ba76cfcae8acdd7131a22262b42ef53e2c1c91f14db074055361b9c1f057",
+      "size_bytes": 12980
+    },
+    "delivery_supplement": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\DELIVERY_SUPPLEMENT.json",
+      "sha256": "406ef76a71f81471b4bdeed6feb6387ceb8345e64ff54d02774d41bb5c8b6c04",
+      "size_bytes": 1230
+    },
+    "case_inspection": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\case_replay_delivery_corrected_inspection.json",
+      "sha256": "8b6a0d334e366df95998eb39709e037e249492f6d4e73d6c9a4e517bbc20fa48",
+      "size_bytes": 19567
+    },
+    "actual_date_controls": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\acquired_date_actual_green.json",
+      "sha256": "d9796baa4cf79580468f5dfa82bca1dbae094c5976906de36f922bf752af9c7f",
+      "size_bytes": 5173
+    },
+    "source_snapshot": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\SOURCE_FINGERPRINT_DELIVERY.json",
+      "sha256": "6dec8c6dd7ebeff598821a6305a191cd537d41af5bf08d4f8f88dcc2659e4aba",
+      "size_bytes": 18438
+    },
+    "full_suite": {
+      "tests": 699,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml",
+        "sha256": "e3f651dd1a1ed0e499b521a64ca4f5b27ec5ef678dccf030a4764e38fb5e96aa",
+        "size_bytes": 100741
+      }
+    },
+    "focused_suite": {
+      "tests": 196,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "junit": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.xml",
+        "sha256": "078b034d6f18de6b2dbaa5bbaedd7ef344526eca7fa85bb97ee70f8fd9cc5203",
+        "size_bytes": 31085
+      }
+    },
+    "focused_overlaps_full": true,
+    "review_test_modules_in_full_suite": {
+      "tests.test_final_independent_review": 45,
+      "tests.test_final_runtime_followup": 38,
+      "tests.test_final_clinical_design": 18,
+      "tests.test_final_acquired_temporal_guard": 28
+    },
+    "distribution": {
+      "version": "0.3.0",
+      "wheel": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\dist\\litdatamatcher-0.3.0-py3-none-any.whl",
+        "sha256": "74c3213d21939323d73874be0e101db252b89089434f9321631fb7f2dd0c5814",
+        "size_bytes": 293446
+      },
+      "sdist": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\dist\\litdatamatcher-0.3.0.tar.gz",
+        "sha256": "dddc68514e034391773107b43bdcbb2bb1966a4052c744398175ca50cfdcce96",
+        "size_bytes": 363887
+      },
+      "source_archive": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\dist\\litdatamatcher-0.3.0-source.zip",
+        "sha256": "0b0acf160ddd3c7ef4606ec9611ad8fcd75e3a3f86a1b02d03f1a36ea380a7b2",
+        "size_bytes": 807940
+      }
+    },
+    "protected_alpha": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\PROTECTED_ALPHA.json",
+      "sha256": "512ba7471ca576ff88981bc4a7b12c2495b47dada8b974f34fadd9b125b4f4b4",
+      "size_bytes": 3125
+    },
+    "original_preservation": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\ASSEMBLED_SUPPLEMENT.json",
+      "sha256": "fad85ac762774928852248d0fe63f8dd9c5c51fda7a3e3cf2c646fa438821421",
+      "size_bytes": 1944
+    }
+  },
+  "scope": "Independent functional review of exact final source, delivered artifacts, actual installed offline replay and corrected source-assisted cases. Prior native reviews retain their own execution commits; final-source passing controls and source/archive checks bind their dispositions here.",
+  "limitations": [
+    "Expert review remains pending; rankings are uncalibrated review priorities.",
+    "Two accepted claims and four source-context-only cases do not establish extraction precision/recall, scientific answerability, global novelty, independent cohorts or statistical adequacy.",
+    "Actual execution used Windows Python 3.12.13; all declared Python versions were not executed.",
+    "Python audit-hook network denial and bounded source/archive security checks do not certify native firewall coverage or general malware absence.",
+    "The reviewer previously implemented separately audited cache/acquisition components; root and other agents implemented the core/runtime/design/package fixes reviewed here.",
+    "No publication, push, campaign-state transition, new inference, acquisition or sealed-holdout execution is certified by this review."
+  ]
+}

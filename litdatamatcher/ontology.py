@@ -131,7 +131,21 @@ ENTITY_CONTRACTS = {
     "disease_condition": {"crohn disease": ("MONDO:0005011", "exact"), "ibd": (("MONDO:0005011", "MONDO:0005101"), "ambiguous")},
     "intervention_chemical": {"lipopolysaccharide": ("CHEBI:16412", "exact"), "lps": ("CHEBI:16412", "synonym")},
     "tissue_cell_type": {"macrophage": ("CL:0000235", "exact"), "gut": (("UBERON:0001155", "UBERON:0002107"), "ambiguous")},
-    "organism": {"homo sapiens": ("NCBITaxon:9606", "exact"), "human": ("NCBITaxon:9606", "synonym"), "homo sapiens (human)": ("NCBITaxon:9606", "synonym"), "mus musculus": ("NCBITaxon:10090", "exact"), "mouse": ("NCBITaxon:10090", "synonym"), "mus musculus (mouse)": ("NCBITaxon:10090", "synonym")},
+    "organism": {
+        "homo sapiens": ("NCBITaxon:9606", "exact"),
+        "human": ("NCBITaxon:9606", "synonym"),
+        "homo sapiens (human)": ("NCBITaxon:9606", "synonym"),
+        "mus musculus": ("NCBITaxon:10090", "exact"),
+        "mouse": ("NCBITaxon:10090", "synonym"),
+        "mus musculus (mouse)": ("NCBITaxon:10090", "synonym"),
+        # Qualified against versioned UniProt taxonomy snapshots. Only these
+        # exact controlled spellings are aliases; arbitrary suffixes stay unknown.
+        "arabidopsis thaliana": ("NCBITaxon:3702", "exact"),
+        "drosophila melanogaster": ("NCBITaxon:7227", "exact"),
+        "drosophila melanogaster (fruit fly)": ("NCBITaxon:7227", "synonym"),
+        "rattus norvegicus": ("NCBITaxon:10116", "exact"),
+        "rattus norvegicus (rat)": ("NCBITaxon:10116", "synonym"),
+    },
     "assay": {"rna-seq": ("EFO:0002772", "exact"), "rna sequencing": ("EFO:0002772", "synonym")},
     "experimental_condition": {"lps": ("CHEBI:16412", "synonym"), "untreated": ("LDM:UNTREATED_CONTROL", "exact")},
 }

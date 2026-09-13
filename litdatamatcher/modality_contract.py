@@ -33,12 +33,12 @@ def modality_families(value: object) -> set[str]:
     return {name for name, values in MODALITY_FAMILIES.items() if terms & values}
 
 
-def same_organism(expected: object, observed: object) -> bool:
+def same_organism(expected: object, observed: object) -> bool | None:
     left = normalize_entity(str(expected), "organism")
     right = normalize_entity(str(observed), "organism")
     if left["status"] == right["status"] == "RESOLVED":
         return left["candidates"] == right["candidates"]
-    return str(expected).strip().casefold() == str(observed).strip().casefold()
+    return None
 
 
 def modality_contract(record: JsonDict) -> JsonDict:
@@ -83,8 +83,12 @@ def compatibility(required_modality: str, required_organism: str, record: JsonDi
     if required_families and modalities != {"UNKNOWN"} and not required_families & modalities:
         return "INCOMPATIBLE"
     organisms = {str(x).lower() for x in record.get("organisms", [])}
-    if required_organism and organisms and not any(same_organism(required_organism, value) for value in organisms):
-        return "INCOMPATIBLE"
+    if required_organism and organisms:
+        comparisons = [same_organism(required_organism, value) for value in organisms]
+        if all(value is False for value in comparisons):
+            return "INCOMPATIBLE"
+        if not any(value is True for value in comparisons):
+            return "UNKNOWN"
     if not required_families or contract["modality"] == ["UNKNOWN"] or contract["organism"] == "UNKNOWN":
         return "UNKNOWN"
     return "PARTIAL"

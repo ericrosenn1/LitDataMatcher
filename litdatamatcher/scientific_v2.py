@@ -202,8 +202,12 @@ def _contract_requirement_status(field, expected, contract):
             return "MISMATCH"
     if field in {"organism", "species"}:
         observed = contract.get("organisms", [])
-        if observed and not any(same_organism(expected, value) for value in observed):
-            return "MISMATCH"
+        if observed:
+            comparisons = [same_organism(expected, value) for value in observed]
+            if all(value is False for value in comparisons):
+                return "MISMATCH"
+            if not any(value is True for value in comparisons):
+                return "UNKNOWN"
     if field in {"feature_type", "feature_unit", "quantification", "normalization", "temporal_design", "baseline_timing", "followup_window", "intervention_timing", "repeated_measure_unit"}:
         observed = str(contract.get(field, "UNKNOWN") or "UNKNOWN")
         if observed == "UNKNOWN":

@@ -34,6 +34,18 @@ def test_organism_synonym_survives_adapter_guard():
     assert compatibility("RNA-seq", "human", profile()) == "PARTIAL"
 
 
+@pytest.mark.parametrize("species, alias", [
+    ("Arabidopsis thaliana", "Arabidopsis thaliana"),
+    ("Drosophila melanogaster", "Drosophila melanogaster (Fruit fly)"),
+    ("Rattus norvegicus", "Rattus norvegicus (Rat)"),
+])
+def test_qualified_real_omics_organisms_do_not_become_false_exclusions(species, alias):
+    requirement = [{"field": "species", "expected": species}]
+    assert assess_requirements(requirement, profile(species=alias))["eligibility"] == "DIRECT_FIT"
+    assert assess_requirements(requirement, profile(species="Homo sapiens"))["eligibility"] == "NOT_QUALIFIED"
+    assert assess_requirements(requirement, profile(species=alias + " unknown strain"))["eligibility"] == "REQUIRES_INSPECTION"
+
+
 def test_known_different_assays_are_not_equated_by_broad_family():
     result = assess_requirements([{"field": "assay", "expected": "RNA-seq"}], profile("microarray"))
     assert result["eligibility"] == "NOT_QUALIFIED"

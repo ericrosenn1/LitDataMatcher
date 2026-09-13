@@ -47,3 +47,20 @@ def test_retrieved_context_never_becomes_a_model_claim_or_direct_support():
     assert item["answers_question"] is False
     assert result["gap_status"] != "answered"
     assert "no global novelty assertion" in result["novelty_claim"]
+
+
+def test_case_contract_never_imputes_species_from_topic_and_checks_source_quote():
+    spec = importlib.util.spec_from_file_location("final_case_contracts", Path(__file__).parents[1] / "scripts/v2/run_final_cases.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    document = {"document_id": "fixture", "topic": "cancer", "text": "Tumors were measured in mice.", "title": "A cancer experiment"}
+    assert module.case_requirements(document, {}) == ([], [])
+    requirement = {"field": "species", "expected": "Mus musculus", "essential": True, "source_locator": "fixture#text"}
+    proof = {"field": "species", "quote": "Tumors were measured in mice.", "source_field": "text"}
+    contract = {"document_id": "fixture", "requirements": [requirement], "requirement_evidence": [proof]}
+    assert module.case_requirements(document, {"cases": [contract]}) == ([requirement], [proof])
+    with pytest.raises(ValueError, match="Duplicate"):
+        module.case_requirements(document, {"cases": [contract, contract]})
+    proof["quote"] = "Human blood was sampled."
+    with pytest.raises(ValueError, match="retained source"):
+        module.case_requirements(document, {"cases": [contract]})

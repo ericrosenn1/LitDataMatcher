@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from litdatamatcher.data_plane import atomic_json, digest
 from litdatamatcher.scientific_dossier import render_dossier, validate_dossier
+from litdatamatcher.scientific_v2 import ExperimentalRequirement
 from litdatamatcher.v2 import analyze, document_lifecycle_status, read_rows, write_rows
 
 
@@ -72,12 +73,35 @@ def abstract_document(abstract):
     return text, sections
 
 
+def case_requirements(document, contracts):
+    """Require source-backed explicit constraints; a topic never implies design."""
+    matches = [item for item in contracts.get("cases", []) if item["document_id"] == document["document_id"]]
+    if not matches:
+        return [], []
+    if len(matches) != 1:
+        raise ValueError("Duplicate case requirement contract")
+    contract = matches[0]
+    requirements = contract["requirements"]
+    evidence = contract["requirement_evidence"]
+    for raw in requirements:
+        requirement = ExperimentalRequirement(**raw)
+        proofs = [item for item in evidence if item["field"] == requirement.field]
+        if not requirement.source_locator or not proofs:
+            raise ValueError("Case requirement lacks source evidence")
+        for proof in proofs:
+            if proof.get("source_field") not in {"text", "title"} or not proof.get("quote") or proof["quote"] not in document.get(proof["source_field"], ""):
+                raise ValueError("Case requirement quote is not in the retained source")
+    return requirements, evidence
+
+
 def prepare(args):
     root = args.root.resolve()
     if root.exists():
         raise ValueError("Preserve existing case inputs; choose a new derivative root")
     root.mkdir(parents=True)
     expanded = args.expanded.resolve()
+    contracts_path = getattr(args, "case_contracts", None)
+    contracts = json.loads(contracts_path.read_text(encoding="utf-8")) if contracts_path else {}
     lineage = {}
     for item in read_rows(expanded / "RECORD_SOURCE_LINEAGE.jsonl"):
         lineage.setdefault(item["source_record_id"], []).append(item)
@@ -110,7 +134,8 @@ def prepare(args):
                 document = dict(row, topic=case_id)
                 document_path = root / "documents" / f"{case_id}.json"
                 atomic_json(document_path, document)
-                cases.append({"case_id": case_id, "domain": domain, "document": file_ref(document_path), "document_id": row["document_id"], "question": f"Which public datasets can test the observations described in {row['title'].rstrip('.?')}?", "requirements": [{"field": "species", "expected": "Homo sapiens", "essential": True}] if domain != "environmental" else [{"field": "modality", "expected": "microbiome_metagenomics", "essential": True}], "question_origin": "predeclared development case; not expert review", "selection": "first acquired active record with at least500 normalized abstract characters"})
+                requirements, requirement_evidence = case_requirements(document, contracts)
+                cases.append({"case_id": case_id, "domain": domain, "document": file_ref(document_path), "document_id": row["document_id"], "question": f"Which public datasets can test the observations described in {row['title'].rstrip('.?')}?", "requirements": requirements, "requirement_evidence": requirement_evidence, "requirement_scope": "Only source-backed declared fields; full answerability and statistical adequacy remain unvalidated", "question_origin": "predeclared development case; not expert review", "selection": "first acquired active record with at least500 normalized abstract characters"})
         if selected != count:
             raise ValueError(f"Insufficient real case inputs in {domain}")
     # Each individual run sees its selected real document while sharing all real studies.
@@ -139,6 +164,8 @@ def prepare(args):
     qualification.parent.mkdir(parents=True)
     shutil.copyfile(args.qualification, qualification)
     protocol = {"schema_version": "final_real_case_protocol_v1", "created_at": datetime.now(timezone.utc).isoformat(), "data_origin": "real", "cases": cases, "limit": 1, "chunks": 2, "scope": "Six new abstract-assisted development cases in four domains. No full-text, independent-cohort, biological-answerability, expert-label or calibrated-probability claim.", "frozen_holdout_executed": False, "inputs": [file_ref(expanded / "corpus/literature.jsonl"), file_ref(expanded / "corpus/datasets.jsonl"), file_ref(expanded / "RECORD_SOURCE_LINEAGE.jsonl"), file_ref(args.omics / "QUALIFICATION.json"), file_ref(args.omics / "studies.jsonl")], "derived_study_ids": len(by_id), "source_catalog_literature_count": len(documents)}
+    if contracts_path:
+        protocol["inputs"].append(file_ref(contracts_path))
     atomic_json(root / "PROTOCOL.json", protocol)
     print(json.dumps({"status": "PREPARED", "cases": len(cases), "study_ids": len(by_id), "root": str(root)}), flush=True)
 
@@ -216,6 +243,7 @@ def main():
     p.add_argument("--expanded", type=Path, required=True)
     p.add_argument("--omics", type=Path, required=True)
     p.add_argument("--qualification", type=Path, required=True)
+    p.add_argument("--case-contracts", type=Path, help="Source-backed explicit question requirements; absent constraints remain unassessed")
     p = sub.add_parser("run")
     p.add_argument("--root", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)

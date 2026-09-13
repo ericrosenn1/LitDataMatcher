@@ -20,6 +20,8 @@ The original hardened-alpha six-class dossier coverage and acceptance remain fro
 
 The final functional source passed **699 unique full-suite tests and 196 overlapping focused runtime/review/validator checks**, with zero failures, errors or skips. The unchanged 32-record synthetic performance fixture also passed its original baseline and tolerance, separately from real scale. Targeted repairs cover lifecycle signals, response-page provenance, cache isolation/atomic writes, adjudication, exact organism mappings, duplicate questions, qualified randomized-trial requirements and acquired publication-date fallback. The last repair promotes only valid full ISO `metadata.first_publication_date` from exact EuropePMC sources, retaining provenance and explicit top-level dates; missing, partial or unqualified dates remain unknown. [Full-suite receipt](C:/Codex/LitDataMatcher-v2/data/final_campaign_20260913/closeout/full_suite_delivery.command.json), [focused receipt](C:/Codex/LitDataMatcher-v2/data/final_campaign_20260913/closeout/focused_suite_delivery.command.json), [fixture receipt](C:/Codex/LitDataMatcher-v2/data/final_campaign_20260913/closeout/SCALE_FIXTURE_FINAL.json).
 
+Final independent functional review **passed**, closing all 13 findings (two high and 11 medium) with zero unresolved. It binds the exact delivery source, 41 assembly checks, four final locator/wrapper checks and 64 actual-record/temporal checks; these are not additional distinct full-suite tests. Reviewer prior involvement in separately audited cache/acquisition components is disclosed. The core/runtime/design/package repairs reviewed here were authored by other agents. This is functional review, not domain-expert adjudication. [Final independent receipt](C:/Codex/LitDataMatcher-v2/data/final_campaign_20260913/closeout/FINAL_INDEPENDENT_REVIEW.json).
+
 ## Qualified scope and interpretation
 
 | Area | Supported scope | Limit that remains visible |
@@ -85,7 +87,7 @@ Inspect `RUN_MANIFEST.json`, source/inference coverage, retained failures, `ques
 
 ## Final acceptance and roadmap
 
-Technical source regression, corrected case replay, package integrity, outside-checkout installation and installed offline smoke have actual receipts. Final independent approval, machine acceptance and lead state/remote/worker closeout remain separately tracked by the matrix. A diagnostic report with passing component gates is not itself an overall acceptance PASS. Final release documentation accompanies the frozen functional package and binds its exact artifacts; no successful historical scientific run is replaced.
+Technical source regression, corrected case replay, package integrity, outside-checkout installation and installed offline smoke have actual receipts. Independent functional approval is recorded; final machine acceptance and lead state/remote/worker closeout remain separately tracked by the matrix. A diagnostic report with passing component gates is not itself an overall acceptance PASS. Final release documentation accompanies the frozen functional package and binds its exact artifacts; no successful historical scientific run is replaced.
 
 Further work should follow demonstrated need:
 

@@ -1,7 +1,7 @@
 {
   "schema_version": "final_requirements_matrix_v1",
-  "status": "TECHNICAL_REQUIREMENTS_VALIDATED_PENDING_INDEPENDENT_REVIEW_AND_CLOSEOUT",
-  "created_at_utc": "2026-09-13T23:52:43.951912+00:00",
+  "status": "TECHNICAL_REQUIREMENTS_VALIDATED_PENDING_ACCEPTANCE_AND_OPERATIONAL_CLOSEOUT",
+  "created_at_utc": "2026-09-13T23:55:50.098033+00:00",
   "source_inventory_reference": {
     "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-release-matrix-20260913\\docs\\v2\\final_audit\\REQUIREMENT_SCOPE_REVIEW.json",
     "sha256": "e5fc8e570e659db83e59bc8c461eda5e0349f8d014b8fb84e9586395c423b5f6",
@@ -134,15 +134,14 @@
   },
   "requirement_count": 74,
   "classification_counts": {
-    "COMPLETE_VALIDATED": 57,
+    "COMPLETE_VALIDATED": 58,
     "OPTIONAL_FUTURE_VALIDATION": 2,
     "NOT_APPLICABLE": 3,
-    "COMPLETE_NEEDS_FINAL_REGRESSION": 4,
+    "COMPLETE_NEEDS_FINAL_REGRESSION": 3,
     "MACHINE_COMPLETABLE_REMAINING": 5,
     "SUPERSEDED": 3
   },
   "blocking_requirement_ids": [
-    "FINAL.INDEPENDENT_REVIEW",
     "FINAL.STATE",
     "FINAL.PUSH",
     "FINAL.CLOSEOUT",
@@ -188,7 +187,6 @@
     ]
   },
   "pending_final_receipts": [
-    "final independent runtime/case/artifact approval receipt",
     "THIS_VALIDATOR final source/requirement/receipt acceptance",
     "lead state/push/remote/final report/worker closeout"
   ],
@@ -2278,6 +2276,20 @@
           "size_bytes": 1782,
           "scope": "Actual selected delivery-case counts, source dates, native statuses and explicit limits",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -2290,7 +2302,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2318,7 +2331,7 @@
           "last_path_commit": "63f02c0bd1ec04ad9cec5bfc3ade9e4b0f7bd955"
         }
       ],
-      "finding": "Source-guarded extraction and explicit requirement machinery execute on six new real sources. Twenty-three exact-source constraints correct the underconstrained development cases. Two model claims were accepted; four cases abstain to source context, and all native runs remain PARTIAL. This supplies auditable bounded execution, not new extraction precision/recall or biological answerability accuracy. Delivery source preserves qualified full-ISO EuropePMC acquisition dates in accepted and source-context evidence; explicit top-level dates remain authoritative and missing/partial/unqualified dates remain unknown. The 28 new temporal tests pass within the 699-test full suite.",
+      "finding": "Source-guarded extraction and explicit requirement machinery execute on six new real sources. Twenty-three exact-source constraints correct the underconstrained development cases. Two model claims were accepted; four cases abstain to source context, and all native runs remain PARTIAL. This supplies auditable bounded execution, not new extraction precision/recall or biological answerability accuracy. Delivery source preserves qualified full-ISO EuropePMC acquisition dates in accepted and source-context evidence; explicit top-level dates remain authoritative and missing/partial/unqualified dates remain unknown. The 28 new temporal tests pass within the 699-test full suite. Final independent functional review passes with zero unresolved findings; expert adjudication and extraction-accuracy claims remain outside that approval.",
       "disposition": "IMPLEMENTED_VALIDATED_WITH_EXPLICIT_LIMITS"
     },
     {
@@ -2832,6 +2845,20 @@
           "size_bytes": 1782,
           "scope": "Actual selected delivery-case counts, source dates, native statuses and explicit limits",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -2844,7 +2871,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -2872,7 +2900,7 @@
           "last_path_commit": "fa78d135e22320198ac00b334ba64e533655b661"
         }
       ],
-      "finding": "Typed measurement/design/temporal/feature/unit contracts and hard eligibility are source bound. Twenty-three exact-source case requirements remove misleading one-field fits. Explicit observational/nonrandomized clinical metadata mismatches RCT requirements; unknown allocation stays UNKNOWN. Missing measurements/independence/adequacy are not inferred from similarity. Delivery source preserves qualified full-ISO EuropePMC acquisition dates in accepted and source-context evidence; explicit top-level dates remain authoritative and missing/partial/unqualified dates remain unknown. The 28 new temporal tests pass within the 699-test full suite.",
+      "finding": "Typed measurement/design/temporal/feature/unit contracts and hard eligibility are source bound. Twenty-three exact-source case requirements remove misleading one-field fits. Explicit observational/nonrandomized clinical metadata mismatches RCT requirements; unknown allocation stays UNKNOWN. Missing measurements/independence/adequacy are not inferred from similarity. Delivery source preserves qualified full-ISO EuropePMC acquisition dates in accepted and source-context evidence; explicit top-level dates remain authoritative and missing/partial/unqualified dates remain unknown. The 28 new temporal tests pass within the 699-test full suite. Final independent functional review passes with zero unresolved findings; expert adjudication and extraction-accuracy claims remain outside that approval.",
       "disposition": "IMPLEMENTED_VALIDATED_WITH_EXPLICIT_LIMITS"
     },
     {
@@ -3457,6 +3485,20 @@
           "size_bytes": 1782,
           "scope": "Actual selected delivery-case counts, source dates, native statuses and explicit limits",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -3470,7 +3512,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -3496,7 +3539,7 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "Earlier independent red/green findings and later case defects are retained with narrow repairs and final regression. The 699 full and 196 focused tests include adversarial source lifecycle, unknown semantics, prompt injection, duplicate-question and clinical-design guards. Fixtures remain engineering evidence, not biological labels. Delivery source preserves qualified full-ISO EuropePMC acquisition dates in accepted and source-context evidence; explicit top-level dates remain authoritative and missing/partial/unqualified dates remain unknown. The 28 new temporal tests pass within the 699-test full suite.",
+      "finding": "Earlier independent red/green findings and later case defects are retained with narrow repairs and final regression. The 699 full and 196 focused tests include adversarial source lifecycle, unknown semantics, prompt injection, duplicate-question and clinical-design guards. Fixtures remain engineering evidence, not biological labels. Delivery source preserves qualified full-ISO EuropePMC acquisition dates in accepted and source-context evidence; explicit top-level dates remain authoritative and missing/partial/unqualified dates remain unknown. The 28 new temporal tests pass within the 699-test full suite. Final independent functional review passes with zero unresolved findings; expert adjudication and extraction-accuracy claims remain outside that approval.",
       "disposition": "IMPLEMENTED_VALIDATED_WITH_EXPLICIT_LIMITS"
     },
     {
@@ -3627,6 +3670,20 @@
           "size_bytes": 18438,
           "scope": "Complete clean delivery functional inventory:7bc86f8 / d3c546f9; source-normalization rule retained",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -3639,7 +3696,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -3672,7 +3730,7 @@
           "recorded_source_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "Six unchanged real questions across four domains execute against 552 catalog IDs using 23 source-bound requirements. Six selected auditable dossiers retain questions, provenance, missing requirements and ranking rationale. All native results are PARTIAL: two accepted claims and four context-only cases, with selected compatibility UNKNOWN/REQUIRES_INSPECTION. The new execution floor is separate from frozen alpha coverage and does not require forced positive matches.",
+      "finding": "Six unchanged real questions across four domains execute against 552 catalog IDs using 23 source-bound requirements. Six selected auditable dossiers retain questions, provenance, missing requirements and ranking rationale. All native results are PARTIAL: two accepted claims and four context-only cases, with selected compatibility UNKNOWN/REQUIRES_INSPECTION. The new execution floor is separate from frozen alpha coverage and does not require forced positive matches. Final independent functional review passes with zero unresolved findings; expert adjudication and extraction-accuracy claims remain outside that approval.",
       "disposition": "VALIDATED_SOURCE_ASSISTED_CASES_WITH_EXPLICIT_ABSTENTION"
     },
     {
@@ -3736,8 +3794,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -4157,8 +4215,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -4203,6 +4261,20 @@
           "size_bytes": 18438,
           "scope": "Complete clean delivery functional inventory:7bc86f8 / d3c546f9; source-normalization rule retained",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -4217,7 +4289,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\case_replay_delivery\\CASE_EXECUTION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -4252,7 +4325,7 @@
           "last_path_commit": "0a5a5484eb05fb8c4f18df3965de7c1a043c18e2"
         }
       ],
-      "finding": "Preserved failed and repaired cache/calibration/taxonomy/case iterations remove demonstrated defects. Current scale meets bounds and compatibility ranking variants tie on bounded source labels. The roadmap targets real expert judgments, measured repository variables, cohort dependence and new question classes; speculative importer/index growth has no demonstrated current benefit.",
+      "finding": "Preserved failed and repaired cache/calibration/taxonomy/case iterations remove demonstrated defects. Current scale meets bounds and compatibility ranking variants tie on bounded source labels. The roadmap targets real expert judgments, measured repository variables, cohort dependence and new question classes; speculative importer/index growth has no demonstrated current benefit. Final independent functional review passes with zero unresolved findings; expert adjudication and extraction-accuracy claims remain outside that approval.",
       "disposition": "EVIDENCED_BOUNDED_REPAIR_AND_DIMINISHING_RETURN_DISPOSITION"
     },
     {
@@ -5061,10 +5134,10 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
-          "sha256": "4d5c62a7d5dcbc24d35e20102c92bbe1abf0f8dd745b40579207bd0f5cefde90",
-          "size_bytes": 14259,
-          "scope": "Executed technical component gates passed; overall FAIL because matrix was stale and independent review absent, never represented as overall PASS",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DELIVERY_ACCEPTANCE_DIAGNOSTIC.json",
+          "sha256": "e4a9e4325ff8494096643db2c6553f3a3d7b0678af0c80a74723849694740dfb",
+          "size_bytes": 14350,
+          "scope": "Executed delivery component gates passed while matrix/review/operations remained pending; not an overall acceptance PASS",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
@@ -5106,7 +5179,7 @@
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DELIVERY_ACCEPTANCE_DIAGNOSTIC.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
@@ -6201,8 +6274,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6561,10 +6634,10 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
-          "sha256": "4d5c62a7d5dcbc24d35e20102c92bbe1abf0f8dd745b40579207bd0f5cefde90",
-          "size_bytes": 14259,
-          "scope": "Executed technical component gates passed; overall FAIL because matrix was stale and independent review absent, never represented as overall PASS",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DELIVERY_ACCEPTANCE_DIAGNOSTIC.json",
+          "sha256": "e4a9e4325ff8494096643db2c6553f3a3d7b0678af0c80a74723849694740dfb",
+          "size_bytes": 14350,
+          "scope": "Executed delivery component gates passed while matrix/review/operations remained pending; not an overall acceptance PASS",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
@@ -6606,7 +6679,7 @@
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DELIVERY_ACCEPTANCE_DIAGNOSTIC.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
@@ -6686,10 +6759,10 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
-          "sha256": "4d5c62a7d5dcbc24d35e20102c92bbe1abf0f8dd745b40579207bd0f5cefde90",
-          "size_bytes": 14259,
-          "scope": "Executed technical component gates passed; overall FAIL because matrix was stale and independent review absent, never represented as overall PASS",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DELIVERY_ACCEPTANCE_DIAGNOSTIC.json",
+          "sha256": "e4a9e4325ff8494096643db2c6553f3a3d7b0678af0c80a74723849694740dfb",
+          "size_bytes": 14350,
+          "scope": "Executed delivery component gates passed while matrix/review/operations remained pending; not an overall acceptance PASS",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
@@ -6732,7 +6805,7 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DELIVERY_ACCEPTANCE_DIAGNOSTIC.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
@@ -6923,52 +6996,17 @@
           "historical_scope_preserved": true
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json",
-          "sha256": "687f43fcdd8c342a887a29cf887ffb99c0a0ada4649410ab7ae5fa720645baf9",
-          "size_bytes": 1404,
-          "scope": "Preserved older independent adversarial failure; lead repairs do not constitute final independent approval",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
-          "sha256": "587458b3fcfc6ae204ca88a5ecc22b60447cebd340eddf5e468ccc8244f0db6b",
-          "size_bytes": 24933,
-          "scope": "Independent functional review: six findings fixed; 45 adversarial and 174 related cases passed on recorded source fingerprints; later case/package review separate",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-          "sha256": "fdc4c7d7dbf2891298dfdc17d6a461ed829f7c5b532bc4530b90dbc13299adc6",
-          "size_bytes": 145646,
-          "scope": "Preserved independent documentation inspection of prior f27479e3 checkpoint; new delivery commands/JUnit/artefacts remain separate authority",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
-          "sha256": "4d5c62a7d5dcbc24d35e20102c92bbe1abf0f8dd745b40579207bd0f5cefde90",
-          "size_bytes": 14259,
-          "scope": "Executed technical component gates passed; overall FAIL because matrix was stale and independent review absent, never represented as overall PASS",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\case_replay_delivery\\CASE_EXECUTION.json",
-          "sha256": "39b339c29bfc3d9559b05e7fae016a016d561c02e2b74a192f23ce7067c9063f",
-          "size_bytes": 9301,
-          "scope": "Six cache-only case-contract PASS results; 2 accepted claims/4 context-only, native all PARTIAL, all 6 dates qualified",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
-          "sha256": "8ca742b04b9c51065f005f0d79f331045d53e7b9b99c6ee8e0c61f98a2815ea8",
-          "size_bytes": 2131,
-          "scope": "Actual delivery wheel/sdist/sourceZIP PASS:80/149/264 archive members, source and artifact hashes retained",
-          "evidence_kind": "EXECUTED_RECEIPT"
-        },
-        {
-          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\source\\litdatamatcher\\v2.py",
-          "sha256": "f91c857bf3d67a7325cf47d96730cae31fecfeb4ffbe0d8dd7e96ce07711feaf",
-          "size_bytes": 45212,
-          "scope": "Frozen delivery source includes the narrow qualified EuropePMC date fallback with explicit provenance",
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -6986,35 +7024,93 @@
           "evidence_kind": "EXECUTED_RECEIPT"
         },
         {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
+          "sha256": "adfb70cc4dd55dbc28d9786046f89018f8eb00355fa1bb00194e4bedb5cf4689",
+          "size_bytes": 9466,
+          "scope": "Six delivery cases with 11 exact source locators, 23 requirements and 552 preserved candidates",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
           "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json",
           "sha256": "52f8d2b17d34ace3af1d62b730f68f544885c5b69474d7cd60eaa98a48030e70",
           "size_bytes": 1782,
           "scope": "Actual selected delivery-case counts, source dates, native statuses and explicit limits",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
+          "sha256": "8ca742b04b9c51065f005f0d79f331045d53e7b9b99c6ee8e0c61f98a2815ea8",
+          "size_bytes": 2131,
+          "scope": "Actual delivery wheel/sdist/sourceZIP PASS:80/149/264 archive members, source and artifact hashes retained",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\install_delivery.command.json",
+          "sha256": "58f02dfff6be6b17e66b4ffbfc1be28e850aa1ac31a10bbfeefdaa129be11c10",
+          "size_bytes": 9568,
+          "scope": "Actual delivered wheel installed in new outside-checkout clean_env_030_delivery; five CLI checks passed",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\offline_delivery.command.json",
+          "sha256": "b1893bb1ed2778d9d31e0e422bffde2fc6e1f6037b2878f40b62ef063093fae2",
+          "size_bytes": 6533,
+          "scope": "Installed delivery CLI replay:2 cache origins,0 fresh calls, blocked probe1/unexpected0 and exact nonempty fresh/replay payload equality",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real_delivery\\BENCHMARK_RECEIPT.json",
+          "sha256": "cb2881f252a2cc1ff89a6b9ac6bf5e5ff6aa7c5cebcc7ba9dad4faaca5017e8b",
+          "size_bytes": 39160,
+          "scope": "Real delivery 1600/552 progressive scale; 17 queries/9384 pairs; all engineering/metadata checks PASS and exact separate-child recovery",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\PROTECTED_ALPHA.json",
+          "sha256": "512ba7471ca576ff88981bc4a7b12c2495b47dada8b974f34fadd9b125b4f4b4",
+          "size_bytes": 3125,
+          "scope": "Seven protected artifact hash checks passed; no alpha/holdout rerun or label inspection",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+          "sha256": "8843c494a523f80d5447439c262bb2bd0987d70d1853a4bc667266d4c916117b",
+          "size_bytes": 1193,
+          "scope": "95 original files, exact Git index and NUL status preserved; 32 untracked entries unchanged",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\SOURCE_FINGERPRINT_DELIVERY.json",
+          "sha256": "6dec8c6dd7ebeff598821a6305a191cd537d41af5bf08d4f8f88dcc2659e4aba",
+          "size_bytes": 18438,
+          "scope": "Complete clean delivery functional inventory:7bc86f8 / d3c546f9; source-normalization rule retained",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT_FINAL3.json",
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\independent_review\\bounded_review_2.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\source_b42f7b4\\docs\\v2\\final_audit\\INDEPENDENT_REVIEW.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\requirements_matrix\\FINAL_TECHNICAL_EVIDENCE_INSPECTION_f27479e3.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\DIAGNOSTIC_ACCEPTANCE_2.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\case_replay_delivery\\CASE_EXECUTION.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\install_delivery.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\offline_delivery.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real_delivery\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\PROTECTED_ALPHA.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Inspect the actual final independent receipt, fix valid findings narrowly and bind affected revalidation before promotion.",
+      "blocks_project_completion": false,
+      "remaining_action": "None within the independently reviewed functional scope. THIS_VALIDATOR and the five lead operational gates remain separate; stronger scientific/expert claims remain pending.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7030,8 +7126,8 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "Final independent review reproduced RFR07 and the lead supplied narrowly repaired delivery source with actual full/focused/package/case/offline/scale receipts. Final independent approval is not inferred before its actual wrapper exists.",
-      "disposition": "FINAL_INDEPENDENT_APPROVAL_PENDING"
+      "finding": "Independent functional review of exact 7bc86f8/d3c546f9 delivery source passed:13 FIXED_VALIDATED findings (2 high,11 medium),0 unresolved. The review binds699 full/196 overlapping focused tests,41 delivery assembly checks,4 locator/wrapper checks and64 actual-record/temporal boundaries. Reviewer prior cache/acquisition involvement is disclosed; separately audited components and other-agent core/runtime/design/package repairs remain distinguished. This is not domain-expert adjudication.",
+      "disposition": "INDEPENDENT_FINAL_FUNCTIONAL_REVIEW_PASS_WITH_SCIENTIFIC_LIMITS"
     },
     {
       "id": "FINAL.REPAIR_FINDINGS",
@@ -7148,6 +7244,20 @@
           "size_bytes": 18438,
           "scope": "Complete clean delivery functional inventory:7bc86f8 / d3c546f9; source-normalization rule retained",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+          "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+          "size_bytes": 25725,
+          "scope": "Independent delivery functional review PASS:13 fixed/validated findings,0 unresolved; reviewer roles and scientific limits explicit",
+          "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\assembled_review\\FINAL_ASSEMBLED_REVIEW.md",
+          "sha256": "bc8b4814ab69bb5d93bafddcf47300f6c887784de5f82b3a1eed8dbab427b04e",
+          "size_bytes": 9120,
+          "scope": "Independent source/package/install/case/temporal/recovery/preservation report; source-context outputs remain scientifically limited",
+          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         }
       ],
       "validation_receipts": [
@@ -7158,7 +7268,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\case_replay_delivery\\CASE_EXECUTION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASE_SUMMARY_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\offline_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real_delivery\\BENCHMARK_RECEIPT.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real_delivery\\BENCHMARK_RECEIPT.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
@@ -7170,7 +7281,7 @@
       "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": false,
-      "remaining_action": "Final independent approval remains a separate row; any further valid finding must return to bounded repair before closeout.",
+      "remaining_action": "None for the13 independently closed findings. Preserve red/green receipts and scientific boundaries; final machine acceptance and operational delivery remain separate.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7193,7 +7304,7 @@
           "last_path_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "Valid cache/calibration/taxonomy/case findings were narrowly repaired with failed predecessors preserved. Final RFR07 publication-date loss is repaired on 7bc86f8 using only exact-source full-ISO fallback and explicit provenance.699 full and196 overlapping focused tests plus delivery case/offline/scale replays pass; no scientific thresholds or original holdout were changed.",
+      "finding": "Valid cache/calibration/taxonomy/case findings were narrowly repaired with failed predecessors preserved. Final RFR07 publication-date loss is repaired on 7bc86f8 using only exact-source full-ISO fallback and explicit provenance.699 full and196 overlapping focused tests plus delivery case/offline/scale replays pass; no scientific thresholds or original holdout were changed. Final independent functional review passes with zero unresolved findings; expert adjudication and extraction-accuracy claims remain outside that approval.",
       "disposition": "REPRODUCED_FINDINGS_REPAIRED_AND_DELIVERY_REVALIDATED"
     },
     {
@@ -7242,16 +7353,9 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
-        },
-        {
-          "path": "project_state\\FINAL_CAMPAIGN_STATE.json",
-          "sha256": "299fba0bf62f248fd32a7cfa7edf952877276af956adcc3053048b3fe3253602",
-          "size_bytes": 4275,
-          "scope": "Current-running state at source7cff4ae; explicitly not a final worker/closeout receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -7330,16 +7434,9 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
-        },
-        {
-          "path": "project_state\\FINAL_CAMPAIGN_STATE.json",
-          "sha256": "299fba0bf62f248fd32a7cfa7edf952877276af956adcc3053048b3fe3253602",
-          "size_bytes": 4275,
-          "scope": "Current-running state at source7cff4ae; explicitly not a final worker/closeout receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -7407,16 +7504,9 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
-        },
-        {
-          "path": "project_state\\FINAL_CAMPAIGN_STATE.json",
-          "sha256": "299fba0bf62f248fd32a7cfa7edf952877276af956adcc3053048b3fe3253602",
-          "size_bytes": 4275,
-          "scope": "Current-running state at source7cff4ae; explicitly not a final worker/closeout receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -7482,16 +7572,9 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
-        },
-        {
-          "path": "project_state\\FINAL_CAMPAIGN_STATE.json",
-          "sha256": "299fba0bf62f248fd32a7cfa7edf952877276af956adcc3053048b3fe3253602",
-          "size_bytes": 4275,
-          "scope": "Current-running state at source7cff4ae; explicitly not a final worker/closeout receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {
@@ -7687,16 +7770,9 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "8994e2e19d81c89fcdd68b78dcec46283ba3d1b2384ce5404121c049026e6fb8",
-          "size_bytes": 18173,
+          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
+          "size_bytes": 18857,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
-          "evidence_kind": "SOURCE_OR_DOCUMENTATION"
-        },
-        {
-          "path": "project_state\\FINAL_CAMPAIGN_STATE.json",
-          "sha256": "299fba0bf62f248fd32a7cfa7edf952877276af956adcc3053048b3fe3253602",
-          "size_bytes": 4275,
-          "scope": "Current-running state at source7cff4ae; explicitly not a final worker/closeout receipt",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
         {

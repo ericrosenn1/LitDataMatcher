@@ -50,6 +50,15 @@ def modality_contract(record: JsonDict) -> JsonDict:
     dependence = metadata.get("dependence", {}) if isinstance(metadata.get("dependence"), dict) else {}
     omics = metadata.get("omics_contract", {}) if isinstance(metadata.get("omics_contract"), dict) else {}
     temporal = metadata.get("temporal_contract", {}) if isinstance(metadata.get("temporal_contract"), dict) else {}
+    biological_unit = "UNKNOWN"
+    capabilities = record.get("capabilities", {})
+    if isinstance(capabilities, dict) and dependence.get("donor_links") != "AMBIGUOUS_NOT_INFERRED":
+        for field in ("biological_sample", "donor", "independent_unit"):
+            observation = capabilities.get(field, {})
+            if (isinstance(observation, dict) and observation.get("status") == "observed"
+                    and observation.get("value") is not None and observation.get("source_locator")
+                    and observation.get("mapping_type", "exact") in {"exact", "synonym"}):
+                biological_unit = "OBSERVED"
     return {
         "modality": families or ["UNKNOWN"],
         "observed_assays": sorted(assays),
@@ -58,7 +67,7 @@ def modality_contract(record: JsonDict) -> JsonDict:
         # explicit, incompatible organism without inventing a synonym mapping.
         "organisms": [str(item) for item in record.get("organisms", []) if str(item).strip()],
         "specimen": "OBSERVED" if metadata.get("specimen") or metadata.get("biome") else "UNKNOWN",
-        "biological_unit": "UNKNOWN" if dependence.get("donor_links") == "AMBIGUOUS_NOT_INFERRED" else "OBSERVED",
+        "biological_unit": biological_unit,
         "technical_units": int(dependence.get("technical_run_count", 0) or 0),
         "feature_type": str(omics.get("feature_type", "UNKNOWN") or "UNKNOWN"),
         "feature_unit": str(omics.get("feature_unit", "UNKNOWN") or "UNKNOWN"),

@@ -51,7 +51,10 @@ def digest(value: Any) -> str:
 
 def _file_sha(path: Path) -> str:
     with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+        checksum = hashlib.sha256()
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            checksum.update(block)
+        return checksum.hexdigest()
 
 
 def verify_model(model_dir: str | Path) -> dict:

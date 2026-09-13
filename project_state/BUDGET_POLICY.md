@@ -1,28 +1,20 @@
-# Current resource policy: continuous execution authorized
+# Current resource policy: continuous unrestricted account execution
 
-The project-owner override `OWNER_CONTINUOUS_OVERRIDE_20260913.md` revokes the
-former 13.74/46.26-minute duty cycle, mandatory idle periods, safety-margin
-throttling, and September 13 21:13:30 UTC delay effective immediately. Earlier
-measurements and policies remain historical evidence in Git at `b863d86`.
+Authority: `OWNER_UNRESTRICTED_OVERRIDE_20260913.md`.
 
-| Field | Current policy |
-| --- | --- |
-| Mode | Continuous execution |
-| Maximum model | gpt-5.6-terra |
-| Allowed effort | low, medium, high |
-| Reasoning concurrency | 1 verified execution |
-| Concurrent subagents | 0 |
-| Speed | Standard only |
-| Mandatory idle | None |
-| Next permitted time | Immediately when runtime is verified within the ceiling |
-| Actual current lead | gpt-6-astra / max; outside current authorization |
-| Supervisor | PAUSED; no restart or schedule creation |
-| Paid routes | No paid API usage, credits, external billing or paid fallback |
-| Throttling on projected use | Revoked |
-| Telemetry cadence | Normal supported checks at major checkpoints |
-| Real capacity stop | Actual account/platform exhaustion |
+- Any available first-party Codex model/effort is authorized as needed, including
+  the observed current `gpt-6-astra` / `max` runtime.
+- Continuous execution; all prior duty cycles, mandatory idle intervals, hourly
+  caps and weekly conservation targets are revoked.
+- Purposeful native reviewers/subagents are authorized. Maintain isolated
+  writer ownership and lead-controlled integration; avoid unnecessary concurrency.
+- Standard speed; no separately billed APIs, paid API credits, outside services
+  imposing additional charges, supervisor restart or schedule creation.
+- Normal included account model usage is authorized. Projected allowance burn
+  does not block execution. Actual platform exhaustion is a genuine blocker.
+- Check supported account telemetry at major checkpoints without repeated polling.
 
-The last recorded shared-account read at 2026-09-13T20:17:10Z observed 97%
-remaining, reset 2026-09-20T19:24:15Z. It is historical, not a refreshed reading.
-No usage projection is used to block work. The present blocker is the verified
-runtime model/effort mismatch, not allowance or an idle deadline.
+Historical readings and former policies remain in Git history at `a2949ba` and
+its ancestors. The September 13 20:17:10 UTC account snapshot (97% remaining,
+reset September 20 19:24:15 UTC) is historical, not a current capacity assertion.
+No past measurement or waiting deadline controls the present campaign.

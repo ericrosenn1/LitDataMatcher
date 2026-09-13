@@ -1,19 +1,17 @@
-# Active final closeout campaign: continuous mode
+# Active final autonomous campaign
 
-The current owner authority is `project_state/OWNER_CONTINUOUS_OVERRIDE_20260913.md`.
-All previous mandatory duty-cycle waits, including September 13 21:13:30 UTC,
-are revoked. Continue without artificial pauses using one verified Terra
-execution at High or lower. No supervisor restart or schedules are authorized.
+Owner authority: `project_state/OWNER_UNRESTRICTED_OVERRIDE_20260913.md`.
+Any available account Codex model/effort, current Astra/Max, continuous reasoning
+and useful scoped native reviewers/subagents are authorized. No previous model
+ceiling, duty cycle or dated waiting period applies. No separately billed API,
+credit expenditure, supervisor restart or schedule is authorized.
 
-Current runtime mismatch: gpt-6-astra / max. Resume this same task with Terra at
-Low, Medium or High; no time restriction remains. Exact campaign state is in
-`project_state/FINAL_CAMPAIGN_STATE.json`. First unfinished work: reconstruct
-the requirements-to-evidence matrix and determine whether real expert labels
-are a mandatory completion gate. Neither has been completed. Then execute the
-full final campaign from `FINAL_CAMPAIGN_REQUEST_20260913.md` continuously.
-
-Earlier sections below are historical bounded-task context; their duty-cycle
-and any-model wording are superseded by the latest owner override above.
+Current stage: reconstruct the final requirements-to-evidence matrix, determine
+whether expert labels are mandatory, then complete all remaining machine work,
+packaging, installation validation and adversarial review. Exact campaign state:
+`project_state/FINAL_CAMPAIGN_STATE.json`. The full campaign request remains
+`project_state/FINAL_CAMPAIGN_REQUEST_20260913.md`. Historical bounded-task prose
+below does not establish the complete definition of done or active resource policy.
 
 The following section records the completed bounded task and prior context.
 

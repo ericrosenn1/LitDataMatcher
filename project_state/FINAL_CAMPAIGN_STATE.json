@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "campaign": "FINAL_AUTONOMOUS_COMPLETION",
-  "status": "BLOCKED_RUNTIME_PROFILE",
-  "updated_at": "2026-09-13T21:09:08.988995+00:00",
+  "status": "RUNNING_REQUIREMENTS_AUDIT",
+  "updated_at": "2026-09-13T21:13:52.824294+00:00",
   "scope": "Full intended project completion, or all machine-resolvable requirements complete with only a proven irreducible external gate.",
   "request": "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md",
   "request_sha256": "1c0966ba0f2c1ce50656af530ce05788cfb42e4ea3cfced35a45e8a0e4b190d6",
@@ -11,13 +11,13 @@
   "unfinished_stage": "REQUIREMENTS_TO_EVIDENCE_MATRIX_NOT_STARTED",
   "expert_labels_gate_classification": "NOT_YET_DETERMINED_FROM_GOVERNING_SPECIFICATION",
   "next_permitted_reasoning_at": null,
-  "reasoning_concurrency": 1,
-  "subagents": 0,
+  "reasoning_concurrency": "purposeful scoped native reviewers and isolated writers authorized",
+  "subagents": "authorized when useful",
   "supervisor": "PAUSED",
   "resume_worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-campaign-20260913",
   "resume_steps": [
-    "Verify one Terra reasoning execution at High or lower, live writer ownership and latest owner authorization; continuous execution is permitted immediately.",
-    "Use normal supported account telemetry at major checkpoints; projected allowance use does not require waiting.",
+    "Read the active unrestricted owner override, inspect live ownership, then continue immediately without model/duty restrictions.",
+    "Use supported telemetry only at major checkpoints; actual platform failure is a blocker, projected burn is not.",
     "Read the finalized build and later Phase 2 scope specifications and existing acceptance evidence.",
     "Build the requested machine-readable requirement classifications with exact source, receipt, commit and blocking status.",
     "Determine whether real expert labels are mandatory for COMPLETE or only EXPERT_VALIDATED; do not infer this from stale NEXT_ACTION prose.",
@@ -38,15 +38,16 @@
   "request_hash_scope": "Committed UTF-8 request blob; Git normalizes CRLF to LF. Source attachment hash is retained separately.",
   "continuous_execution_authorized": true,
   "mandatory_idle_revoked": true,
-  "model_ceiling": "gpt-5.6-terra",
-  "effort_ceiling": "high",
+  "model_ceiling": null,
+  "effort_ceiling": null,
   "runtime_observed": {
     "model": "gpt-6-astra",
     "effort": "max",
     "timestamp": "2026-09-13T21:06:39.941Z"
   },
-  "resume_condition": "Run this same task with verified gpt-5.6-terra at low, medium or high; no time delay applies.",
-  "owner_override": "project_state/OWNER_CONTINUOUS_OVERRIDE_20260913.md",
-  "owner_override_sha256": "70a9a282a9dea9fdf27c1d7abed1806b147d1dab40cff761c232f2f21f80bf72",
-  "owner_override_attachment_sha256": "3b98b0c9bb1d977f93c103ce1ee4fda4b06d1c97aff0e59316b223abd6d027da"
+  "resume_condition": null,
+  "owner_override": "project_state/OWNER_UNRESTRICTED_OVERRIDE_20260913.md",
+  "owner_override_sha256": "e08b2b8d0ee97fc66f905e29c315e1d53516f0f52df9ab8300b5a5a60f82aa4f",
+  "owner_override_attachment_sha256": "6c7b699652e931131d8041fb643ab9abdfab7f0874e45517942236ef4db16bc5",
+  "active_campaign_started_at": "2026-09-13T21:13:52.824294+00:00"
 }

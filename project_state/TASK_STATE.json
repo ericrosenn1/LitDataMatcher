@@ -4,8 +4,8 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-13T21:09:08.988995+00:00",
-  "execution_status": "BLOCKED",
+  "updated_at": "2026-09-13T21:13:52.824294+00:00",
+  "execution_status": "RUNNING",
   "product_status": "HARDENED_ALPHA_COMPLETE",
   "automation_status": "DISABLED_AT_COMPLETION_RUNTIME_UNVERIFIED",
   "calibration_status": "SOURCE_ASSISTED_EVALUATION",
@@ -28,9 +28,9 @@
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
-    "status": "CONTINUOUS_AUTHORIZED_RUNTIME_MISMATCH",
+    "status": "CONTINUOUS_EXECUTION_AUTHORIZED",
     "next_permitted_reasoning_at": null,
-    "source": "Owner revoked all duty-cycle delays and allowance-projection throttling. One verified Terra execution at High or lower is permitted continuously. Actual current runtime: gpt-6-astra/max. No current capacity-exhaustion claim."
+    "source": "Owner explicitly permits current Astra/Max and all available account Codex models/efforts. Purposeful native reviewers/subagents allowed. No prior model cap or duty cycle remains."
   },
   "workstreams": [
     {
@@ -120,16 +120,9 @@
     "distinct_pilot_contexts": 2,
     "case_dossiers": 20
   },
-  "blockers": [
-    {
-      "type": "RUNTIME_PROFILE",
-      "required": "gpt-5.6-terra / low, medium or high",
-      "observed": "gpt-6-astra / max",
-      "resolution": "Switch this task runtime into the authorized ceiling; no idle wait applies."
-    }
-  ],
+  "blockers": [],
   "next_action": {
-    "description": "Immediately after runtime verification within Terra/High, construct the final requirements-to-evidence matrix and determine the expert-label gate from governing specifications; continue the full final campaign.",
+    "description": "Construct the governing final requirements-to-evidence matrix and determine the expert-label gate, then execute all machine-resolvable final campaign work.",
     "cwd": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-campaign-20260913",
     "command": "",
     "command_tested": false
@@ -144,7 +137,7 @@
     "hardened_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03",
     "final_holdout_run": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run"
   },
-  "stop_reason": "Owner-authorized continuous mode persisted. Duty-cycle stop revoked. Current task runtime is outside the restored Terra/High ceiling; no campaign completion claim.",
+  "stop_reason": "",
   "bounded_task_status": "PASS",
   "validation": {
     "scope": "bounded PMID/PMCID reconciliation",

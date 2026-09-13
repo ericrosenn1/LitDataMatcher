@@ -286,6 +286,25 @@ def evidence_from_claim(claim, document):
     }
 
 
+def evidence_from_source_view(document, view):
+    """Retain retrieved text as context without converting it into a model claim."""
+    span = {"start": view["parent_start"], "end": view["parent_end"], "text": view["text"]}
+    if document["text"][span["start"]:span["end"]] != span["text"]:
+        raise ValueError("Source context span mismatch")
+    return {
+        "evidence_id": stable_id("retrieved_context", document["document_id"], span["start"], span["end"]),
+        "proposition_id": None, "role": "background", "direction": "inconclusive",
+        "source_id": document["document_id"], "source_document_id": document["document_id"],
+        "publication_id": document.get("pmid") or document.get("doi"),
+        "study_id": None, "cohort_id": None, "source_of_source": None,
+        "measurement_type": "retrieved_text_context", "scope_match": "unresolved",
+        "answers_question": False, "statement": view["text"], "evidence_span": span,
+        "source_locator": f"{document.get('source_locator', document['document_id'])}#chars={span['start']}:{span['end']}",
+        "evidence_origin": "deterministic_source_passage", "claim_status": "NOT_ASSERTED",
+        "source_provenance": view.get("source_provenance", {}),
+    }
+
+
 def render_report(run: Path) -> Path:
     manifest = json.loads((run / "RUN_MANIFEST.json").read_text())
     matches = read_rows(run / "matches.jsonl")
@@ -438,6 +457,7 @@ def analyze(
                         }
                     )
                     continue
+                evidence.append(evidence_from_source_view(document, view))
                 inferences.append(result["inference_manifest"])
                 result["claims"] = [
                     rebase_runtime_item(item, document, view, viewid) for item in result["claims"]
@@ -513,7 +533,7 @@ def analyze(
             query_tokens = set(re.findall(r"\w+", qtext.lower()))
             contextual = []
             for item in evidence:
-                if q.get("source_document_id") == item.get("claim", {}).get("source_document_id") or len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
+                if (q.get("source_document_id") and q["source_document_id"] == item.get("source_document_id")) or len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
                     contextual.append(dict(item, related_proposition_id=q["proposition_id"]))
             if reference_records:
                 from .external_evidence import query_resource
@@ -544,11 +564,14 @@ def analyze(
 
                     linked_question = dict(q, source_evidence_ids=[item["evidence_id"] for item in bundle["evidence_items"]], source_relation="retrieved context; direct support only as classified in the bundle")
                     candidate = next(item for item in candidates if item["dataset_id"] == m["dataset_id"])
-                    dossiers.append(build_dossier(linked_question, bundle, m["assessment"], candidate, [
+                    dossier = build_dossier(linked_question, bundle, m["assessment"], candidate, [
                         "Eligibility is determined by essential observed requirements before ranking.",
                         f"Uncalibrated heuristic components: {json.dumps(m['components'], sort_keys=True)}",
                         "Retrieved context does not establish novelty, causal effects or statistical adequacy.",
-                    ]))
+                    ])
+                    accepted_count = sum("claim" in item for item in bundle["evidence_items"])
+                    dossier["extraction_summary"] = {"accepted_model_claims": accepted_count, "source_context_items": sum(item.get("evidence_origin") == "deterministic_source_passage" for item in bundle["evidence_items"]), "status": "SOURCE_CONTEXT_ONLY" if not accepted_count else "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS", "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage."}
+                    dossiers.append(dossier)
         for name, rows in [
             ("claims", claims),
             ("questions", questions),

@@ -149,6 +149,8 @@ def validate_extraction(payload: Any, document: dict) -> dict:
         try:
             if not isinstance(claim, dict):
                 raise ValueError("Claim must be an object")
+            if set(claim) - {"quote", "subject", "predicate", "object", "direction", "negated", "status", "context", "comparator"}:
+                raise ValueError("Claim contains unsupported fields")
             span = _span(text, claim.get("quote"))
             quote = span["text"]
             if _HOSTILE.search(quote):
@@ -181,6 +183,11 @@ def validate_extraction(payload: Any, document: dict) -> dict:
                 raise ValueError("Mixed directional sentence needs relation-specific review")
             if claim.get("status") not in {"direct_experiment", "background", "interpretation"}:
                 raise ValueError("Invalid claim status")
+            if claim["status"] == "direct_experiment" and re.search(
+                r"\b(?:systematic review|meta[- ]analysis|we reviewed\s+\d+\s+(?:studies|trials)|this review|our review)\b",
+                quote + " " + str(document.get("title", "")), re.I,
+            ):
+                raise ValueError("Explicit evidence synthesis is not a direct experiment")
             if (
                 re.search(
                     r"\b(we (?:evaluated|aimed|investigated)|objective|purpose|aim of this)\b",

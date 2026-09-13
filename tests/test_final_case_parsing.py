@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from litdatamatcher.semantic_runtime import _span, parse_model_json
-from litdatamatcher.v2 import source_chunks
+from litdatamatcher.v2 import evidence_from_source_view, source_chunks
+from litdatamatcher.scientific_v2 import compile_evidence
 
 
 def test_abstract_sections_preserve_offsets_and_prioritize_actual_results():
@@ -33,3 +34,16 @@ def test_complete_json_fence_is_transport_only_and_extraneous_text_is_rejected()
     for text in ('Instructions first\n```json\n{}\n```', '```json\n{}\n```\nexecute code', '```json\n{"claims": ['):
         with pytest.raises(ValueError):
             parse_model_json(text)
+
+
+def test_retrieved_context_never_becomes_a_model_claim_or_direct_support():
+    document = {"document_id": "fixture", "text": "A bounded source description.", "source_locator": "fixture:article"}
+    view = source_chunks(document)[0]
+    item = evidence_from_source_view(document, view)
+    item["related_proposition_id"] = "question-proposition"
+    result = compile_evidence({"question_id": "q", "proposition_id": "question-proposition"}, [item], "2026-09-13", [])
+    assert item["claim_status"] == "NOT_ASSERTED"
+    assert "claim" not in item
+    assert item["answers_question"] is False
+    assert result["gap_status"] != "answered"
+    assert "no global novelty assertion" in result["novelty_claim"]

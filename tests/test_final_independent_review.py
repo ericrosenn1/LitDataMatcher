@@ -114,6 +114,16 @@ def test_biological_unit_requires_qualified_observation(changes, dependence, exp
     assert normalize_dataset(raw)["modality_contract"]["biological_unit"] == expected
 
 
+@pytest.mark.parametrize("observation,expected", [
+    ({"value": None, "status": "absent", "source_locator": "fixture:protocol#sample-not-collected"}, "NOT_QUALIFIED"),
+    ({"value": "participant", "status": "known", "source_locator": ["fixture:sample-table#unit"]}, "DIRECT_FIT"),
+])
+def test_biological_unit_repair_preserves_explicit_absence_and_legacy_migration(observation, expected):
+    raw = {"dataset_id": "fixture-declared-unit", "capabilities": {"biological_sample": observation}}
+    result = assess_requirements([{"field": "biological_sample", "expected": "participant"}], normalize_dataset(raw))
+    assert result["eligibility"] == expected
+
+
 @pytest.mark.parametrize("observed,expected,status", [
     ("NCBITaxon:9606", "human", "DIRECT_FIT"),
     ("NCBITaxon:10090", "human", "NOT_QUALIFIED"),
@@ -151,6 +161,35 @@ def test_page_provenance_survives_skipped_rows_and_invalidates_only_changed_page
     assert states == ["UNCHANGED", "INVALIDATED"]
     replay = literature_pages(cache_status="HIT")
     assert all(invalidate_affected_derivations(old, new, ["fixture-claim"])["status"] == "UNCHANGED" for old, new in zip(before, replay, strict=True))
+
+
+@pytest.mark.parametrize("source,payload", [
+    ("openalex", {"results": []}),
+    ("pubmed", {"esearchresult": {"idlist": []}}),
+    ("crossref", {"message": {"items": []}}),
+    ("mgnify", {"data": []}),
+    ("ena", []),
+    ("europepmc", {"resultList": {"result": []}}),
+    ("clinicaltrials", {"studies": []}),
+])
+def test_valid_empty_envelopes_remain_successful_searches(source, payload):
+    class Client:
+        def get_json(self, url, params=None):
+            return deepcopy(payload)
+
+    search = search_dataset_sources if source in {"mgnify", "ena", "clinicaltrials"} else search_literature_sources
+    rows = search("synthetic fixture", [source], client=Client())
+    assert rows == []
+    assert rows.source_statuses[0]["status"] == "OBSERVED"
+
+
+def test_pubmed_ordinary_comment_does_not_inherit_retraction_from_citation_text():
+    class CommentFixture(PubMedFixture):
+        def get_text(self, url, params=None):
+            return super().get_text(url, params).replace("RetractionIn", "CommentOn").replace("Synthetic fixture notice", "Retraction discussed in another publication")
+
+    rows = search_literature_sources("synthetic fixture", ["pubmed"], client=CommentFixture("xml_relation"))
+    assert document_lifecycle_status(rows[0]) == "ACTIVE_METADATA_ONLY"
 
 
 def calibration_inputs():

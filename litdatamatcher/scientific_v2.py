@@ -109,12 +109,12 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             else ObservedCapability(None, "unknown", reason="not reported")
         )
         contract_status = _contract_requirement_status(req.field, req.expected, contract)
-        if contract_status:
+        if cap.status == "absent":
+            status = "MISMATCH"
+        elif contract_status:
             status = contract_status
         elif cap.status == "unknown":
             status = "UNKNOWN"
-        elif cap.status == "absent":
-            status = "MISMATCH"
         elif (
             not cap.source_locator
             or cap.status == "derived"
@@ -191,6 +191,8 @@ def _contract_requirement_status(field, expected, contract):
         modalities = contract.get("modality", ["UNKNOWN"])
         required_families = modality_families(expected)
         if modalities != ["UNKNOWN"] and required_families and not required_families.intersection(modalities):
+            if any(not modality_families(value) for value in contract.get("observed_assays", [])):
+                return "UNKNOWN"
             return "MISMATCH"
         # A family match does not equate RNA-seq and microarrays. Preserve
         # precise observed assay constraints when both names are qualified.

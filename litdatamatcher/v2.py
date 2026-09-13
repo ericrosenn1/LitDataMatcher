@@ -56,7 +56,7 @@ def normalize_dataset(record):
             if k in {"value", "status", "source_locator", "reason", "mapping_type"}
         }
         caps[key] = value
-    contract = modality_contract(record)
+    contract = modality_contract(dict(record, capabilities=caps))
     provenance = record.get("source_provenance") or record.get("metadata", {}).get("source_provenance", {})
     locator = provenance.get("source_locator") or provenance.get("source_url") if isinstance(provenance, dict) else None
     # Source adapter fields can support narrow metadata compatibility. They do

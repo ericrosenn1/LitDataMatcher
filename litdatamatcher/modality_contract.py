@@ -9,6 +9,7 @@ MODALITY_FAMILIES = {
     "bulk_transcriptomics": {"rna-seq", "microarray", "transcriptomics"},
     "single_cell_transcriptomics": {"single-cell rna-seq", "scrna-seq"},
     "sequencing_genomics": {"wgs", "whole genome sequencing", "genomics"},
+    "perturbational_screens": {"crispr screen", "pooled crispr screen", "rnai screen", "perturbational screen"},
     "clinical_registry": {"clinical study registry metadata", "clinical registry"},
     "microbiome_metagenomics": {"metagenomics", "shotgun metagenomics", "16s rrna sequencing"},
     "proteomics": {"proteomics", "mass spectrometry proteomics"},
@@ -53,7 +54,7 @@ def modality_contract(record: JsonDict) -> JsonDict:
     biological_unit = "UNKNOWN"
     capabilities = record.get("capabilities", {})
     if isinstance(capabilities, dict) and dependence.get("donor_links") != "AMBIGUOUS_NOT_INFERRED":
-        for field in ("biological_sample", "donor", "independent_unit"):
+        for field in ("biological_sample", "donor", "independent_unit", "biological_sample_count", "donor_count", "independent_unit_count"):
             observation = capabilities.get(field, {})
             if (isinstance(observation, dict) and observation.get("status") == "observed"
                     and observation.get("value") is not None and observation.get("source_locator")
@@ -90,6 +91,8 @@ def compatibility(required_modality: str, required_organism: str, record: JsonDi
     modalities = set(contract["modality"])
     required_families = modality_families(required_modality)
     if required_families and modalities != {"UNKNOWN"} and not required_families & modalities:
+        if any(not modality_families(value) for value in contract["observed_assays"]):
+            return "UNKNOWN"
         return "INCOMPATIBLE"
     organisms = {str(x).lower() for x in record.get("organisms", [])}
     if required_organism and organisms:

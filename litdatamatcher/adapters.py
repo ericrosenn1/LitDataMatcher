@@ -40,6 +40,18 @@ def _search_status(adapter) -> JsonDict:
     return {"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE" if failure else "OBSERVED", **({"pagination": pagination} if pagination else {})}
 
 
+def _response_object(value: object) -> JsonDict:
+    if not isinstance(value, dict) or any(value.get(key) for key in ("error", "errors", "ERROR", "errorlist")):
+        raise ValueError("Provider error or invalid response object")
+    return value
+
+
+def _response_list(value: object) -> list[JsonDict]:
+    if not isinstance(value, list) or not all(isinstance(item, dict) for item in value):
+        raise ValueError("Provider response requires an object list")
+    return value
+
+
 class LiteratureSourceAdapter(Protocol):
     """Protocol for literature search adapters."""
 
@@ -63,7 +75,7 @@ def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonD
             payload = client.get_json(url, params=params)
         except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
             return _pagination_result(items, pages, "ERROR", error=type(exc).__name__)
-        if not isinstance(payload, dict):
+        if not isinstance(payload, dict) or any(payload.get(key) for key in ("error", "errors", "ERROR")):
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="payload_not_object")
         page_items = extract_items(payload)
         if not isinstance(page_items, list) or not all(isinstance(item, dict) for item in page_items):
@@ -112,7 +124,7 @@ class OpenAlexLiteratureAdapter:
             params={"search": query, "per-page": min(max(1, limit), 200)},
         )
         rows: list[dict] = []
-        for work in data.get("results", []):
+        for work in _response_list(_response_object(data).get("results")):
             abstract = _openalex_abstract(work.get("abstract_inverted_index") or {})
             source_url = work.get("id", "")
             # OpenAlex may expose abstracts, but the adapter still returns discovery metadata.
@@ -140,6 +152,7 @@ class OpenAlexLiteratureAdapter:
                     "year": work.get("publication_year"),
                     "source": self.name,
                     "source_provenance": provenance,
+                    "version_relationships": {"is-retracted": {"source": "openalex", "declared": True}} if work.get("is_retracted") is True else {},
                     "metadata": {
                         "cited_by_count": work.get("cited_by_count", 0),
                         "concepts": [
@@ -159,10 +172,12 @@ class PubMedLiteratureAdapter:
 
     client: CachedHttpClient
     name: str = "pubmed"
+    last_search_status: JsonDict = field(default_factory=dict, init=False)
 
     def search_literature(self, query: str, limit: int = 25) -> list[dict]:
         """Search PubMed and return normalized literature rows with abstracts when available."""
 
+        self.last_search_status = {}
         ids = _ncbi_search(self.client, "pubmed", query, limit)
         if not ids:
             return []
@@ -170,12 +185,26 @@ class PubMedLiteratureAdapter:
             "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi",
             params={"db": "pubmed", "id": ",".join(ids), "retmode": "json"},
         )
-        xml_records = _pubmed_efetch_records(self.client, ids)
-        results = data.get("result", {})
+        results = _response_object(_response_object(data).get("result"))
+        summary_snapshot = _client_response_metadata(self.client)
+        fetch_error = ""
+        try:
+            xml_records = _pubmed_efetch_records(self.client, ids)
+        except (AttributeError, KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
+            xml_records = {}
+            fetch_error = type(exc).__name__
+        fetch_snapshot = _client_response_metadata(self.client) if not fetch_error else {}
+        missing = [uid for uid in ids if uid not in xml_records]
+        if fetch_error or missing:
+            self.last_search_status = {"status": "ERROR", "stage": "pubmed_efetch", "error": fetch_error or "requested_records_missing", "missing_ids": missing, "retained_summary_metadata": True}
         rows: list[dict] = []
         for uid in ids:
             item = results.get(uid, {})
             xml_item = xml_records.get(uid, {})
+            _response_object(item)
+            if not item and not xml_item:
+                self.last_search_status = {"status": "ERROR", "stage": "pubmed_records", "error": "requested_record_missing"}
+                continue
             article_ids = item.get("articleids", []) if isinstance(item, dict) else []
             doi = xml_item.get("doi", "") or _article_id(article_ids, "doi")
             title = xml_item.get("title", "") or item.get("title", "")
@@ -192,8 +221,20 @@ class PubMedLiteratureAdapter:
                 if abstract
                 else ["PubMed EFetch did not provide an abstract for this record."],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("pubmed")},
+                metadata={"source_profile": source_profile("pubmed"), "esummary_snapshot": summary_snapshot, "efetch_snapshot": fetch_snapshot, "efetch_status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE" if uid in missing else "OBSERVED"},
             ).to_dict()
+            publication_types = list(item.get("pubtype", []) or []) + list(xml_item.get("publication_types", []) or [])
+            relations = {"commentCorrection": xml_item.get("comments_corrections", [])}
+            for publication_type in publication_types:
+                normalized_type = re.sub(r"[^a-z]", "", str(publication_type).casefold())
+                if normalized_type in {"retractedpublication", "retractionofpublication"}:
+                    relations.setdefault("retracted_publication_type", []).append(publication_type)
+                elif normalized_type in {"publishederrata", "publishederratum", "correctedandrepublishedarticle"}:
+                    relations.setdefault("correction_publication_type", []).append(publication_type)
+                elif normalized_type in {"expressionofconcern"}:
+                    relations.setdefault("lifecycle_review", []).append(publication_type)
+            if uid in missing:
+                relations["lifecycle_review"] = {"source": "pubmed_efetch", "reason": "Unresolved lifecycle lookup"}
             rows.append(
                 {
                     "source_id": f"pubmed:{uid}",
@@ -204,6 +245,7 @@ class PubMedLiteratureAdapter:
                     "pmid": uid,
                     "pmcid": xml_item.get("pmcid", "") or _article_id(article_ids, "pmc"),
                     "source": self.name,
+                    "version_relationships": relations,
                     "year": xml_item.get("year") or _pubdate_year(item.get("pubdate", "")),
                     "source_provenance": provenance,
                     "metadata": {
@@ -310,11 +352,11 @@ class CrossrefLiteratureAdapter:
 
         data = self.client.get_json(
             "https://api.crossref.org/works",
-            params={"query": query, "rows": min(max(1, limit), 100), "select": "DOI,title,abstract,published,published-online,published-print,indexed,created,relation,update-policy,container-title,author,type"},
+            params={"query": query, "rows": min(max(1, limit), 100), "select": "DOI,title,abstract,published,published-online,published-print,indexed,created,relation,update-policy,update-to,container-title,author,type"},
         )
         response_metadata = _client_response_metadata(self.client)
         rows: list[dict] = []
-        for item in data.get("message", {}).get("items", []):
+        for item in _response_list(_response_object(_response_object(data).get("message")).get("items")):
             if not isinstance(item, dict):
                 continue
             doi = _normalize_doi(item.get("DOI", ""))
@@ -323,7 +365,10 @@ class CrossrefLiteratureAdapter:
                 continue
             source_id = f"crossref:{doi}"
             source_url = f"https://doi.org/{doi}"
-            version_relationships = item.get("relation", {})
+            version_relationships = dict(item.get("relation", {}) or {})
+            if "update-to" in item:
+                updates = _response_list(item["update-to"])
+                version_relationships["commentCorrection"] = [dict(update, type=update.get("type", "")) for update in updates]
             provenance = remote_source_provenance(
                 source_type="crossref",
                 source_url=source_url,
@@ -551,6 +596,7 @@ class ENASRADatasetAdapter:
 
     client: CachedHttpClient
     name: str = "ena"
+    last_search_status: JsonDict = field(default_factory=dict, init=False)
 
     def search(self, query: str) -> list[DatasetRecord]:
         """Search a bounded ENA read-run page and group rows by stable study accession."""
@@ -566,13 +612,18 @@ class ENASRADatasetAdapter:
             },
         )
         response_metadata = _client_response_metadata(self.client)
-        rows = data if isinstance(data, list) else data.get("data", [])
+        rows = data if isinstance(data, list) else _response_object(data).get("data")
+        if not isinstance(rows, list):
+            raise ValueError("ENA response requires a list")
+        self.last_search_status = {}
         grouped: dict[str, list[JsonDict]] = {}
         for row in rows if isinstance(rows, list) else []:
             if not isinstance(row, dict):
+                self.last_search_status = {"status": "SCHEMA_DRIFT", "error": "invalid_row", "retained_valid_rows": True}
                 continue
             study_id = str(row.get("study_accession", "") or "").strip().upper()
             if not re.fullmatch(r"(?:ERP|SRP|DRP|PRJ(?:EB|NA|DB))\d+", study_id):
+                self.last_search_status = {"status": "SCHEMA_DRIFT", "error": "invalid_study_identifier", "retained_valid_rows": True}
                 continue
             grouped.setdefault(study_id, []).append(row)
         records = [
@@ -1215,7 +1266,10 @@ def _ncbi_search(client: CachedHttpClient, database: str, query: str, limit: int
             "retmax": min(max(1, limit), 200),
         },
     )
-    return [str(uid) for uid in data.get("esearchresult", {}).get("idlist", [])]
+    ids = _response_object(_response_object(data).get("esearchresult")).get("idlist")
+    if not isinstance(ids, list) or not all(isinstance(uid, (str, int)) and not isinstance(uid, bool) and str(uid).isdigit() for uid in ids):
+        raise ValueError("NCBI ESearch requires an identifier list")
+    return [str(uid) for uid in ids]
 
 
 def _article_id(article_ids: list[JsonDict], id_type: str) -> str:
@@ -1236,15 +1290,12 @@ def _metadata_with_provenance(raw_metadata: JsonDict, provenance: JsonDict) -> J
 
 
 def _pubmed_efetch_records(client: CachedHttpClient, ids: list[str]) -> dict[str, JsonDict]:
-    """Fetch and parse PubMed XML records, falling back to empty metadata on failure."""
+    """Fetch and parse PubMed XML; caller retains summary rows with explicit failure."""
 
-    try:
-        xml_text = client.get_text(
-            "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
-            params={"db": "pubmed", "id": ",".join(ids), "retmode": "xml"},
-        )
-    except Exception:
-        return {}
+    xml_text = client.get_text(
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
+        params={"db": "pubmed", "id": ",".join(ids), "retmode": "xml"},
+    )
     return _parse_pubmed_xml(xml_text)
 
 
@@ -1253,8 +1304,10 @@ def _parse_pubmed_xml(xml_text: str) -> dict[str, JsonDict]:
 
     try:
         root = ET.fromstring(xml_text.encode("utf-8"))
-    except ET.ParseError:
-        return {}
+    except ET.ParseError as exc:
+        raise ValueError("Malformed PubMed XML") from exc
+    if _xml_name(root) != "PubmedArticleSet" or any(_xml_name(item).casefold() == "error" for item in root.iter()):
+        raise ValueError("Unexpected PubMed XML response envelope")
     records: dict[str, JsonDict] = {}
     for article in root.iter():
         if _xml_name(article) != "PubmedArticle":
@@ -1273,6 +1326,8 @@ def _parse_pubmed_xml(xml_text: str) -> dict[str, JsonDict]:
             "journal": _xml_text(_first_xml(_first_xml(article_node, "Journal"), "Title")),
             "year": _pubmed_xml_year(article_node),
             "authors": _pubmed_authors(article_node),
+            "publication_types": [_xml_text(item) for item in article_node.iter() if _xml_name(item) == "PublicationType"] if article_node is not None else [],
+            "comments_corrections": [{"type": item.get("RefType", ""), "id": _xml_text(_first_xml(item, "PMID")), "reference": _xml_text(_first_xml(item, "RefSource"))} for group in list(medline) if _xml_name(group) == "CommentsCorrectionsList" for item in list(group) if _xml_name(item) == "CommentsCorrections"] if medline is not None else [],
         }
     return records
 
@@ -1366,10 +1421,11 @@ def _xml_text(element: ET.Element | None) -> str:
 def _mgnify_items(data: JsonDict) -> list[JsonDict]:
     """Normalize MGnify v2 list rows and legacy JSON:API rows into flat dicts."""
 
-    if isinstance(data.get("items"), list):
-        return [item for item in data["items"] if isinstance(item, dict)]
+    data = _response_object(data)
+    if "items" in data:
+        return _response_list(data["items"])
     legacy_rows: list[JsonDict] = []
-    for item in data.get("data", []):
+    for item in _response_list(data.get("data")):
         if not isinstance(item, dict):
             continue
         attrs = dict(item.get("attributes", {}) or {})

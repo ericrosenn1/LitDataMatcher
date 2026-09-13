@@ -161,6 +161,14 @@ def normalize_entity(value: str, category: str, *, source_available: bool = True
         return {"status": "DEPRECATED", "mapping_type": "unresolved", "source": "local_contract_v1", "candidates": [DEPRECATED_ENTITY_IDS[raw]], "deprecated_id": raw}
     entry = ENTITY_CONTRACTS.get(category, {}).get(raw.casefold())
     if not entry:
+        canonical_ids = {
+            candidate
+            for value, _ in ENTITY_CONTRACTS.get(category, {}).values()
+            for candidate in (value if isinstance(value, tuple) else (value,))
+            if ":" in candidate
+        }
+        if raw in canonical_ids:
+            return {"status": "RESOLVED", "mapping_type": "exact", "source": "local_contract_v1", "candidates": [raw]}
         return {"status": "UNRESOLVED", "mapping_type": "unresolved", "source": "local_contract_v1", "candidates": []}
     candidate, mapping_type = entry
     candidates = list(candidate) if isinstance(candidate, tuple) else [candidate]

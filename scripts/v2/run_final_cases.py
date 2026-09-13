@@ -10,6 +10,7 @@ import copy
 import gc
 import hashlib
 import json
+import re
 import shutil
 import socket
 import subprocess
@@ -34,17 +35,41 @@ class AbstractText(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.parts = []
+        self.headings = []
+        self.in_heading = False
 
     def handle_starttag(self, tag, attrs):
+        if tag == "h4":
+            self.in_heading = True
         if tag in {"h4", "p", "br", "div"}:
             self.parts.append("\n")
 
     def handle_endtag(self, tag):
+        if tag == "h4":
+            self.in_heading = False
         if tag in {"h4", "p", "div"}:
             self.parts.append("\n")
 
     def handle_data(self, data):
         self.parts.append(data)
+        if self.in_heading:
+            self.headings.append(data.strip())
+
+
+def abstract_document(abstract):
+    parser = AbstractText()
+    parser.feed(abstract)
+    # Unicode horizontal whitespace is a recorded presentation transformation;
+    # words, numbers, punctuation and paragraph boundaries are preserved.
+    text = "\n".join(re.sub(r"[^\S\n]+", " ", line).strip() for line in "".join(parser.parts).splitlines() if line.strip())
+    headers = [match for match in re.finditer(r"(?m)^.+$", text) if match.group() in parser.headings]
+    sections = []
+    for index, match in enumerate(headers):
+        start = match.end() + 1
+        end = headers[index + 1].start() if index + 1 < len(headers) else len(text)
+        if start < end:
+            sections.append({"start": start, "end": end, "text": text[start:end], "section": match.group()})
+    return text, sections
 
 
 def prepare(args):
@@ -71,10 +96,10 @@ def prepare(args):
                 raise ValueError("Source snapshot changed")
             source = row["source_provenance"]
             source["metadata"]["cache_snapshot"] = {"cache_path": str(snapshot), "cache_content_sha256": entry["response_sha256"], "retrieval_time_utc": entry["retrieved_at_utc"], "cache_status": "immutable_source_snapshot"}
-            parser = AbstractText()
-            parser.feed(row.get("abstract", ""))
-            text = "\n".join(line.strip() for line in "".join(parser.parts).splitlines() if line.strip())
+            text, sections = abstract_document(row.get("abstract", ""))
             row.update(text=text, topic=domain, split_context="development", source_locator=source["source_locator"], fulltext_status="NOT_RETRIEVED_ABSTRACT_ONLY", source_snapshot={"sha256": entry["response_sha256"], "url": entry["request_url"], "retrieved_at": entry["retrieved_at_utc"], "object_path": str(snapshot), "json_pointer": entry["json_pointer"]}, derivation={"method": "HTMLParser entity decoding; explicit block boundaries; strip outer line whitespace", "input_abstract_sha256": hashlib.sha256(raw.get("abstract", "").encode()).hexdigest(), "raw_record_lineage": entry, "text_sha256": hashlib.sha256(text.encode()).hexdigest()})
+            row["sections"] = sections
+            row["derivation"]["method"] += "; normalize horizontal Unicode whitespace; retain source h4 headings and exact derived-text section offsets"
             if row["document_id"] not in seen:
                 documents.append(row)
                 seen.add(row["document_id"])

@@ -102,7 +102,7 @@ def _span(text: str, quote: Any) -> dict:
     if text.find(quote, start + 1) >= 0:
         raise ValueError("Ambiguous repeated quote requires a unique locator")
     # Prevent extracting an affirmative subclause after omitted negation/context.
-    prefix = text[:start].rstrip()
+    prefix = text[:start].rstrip(" \t\r")
     suffix = text[start + len(quote) :].lstrip()
     if prefix and prefix[-1] not in ".!?\n":
         raise ValueError("Quote omits sentence prefix/context")

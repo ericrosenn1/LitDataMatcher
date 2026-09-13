@@ -56,6 +56,25 @@ def test_unknown_assay_has_no_false_incompatibility_from_string_family_compariso
     assert result["eligibility"] == "REQUIRES_INSPECTION"
 
 
+def test_partially_unqualified_assay_list_cannot_prove_absence_of_a_modality():
+    raw = profile("WGS")
+    raw["assay_types"].append("unqualified assay")
+    assert compatibility("proteomics", "human", raw) == "UNKNOWN"
+    assert assess_requirements([{"field": "modality", "expected": "proteomics"}], raw)["eligibility"] == "REQUIRES_INSPECTION"
+
+
+def test_declared_screen_modality_requires_units_and_specific_design_review():
+    raw = profile("pooled CRISPR screen")
+    raw["source_provenance"] = {"source_url": "fixture:declared-screen-metadata"}
+    raw = normalize_dataset(raw)
+    broad = assess_requirements([{"field": "modality", "expected": "perturbational_screens"}], raw)
+    assert broad["eligibility"] == "DIRECT_FIT"
+    assert broad["independent_units"] is None
+    assert broad["statistical_adequacy"] == "UNKNOWN"
+    assert assess_requirements([{"field": "assay", "expected": "RNAi screen"}], raw)["eligibility"] == "NOT_QUALIFIED"
+    assert assess_requirements([{"field": "donor_count", "expected": 100}], raw)["eligibility"] == "REQUIRES_INSPECTION"
+
+
 def test_adapter_capabilities_need_source_provenance_and_never_imply_units():
     raw = profile()
     raw["capabilities"] = {}

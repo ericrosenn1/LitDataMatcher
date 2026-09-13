@@ -134,6 +134,10 @@ def test_real_cli_offline_cache_reconciliation(tmp_path, monkeypatch, limit):
            {"esearchresult": {"idlist": ["12345"]}})
     cached(base + "esummary.fcgi", {"db": "pubmed", "id": "12345", "retmode": "json"},
            {"result": {"12345": {"title": "Study", "articleids": [{"idtype": "pmc", "value": "PMC456"}]}}})
+    # A complete offline search includes the lifecycle-bearing EFetch response.
+    # Missing EFetch is tested separately as a visible partial source failure.
+    cache._cache_path(base + "efetch.fcgi", {"db": "pubmed", "id": "12345", "retmode": "xml"}, suffix=".txt").write_text(
+        "<PubmedArticleSet><PubmedArticle><MedlineCitation><PMID>12345</PMID><Article><ArticleTitle>Study</ArticleTitle></Article></MedlineCitation></PubmedArticle></PubmedArticleSet>", encoding="utf-8")
     cached("https://www.ebi.ac.uk/europepmc/webservices/rest/search",
            {"query": "fixture", "format": "json", "resultType": "core", "pageSize": limit, "cursorMark": "*"},
            {"resultList": {"result": [{"source": "MED", "id": "12345", "title": "Study", "pmcid": "PMC456",

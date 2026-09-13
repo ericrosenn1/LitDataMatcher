@@ -1,38 +1,28 @@
-# Execution override, updated 2026-09-13
+# Current execution authorization, 2026-09-13
 
-## Current controlling correction
+Authority: `project_state/OWNER_CONTINUOUS_OVERRIDE_20260913.md`, supplied by
+project owner after the final-campaign request. This supersedes older duty-cycle
+language and the earlier any-model/effort permission. Prior policy evidence is
+preserved in Git at `b863d86` and earlier commits.
 
-The user explicitly authorized: "allow any effort level and model now as needed".
-This supersedes all model/effort prohibitions below, in AGENTS.md, and in prior
-task state. It does not authorize additional concurrent reasoning, Fast mode,
-paid APIs, purchased or consumed credits, OpenCode/Muse delegation, new schedules,
-or a supervisor restart. Retain one reasoning execution and zero subagents.
-Planning, review and integration count toward the existing 13.74-minute active /
-46.26-minute idle policy. Runtime for this bounded task was observed in the
-current session turn_context as `gpt-6-astra` / `ultra`; no agent was spawned.
+- Continuous reasoning is authorized. No hourly idle period or future start
+  timestamp applies; the previous September 13 21:13:30 UTC delay is revoked.
+- One verified `gpt-5.6-terra` reasoning execution, at `low`, `medium` or `high`.
+  Use adequate effort and progress without artificial waiting.
+- No Sol, Astra, xhigh, Max, Ultra, Fast mode, paid API usage, credits,
+  OpenCode/Muse delegation or unverified execution path.
+- Zero concurrent reasoning subagents under current authorization. Lead alone
+  integrates and pushes; preserve isolated-writer ownership and user changes.
+- Keep the corrective supervisor PAUSED. Do not create or resume schedules.
+- Actual platform/account exhaustion is a stopping condition; projected future
+  usage, a weekly safety target, or unused allowance is not a reason to stop.
+- Supported telemetry checks at major checkpoints are sufficient. Do not spend
+  substantial time polling or waiting to measure a projected burn rate.
+- Preserve all scientific acceptance criteria and protected alpha/holdout assets.
 
-Refresh shared-account telemetry through the supported local app-server
-`account/rateLimits/read` method. A helper issuing only that read and protocol
-initialization is a deterministic process, not another reasoning execution.
-Never issue turn/start, login, credit consumption or schedule operations from
-the telemetry helper. A new model needs a new timed burn measurement before any
-sustainability claim or duty-cap increase. Historical single-worker labels do
-not establish the earlier lead model; September 13 inspection found historical
-lead contexts at other efforts. Preserve historical results without treating
-those samples as verified isolated Terra Low measurements.
-
-## Historical September 7 policy (superseded model/effort permissions)
-
-This is the controlling development-execution policy for LitDataMatcher v2. It supersedes every earlier project instruction that permits Sol, Astra, automatic escalation, `highest sustainable` effort above High, or any model/effort/concurrency setting above the ceiling below. The immutable build specification remains historical scientific scope only; its older execution wording is not an executable permission.
-
-- Maximum development model: `gpt-5.6-terra`.
-- Maximum reasoning effort: `high`. Lower effort is permitted. No `xhigh`/Extra High, Max, or Ultra.
-- Do not use Sol or Astra at any effort. Do not use Fast mode, paid API usage, credits, alternate billing, or automatic fallback/escalation.
-- The actual current lead profile is `gpt-5.6-terra` / `medium`; no reasoning subagents are active. Any future lead, reviewer, debugging, retry, replacement, resumption, planning, or supervisor-launched worker must be explicitly within this ceiling before it is used.
-- A default setting or an agent name is not runtime proof. When a scheduled or worker execution path does not expose a verifiable model/effort, keep it paused/unavailable; continue only verified work.
-- The corrective supervisor is deliberately paused at completion. Its configuration does not specify a model/effort and therefore is runtime-unverified for this ceiling; it must remain paused until a supported configured and runtime verification is available.
-- Preserve work made by any former above-ceiling worker, but do not resume its reasoning session. Verify writer ownership has stopped before any permitted replacement starts. Healthy deterministic CPU/GPU/local inference and validated jobs continue. Do not restart acquisition, redownload models, rebuild validated artifacts, rerun the sealed holdout, or alter scientific assumptions merely to change Codex development models.
-- Use decomposition, targeted tests, deterministic scripts, and permitted independent review for difficult work. Preserve scientific acceptance criteria and existing checkpoint/push policy.
-- Account telemetry is sampled only through supported Codex telemetry and without high-frequency polling. The shared account-level weekly bucket is authoritative for all reasoning usage even though it has no per-thread/subagent/supervisor attribution or rolling series. From the observed 17% used over 5.8264 hours of the current 7-day window, the conservative observed rate is 2.9177 percentage points/hour. With 162.1736 hours to reset, continuation at that rate projects 490.18% total use and exhaustion in 28.4466 hours (2026-09-08T18:19:05Z). The profile is UNSUSTAINABLE; the maximum recommended active profile is one Terra Medium reasoning worker and no concurrent reasoning workers, with deterministic local work prioritized. No claim of a sustainable reasoning rate can be made without lower observed burn.
-
-Verified at correction: the local automation record is `PAUSED`, the project supervisor receipt is `DISABLED_AT_COMPLETION`, and the lead runtime profile is supplied by the active task context as `gpt-5.6-terra` / `medium`. No active subagent execution is present. No older Sol/Astra/escalation permission remains in executable project policy.
+Runtime observation at the owner-override turn: `gpt-6-astra` / `max`, from
+session `turn_context` at `2026-09-13T21:06:39.941Z`. That execution is outside
+this restored ceiling. No worker was launched. Only the owner-requested policy
+checkpoint is performed before ending this incompatible turn. The exposed tools
+have no control to change this active lead model. Resume this same task under
+verified Terra High or lower; defaults alone are not proof of runtime settings.

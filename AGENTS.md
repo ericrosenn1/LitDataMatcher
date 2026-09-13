@@ -1,2 +1,12 @@
 # LitDataMatcher v2 project instructions
-Read `docs/v2/EXECUTION_OVERRIDE.md` and `project_state/BUDGET_POLICY.md` before continuation. The user's September 13 correction permits any available model and effort as needed; the earlier Terra ceiling is superseded. Retain one reasoning execution, zero subagents, the existing duty cap, Standard speed, no paid APIs/credits, and a paused supervisor. Read current `project_state/TASK_STATE.json` and `project_state/NEXT_ACTION.md`; continue validated work without repeating bootstrap. Preserve original checkout/index and shared data. Lead alone integrates and pushes; source edits use an isolated worktree. Scientific requirements and gates in the finalized package remain unchanged.
+
+Read `docs/v2/EXECUTION_OVERRIDE.md`, `project_state/BUDGET_POLICY.md`,
+`project_state/FINAL_CAMPAIGN_STATE.json`, and `project_state/NEXT_ACTION.md`.
+The latest owner override authorizes continuous execution with one verified
+GPT-5.6 Terra reasoning execution at Low, Medium or High. No mandatory idle
+interval remains. The prior any-model/effort permission is superseded by this
+newer explicit ceiling. No concurrent reasoning subagents, Fast mode, paid APIs,
+credits, OpenCode/Muse delegation, or supervisor/schedule restart is authorized.
+Lead alone integrates and pushes; source writers use assigned isolated worktrees.
+Preserve original checkout/index, shared data, scientific requirements, frozen
+alpha and sealed holdout. Do not repeat completed scientific runs.

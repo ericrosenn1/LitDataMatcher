@@ -1,84 +1,28 @@
-# Phase 2 weekly allowance policy
+# Current resource policy: continuous execution authorized
 
-## Current policy, 2026-09-13
+The project-owner override `OWNER_CONTINUOUS_OVERRIDE_20260913.md` revokes the
+former 13.74/46.26-minute duty cycle, mandatory idle periods, safety-margin
+throttling, and September 13 21:13:30 UTC delay effective immediately. Earlier
+measurements and policies remain historical evidence in Git at `b863d86`.
 
-The user now permits any available model/effort as needed. The previous Terra
-ceiling and model-specific ratchet are superseded; retain the 13.74-minute
-active / at least 46.26-minute idle cap, one reasoning execution, zero subagents,
-Standard speed, no paid API/credits, and a paused supervisor. Count all lead
-planning, implementation, review and integration time, not merely writer time.
-
-Current execution: `gpt-6-astra` / `ultra`, observed in the active session's
-`turn_context` at `2026-09-13T20:16:02.560Z`. No worker or schedule was launched.
-The service-tier field is null; no Fast request or setting change was made.
-
-Supported `codex app-server account/rateLimits/read` at
-`2026-09-13T20:17:10.725355Z` reports the shared `codex` bucket at 3% used / 97%
-remaining, weekly reset `2026-09-20T19:24:15Z`, and no secondary/5-hour window.
-Safety-adjusted target at 20:22 UTC: `0.46457` percentage points/hour
-(`0.80 * 97 / 167.03516`). Receipt lives under
-`data/phase2/pmid_reconciliation_20260913/budget_20260913T201710Z.json`.
-Per-task, subagent and supervisor attribution is not exposed by this read.
-
-This is a new baseline, not a measured burn rate for the current profile.
-The earlier isolated-Low labels were not verified for the lead; retain those
-historic figures below as reported observations, not proof of sustainability.
-Do not increase active time. Remeasure after a profile or major workload change,
-after a valid 30-minute workload sample, or within six hours of continuous work.
-Idle gaps must be disclosed and must not be presented as continuous active work.
-
-## Historical observations (not the current model/effort policy)
-
-Current duty reservation (including preflight before the authorization change):
-charge the full 13.74-minute slot beginning `2026-09-13T20:13:30Z` through
-`2026-09-13T20:27:14.400Z`, even if closeout finishes earlier. No additional
-reasoning before `2026-09-13T21:13:30Z`. All root planning, implementation,
-review and integration are included; no subagents were used. The next continuous
-work refresh is due no later than `2026-09-14T02:17:10Z` or sooner on a profile
-change. This partial bounded interval does not meet the 30-minute burn-rate
-measurement requirement.
-
-Latest telemetry refresh: `2026-09-11T22:59:45-04:00` (`2026-09-12T02:59:45Z`).
-
-| Field | Current value |
+| Field | Current policy |
 | --- | --- |
-| Telemetry source | Supported shared Codex weekly-allowance telemetry |
-| Measurement timestamp | `2026-09-11T22:59:45-04:00` (`2026-09-12T02:59:45Z`) |
-| Latest weekly remaining | `96%` (`4%` used) |
-| Weekly remaining at Medium measurement start | `100%` |
-| Weekly remaining at Medium measurement end | `97%` |
-| Weekly reset | `2026-09-15T00:49:42-04:00` (`1789447782`) |
-| Current reasoning model / effort | `gpt-5.6-terra` / `low` (duty-cycled) |
-| Active reasoning-agent count | `0` while in the mandatory idle interval |
-| Maximum allowed model / effort | `gpt-5.6-terra` / `high` |
-| Maximum reasoning concurrency | `1` |
-| Speed / prohibited routes | Standard speed; no Sol, Astra, xhigh, Max, Ultra, paid API, credits, OpenCode, or Muse |
-| Corrective supervisor | Paused; runtime model/effort is not verifiable |
-| Medium measurement duration | `0.501061 h` |
-| Medium observed burn rate | `5.9873 percentage points/hour` (`3 / 0.501061`) |
-| Sustainable target at ratchet | `0.46332 percentage points/hour` (`0.80 * 97 / hours_to_reset`) |
-| Medium verdict | `UNSUSTAINABLE` |
-| Selected maximum profile | One `gpt-5.6-terra` / `low` reasoning worker; zero reasoning subagents |
-| Low measurement duration | `0.497894 h` |
-| Low observed burn rate | `2.00846 percentage points/hour` (`1 / 0.497894`) |
-| Sustainable target at Low reading | `0.45994 percentage points/hour` (`0.80 * 96 / hours_to_reset`) |
-| Current sustainable target | `1.04020 percentage points/hour` (`0.80 * 96 / 73.8323 h to reset`) |
-| Low verdict | `UNSUSTAINABLE` |
-| Required reasoning duty cycle | `22.90%` (`target / burn`): at most `13.74` minutes of Terra Low work per wall-clock hour, followed by at least `46.26` minutes without a reasoning agent |
-| Next measurement | After the next accumulated 30 minutes of Terra Low work, after a profile/concurrency/major-workload change, or by `2026-09-12T08:59:45Z`, whichever occurs first |
+| Mode | Continuous execution |
+| Maximum model | gpt-5.6-terra |
+| Allowed effort | low, medium, high |
+| Reasoning concurrency | 1 verified execution |
+| Concurrent subagents | 0 |
+| Speed | Standard only |
+| Mandatory idle | None |
+| Next permitted time | Immediately when runtime is verified within the ceiling |
+| Actual current lead | gpt-6-astra / max; outside current authorization |
+| Supervisor | PAUSED; no restart or schedule creation |
+| Paid routes | No paid API usage, credits, external billing or paid fallback |
+| Throttling on projected use | Revoked |
+| Telemetry cadence | Normal supported checks at major checkpoints |
+| Real capacity stop | Actual account/platform exhaustion |
 
-The Medium profile was ratcheted down after its valid second reading. The Low second reading also exceeded the safety-adjusted target, and Terra Low is the lowest supported practical effort on this runtime. The September 12 supported shared-account refresh observed 4 percent used / 96 percent remaining, but contains no new active-worker interval and therefore does not replace the measured Low burn rate. Retain at most one Terra Low reasoning worker, zero reasoning subagents, and the stricter existing duty cycle until the next accumulated 30-minute Low reading. During its mandatory idle interval, only deterministic local work may run. The paused corrective supervisor must remain paused because its runtime effort cannot be verified within this policy. Do not alter scientific acceptance criteria.
-
-The two sampled workload windows consisted of bounded local Phase 2 implementation, validation, and receipt generation. They did not change model family, reasoning concurrency, source acquisition, model inference, sealed alpha/holdout evidence, or supervisor state. The next Low sample must be based on a new accumulated 30-minute active Low interval and must recalculate the duty cycle before any increase in reasoning time.
-
-## Active-duty ledger
-
-- `2026-09-12T03:01Z` to before `2026-09-12T03:04Z`: one explicitly
-  configured `gpt-5.6-terra` / `low` worker, zero concurrent subagents, made
-  the isolated cross-source lifecycle patch that was lead-integrated as
-  `4cd9e9d`.  The worker exited after its targeted tests; no supervisor or
-  network acquisition was used.
-- Conservatively allow no further reasoning worker before `2026-09-12T03:50Z`
-  (more than the required 46.26-minute idle period after the bounded worker).
-  This partial interval does not constitute the required new 30-minute
-  telemetry measurement.
+The last recorded shared-account read at 2026-09-13T20:17:10Z observed 97%
+remaining, reset 2026-09-20T19:24:15Z. It is historical, not a refreshed reading.
+No usage projection is used to block work. The present blocker is the verified
+runtime model/effort mismatch, not allowance or an idle deadline.

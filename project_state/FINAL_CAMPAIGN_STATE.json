@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "campaign": "FINAL_AUTONOMOUS_COMPLETION",
-  "status": "PAUSED_EXECUTION_POLICY",
-  "updated_at": "2026-09-13T20:53:58.211964+00:00",
+  "status": "BLOCKED_RUNTIME_PROFILE",
+  "updated_at": "2026-09-13T21:09:08.988995+00:00",
   "scope": "Full intended project completion, or all machine-resolvable requirements complete with only a proven irreducible external gate.",
   "request": "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md",
   "request_sha256": "1c0966ba0f2c1ce50656af530ce05788cfb42e4ea3cfced35a45e8a0e4b190d6",
@@ -10,14 +10,14 @@
   "starting_verified_remote": "a4ee398cd8f30d275a8d151a46ffb13ef283392d",
   "unfinished_stage": "REQUIREMENTS_TO_EVIDENCE_MATRIX_NOT_STARTED",
   "expert_labels_gate_classification": "NOT_YET_DETERMINED_FROM_GOVERNING_SPECIFICATION",
-  "next_permitted_reasoning_at": "2026-09-13T21:13:30Z",
+  "next_permitted_reasoning_at": null,
   "reasoning_concurrency": 1,
   "subagents": 0,
   "supervisor": "PAUSED",
   "resume_worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-campaign-20260913",
   "resume_steps": [
-    "Verify duty window, live writer ownership and current project policy.",
-    "Refresh shared account telemetry for the changed campaign workload using supported account/rateLimits/read; preserve current duty cap until valid recalculation.",
+    "Verify one Terra reasoning execution at High or lower, live writer ownership and latest owner authorization; continuous execution is permitted immediately.",
+    "Use normal supported account telemetry at major checkpoints; projected allowance use does not require waiting.",
     "Read the finalized build and later Phase 2 scope specifications and existing acceptance evidence.",
     "Build the requested machine-readable requirement classifications with exact source, receipt, commit and blocking status.",
     "Determine whether real expert labels are mandatory for COMPLETE or only EXPERT_VALIDATED; do not infer this from stale NEXT_ACTION prose.",
@@ -35,5 +35,18 @@
   "human_only_gate_proven": false,
   "background_execution_claimed": false,
   "source_attachment_sha256": "64487f76a0556ce868479bfaff5e8a86795ea1a275be38a420180681d779cfcf",
-  "request_hash_scope": "Committed UTF-8 request blob; Git normalizes CRLF to LF. Source attachment hash is retained separately."
+  "request_hash_scope": "Committed UTF-8 request blob; Git normalizes CRLF to LF. Source attachment hash is retained separately.",
+  "continuous_execution_authorized": true,
+  "mandatory_idle_revoked": true,
+  "model_ceiling": "gpt-5.6-terra",
+  "effort_ceiling": "high",
+  "runtime_observed": {
+    "model": "gpt-6-astra",
+    "effort": "max",
+    "timestamp": "2026-09-13T21:06:39.941Z"
+  },
+  "resume_condition": "Run this same task with verified gpt-5.6-terra at low, medium or high; no time delay applies.",
+  "owner_override": "project_state/OWNER_CONTINUOUS_OVERRIDE_20260913.md",
+  "owner_override_sha256": "70a9a282a9dea9fdf27c1d7abed1806b147d1dab40cff761c232f2f21f80bf72",
+  "owner_override_attachment_sha256": "3b98b0c9bb1d977f93c103ce1ee4fda4b06d1c97aff0e59316b223abd6d027da"
 }

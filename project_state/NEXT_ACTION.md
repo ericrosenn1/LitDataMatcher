@@ -1,19 +1,19 @@
-# Active final closeout campaign, 2026-09-13
+# Active final closeout campaign: continuous mode
 
-The full user request in `project_state/FINAL_CAMPAIGN_REQUEST_20260913.md`
-supersedes the bounded-task scope below. Exact continuation is in
-`project_state/FINAL_CAMPAIGN_STATE.json`. No final requirements matrix or
-expert-gate decision exists yet. The reported V2.4 dependency is a candidate
-gate to investigate against the governing specifications, not a proven reason
-to stop the project. Complete all machine-resolvable requirements, packaging,
-installation validation and adversarial review before final closeout.
+The current owner authority is `project_state/OWNER_CONTINUOUS_OVERRIDE_20260913.md`.
+All previous mandatory duty-cycle waits, including September 13 21:13:30 UTC,
+are revoked. Continue without artificial pauses using one verified Terra
+execution at High or lower. No supervisor restart or schedules are authorized.
 
-Current stop: mandatory policy idle. Earliest reasoning continuation:
-`2026-09-13T21:13:30Z`. No background worker or automation has been scheduled.
-Begin by checking the current policy, refreshing supported account telemetry
-for the changed workload, and constructing the requirements-to-evidence matrix.
-Use the assigned isolated final-campaign worktree; only the lead integrates and
-pushes. Preserve the sealed holdout and frozen alpha.
+Current runtime mismatch: gpt-6-astra / max. Resume this same task with Terra at
+Low, Medium or High; no time restriction remains. Exact campaign state is in
+`project_state/FINAL_CAMPAIGN_STATE.json`. First unfinished work: reconstruct
+the requirements-to-evidence matrix and determine whether real expert labels
+are a mandatory completion gate. Neither has been completed. Then execute the
+full final campaign from `FINAL_CAMPAIGN_REQUEST_20260913.md` continuously.
+
+Earlier sections below are historical bounded-task context; their duty-cycle
+and any-model wording are superseded by the latest owner override above.
 
 The following section records the completed bounded task and prior context.
 

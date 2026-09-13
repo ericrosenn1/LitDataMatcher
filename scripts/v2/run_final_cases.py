@@ -170,7 +170,7 @@ def execute(args):
     for case in protocol["cases"]:
         print(json.dumps({"stage": "starting", "case_id": case["case_id"], "mode": "cache_replay" if args.replay else "fresh"}), flush=True)
         run = out / case["case_id"]
-        result = analyze(root, run, args.model, args.embeddings, question=case["question"], requirements=case["requirements"], limit=1, chunks=protocol["chunks"], fresh=not args.replay, device="cuda", topic=case["case_id"])
+        result = analyze(root, run, args.model, args.embeddings, question=case["question"], requirements=case["requirements"], limit=1, chunks=protocol["chunks"], fresh=not args.replay, device="cuda", topic=case["case_id"], question_source_id=case["document_id"])
         run_dossiers = read_rows(run / "scientific_dossiers.jsonl")
         if not run_dossiers:
             result["case_validation"] = "FAIL_NO_SOURCE_LINKED_DOSSIER"

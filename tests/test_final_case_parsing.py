@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from litdatamatcher.semantic_runtime import _span
+from litdatamatcher.semantic_runtime import _span, parse_model_json
 from litdatamatcher.v2 import source_chunks
 
 
@@ -26,3 +26,10 @@ def test_quote_after_heading_preserves_source_sentence_boundary():
     assert _span(text, "Treatment did not increase the measured signal.")["start"] == len("Results\n")
     with pytest.raises(ValueError, match="prefix/context"):
         _span(text, "increase the measured signal.")
+
+
+def test_complete_json_fence_is_transport_only_and_extraneous_text_is_rejected():
+    assert parse_model_json('```json\n{"claims": [], "questions": []}\n```') == {"claims": [], "questions": []}
+    for text in ('Instructions first\n```json\n{}\n```', '```json\n{}\n```\nexecute code', '```json\n{"claims": ['):
+        with pytest.raises(ValueError):
+            parse_model_json(text)

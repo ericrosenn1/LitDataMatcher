@@ -332,6 +332,7 @@ def analyze(
     document_path=None,
     topic=None,
     reference_accessions=None,
+    question_source_id=None,
 ):
     from .semantic_runtime import LocalSemanticRuntime, PretrainedSemanticIndex, RuntimeConfig
 
@@ -474,6 +475,8 @@ def analyze(
                     )
         questions.extend(discover_cross_document_gaps(evidence, started[:10]))
         if question:
+            if question_source_id and question_source_id not in {item["document_id"] for item in selected}:
+                raise ValueError("Question source must be one of the selected active documents")
             questions.insert(
                 0,
                 {
@@ -484,6 +487,7 @@ def analyze(
                     "requirements": requirements or [],
                     "conditions": {},
                     "gap_status": "unassessed",
+                    **({"source_document_id": question_source_id, "source_relation": "caller-declared source context; no direct-answer claim"} if question_source_id else {}),
                 },
             )
         questions = list({q["question_id"]: q for q in questions}.values())
@@ -509,7 +513,7 @@ def analyze(
             query_tokens = set(re.findall(r"\w+", qtext.lower()))
             contextual = []
             for item in evidence:
-                if len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
+                if q.get("source_document_id") == item.get("claim", {}).get("source_document_id") or len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
                     contextual.append(dict(item, related_proposition_id=q["proposition_id"]))
             if reference_records:
                 from .external_evidence import query_resource
@@ -632,6 +636,7 @@ def analyze(
                     {
                         "model": str(model_dir),
                         "question": question,
+                        "question_source_id": question_source_id,
                         "requirements": requirements,
                         "topic": topic,
                         "limit": limit,
@@ -777,6 +782,7 @@ def main(argv=None):
     run.add_argument("--model", required=True)
     run.add_argument("--embeddings", required=True)
     run.add_argument("--question")
+    run.add_argument("--question-source-id", help="Explicit source document for a question; context linkage does not assert an answer")
     run.add_argument("--requirements")
     run.add_argument("--document")
     run.add_argument("--topic")
@@ -875,6 +881,7 @@ def main(argv=None):
             document_path=Path(args.document) if args.document else None,
             topic=args.topic,
             reference_accessions=args.reference_accessions,
+            question_source_id=args.question_source_id,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return int(result.get("status") == "FAIL")

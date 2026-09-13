@@ -1,0 +1,217 @@
+{
+  "schema_version": "final_contract_review_initial_v1",
+  "timestamp": "2026-09-13T21:23:03.257862+00:00",
+  "source_commit": "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
+  "worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-contract-audit-20260913",
+  "branch": "codex/final-contract-audit-20260913",
+  "task_status": "PASS_WITH_FINDINGS",
+  "code_modified": false,
+  "network_used": false,
+  "sealed_holdout_read_or_run": false,
+  "protected_alpha_modified": false,
+  "scope": "Bounded adversarial offline audit of declared Phase 2 contracts; release packaging and full final regression owned by lead.",
+  "environment": {
+    "python": "3.12.13",
+    "executable": "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe"
+  },
+  "validation": {
+    "command": "$env:PYTHONDONTWRITEBYTECODE = '1'\n& 'C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe' -m pytest -p no:cacheprovider -q tests/test_expert_review.py tests/test_calibration_readiness.py tests/test_scientific_dossier.py tests/test_literature_integrity.py tests/test_phase2_safety_invariants.py",
+    "passed": 14,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "repro_cases": 8
+  },
+  "findings": [
+    {
+      "id": "CA-01",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Offline file POST still attempts network access",
+      "file": "litdatamatcher/http_cache.py",
+      "line_start": 174,
+      "line_end": 183,
+      "governing_requirements": [
+        "docs/v2/build_spec/02_FINAL_ARCHITECTURE_SPEC.md:103",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:23"
+      ],
+      "impact": "On a cache miss, CachedHttpClient(offline=True).post_file_text reaches requests.post. Offline mode does not constrain this public method.",
+      "scope": "Declared Phase 2 functionality",
+      "reproduction_python": "import io\nfrom pathlib import Path\nfrom unittest.mock import patch\nfrom litdatamatcher.http_cache import CachedHttpClient\nwith patch.object(Path,'mkdir'), patch.object(Path,'exists',return_value=False), patch.object(Path,'open',return_value=io.BytesIO(b'fixture')), patch('litdatamatcher.http_cache._file_sha256',return_value='fixture'), patch('litdatamatcher.http_cache.requests.post',side_effect=RuntimeError('NETWORK_CALL_INTERCEPTED')) as post:\n client=CachedHttpClient('unused',offline=True,min_interval_seconds=0)\n try: client.post_file_text('https://example.invalid/api/processFulltextDocument','fixture.pdf')\n except Exception as exc: print(type(exc).__name__,str(exc),'requests_post_calls=',post.call_count)\n",
+      "observed_stdout": "RuntimeError NETWORK_CALL_INTERCEPTED requests_post_calls= 1\n",
+      "recommended_bounded_repair": "Apply the offline cache-only guard before entering the POST request loop. Add cache-hit/cache-miss tests that forbid requests.post.",
+      "source_sha256": "4e2dee4386c42f32ba129a2f9b73f1bacd1964bd12ccd5ae69d1072538abb09d"
+    },
+    {
+      "id": "CA-02",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Adjudication accepts unsupported or contradictory decisions as eligible labels",
+      "file": "litdatamatcher/expert_review.py",
+      "line_start": 151,
+      "line_end": 165,
+      "governing_requirements": [
+        "project_state/V2_4_EXPERT_REVIEW_HANDOFF.md:5",
+        "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md:332",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:64"
+      ],
+      "impact": "A decision outside LABEL_VALUES, an empty policy ID, or two conflicting decisions for one item/dimension are accepted and emit ADJUDICATED plus ADJUDICATED_POLICY_LABELS_ONLY. This bypasses categorical validation at the final label boundary.",
+      "scope": "Importable expert-review helper; currently called by tests, not by a production CLI. Optional real expert labels do not excuse invalid machinery.",
+      "reproduction_python": "import json\nfrom litdatamatcher.expert_review import build_blinded_review_packet,validate_review_labels,finalize_adjudication\npacket=build_blinded_review_packet([{'question_text':'fixture question','dataset_id':'D1'}],['a','b'])['packet']\nitem=packet['items'][0]['review_item_id']\nlabels=validate_review_labels(packet,[{'reviewer_id':'a','review_item_id':item,'labels':{'relevance':'relevant'}},{'reviewer_id':'b','review_item_id':item,'labels':{'relevance':'not_relevant'}}])['valid_labels']\nfor case,values,policy in [('unsupported',['invented'],'p1'),('duplicate_conflict',['relevant','not_relevant'],'p1'),('missing_policy',['relevant'],'')]:\n decisions=[{'review_item_id':item,'dimension':'relevance','adjudicator_id':'chair','rationale':'source fixture','decision':value} for value in values]\n result=finalize_adjudication(packet,labels,decisions,policy_id=policy)\n print(case,json.dumps({key:result[key] for key in ['status','calibration_eligibility','accepted_decisions','invalid_decisions','unresolved']},sort_keys=True))\n",
+      "observed_stdout": "unsupported {\"accepted_decisions\": [{\"decision\": \"invented\", \"dimension\": \"relevance\", \"policy_id\": \"p1\", \"provenance\": {\"dataset_provenance\": [], \"question_source_spans\": []}, \"rationale\": \"source fixture\", \"review_item_id\": \"blind_review_6a2c3b4cfb0e44e2\"}], \"calibration_eligibility\": \"ADJUDICATED_POLICY_LABELS_ONLY\", \"invalid_decisions\": [], \"status\": \"ADJUDICATED\", \"unresolved\": []}\nduplicate_conflict {\"accepted_decisions\": [{\"decision\": \"relevant\", \"dimension\": \"relevance\", \"policy_id\": \"p1\", \"provenance\": {\"dataset_provenance\": [], \"question_source_spans\": []}, \"rationale\": \"source fixture\", \"review_item_id\": \"blind_review_6a2c3b4cfb0e44e2\"}, {\"decision\": \"not_relevant\", \"dimension\": \"relevance\", \"policy_id\": \"p1\", \"provenance\": {\"dataset_provenance\": [], \"question_source_spans\": []}, \"rationale\": \"source fixture\", \"review_item_id\": \"blind_review_6a2c3b4cfb0e44e2\"}], \"calibration_eligibility\": \"ADJUDICATED_POLICY_LABELS_ONLY\", \"invalid_decisions\": [], \"status\": \"ADJUDICATED\", \"unresolved\": []}\nmissing_policy {\"accepted_decisions\": [{\"decision\": \"relevant\", \"dimension\": \"relevance\", \"policy_id\": \"\", \"provenance\": {\"dataset_provenance\": [], \"question_source_spans\": []}, \"rationale\": \"source fixture\", \"review_item_id\": \"blind_review_6a2c3b4cfb0e44e2\"}], \"calibration_eligibility\": \"ADJUDICATED_POLICY_LABELS_ONLY\", \"invalid_decisions\": [], \"status\": \"ADJUDICATED\", \"unresolved\": []}\n",
+      "recommended_bounded_repair": "Validate policy identity, supported dimension/value, packet membership and decision uniqueness; keep disputed or invalid targets ineligible. Preserve decision provenance without exposing blinded reviewers.",
+      "source_sha256": "f082452d331a0c02d3a51469b9d0bf5817a8b9950733d616170638707060bd1f"
+    },
+    {
+      "id": "CA-03",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Calibration scorecard marks malformed labels and denominators CALIBRATED",
+      "file": "litdatamatcher/calibration_readiness.py",
+      "line_start": 15,
+      "line_end": 44,
+      "governing_requirements": [
+        "project_state/V2_4_CALIBRATION_READINESS_HANDOFF.md:3",
+        "project_state/NEXT_ACTION.md:50",
+        "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md:332",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:22"
+      ],
+      "impact": "Each independent mutation of an otherwise valid two-row fixture passes: arbitrary string provenance, empty split family, duplicate conflicting record identity, FAILED record status, or forbidden novelty dimension with trailing whitespace. All emit metrics and CALIBRATED with no reason codes.",
+      "scope": "Standalone scorecard API and receipt helper. It is not wired into calibrate-ranking; that older exploratory threshold report is a separate contract.",
+      "reproduction_python": "import json\nfrom litdatamatcher.calibration_readiness import build_calibration_scorecard\nbase={'record_id':'r1','record_status':'RETAINED','label_origin':'source_determined','label_provenance':{'source_locator':'fixture:1'},'split_family':'fixture-family','dimension':'dataset_compatibility','label':1,'score':0.9}\nrows=[base,{**base,'record_id':'r2','label':0,'score':0.1}]\ncases=[('invalid_provenance',[{**r,'label_provenance':'garbage'} for r in rows],'fixture-family'),('blank_split',[{**r,'split_family':''} for r in rows],''),('duplicate_identity',[{**r,'record_id':'r1'} for r in rows],'fixture-family'),('forbidden_dimension_whitespace',[{**r,'dimension':'novelty '} for r in rows],'fixture-family'),('failed_record_status',[{**r,'record_status':'FAILED'} for r in rows],'fixture-family')]\nfor case,changed,family in cases:\n result=build_calibration_scorecard(changed,split_family=family)\n print(case,json.dumps({key:result[key] for key in ['calibration_status','reason_codes','metrics']},sort_keys=True))\n",
+      "observed_stdout": "invalid_provenance {\"calibration_status\": \"CALIBRATED\", \"metrics\": {\"accuracy_at_0_5\": 1.0, \"denominator\": 2, \"negative_labels\": 1, \"positive_labels\": 1}, \"reason_codes\": []}\nblank_split {\"calibration_status\": \"CALIBRATED\", \"metrics\": {\"accuracy_at_0_5\": 1.0, \"denominator\": 2, \"negative_labels\": 1, \"positive_labels\": 1}, \"reason_codes\": []}\nduplicate_identity {\"calibration_status\": \"CALIBRATED\", \"metrics\": {\"accuracy_at_0_5\": 1.0, \"denominator\": 2, \"negative_labels\": 1, \"positive_labels\": 1}, \"reason_codes\": []}\nforbidden_dimension_whitespace {\"calibration_status\": \"CALIBRATED\", \"metrics\": {\"accuracy_at_0_5\": 1.0, \"denominator\": 2, \"negative_labels\": 1, \"positive_labels\": 1}, \"reason_codes\": []}\nfailed_record_status {\"calibration_status\": \"CALIBRATED\", \"metrics\": {\"accuracy_at_0_5\": 1.0, \"denominator\": 2, \"negative_labels\": 1, \"positive_labels\": 1}, \"reason_codes\": []}\n",
+      "recommended_bounded_repair": "Validate retained status, structured source provenance, nonblank split identity, consistent unique observation keys and normalized supported dimensions before calculating any denominator. Do not fabricate labels or change scientific thresholds.",
+      "source_sha256": "d8f1b9f22e8b852be6a5cd2f4bb4602958c72b41dc0ef48ba5f60e639c8c8d9a"
+    },
+    {
+      "id": "CA-04",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Adapter gate rejects a matching RNA-seq assay and established organism alias",
+      "file": "litdatamatcher/scientific_v2.py",
+      "line_start": 182,
+      "line_end": 193,
+      "governing_requirements": [
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:20",
+        "project_state/V2_REQUIREMENT_FORMALIZATION_HANDOFF.md:3",
+        "project_state/V2_2_ELIGIBILITY_INTEGRATION_HANDOFF.md:3"
+      ],
+      "impact": "An observed assay of RNA-seq with assay_types=[RNA-seq] becomes NOT_QUALIFIED for an RNA-seq requirement: the hard gate compares the raw assay to the bulk_transcriptomics family. A human/Homo sapiens exact alias also mismatches before established normalization.",
+      "scope": "Declared Phase 2 functionality",
+      "reproduction_python": "import json\nfrom litdatamatcher.scientific_v2 import assess_requirements\nfor field,value,extras in [('assay','RNA-seq',{'assay_types':['RNA-seq']}),('organism','human',{'organisms':['Homo sapiens']})]:\n dataset={'dataset_id':'D1','capabilities':{field:{'value':value,'status':'observed','source_locator':'fixture:field'}},**extras}\n result=assess_requirements([{'field':field,'expected':value}],dataset)\n print(field,json.dumps({'eligibility':result['eligibility'],'compatibility_status':result['compatibility_status'],'requirements':result['requirements']},sort_keys=True))\n",
+      "observed_stdout": "assay {\"compatibility_status\": \"INCOMPATIBLE\", \"eligibility\": \"NOT_QUALIFIED\", \"requirements\": [{\"essential\": true, \"expected\": \"RNA-seq\", \"field\": \"assay\", \"observation\": {\"mapping_type\": \"exact\", \"reason\": null, \"source_locator\": \"fixture:field\", \"status\": \"observed\", \"value\": \"RNA-seq\"}, \"source_locator\": \"user question\", \"status\": \"MISMATCH\"}]}\norganism {\"compatibility_status\": \"INCOMPATIBLE\", \"eligibility\": \"NOT_QUALIFIED\", \"requirements\": [{\"essential\": true, \"expected\": \"human\", \"field\": \"organism\", \"observation\": {\"mapping_type\": \"exact\", \"reason\": null, \"source_locator\": \"fixture:field\", \"status\": \"observed\", \"value\": \"human\"}, \"source_locator\": \"user question\", \"status\": \"MISMATCH\"}]}\n",
+      "recommended_bounded_repair": "Compare like representations in the hard gate; retain accepted exact/synonym organism and assay mappings without permitting wrong-modality records to qualify.",
+      "source_sha256": "03f74d1dad3e0e3dcd07971677b299295c205e660e8c9cdea68c08639aaa46f3"
+    },
+    {
+      "id": "CA-05",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Dossier rejects the compiler standard scoped novelty disclaimer",
+      "file": "litdatamatcher/scientific_dossier.py",
+      "line_start": 13,
+      "line_end": 14,
+      "governing_requirements": [
+        "project_state/V2_6_DOSSIER_HANDOFF.md:3",
+        "docs/v2/build_spec/02_FINAL_ARCHITECTURE_SPEC.md:5",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:27"
+      ],
+      "impact": "build_dossier rejects the ordinary output of compile_evidence because its standard no-global-novelty disclaimer contains the substring global novelty. The existing dossier fixture uses a different sentence, masking the integration failure. validate_dossier repeats the same substring rule at line 21.",
+      "scope": "The V2.6 template is importable standalone machinery. This finding requires API composition, not a new command or wholesale replacement of the existing v2 report renderer.",
+      "reproduction_python": "from litdatamatcher.scientific_v2 import compile_evidence\nfrom litdatamatcher.scientific_dossier import build_dossier\nquestion={'question_id':'Q1','proposition_id':'P1','question':'Does X affect Y?','source_evidence_ids':['E1'],'conditions':{}}\nevidence={'evidence_id':'E1','proposition_id':'P1','source_locator':'fixture:evidence','direction':'inconclusive'}\nbundle=compile_evidence(question,[evidence],'2026-09-13',[])\nprint('compiler_novelty_claim=',bundle['novelty_claim'])\ntry: build_dossier(question,bundle,{'compatibility_status':'UNKNOWN'},{'dataset_id':'D1'},['Fixture'])\nexcept Exception as exc: print(type(exc).__name__,str(exc))\n",
+      "observed_stdout": "compiler_novelty_claim= Limited to recorded searched coverage; no global novelty assertion\nValueError Dossier cannot assert global novelty\n",
+      "recommended_bounded_repair": "Use a compatible scoped novelty contract and explicitly test compile_evidence -> build_dossier -> validate/render. Continue rejecting positive unsupported novelty claims.",
+      "source_sha256": "f14ea33e950a467c978f3ff65a006e7837e37ae02c9d244562fd06800d3702db"
+    },
+    {
+      "id": "CA-06",
+      "priority": 2,
+      "severity": "MEDIUM",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Literature derivation key ignores changed source content and snapshot hash",
+      "file": "litdatamatcher/literature_integrity.py",
+      "line_start": 76,
+      "line_end": 88,
+      "governing_requirements": [
+        "project_state/V2_LITERATURE_INTEGRITY_HANDOFF.md:3",
+        "docs/v2/build_spec/02_FINAL_ARCHITECTURE_SPEC.md:35",
+        "docs/v2/build_spec/13_RECOVERY_AND_RESUME_POLICY.md:11",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:23"
+      ],
+      "impact": "Changing an abstract from a positive statement to its negation while changing the cached source-content digest returns UNCHANGED and no affected derivations. The key covers only source IDs, relation names/data and lifecycle state. Missing keys also compare equal; this was not separately promoted to a finding.",
+      "scope": "Bounded defect in the public literature helper. Search finds invalidate_affected_derivations used only in tests. Catalog.upsert separately hashes complete payloads and has content-invalidation tests; this finding does not prove Catalog invalidation fails or require wiring every helper into it.",
+      "reproduction_python": "import json\nfrom litdatamatcher.literature_integrity import consolidate_literature_rows,invalidate_affected_derivations\nold={'source_id':'pubmed:1','source':'pubmed','abstract':'X increases Y','source_provenance':{'metadata':{'cache_snapshot':{'cache_content_sha256':'old'}}}}\nnew={**old,'abstract':'X does not increase Y','source_provenance':{'metadata':{'cache_snapshot':{'cache_content_sha256':'new'}}}}\nprevious,current=consolidate_literature_rows([old,new])\nprint(json.dumps(invalidate_affected_derivations(previous,current,['claim:1']),sort_keys=True))\n",
+      "observed_stdout": "{\"current_key\": \"4af79790b8254b28696f3d9cae2753191473753755e99155707e51a9529c1989\", \"derivation_ids\": [], \"previous_key\": \"4af79790b8254b28696f3d9cae2753191473753755e99155707e51a9529c1989\", \"status\": \"UNCHANGED\"}\n",
+      "recommended_bounded_repair": "Include the stable content/source-version inputs promised by this helper, excluding volatile retrieval-only metadata where appropriate. Retain order-invariant identity and unchanged-replay tests; preserve unaffected derivations.",
+      "source_sha256": "5a1dbe37ac49c3565208d6a9d48010bd71b6a613831076e80a1218c184dbb020"
+    },
+    {
+      "id": "CA-07",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Empty offline cache becomes successful zero-result CLI search",
+      "file": "litdatamatcher/adapters.py",
+      "line_start": 952,
+      "line_end": 961,
+      "governing_requirements": [
+        "litdatamatcher/cli.py:100",
+        "project_state/V2_1_PAGINATION_HANDOFF.md:5",
+        "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md:322",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:24"
+      ],
+      "impact": "Europe PMC and ClinicalTrials pagination errors disappear when there are no rows to carry their metadata; Crossref exceptions are similarly swallowed by search_literature_sources. The public CLI then writes an empty result and returns 0 without any error/status. Cache failure is indistinguishable from a successful empty query.",
+      "scope": "Declared Phase 2 functionality",
+      "reproduction_python": "import io\nfrom contextlib import redirect_stdout\nfrom unittest.mock import patch\nfrom litdatamatcher import cli\nclass MissingCache:\n last_response_metadata={}\n def get_json(self,*args,**kwargs): raise FileNotFoundError('offline cache missing: fixture')\n def get_text(self,*args,**kwargs): raise FileNotFoundError('offline cache missing: fixture')\nfor command,source in [('literature-search','europepmc'),('literature-search','crossref'),('dataset-search','clinicaltrials')]:\n stdout=io.StringIO()\n with patch.object(cli,'cached_client',return_value=MissingCache()),patch.object(cli,'write_jsonl') as write,redirect_stdout(stdout):\n  code=cli.main([command,'--source',source,'--query','fixture','--out','unused.jsonl','--offline'])\n print(command,source,'exit=',code,'written_rows=',len(write.call_args.args[1]),'stdout=',stdout.getvalue().strip())\n",
+      "observed_stdout": "literature-search europepmc exit= 0 written_rows= 0 stdout= {\n  \"out\": \"unused.jsonl\",\n  \"rows\": 0,\n  \"sources\": [\n    \"europepmc\"\n  ]\n}\nliterature-search crossref exit= 0 written_rows= 0 stdout= {\n  \"out\": \"unused.jsonl\",\n  \"rows\": 0,\n  \"sources\": [\n    \"crossref\"\n  ]\n}\ndataset-search clinicaltrials exit= 0 written_rows= 0 stdout= {\n  \"out\": \"unused.jsonl\",\n  \"records\": 0,\n  \"sources\": [\n    \"clinicaltrials\"\n  ]\n}\n",
+      "recommended_bounded_repair": "Preserve query-level failure/partial status independently of result rows, or raise a typed failure on unsuccessful empty acquisition. Ensure CLI exits/status distinguish cache failure from genuine empty success while retaining valid partial records.",
+      "source_sha256": "ef7e69f14b598d3355e001554c7cb9f72e5f20e0773b7376f650499c0c487ffe"
+    },
+    {
+      "id": "CA-08",
+      "priority": 1,
+      "severity": "HIGH",
+      "status": "REPRODUCED_OPEN",
+      "blocks_declared_functionality": true,
+      "title": "Failed cache refresh can destroy the previous replayable entry",
+      "file": "litdatamatcher/http_cache.py",
+      "line_start": 86,
+      "line_end": 86,
+      "governing_requirements": [
+        "project_state/V2_1_CACHE_REFRESH_HANDOFF.md:5",
+        "docs/v2/build_spec/13_RECOVERY_AND_RESUME_POLICY.md:13",
+        "docs/v2/build_spec/08_VALIDATION_AND_ACCEPTANCE_GATES.md:24"
+      ],
+      "impact": "Refresh replaces the cache with Path.write_text in place. A simulated interrupted disk write truncates the old JSON; the next offline replay raises JSONDecodeError. Failed refresh therefore does not preserve the old entry as promised.",
+      "scope": "In-memory failure injection at the real refresh write boundary. No actual disk corruption or live HTTP occurred.",
+      "reproduction_python": "from unittest.mock import patch,MagicMock\nfrom pathlib import Path\nfrom litdatamatcher.http_cache import CachedHttpClient\nclass Entry:\n def __init__(self): self.text='{\"version\":\"old\"}'\n def exists(self): return True\n def read_text(self,**kwargs): return self.text\n def write_text(self,text,**kwargs): self.text=text[:3]; raise OSError('injected disk/write failure')\nentry=Entry(); response=MagicMock(); response.json.return_value={'version':'new'}\nwith patch.object(Path,'mkdir'),patch.object(CachedHttpClient,'_cache_path',return_value=entry),patch('litdatamatcher.http_cache._file_sha256',return_value='old-hash'),patch('litdatamatcher.http_cache.requests.get',return_value=response),patch.object(CachedHttpClient,'_record_cache_response'):\n client=CachedHttpClient('unused',min_interval_seconds=0)\n try: client.get_json('https://example.invalid',refresh=True,retries=0)\n except Exception as exc: print('refresh',type(exc).__name__,str(exc))\n client.offline=True\n try: client.get_json('https://example.invalid')\n except Exception as exc: print('offline_replay',type(exc).__name__,str(exc),'cache_remaining=',repr(entry.text))\n",
+      "observed_stdout": "refresh OSError injected disk/write failure\noffline_replay JSONDecodeError Unterminated string starting at: line 1 column 2 (char 1) cache_remaining= '{\"v'\n",
+      "recommended_bounded_repair": "Write and validate a temporary sibling, then atomically replace the cache only after success; remove failed temporary content and retain the original byte digest. Test write/promotion failure, not only failed HTTP responses.",
+      "source_sha256": "4e2dee4386c42f32ba129a2f9b73f1bacd1964bd12ccd5ae69d1072538abb09d"
+    }
+  ],
+  "non_findings": [
+    "Original acceptance explicitly allows true expert calibration to remain pending (08:64 and 01:95). Actual human labels are not a machine software acceptance gate.",
+    "Expert packet/scorecard, dossier, recovery_contract and provenance_dag helpers are standalone in the searched implementation; their lack of individual CLI commands is not automatically a missing mandatory gate.",
+    "scientific_v2.compile_evidence and assess_requirements are used by the v2 analyze path; source search lifecycle consolidation is used by the optional-adapter CLI.",
+    "Catalog.upsert uses complete payload digests and dependency invalidation; CA-06 is confined to the literature helper.",
+    "The scale receipt explicitly measures a small synthetic fixture and close/reopen recovery; it makes no production-scale claim. No separate scale blocker was proven in this bounded audit."
+  ],
+  "limitations": [
+    "No full-suite rerun, sealed holdout, live acquisition, fresh model inference, clean installation, release package validation or scientific expert adjudication was performed by this audit.",
+    "Reproduction mocks intercept all HTTP and file writes; only this report and its JSON are written.",
+    "Findings are initial defects, not repaired-state review; lead must adjudicate/repair/revalidate before closeout."
+  ]
+}

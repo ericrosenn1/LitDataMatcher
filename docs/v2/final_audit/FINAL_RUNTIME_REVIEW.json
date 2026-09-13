@@ -383,5 +383,99 @@
     "expert_status": "PENDING_EXPERT_REVIEW",
     "findings": "Critical/high/P0/P1 findings require FIXED_VALIDATED or DISMISSED_WITH_EVIDENCE with evidence refs",
     "binding_status": "PENDING_SEPARATE_FINAL_ASSEMBLED_REVIEW"
-  }
+  },
+  "follow_up_reviews": [
+    {
+      "scope": "Question identity and clinical registry design",
+      "review": {
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\QUESTION_CLINICAL_REVIEW.json",
+        "sha256": "c715d5911f448a6f69a8c6decf6e24e3e1f850aafb6c4980461265d102857525",
+        "size_bytes": 9900
+      },
+      "reviewed_commit": "8f7fcbf5a72877746dcca346afba181df2423a60",
+      "finding_counts": {
+        "total": 2,
+        "critical": 0,
+        "high": 0,
+        "medium": 2,
+        "unresolved": 0
+      },
+      "findings": [
+        {
+          "id": "RFR05",
+          "severity": "MEDIUM",
+          "status": "FIXED_VALIDATED",
+          "title": "The same source-span future-work question was exported twice under model and deterministic IDs",
+          "fix_commit": "1a9502cfe04ced4bc06fb4f4abdd0782e7808de8",
+          "repro": "tests/test_final_runtime_followup.py -k source_question_dedup",
+          "red_counts": {
+            "tests": 4,
+            "failures": 4
+          },
+          "evidence": [
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_identity_observation.json",
+              "sha256": "31750901fae72c439268f7d44262daea071c8ef3c3f70ba67f42443873d943c0",
+              "size_bytes": 5218
+            },
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_identity_red.json",
+              "sha256": "23e06e3474c0234c39ed8600004f63a62a11dc2316fa4f3a2d477aae75e3ad9e",
+              "size_bytes": 1696
+            },
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_identity_final.json",
+              "sha256": "09e9237aa06834b67bfbb376b5e71db0b9652bc5291d86603861281ac11436b5",
+              "size_bytes": 1709
+            },
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\clinical_and_identity_final.json",
+              "sha256": "e6d2c3ecb4e3136598e375e6a045890794bf63e70b9498abc55f8bcc4c871a4c",
+              "size_bytes": 2764
+            }
+          ],
+          "fix_scope": "Exact valid source ID/parent span/verbatim text plus equal requirements/conditions; preserve first scientific ID, all extraction origins, original IDs and full original records. Distinct source, offset, user and scope identities remain separate. Idempotence and input immutability verified."
+        },
+        {
+          "id": "RFR06",
+          "severity": "MEDIUM",
+          "status": "FIXED_VALIDATED",
+          "title": "Source-declared observational and nonrandomized designs remained unknown against a randomized-trial requirement",
+          "fix_commit": "7c27a3133b70e256f62286d2e9b258061e767e75",
+          "repro": "tests/test_final_clinical_design.py",
+          "red_counts": {
+            "tests": 18,
+            "failures": 5,
+            "passed": 13
+          },
+          "evidence": [
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\clinical_design_red_bound.json",
+              "sha256": "181fef5bee963717dd0cd41fd99fc9a8ea302ab6d9c42f4b627ad707ae59ba53",
+              "size_bytes": 1926
+            },
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\clinical_and_identity_final.json",
+              "sha256": "e6d2c3ecb4e3136598e375e6a045890794bf63e70b9498abc55f8bcc4c871a4c",
+              "size_bytes": 2764
+            },
+            {
+              "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\runtime_followup\\question_clinical_readonly_revalidation.json",
+              "sha256": "c49fca4c52703fe6b86fd7764b4619e57eefdf19569b55d89aa6b42774a07e49",
+              "size_bytes": 2584
+            }
+          ],
+          "fix_scope": "Use source-located protocolSection/designModule values and qualified exact design aliases only. Observational/nonrandomized designs mismatch randomized trials; interventional+randomized matches that field; incomplete or unsupported designs remain UNKNOWN. No statistical adequacy, independent-unit or causal claim."
+        }
+      ]
+    }
+  ],
+  "cumulative_finding_counts": {
+    "total": 6,
+    "critical": 0,
+    "high": 1,
+    "medium": 5,
+    "unresolved": 0
+  },
+  "cumulative_scope_note": "Initial reviewed_commit and source fingerprint retain their original anchors; follow_up_reviews records independently executed later scopes. Final assembled-source/package certification is still separate."
 }

@@ -24,3 +24,15 @@ All inspected input/artifact hashes, accepted claim spans and deterministic cont
 No model inference, acquisition, frozen evaluation, holdout execution or input mutation occurred during this review. Failed attempts retain their actual source commits and remain preserved. Final package/source-snapshot review is still required before a final_independent_review_v1 wrapper can bind this bounded report; the JSON defines the exact required wrapper fields.
 
 Evidence directory: `C:\Codex\LitDataMatcher-v2\data\final_campaign_20260913\runtime_followup`. Machine receipt: `FINAL_RUNTIME_REVIEW.json`. Source fingerprint, read-only real-case inspections, red/green logs and JUnit files are retained there. The compact handoff includes a manifest and archive reopen/hash verification.
+
+## Follow-up: question identity and clinical design
+
+Reviewed `8f7fcbf5a72877746dcca346afba181df2423a60` against root `7c27a3133b70e256f62286d2e9b258061e767e75`. RFR05 and RFR06 are medium-severity findings, now FIXED_VALIDATED. Across the initial scope and this follow-up: six findings, one high and five medium, zero unresolved. Earlier source/receipt anchors above are preserved.
+
+RFR05 reproduced the same metabolic future-work sentence twice at source span 2368:2487. Four analyze fixtures failed before repair. Exact source-span deduplication now retains both origins, original IDs and complete source records, preserves distinct sources/offsets/user questions/constraints, and is idempotent without mutating inputs.
+
+RFR06 reproduced source-declared clinical design being discarded: 18 independent controls initially had five failures. The repaired normalizer retains the exact registry design location; the assessor uses qualified design aliases and tri-state decisions. The actual retained NCT03631186 record is now NOT_QUALIFIED because its declared OBSERVATIONAL design mismatches randomized clinical trials; the other four missing requirements remain UNKNOWN.
+
+The final selected follow-up suite passed 81 tests with zero transport attempts. These tests overlap the earlier 129-test receipt. Exact commands, test-file hashes, JUnit and logs are in QUESTION_CLINICAL_REVIEW.json and its referenced receipts.
+
+The corrected canonical-LF fresh run was inspected read-only: six exported cases, two accepted claims, four context-only cases, 23 preserved source-bound requirements, all native statuses PARTIAL from source_guard rejection only. All input/artifact hashes and source spans match; every inference runtime fingerprint matches the exact reviewed LF bytes. The preserved fresh output predates the two repairs and still has one duplicate question and the observational candidate. Final-source cache replay and assembled-package review remain pending; pure function revalidation is not a regenerated case run.

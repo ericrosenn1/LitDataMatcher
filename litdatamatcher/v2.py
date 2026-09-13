@@ -70,6 +70,13 @@ def normalize_dataset(record):
         ):
             if values and field not in caps:
                 caps[field] = {"value": values, "status": "observed", "source_locator": f"{locator}#{source_field}", "mapping_type": "exact"}
+        metadata = record.get("metadata", {})
+        protocol = metadata.get("protocolSection", {}) if isinstance(metadata, dict) else {}
+        design = protocol.get("designModule", {}) if isinstance(protocol, dict) else {}
+        if isinstance(design, dict) and design.get("studyType") in {"OBSERVATIONAL", "INTERVENTIONAL"} and "study_design" not in caps:
+            info = design.get("designInfo", {})
+            allocation = info.get("allocation", "UNKNOWN") if isinstance(info, dict) else "UNKNOWN"
+            caps["study_design"] = {"value": {"study_type": design["studyType"], "allocation": allocation}, "status": "observed", "source_locator": f"{locator}#/protocolSection/designModule", "mapping_type": "exact"}
     result["capabilities"] = caps
     result["modality_contract"] = contract
     result["availability"] = record.get("access_status", record.get("metadata", {}).get("access_status", "UNKNOWN"))

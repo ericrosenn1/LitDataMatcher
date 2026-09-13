@@ -121,6 +121,8 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             or cap.mapping_type not in {"exact", "synonym"}
         ):
             status = "UNKNOWN"
+        elif req.field == "study_design" and isinstance(cap.value, dict):
+            status = _clinical_design_status(req.expected, cap.value)
         else:
             values = cap.value if isinstance(cap.value, list) else [cap.value]
             category = _entity_category(req.field)
@@ -162,6 +164,23 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
         "availability": dataset.get("availability", "UNKNOWN"),
         "compatibility_status": _compatibility_status(assessments, dataset),
     }
+
+
+def _clinical_design_status(expected, observed):
+    """Resolve only qualified design families from explicit registry design fields."""
+    name = " ".join(str(expected).casefold().replace("randomised", "randomized").split())
+    randomized = {"rct", "randomized clinical trial", "randomized clinical trials", "randomized controlled trial", "randomized controlled trials"}
+    study_type, allocation = observed.get("study_type"), observed.get("allocation")
+    if name in randomized:
+        if study_type == "OBSERVATIONAL" or allocation == "NON_RANDOMIZED":
+            return "MISMATCH"
+        if study_type == "INTERVENTIONAL" and allocation == "RANDOMIZED":
+            return "MATCH"
+        return "UNKNOWN"
+    families = {"observational": "OBSERVATIONAL", "observational study": "OBSERVATIONAL", "interventional": "INTERVENTIONAL", "interventional study": "INTERVENTIONAL"}
+    if name in families and study_type in {"OBSERVATIONAL", "INTERVENTIONAL"}:
+        return "MATCH" if families[name] == study_type else "MISMATCH"
+    return "UNKNOWN"
 
 
 def _compatibility_status(assessments: list[dict], dataset: dict) -> str:

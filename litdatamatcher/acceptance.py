@@ -31,7 +31,7 @@ ACCEPTANCE_SCHEMA_PATH = _TEMPLATE_DIR / "ACCEPTANCE_REPORT.schema.json"
 ACCEPTANCE_TEMPLATE_PATH = _TEMPLATE_DIR / "ACCEPTANCE_REPORT.template.json"
 RUN_MANIFEST_SCHEMA_PATH = _TEMPLATE_DIR / "RUN_MANIFEST.schema.json"
 
-IMPLEMENTATION_VERSION = "acceptance-validator-v2"
+IMPLEMENTATION_VERSION = "acceptance-validator-v3"
 PRODUCT_GATE_IDS = tuple(f"G{number:02d}" for number in range(1, 17))
 OPERATION_IDS = tuple(f"O{number:02d}" for number in range(1, 6))
 
@@ -402,7 +402,8 @@ def _validate_run_entry(root: Path, entry: JsonObject) -> tuple[JsonObject | Non
             faults.extend(f"{check['target']}/{check['id']}: {fault}" for fault in check_faults)
         else:
             usable_checks.append(check)
-    return {"manifest": manifest, "manifest_path": manifest_path, "checks": usable_checks}, faults
+    return {"manifest": manifest, "manifest_path": manifest_path, "checks": usable_checks,
+            "validated_artifacts": artifacts}, faults
 
 
 def _validate_check(
@@ -609,6 +610,8 @@ def _coverage(runs: list[JsonObject]) -> JsonObject:
 
 
 def _calibration(runs: list[JsonObject]) -> tuple[str, list[str]]:
+    from .calibration_readiness import verify_calibration_result
+
     origins = {
         origin for entry in runs for origin in entry["manifest"]["evaluation"]["label_origins"]
     }
@@ -617,8 +620,37 @@ def _calibration(runs: list[JsonObject]) -> tuple[str, list[str]]:
         for entry in runs
         if entry["manifest"]["evaluation"]["label_origins"]
     ]
-    if "expert" in origins:
-        return "EXPERT_CALIBRATED", evidence
+    calibrated_evidence = []
+    for entry in runs:
+        manifest = entry["manifest"]
+        evaluation = manifest["evaluation"]
+        if (evaluation.get("split_role") not in {"VALIDATION", "TRANSFER"}
+                or evaluation.get("holdout_exposed_to_tuning") is not False
+                or evaluation.get("label_origins") != ["expert"]):
+            continue
+        run_root = Path(entry["manifest_path"]).parent
+        references = {
+            path for check in entry.get("checks", [])
+            if check.get("target") == "G10" and check.get("kind") == "label_provenance"
+            for path in check.get("artifacts", [])
+        }
+        for reference in sorted(references):
+            artifact = entry.get("validated_artifacts", {}).get(reference)
+            path = _safe_relative_path(run_root, reference)
+            if not artifact or path is None or path.suffix.lower() != ".json":
+                continue
+            try:
+                # Recheck at consumption time rather than trusting a prior hash.
+                if path.stat().st_size != artifact["size_bytes"] or _sha256(path) != artifact["sha256"]:
+                    continue
+                result = _read_json(path)
+                if (result.get("protocol", {}).get("protocol_id") == evaluation.get("protocol_version")
+                        and verify_calibration_result(result, require_real_expert=True)):
+                    calibrated_evidence.append(str(path))
+            except (OSError, ValueError, TypeError, AttributeError):
+                continue
+    if calibrated_evidence:
+        return "EXPERT_CALIBRATED", sorted(set(calibrated_evidence))
     if "source_determined" in origins or "model_assisted" in origins:
         return "SOURCE_ASSISTED_EVALUATION", evidence
     return "PENDING_EXPERT_LABELS", []

@@ -6,9 +6,11 @@ def row(**overrides):
     return {**base, **overrides}
 
 
-def test_scorecard_calibrates_only_valid_source_determined_binary_denominator():
+def test_valid_source_determined_labels_produce_descriptive_metrics_not_calibration():
     report = build_calibration_scorecard([row(), row(record_id="r2", label=0, score=0.1, ablation="no_provenance")], split_family="source-family-a")
-    assert report["calibration_status"] == "CALIBRATED"
+    assert report["calibration_status"] == "NOT_CALIBRATED"
+    assert report["readiness_status"] == "DESCRIPTIVE_LABEL_QA_READY"
+    assert report["metrics"]["status"] == "DESCRIPTIVE_ONLY"
     assert report["metrics"]["denominator"] == 2
     assert report["ablation_reporting"]["denominators_by_ablation"] == {"full": 1, "no_provenance": 1}
 

@@ -41,6 +41,20 @@ def test_validated_single_run_populates_report_run_id(tmp_path):
     assert report["product_status"] == "NOT_READY"
 
 
+def test_manifest_expert_label_origin_does_not_claim_calibration(tmp_path):
+    _write_run(tmp_path)
+    path = tmp_path / "run" / "RUN_MANIFEST.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["evaluation"]["label_origins"] = ["expert"]
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    _write_ledger(tmp_path, checks=[])
+
+    report = validate_acceptance(tmp_path / "ACCEPTANCE_EVIDENCE.json")
+
+    assert report["calibration_status"] == "PENDING_EXPERT_LABELS"
+    assert report["calibration_evidence"] == []
+
+
 def test_forged_artifact_digest_fails_the_claimed_gate(tmp_path):
     _write_run(tmp_path, forged_proof_digest=True)
     _write_ledger(tmp_path, checks=_g05_checks())

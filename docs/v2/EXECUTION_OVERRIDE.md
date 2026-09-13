@@ -1,4 +1,27 @@
-# Execution override, 2026-09-07
+# Execution override, updated 2026-09-13
+
+## Current controlling correction
+
+The user explicitly authorized: "allow any effort level and model now as needed".
+This supersedes all model/effort prohibitions below, in AGENTS.md, and in prior
+task state. It does not authorize additional concurrent reasoning, Fast mode,
+paid APIs, purchased or consumed credits, OpenCode/Muse delegation, new schedules,
+or a supervisor restart. Retain one reasoning execution and zero subagents.
+Planning, review and integration count toward the existing 13.74-minute active /
+46.26-minute idle policy. Runtime for this bounded task was observed in the
+current session turn_context as `gpt-6-astra` / `ultra`; no agent was spawned.
+
+Refresh shared-account telemetry through the supported local app-server
+`account/rateLimits/read` method. A helper issuing only that read and protocol
+initialization is a deterministic process, not another reasoning execution.
+Never issue turn/start, login, credit consumption or schedule operations from
+the telemetry helper. A new model needs a new timed burn measurement before any
+sustainability claim or duty-cap increase. Historical single-worker labels do
+not establish the earlier lead model; September 13 inspection found historical
+lead contexts at other efforts. Preserve historical results without treating
+those samples as verified isolated Terra Low measurements.
+
+## Historical September 7 policy (superseded model/effort permissions)
 
 This is the controlling development-execution policy for LitDataMatcher v2. It supersedes every earlier project instruction that permits Sol, Astra, automatic escalation, `highest sustainable` effort above High, or any model/effort/concurrency setting above the ceiling below. The immutable build specification remains historical scientific scope only; its older execution wording is not an executable permission.
 

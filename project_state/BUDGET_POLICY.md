@@ -1,5 +1,43 @@
 # Phase 2 weekly allowance policy
 
+## Current policy, 2026-09-13
+
+The user now permits any available model/effort as needed. The previous Terra
+ceiling and model-specific ratchet are superseded; retain the 13.74-minute
+active / at least 46.26-minute idle cap, one reasoning execution, zero subagents,
+Standard speed, no paid API/credits, and a paused supervisor. Count all lead
+planning, implementation, review and integration time, not merely writer time.
+
+Current execution: `gpt-6-astra` / `ultra`, observed in the active session's
+`turn_context` at `2026-09-13T20:16:02.560Z`. No worker or schedule was launched.
+The service-tier field is null; no Fast request or setting change was made.
+
+Supported `codex app-server account/rateLimits/read` at
+`2026-09-13T20:17:10.725355Z` reports the shared `codex` bucket at 3% used / 97%
+remaining, weekly reset `2026-09-20T19:24:15Z`, and no secondary/5-hour window.
+Safety-adjusted target at 20:22 UTC: `0.46457` percentage points/hour
+(`0.80 * 97 / 167.03516`). Receipt lives under
+`data/phase2/pmid_reconciliation_20260913/budget_20260913T201710Z.json`.
+Per-task, subagent and supervisor attribution is not exposed by this read.
+
+This is a new baseline, not a measured burn rate for the current profile.
+The earlier isolated-Low labels were not verified for the lead; retain those
+historic figures below as reported observations, not proof of sustainability.
+Do not increase active time. Remeasure after a profile or major workload change,
+after a valid 30-minute workload sample, or within six hours of continuous work.
+Idle gaps must be disclosed and must not be presented as continuous active work.
+
+## Historical observations (not the current model/effort policy)
+
+Current duty reservation (including preflight before the authorization change):
+charge the full 13.74-minute slot beginning `2026-09-13T20:13:30Z` through
+`2026-09-13T20:27:14.400Z`, even if closeout finishes earlier. No additional
+reasoning before `2026-09-13T21:13:30Z`. All root planning, implementation,
+review and integration are included; no subagents were used. The next continuous
+work refresh is due no later than `2026-09-14T02:17:10Z` or sooner on a profile
+change. This partial bounded interval does not meet the 30-minute burn-rate
+measurement requirement.
+
 Latest telemetry refresh: `2026-09-11T22:59:45-04:00` (`2026-09-12T02:59:45Z`).
 
 | Field | Current value |

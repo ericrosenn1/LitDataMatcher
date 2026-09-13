@@ -295,6 +295,30 @@ def validate_run_artifact(path: Path) -> str:
     return "PASS"
 
 
+def evidence_publication_date(document):
+    """Use an explicit date or a full day from the qualified source adapter."""
+    if document.get("publication_date"):
+        return {"publication_date": document["publication_date"]}
+    metadata = document.get("metadata")
+    value = metadata.get("first_publication_date") if isinstance(metadata, dict) else None
+    if document.get("source") != "europepmc" or not isinstance(value, str):
+        return {"publication_date": None}
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return {"publication_date": None}
+    try:
+        dt.date.fromisoformat(value)
+    except ValueError:
+        return {"publication_date": None}
+    return {
+        "publication_date": value,
+        "publication_date_provenance": {
+            "source": "europepmc",
+            "source_field": "metadata.first_publication_date",
+            "source_locator": document.get("source_locator") or document["document_id"],
+        },
+    }
+
+
 def evidence_from_claim(claim, document):
     # A direction of increase is not automatically support for an arbitrary question.
     # Claim propositions include their verbatim relation and context.
@@ -310,7 +334,7 @@ def evidence_from_claim(claim, document):
         "source_id": document["document_id"],
         "source_document_id": document["document_id"],
         "publication_id": document.get("pmid") or document.get("doi"),
-        "publication_date": document.get("publication_date"),
+        **evidence_publication_date(document),
         "study_id": None,
         "cohort_id": None,
         "source_of_source": None,
@@ -336,7 +360,7 @@ def evidence_from_source_view(document, view):
         "proposition_id": None, "role": "background", "direction": "inconclusive",
         "source_id": document["document_id"], "source_document_id": document["document_id"],
         "publication_id": document.get("pmid") or document.get("doi"),
-        "publication_date": document.get("publication_date"),
+        **evidence_publication_date(document),
         "study_id": None, "cohort_id": None, "source_of_source": None,
         "measurement_type": "retrieved_text_context", "scope_match": "unresolved",
         "answers_question": False, "statement": view["text"], "evidence_span": span,

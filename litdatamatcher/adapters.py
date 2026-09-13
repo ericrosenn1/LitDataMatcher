@@ -11,17 +11,32 @@ decide how much text or dataset detail can be used.
 from __future__ import annotations
 
 import re
-from copy import deepcopy
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass
+from collections.abc import Callable
+from copy import deepcopy
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Protocol
+from typing import Protocol
 
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
 from .literature_integrity import consolidate_literature_rows
 from .provenance import remote_source_provenance, source_profile
 from .schemas import DatasetRecord, JsonDict
+
+
+class SourceSearchResult(list):
+    """List-compatible results retaining source failures even when no rows exist."""
+
+    def __init__(self, rows=(), source_statuses=()):
+        super().__init__(rows)
+        self.source_statuses = list(source_statuses)
+
+
+def _search_status(adapter) -> JsonDict:
+    pagination = getattr(adapter, "last_search_status", {})
+    failure = pagination.get("status") in {"ERROR", "SCHEMA_DRIFT", "REPEATED_CURSOR"}
+    return {"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE" if failure else "OBSERVED", **({"pagination": pagination} if pagination else {})}
 
 
 class LiteratureSourceAdapter(Protocol):
@@ -199,6 +214,7 @@ class EuropePMCLiteratureAdapter:
 
     client: CachedHttpClient
     name: str = "europepmc"
+    last_search_status: JsonDict = field(default_factory=dict, init=False)
 
     def search_literature(self, query: str, limit: int = 25) -> list[dict]:
         """Search Europe PMC core records without requesting article bodies."""
@@ -211,6 +227,7 @@ class EuropePMCLiteratureAdapter:
             cursor_field="nextCursorMark", cursor_param="cursorMark", initial_cursor="*",
             max_pages=max(1, min(4, (limit + page_size - 1) // page_size)),
         )
+        self.last_search_status = result["pagination"]
         response_metadata = _client_response_metadata(self.client)
         rows: list[dict] = []
         for item in result["items"]:
@@ -346,6 +363,7 @@ class ClinicalTrialsDatasetAdapter:
 
     client: CachedHttpClient
     name: str = "clinicaltrials"
+    last_search_status: JsonDict = field(default_factory=dict, init=False)
 
     def search(self, query: str) -> list[DatasetRecord]:
         """Search and normalize bounded study metadata with explicit design caveats."""
@@ -356,6 +374,7 @@ class ClinicalTrialsDatasetAdapter:
             extract_items=lambda payload: payload.get("studies"),
             cursor_field="nextPageToken", cursor_param="pageToken", max_pages=4,
         )
+        self.last_search_status = result["pagination"]
         response_metadata = _client_response_metadata(self.client)
         records_by_id: dict[str, DatasetRecord] = {}
         for study in result["items"]:
@@ -927,15 +946,23 @@ def search_dataset_sources(
 
     records: list[DatasetRecord] = []
     seen: set[str] = set()
+    source_statuses = []
+    if limit <= 0:
+        return SourceSearchResult()
     for adapter in build_dataset_adapters(source_names, client=client):
-        for record in adapter.search(query):
+        try:
+            adapter_records = adapter.search(query)
+            source_statuses.append(_search_status(adapter))
+        except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
+            adapter_records = []
+            source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE", "error": type(exc).__name__})
+        for record in adapter_records:
             if record.dataset_id in seen:
                 continue
             seen.add(record.dataset_id)
-            records.append(record)
-            if len(records) >= limit:
-                return records
-    return records
+            if len(records) < limit:
+                records.append(record)
+    return SourceSearchResult(records, source_statuses)
 
 
 def search_literature_sources(
@@ -954,11 +981,11 @@ def search_literature_sources(
     for adapter in build_literature_adapters(source_names, client=client):
         try:
             adapter_rows = adapter.search_literature(query, limit=limit)
-            source_statuses.append({"source": adapter.name, "status": "OBSERVED"})
-        except (KeyError, TypeError, ValueError, OSError):
+            source_statuses.append(_search_status(adapter))
+        except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
             # A source/schema problem is unknown, never an implicit clean result.
             adapter_rows = []
-            source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE"})
+            source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE", "error": type(exc).__name__})
         for original in adapter_rows:
             row = deepcopy(original)
             keys = _literature_identity_keys(row)
@@ -990,7 +1017,7 @@ def search_literature_sources(
                 rows.append(row)
         # Continue bounded source queries even when output is full, so later
         # sources can contribute identifiers, provenance and lifecycle notices.
-    return consolidate_literature_rows(rows, source_statuses)
+    return SourceSearchResult(consolidate_literature_rows(rows, source_statuses), source_statuses)
 
 
 def cached_client(cache_dir: str | Path | None = None, *, offline: bool = False) -> CachedHttpClient:

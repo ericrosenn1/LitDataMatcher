@@ -12,6 +12,7 @@ from .annotations import export_annotation_corpus
 from .artifact_validation import validate_run_artifacts
 from .calibration import calibrate_ranking_threshold
 from .capability_registry import capability_summary, infer_dataset_capabilities
+from .data_plane import atomic_json
 from .evaluation import (
     evaluate_question_extraction,
     evaluate_ranking,
@@ -286,11 +287,13 @@ def main(argv: list[str] | None = None) -> int:
         rows = search_literature_sources(args.query, args.source, client=client, limit=args.limit)
         write_jsonl(args.out, rows)
         metrics = {"rows": len(rows), "out": args.out, "sources": args.source}
+        metrics.update(_acquisition_status(rows, args.out))
     elif args.command == "dataset-search":
         client = cached_client(args.cache_dir, offline=args.offline)
         records = search_dataset_sources(args.query, args.source, client=client, limit=args.limit)
         write_jsonl(args.out, [record.to_dict() for record in records])
         metrics = {"records": len(records), "out": args.out, "sources": args.source}
+        metrics.update(_acquisition_status(records, args.out))
     elif args.command == "run":
         # Full runs are the only path that requires an external literature input file.
         metrics = run_pipeline(args.input, args.out, catalog_path=args.catalog, top_n=args.top_n)
@@ -375,7 +378,15 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"Unknown command: {args.command}")
     # All commands return JSON metrics so shell scripts can capture them reproducibly.
     print(json.dumps(metrics, indent=2, sort_keys=True))
-    return 0
+    return 2 if metrics.get("status") in {"FAIL", "PARTIAL"} else 0
+
+
+def _acquisition_status(records, output: str) -> dict:
+    statuses = getattr(records, "source_statuses", [])
+    failed = [row for row in statuses if row["status"] != "OBSERVED"]
+    result = {"status": ("PARTIAL" if records else "FAIL") if failed else "PASS", "source_statuses": statuses}
+    atomic_json(str(output) + ".status.json", result)
+    return result
 
 
 def _load_questions(run_dir: str) -> list[QuestionCandidate]:

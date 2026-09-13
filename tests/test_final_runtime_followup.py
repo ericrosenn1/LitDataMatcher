@@ -1,11 +1,15 @@
 """Independent runtime follow-up fixtures; no model loading or scientific execution."""
 
 import json
+import importlib.util
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from litdatamatcher.semantic_runtime import parse_model_json, validate_extraction
-from litdatamatcher.v2 import analyze, read_rows, write_rows
+from litdatamatcher.scientific_v2 import compile_evidence
+from litdatamatcher.v2 import analyze, evidence_from_source_view, read_rows, source_chunks, write_rows
 
 
 @pytest.fixture(autouse=True)
@@ -60,7 +64,7 @@ def test_transport_handling_does_not_repair_non_json_content(raw):
         parse_model_json(raw)
 
 
-def source_bound_run(tmp_path, monkeypatch, source_id, *, excluded=False):
+def source_bound_run(tmp_path, monkeypatch, source_id, *, excluded=False, mode="claim"):
     import litdatamatcher.semantic_runtime as runtime_module
 
     executed = []
@@ -73,7 +77,12 @@ def source_bound_run(tmp_path, monkeypatch, source_id, *, excluded=False):
 
         def extract(self, view, *args, **kwargs):
             executed.append(view)
-            valid = validate_extraction({"claims": [claim(view["text"])], "questions": []}, view)
+            if mode == "error":
+                raise RuntimeError("Injected inference failure")
+            candidates = [] if mode == "abstain" else [claim(view["text"])]
+            if mode == "reject":
+                candidates[0]["expert_validated"] = True
+            valid = validate_extraction({"claims": candidates, "questions": []}, view)
             return {**valid, "inference_manifest": {"origin": "synthetic_test_stub", "fingerprint": {"prompt_sha256": "fixture"}}}
 
     class Index:
@@ -124,3 +133,88 @@ def test_no_source_binding_does_not_create_unrelated_context(tmp_path, monkeypat
 def test_question_source_binding_cannot_reintroduce_unselected_or_retracted_documents(tmp_path, monkeypatch, source_id, excluded):
     with pytest.raises(ValueError, match="selected active documents"):
         source_bound_run(tmp_path, monkeypatch, source_id, excluded=excluded)
+
+
+@pytest.mark.parametrize("mode,expected_status", [("abstain", "PASS"), ("reject", "PARTIAL")])
+def test_observed_abstention_or_rejection_retains_unasserted_source_context(tmp_path, monkeypatch, mode, expected_status):
+    result, out, _ = source_bound_run(tmp_path, monkeypatch, "fixture-source", mode=mode)
+    assert result["status"] == expected_status
+    assert read_rows(out / "claims.jsonl") == []
+    assert read_rows(out / "inferences.jsonl")[0]["origin"] == "synthetic_test_stub"
+    dossier = read_rows(out / "scientific_dossiers.jsonl")[0]
+    assert dossier["extraction_summary"]["status"] == "SOURCE_CONTEXT_ONLY"
+    assert dossier["extraction_summary"]["accepted_model_claims"] == 0
+    assert dossier["unresolvedness"]["gap_status"] == "insufficient-coverage"
+    for item in dossier["source_evidence"]:
+        assert item["evidence_origin"] == "deterministic_source_passage"
+        assert item["claim_status"] == "NOT_ASSERTED"
+        assert item["role"] == "background"
+        assert item["direction"] == "inconclusive"
+        assert item["answers_question"] is False
+        assert item["proposition_id"] is None
+        assert "claim" not in item
+        assert item["evidence_span"]["text"] == "We observed a signal of 4 units."
+    manifest = json.loads((out / "RUN_MANIFEST.json").read_text(encoding="utf-8"))
+    assert bool(manifest["failures"]) == (mode == "reject")
+
+
+def test_thrown_inference_failure_does_not_produce_source_context_dossier(tmp_path, monkeypatch):
+    result, out, _ = source_bound_run(tmp_path, monkeypatch, "fixture-source", mode="error")
+    assert result["status"] == "PARTIAL"
+    assert read_rows(out / "claims.jsonl") == []
+    assert read_rows(out / "inferences.jsonl") == []
+    assert read_rows(out / "scientific_dossiers.jsonl") == []
+
+
+def test_source_passage_retains_known_publication_date_for_temporal_guard():
+    document = {"document_id": "fixture-future", "text": "We observed a signal of 4 units.", "publication_date": "2099-01-01"}
+    item = evidence_from_source_view(document, source_chunks(document)[0])
+    item["related_proposition_id"] = "fixture-proposition"
+    with pytest.raises(ValueError, match="postdates"):
+        compile_evidence({"question_id": "fixture-q", "proposition_id": "fixture-proposition"}, [item], "2026-09-13", [])
+
+
+@pytest.mark.parametrize("analyze_status,expected_exit", [("PASS", 0), ("FAIL", 1)])
+def test_case_controller_never_reports_pass_for_failed_analysis_outputs(tmp_path, monkeypatch, analyze_status, expected_exit):
+    spec = importlib.util.spec_from_file_location("runtime_review_case_controller", Path(__file__).parents[1] / "scripts/v2/run_final_cases.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    captured_hooks = []
+    monkeypatch.setattr(module.sys, "addaudithook", captured_hooks.append)
+
+    class SocketProbe:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def connect(self, address):
+            captured_hooks[0]("socket.connect", address)
+
+    monkeypatch.setattr(module.socket, "socket", SocketProbe)
+    monkeypatch.setattr(module.subprocess, "check_output", lambda *args, **kwargs: "fixture-source-commit")
+    root = tmp_path / "case-root"
+    root.mkdir()
+    document = root / "document.json"
+    document.write_text(json.dumps({"source_locator": "fixture:document"}), encoding="utf-8")
+    cases = [{"case_id": f"fixture-case-{i}", "domain": "fixture", "question": "Fixture question", "requirements": [], "document_id": "fixture-document", "document": module.file_ref(document)} for i in range(6)]
+    (root / "PROTOCOL.json").write_text(json.dumps({"cases": cases, "chunks": 1}), encoding="utf-8")
+    write_rows(root / "catalog/studies.jsonl", [])
+    dossier = {"question": {"question_id": "fixture-q", "question": "Fixture question", "source_evidence_ids": ["fixture-e"]},
+               "source_evidence": [{"evidence_id": "fixture-e", "source_locator": "fixture:document"}], "contradictions": [],
+               "candidate_dataset": {"dataset_id": "fixture-study"}, "compatibility": {"status": "UNKNOWN"},
+               "unresolvedness": {"novelty_claim": "Limited to recorded searched coverage; no global novelty assertion"},
+               "ranking_rationale": ["Synthetic controller fixture"], "review_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW"}
+
+    def injected_analysis(case_root, run, *args, **kwargs):
+        write_rows(run / "scientific_dossiers.jsonl", [dossier])
+        (run / "RUN_MANIFEST.json").write_text(json.dumps({"execution_status": analyze_status}), encoding="utf-8")
+        return {"status": analyze_status, "run": str(run)}
+
+    monkeypatch.setattr(module, "analyze", injected_analysis)
+    output = tmp_path / "case-output"
+    result = module.execute(SimpleNamespace(root=root, out=output, replay=False, model=tmp_path / "unused-model", embeddings=tmp_path / "unused-embedding"))
+    assert result == expected_exit
+    receipt = json.loads((output / "CASE_EXECUTION.json").read_text(encoding="utf-8"))
+    assert (receipt["status"] == "PASS") == (expected_exit == 0)

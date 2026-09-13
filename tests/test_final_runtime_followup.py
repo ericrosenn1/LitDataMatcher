@@ -9,7 +9,7 @@ import pytest
 
 from litdatamatcher.semantic_runtime import parse_model_json, validate_extraction
 from litdatamatcher.scientific_v2 import compile_evidence
-from litdatamatcher.v2 import analyze, evidence_from_source_view, read_rows, source_chunks, write_rows
+from litdatamatcher.v2 import analyze, evidence_from_source_view, explicit_unresolved_questions, read_rows, rebase_runtime_item, source_chunks, write_rows
 
 
 @pytest.fixture(autouse=True)
@@ -230,3 +230,71 @@ def test_case_controller_never_reports_pass_for_failed_analysis_outputs(tmp_path
     assert result == expected_exit
     receipt = json.loads((output / "CASE_EXECUTION.json").read_text(encoding="utf-8"))
     assert (receipt["status"] == "PASS") == (expected_exit == 0)
+
+
+@pytest.mark.parametrize("layout,expected_source_questions", [("same_span", 1), ("different_sources", 2), ("different_offsets", 2), ("user_origin", 1)])
+def test_source_question_dedup_retains_origins_without_merging_other_identities(tmp_path, monkeypatch, layout, expected_source_questions):
+    import litdatamatcher.semantic_runtime as runtime_module
+
+    statement = "Further research is needed to resolve dose effects."
+    source_documents = [{"document_id": "fixture-question-a", "title": "Synthetic future work", "text": statement, "source_locator": "fixture:question-a", "source_snapshot": {"sha256": "fixture-source-hash-a"}, "split_context": "development"}]
+    if layout == "different_sources":
+        source_documents.append({**source_documents[0], "document_id": "fixture-question-b", "source_locator": "fixture:question-b", "source_snapshot": {"sha256": "fixture-source-hash-b"}})
+    elif layout == "different_offsets":
+        source_documents[0]["text"] = statement + "\n" + statement
+        source_documents[0]["sections"] = [{"start": 0, "end": len(statement), "section": "Results"}, {"start": len(statement) + 1, "end": 2 * len(statement) + 1, "section": "Discussion"}]
+
+    expected_members = {}
+    for document in source_documents:
+        for view in source_chunks(document, max_chunks=2):
+            from litdatamatcher.semantic_runtime import digest
+
+            view_id = digest(view)
+            local = validate_extraction({"claims": [], "questions": [{"quote": statement}]}, dict(view, document_id=view_id))["questions"][0]
+            model_question = rebase_runtime_item(local, document, view, view_id)
+            source_question = explicit_unresolved_questions(document, view)[0]
+            expected_members[(document["document_id"], model_question["evidence_span"]["start"])] = {model_question["question_id"], source_question["question_id"]}
+
+    class Runtime:
+        model_manifest = {"model_id": "question-identity-fixture", "revision": "fixture", "license": "fixture"}
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def extract(self, view, *args, **kwargs):
+            valid = validate_extraction({"claims": [], "questions": [{"quote": statement}]}, view)
+            return {**valid, "inference_manifest": {"origin": "synthetic_test_stub", "fingerprint": {"prompt_sha256": "fixture-question-prompt"}}}
+
+    class Index:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fit(self, records):
+            self.records = records
+
+        def search(self, *args, **kwargs):
+            return [{"id": row["id"], "score": 0.5} for row in self.records]
+
+    monkeypatch.setattr(runtime_module, "LocalSemanticRuntime", Runtime)
+    monkeypatch.setattr(runtime_module, "PretrainedSemanticIndex", Index)
+    root, out = tmp_path / "question-root", tmp_path / "question-run"
+    write_rows(root / "catalog/literature.jsonl", source_documents)
+    write_rows(root / "catalog/studies.jsonl", [{"dataset_id": "fixture-study", "title": "Synthetic study", "source_provenance": {"source_url": "fixture:study"}}])
+    write_rows(root / "catalog/processed_inspections.jsonl", [])
+    analyze(root, out, tmp_path / "unused-model", tmp_path / "unused-embedding", question=statement if layout == "user_origin" else None,
+            question_source_id=source_documents[0]["document_id"] if layout == "user_origin" else None, limit=2, chunks=2)
+    questions = read_rows(out / "questions.jsonl")
+    source_questions = [question for question in questions if question["origin"] != "user"]
+    assert len(source_questions) == expected_source_questions
+    assert sum(question["origin"] == "user" for question in questions) == (layout == "user_origin")
+    assert len(read_rows(out / "matches.jsonl")) == len(questions)
+    for question in source_questions:
+        key = (question["source_document_id"], question["evidence_span"]["start"])
+        assert set(question["extraction_origins"]) == {"explicit_unresolved", "explicit_unresolved_source"}
+        assert set(question["original_question_ids"]) == expected_members[key]
+        records = question["source_question_records"]
+        assert {record["question_id"] for record in records} == expected_members[key]
+        model_record = next(record for record in records if record["origin"] == "explicit_unresolved")
+        assert model_record["inference_fingerprint"]["prompt_sha256"] == "fixture-question-prompt"
+        assert model_record["source_provenance"]["source_snapshot"]["sha256"].startswith("fixture-source-hash-")
+        assert all(record["source_document_id"] == question["source_document_id"] and record["evidence_span"] == question["evidence_span"] for record in records)

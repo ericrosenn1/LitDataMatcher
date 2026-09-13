@@ -140,6 +140,13 @@ def test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics(obse
     assert result["eligibility"] == status
 
 
+@pytest.mark.parametrize("observed,expected", [("RNA-seq", "EFO:0002772"), ("EFO:0002772", "RNA-seq")])
+def test_qualified_assay_identifier_survives_precise_assay_guard(observed, expected):
+    raw = {"dataset_id": "fixture-assay-identifier", "assay_types": [observed], "source_provenance": {"source_url": "fixture:assay"}}
+    result = assess_requirements([{"field": "assay", "expected": expected}], normalize_dataset(raw))
+    assert result["eligibility"] == "DIRECT_FIT"
+
+
 def literature_pages(second_hash="b", cache_status="LIVE"):
     class Pages:
         last_response_metadata = {}

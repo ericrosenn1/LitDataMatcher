@@ -271,3 +271,19 @@ Earlier native receipt checks under this evidence root passed acquisition
 and real benchmark contracts (17 queries x 552 candidates, three scale points,
 recovery exits 71/0). Their original source bindings remain recorded; root will
 execute the final unchanged-protocol benchmark derivative on assembled source.
+
+The subsequent Windows build exposed a metadata-header parsing defect: valid
+CRLF `Name` and `Version` fields retained a trailing carriage return under the
+original regular expression. Distribution inspection now uses the standard
+library email parser on headers only. Each metadata block must have exactly one
+nonempty Name and Version field; duplicate fields are rejected case-insensitively,
+including identical duplicates. Description-body examples cannot supply or
+override either field. Cross-file package identity/version checks and wheel
+RECORD, archive CRC, member safety, and source comparisons remain in force.
+
+The retained repair receipts are under
+`C:\Codex\LitDataMatcher-v2\data\final_campaign_20260913\final_validator\metadata_header_repair_20260913`.
+They record 16 failing pre-repair regressions and reopen the original failed-build
+wheel and sdist without extraction or alteration. The post-repair fixture suite
+and real artifact results are recorded separately in `green_after.json` and its
+JUnit/stdout artifacts. This is parser validation, not a replacement final build.

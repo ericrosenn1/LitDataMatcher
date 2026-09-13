@@ -22,6 +22,8 @@ import xml.etree.ElementTree as ET
 import zipfile
 from contextlib import suppress
 from datetime import datetime, timezone
+from email import policy
+from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
 
 from .data_plane import atomic_json, digest
@@ -280,11 +282,25 @@ def inspect_archive(path: str | Path, kind: str) -> dict:
         require(metadata, f"Missing {kind} package metadata")
         versions, names = set(), set()
         for item in metadata:
-            fields = dict(
-                re.findall(r"^(Name|Version):\s*(.+)$", item.decode("utf-8"), flags=re.MULTILINE)
-            )
-            versions.add(fields.get("Version"))
-            names.add(fields.get("Name"))
+            # Core metadata is an email-style header block. Read only that block:
+            # CRLF is valid, and README body examples are not package identity.
+            message = BytesParser(policy=policy.default).parsebytes(item, headersonly=True)
+            require(not message.defects, "Malformed package metadata headers")
+            fields = {}
+            for header in ("Name", "Version"):
+                values = message.get_all(header, [])
+                require(
+                    len(values) == 1,
+                    f"Duplicate or missing {header} package metadata header",
+                )
+                value = str(values[0]).strip()
+                require(
+                    value and not any(character.isspace() for character in value),
+                    f"Invalid {header} package metadata header",
+                )
+                fields[header] = value
+            versions.add(fields["Version"])
+            names.add(fields["Name"])
         require(
             names == {"litdatamatcher"} and len(versions) == 1 and None not in versions,
             "Contradictory package name/version metadata",

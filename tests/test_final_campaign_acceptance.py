@@ -116,8 +116,7 @@ def matrix(v):
     return {"requirements": rows}
 
 
-def package_archives(v):
-    metadata = b"Name: litdatamatcher\nVersion: 0.3.0\n"
+def package_archives(v, metadata=b"Name: litdatamatcher\nVersion: 0.3.0\n"):
     files = {
         "litdatamatcher/__init__.py": (v.root / "litdatamatcher/__init__.py").read_bytes(),
         "litdatamatcher-0.3.0.dist-info/METADATA": metadata,
@@ -254,6 +253,56 @@ def test_distribution_reopens_and_compares_current_source(workspace):
     package_archives(workspace)
     result = workspace.check_distribution()
     assert result["wheel"]["version"] == result["sdist"]["version"] == "0.3.0"
+
+
+@pytest.mark.parametrize("kind", ["wheel", "sdist"])
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        b"Metadata-Version: 2.4\r\nName: litdatamatcher\r\nVersion: 0.3.0\r\n\r\nDescription\r\n",
+        b"Name: litdatamatcher\nVersion: 0.3.0\n\nName: example-from-readme\nVersion: 99.0\n",
+    ],
+    ids=["windows-crlf", "body-example-is-not-a-header"],
+)
+def test_distribution_metadata_parses_headers_only(workspace, kind, metadata):
+    package_archives(workspace, metadata)
+    path = workspace.ledger["distribution"][kind]["path"]
+    assert fc.inspect_archive(path, kind)["version"] == "0.3.0"
+
+
+@pytest.mark.parametrize("kind", ["wheel", "sdist"])
+@pytest.mark.parametrize(
+    "duplicate",
+    [
+        b"Name: litdatamatcher\r\n",
+        b"Name: another-package\r\n",
+        b"Version: 0.3.0\r\n",
+        b"vErSiOn: 99.0\r\n",
+    ],
+    ids=["same-name", "conflicting-name", "same-version", "conflicting-version-case"],
+)
+def test_distribution_metadata_duplicate_headers_rejected(workspace, kind, duplicate):
+    metadata = b"Name: litdatamatcher\r\nVersion: 0.3.0\r\n" + duplicate + b"\r\n"
+    package_archives(workspace, metadata)
+    path = workspace.ledger["distribution"][kind]["path"]
+    with pytest.raises(fc.InvalidEvidence, match="Duplicate or missing.*metadata header"):
+        fc.inspect_archive(path, kind)
+
+
+@pytest.mark.parametrize("kind", ["wheel", "sdist"])
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        b"Version: 0.3.0\r\n\r\nName: litdatamatcher\r\n",
+        b"Name: litdatamatcher\r\n\r\nVersion: 0.3.0\r\n",
+    ],
+    ids=["name-in-body", "version-in-body"],
+)
+def test_distribution_metadata_body_cannot_supply_required_header(workspace, kind, metadata):
+    package_archives(workspace, metadata)
+    path = workspace.ledger["distribution"][kind]["path"]
+    with pytest.raises(fc.InvalidEvidence, match="Duplicate or missing.*metadata header"):
+        fc.inspect_archive(path, kind)
 
 
 def test_tampered_wheel_with_rehashed_outer_artifact_fails_record(workspace):

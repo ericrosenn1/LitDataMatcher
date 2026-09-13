@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .ontology import normalize_entity
 from .schemas import JsonDict
 
 MODALITY_FAMILIES = {
@@ -15,17 +16,43 @@ MODALITY_FAMILIES = {
 }
 
 
+def modality_families(value: object) -> set[str]:
+    """Resolve only declared assay terms/families and qualified local synonyms."""
+    term = str(value).strip().casefold()
+    if term in MODALITY_FAMILIES:
+        return {term}
+    mapping = normalize_entity(term, "assay")
+    terms = {term}
+    if mapping["status"] == "RESOLVED":
+        terms.update(
+            assay
+            for assays in MODALITY_FAMILIES.values()
+            for assay in assays
+            if normalize_entity(assay, "assay")["candidates"] == mapping["candidates"]
+        )
+    return {name for name, values in MODALITY_FAMILIES.items() if terms & values}
+
+
+def same_organism(expected: object, observed: object) -> bool:
+    left = normalize_entity(str(expected), "organism")
+    right = normalize_entity(str(observed), "organism")
+    if left["status"] == right["status"] == "RESOLVED":
+        return left["candidates"] == right["candidates"]
+    return str(expected).strip().casefold() == str(observed).strip().casefold()
+
+
 def modality_contract(record: JsonDict) -> JsonDict:
     """Return explicit observed/unknown modality and unit semantics for one record."""
 
     assays = {str(x).strip().lower() for x in record.get("assay_types", []) if str(x).strip()}
-    families = sorted(name for name, values in MODALITY_FAMILIES.items() if assays & values)
+    families = sorted({family for assay in assays for family in modality_families(assay)})
     metadata = record.get("metadata", {}) if isinstance(record.get("metadata"), dict) else {}
     dependence = metadata.get("dependence", {}) if isinstance(metadata.get("dependence"), dict) else {}
     omics = metadata.get("omics_contract", {}) if isinstance(metadata.get("omics_contract"), dict) else {}
     temporal = metadata.get("temporal_contract", {}) if isinstance(metadata.get("temporal_contract"), dict) else {}
     return {
         "modality": families or ["UNKNOWN"],
+        "observed_assays": sorted(assays),
         "organism": "OBSERVED" if record.get("organisms") else "UNKNOWN",
         # Preserve the observed values so downstream eligibility can reject an
         # explicit, incompatible organism without inventing a synonym mapping.
@@ -52,11 +79,12 @@ def compatibility(required_modality: str, required_organism: str, record: JsonDi
 
     contract = modality_contract(record)
     modalities = set(contract["modality"])
-    if required_modality and modalities != {"UNKNOWN"} and required_modality not in modalities:
+    required_families = modality_families(required_modality)
+    if required_families and modalities != {"UNKNOWN"} and not required_families & modalities:
         return "INCOMPATIBLE"
     organisms = {str(x).lower() for x in record.get("organisms", [])}
-    if required_organism and organisms and required_organism.lower() not in organisms:
+    if required_organism and organisms and not any(same_organism(required_organism, value) for value in organisms):
         return "INCOMPATIBLE"
-    if contract["modality"] == ["UNKNOWN"] or contract["organism"] == "UNKNOWN":
+    if not required_families or contract["modality"] == ["UNKNOWN"] or contract["organism"] == "UNKNOWN":
         return "UNKNOWN"
     return "PARTIAL"

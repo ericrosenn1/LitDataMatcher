@@ -13,7 +13,7 @@ from datetime import date
 from typing import Any
 
 from .data_plane import digest
-from .modality_contract import modality_contract
+from .modality_contract import MODALITY_FAMILIES, modality_contract, modality_families, same_organism
 from .ontology import normalize_entity
 from .schemas import stable_id
 
@@ -184,11 +184,19 @@ def _contract_requirement_status(field, expected, contract):
     field = str(field).casefold()
     if field in {"modality", "assay", "assay_modality"}:
         modalities = contract.get("modality", ["UNKNOWN"])
-        if modalities != ["UNKNOWN"] and str(expected) not in modalities:
+        required_families = modality_families(expected)
+        if modalities != ["UNKNOWN"] and required_families and not required_families.intersection(modalities):
             return "MISMATCH"
+        # A family match does not equate RNA-seq and microarrays. Preserve
+        # precise observed assay constraints when both names are qualified.
+        observed = contract.get("observed_assays", [])
+        if str(expected).strip().casefold() not in MODALITY_FAMILIES and required_families and observed:
+            if not any(_equivalent(expected, value) for value in observed):
+                if all(modality_families(value) for value in observed):
+                    return "MISMATCH"
     if field in {"organism", "species"}:
         observed = contract.get("organisms", [])
-        if observed and str(expected).casefold() not in {str(x).casefold() for x in observed}:
+        if observed and not any(same_organism(expected, value) for value in observed):
             return "MISMATCH"
     if field in {"feature_type", "feature_unit", "quantification", "normalization", "temporal_design", "baseline_timing", "followup_window", "intervention_timing", "repeated_measure_unit"}:
         observed = str(contract.get(field, "UNKNOWN") or "UNKNOWN")

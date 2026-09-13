@@ -2,6 +2,7 @@
 
 import json
 import importlib.util
+import copy
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -298,3 +299,30 @@ def test_source_question_dedup_retains_origins_without_merging_other_identities(
         assert model_record["inference_fingerprint"]["prompt_sha256"] == "fixture-question-prompt"
         assert model_record["source_provenance"]["source_snapshot"]["sha256"].startswith("fixture-source-hash-")
         assert all(record["source_document_id"] == question["source_document_id"] and record["evidence_span"] == question["evidence_span"] for record in records)
+
+
+@pytest.mark.parametrize("change", [{"requirements": [{"field": "paired", "expected": True}]}, {"conditions": {"dose": "high"}}, {"question": "Does a different dose have an effect?"}, {"evidence_span": {"start": 0, "end": 1, "text": "Further research is needed."}}])
+def test_question_dedup_never_merges_different_scope_or_invalid_span(change):
+    from litdatamatcher.v2 import deduplicate_questions
+
+    text = "Further research is needed."
+    first = {"question_id": "fixture-model-q", "question": text, "origin": "explicit_unresolved", "source_document_id": "fixture-source", "evidence_span": {"start": 0, "end": len(text), "text": text}, "requirements": [], "conditions": {}}
+    second = {**copy.deepcopy(first), "question_id": "fixture-source-q", "origin": "explicit_unresolved_source", **change}
+    original = copy.deepcopy([first, second])
+    assert deduplicate_questions([first, second]) == original
+    assert [first, second] == original
+
+
+def test_question_dedup_is_idempotent_and_preserves_original_records():
+    from litdatamatcher.v2 import deduplicate_questions
+
+    text = "Further research is needed."
+    first = {"question_id": "fixture-model-q", "question": text, "origin": "explicit_unresolved", "source_document_id": "fixture-source", "evidence_span": {"start": 0, "end": len(text), "text": text}, "requirements": [], "conditions": {}, "inference_fingerprint": {"prompt_sha256": "fixture-prompt"}}
+    second = {**copy.deepcopy(first), "question_id": "fixture-source-q", "origin": "explicit_unresolved_source"}
+    original = copy.deepcopy([first, second])
+    merged = deduplicate_questions([first, second])
+    assert len(merged) == 1
+    assert merged[0]["question_id"] == first["question_id"]
+    assert merged[0]["source_question_records"] == original
+    assert deduplicate_questions(merged + [first, second]) == merged
+    assert [first, second] == original

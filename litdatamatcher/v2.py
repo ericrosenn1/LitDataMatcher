@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from .data_plane import Catalog, atomic_json, atomic_write, digest
+from .literature_integrity import consolidate_literature_rows
 from .modality_contract import modality_contract
 from .schemas import stable_id
 from .scientific_v2 import compile_evidence, discover_cross_document_gaps, rank_candidates
@@ -40,6 +41,7 @@ def write_rows(path, rows):
 def normalize_dataset(record):
     """Explicit acquisition-v2.1 -> experimental contract migration; raw retained."""
     result = dict(record)
+    result.setdefault("summary", record.get("description", ""))
     caps = {}
     for key, raw in record.get("capabilities", {}).items():
         value = dict(raw)
@@ -54,9 +56,23 @@ def normalize_dataset(record):
             if k in {"value", "status", "source_locator", "reason", "mapping_type"}
         }
         caps[key] = value
+    contract = modality_contract(record)
+    provenance = record.get("source_provenance") or record.get("metadata", {}).get("source_provenance", {})
+    locator = provenance.get("source_locator") or provenance.get("source_url") if isinstance(provenance, dict) else None
+    # Source adapter fields can support narrow metadata compatibility. They do
+    # not establish measured outcomes, participant access, or independent units.
+    if locator:
+        for field, values, source_field in (
+            ("species", record.get("organisms", []), "organisms"),
+            ("organism", record.get("organisms", []), "organisms"),
+            ("assay", record.get("assay_types", []), "assay_types"),
+            ("modality", [v for v in contract["modality"] if v != "UNKNOWN"], "assay_types"),
+        ):
+            if values and field not in caps:
+                caps[field] = {"value": values, "status": "observed", "source_locator": f"{locator}#{source_field}", "mapping_type": "exact"}
     result["capabilities"] = caps
-    result["modality_contract"] = modality_contract(record)
-    result["availability"] = record.get("access_status", "UNKNOWN")
+    result["modality_contract"] = contract
+    result["availability"] = record.get("access_status", record.get("metadata", {}).get("access_status", "UNKNOWN"))
     result["migration"] = {
         "from": record.get("schema_version"),
         "to": "experimental-contract-2.0",
@@ -117,6 +133,11 @@ def source_chunks(document, max_chars=1800, max_chunks=2):
         if len(result) >= max_chunks:
             break
     return result
+
+
+def document_lifecycle_status(document):
+    """Check current source relations before reusing or generating scientific evidence."""
+    return consolidate_literature_rows([document])[0]["metadata"]["literature_integrity"]["lifecycle_status"]
 
 
 _EXPLICIT_GAP = re.compile(
@@ -310,6 +331,7 @@ def analyze(
     device="cpu",
     document_path=None,
     topic=None,
+    reference_accessions=None,
 ):
     from .semantic_runtime import LocalSemanticRuntime, PretrainedSemanticIndex, RuntimeConfig
 
@@ -352,11 +374,17 @@ def analyze(
         if not documents:
             raise ValueError(f"No literature documents matched topic: {topic}")
     # Reserved transfer/final families are never silently consumed in development.
+    excluded_documents = [
+        {"document_id": document["document_id"], "reason": document_lifecycle_status(document)}
+        for document in documents
+        if document_lifecycle_status(document) != "ACTIVE_METADATA_ONLY"
+    ]
+    excluded_ids = {item["document_id"] for item in excluded_documents}
     selected = sorted(
         [
             d
             for d in documents
-            if d.get("split_context", "development") == "development" and d.get("text")
+            if d.get("split_context", "development") == "development" and d.get("text") and d["document_id"] not in excluded_ids
         ],
         key=lambda d: d["document_id"],
     )[:limit]
@@ -469,6 +497,12 @@ def analyze(
             )
         matches = []
         bundles = []
+        dossiers = []
+        reference_records = []
+        if (root / "external_evidence/uniprot").exists():
+            from .external_evidence import import_resource
+
+            reference_records = import_resource(root, offline=True, **({"accessions": reference_accessions} if reference_accessions else {}))
         for q in questions:
             # Related retrieved claims remain context; exact proposition support requires a separate justified mapping.
             qtext = q["question"]
@@ -477,16 +511,12 @@ def analyze(
             for item in evidence:
                 if len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
                     contextual.append(dict(item, related_proposition_id=q["proposition_id"]))
-            resource_path = root / "external_evidence/uniprot"
-            if resource_path.exists():
-                from .external_evidence import import_resource, query_resource
+            if reference_records:
+                from .external_evidence import query_resource
 
-                records = import_resource(root, offline=True)
-                entities = [
-                    e for e in ["TNF", "IL6", "IL1B"] if re.search(r"\b" + e + r"\b", qtext, re.I)
-                ]
+                entities = sorted({alias for record in reference_records for alias in record["aliases"] if re.search(r"(?<!\w)" + re.escape(alias) + r"(?!\w)", qtext, re.I)})
                 contextual.extend(
-                    query_resource(records, entities, proposition_id=q["proposition_id"])
+                    query_resource(reference_records, entities, proposition_id=q["proposition_id"])
                 )
             bundle = compile_evidence(q, contextual, started[:10], [])
             bundles.append(bundle)
@@ -505,6 +535,16 @@ def analyze(
                     evidence_bundle_id=bundle["bundle_id"],
                 )
                 matches.append(m)
+                if bundle["evidence_items"]:
+                    from .scientific_dossier import build_dossier
+
+                    linked_question = dict(q, source_evidence_ids=[item["evidence_id"] for item in bundle["evidence_items"]], source_relation="retrieved context; direct support only as classified in the bundle")
+                    candidate = next(item for item in candidates if item["dataset_id"] == m["dataset_id"])
+                    dossiers.append(build_dossier(linked_question, bundle, m["assessment"], candidate, [
+                        "Eligibility is determined by essential observed requirements before ranking.",
+                        f"Uncalibrated heuristic components: {json.dumps(m['components'], sort_keys=True)}",
+                        "Retrieved context does not establish novelty, causal effects or statistical adequacy.",
+                    ]))
         for name, rows in [
             ("claims", claims),
             ("questions", questions),
@@ -513,6 +553,8 @@ def analyze(
             ("matches", matches),
             ("inferences", inferences),
             ("source_views", views),
+            ("scientific_dossiers", dossiers),
+            ("excluded_documents", excluded_documents),
         ]:
             write_rows(out / f"{name}.jsonl", rows)
         inspected = read_rows(root / "catalog/processed_inspections.jsonl")
@@ -538,7 +580,7 @@ def analyze(
             "distinct_pilot_contexts": len(
                 {d.get("topic") for d in catalog_documents if d.get("topic")}
             ),
-            "case_dossiers": len({(m["question_id"], m["dataset_id"]) for m in matches}),
+            "case_dossiers": len(dossiers),
         }
         source_root = Path(__file__).parents[1]
         try:
@@ -738,6 +780,7 @@ def main(argv=None):
     run.add_argument("--requirements")
     run.add_argument("--document")
     run.add_argument("--topic")
+    run.add_argument("--reference-accessions", nargs="+", help="Qualified locally imported UniProt accessions; defaults to the original cytokine panel")
     run.add_argument("--limit", type=int, default=3)
     run.add_argument("--chunks", type=int, default=2)
     run.add_argument("--fresh", action="store_true")
@@ -745,6 +788,11 @@ def main(argv=None):
 
     report = sub.add_parser("report")
     report.add_argument("--run", required=True)
+
+    reference_sync = sub.add_parser("reference-sync", help="Import or replay a bounded, versioned human UniProt reference panel")
+    reference_sync.add_argument("--root", required=True)
+    reference_sync.add_argument("--accessions", nargs="+", required=True)
+    reference_sync.add_argument("--offline", action="store_true")
 
     acceptance = sub.add_parser(
         "acceptance",
@@ -793,6 +841,11 @@ def main(argv=None):
             )
     elif args.command == "report":
         result = {"report": str(render_report(Path(args.run)))}
+    elif args.command == "reference-sync":
+        from .external_evidence import import_resource
+
+        records = import_resource(args.root, accessions=args.accessions, offline=args.offline)
+        result = {"status": "PASS", "accessions": [item["accession"] for item in records], "releases": sorted({item["resource_release"] for item in records}), "interpretation": "Curated reference context; independence and experimental relevance are not inferred."}
     elif args.command == "acceptance":
         from .acceptance import validate_acceptance
 
@@ -821,6 +874,7 @@ def main(argv=None):
             device=args.device,
             document_path=Path(args.document) if args.document else None,
             topic=args.topic,
+            reference_accessions=args.reference_accessions,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return int(result.get("status") == "FAIL")

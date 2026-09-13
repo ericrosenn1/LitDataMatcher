@@ -7,6 +7,7 @@ import pytest
 from litdatamatcher.modality_contract import compatibility
 from litdatamatcher.scientific_dossier import build_dossier, validate_dossier
 from litdatamatcher.scientific_v2 import assess_requirements, compile_evidence
+from litdatamatcher.v2 import document_lifecycle_status, normalize_dataset
 
 
 def profile(assay="RNA-seq", species="Homo sapiens"):
@@ -43,6 +44,26 @@ def test_unknown_assay_has_no_false_incompatibility_from_string_family_compariso
     assert result["eligibility"] == "REQUIRES_INSPECTION"
 
 
+def test_adapter_capabilities_need_source_provenance_and_never_imply_units():
+    raw = profile()
+    raw["capabilities"] = {}
+    assert normalize_dataset(raw)["capabilities"] == {}
+    raw["source_provenance"] = {"source_url": "https://example.test/study"}
+    result = normalize_dataset(raw)
+    assessment = assess_requirements([{"field": "modality", "expected": "bulk_transcriptomics"}, {"field": "species", "expected": "human"}], result)
+    assert assessment["eligibility"] == "DIRECT_FIT"
+    assert assessment["independent_units"] is None
+    assert assessment["statistical_adequacy"] == "UNKNOWN"
+    assert assessment["requirements"][0]["observation"]["source_locator"].endswith("#assay_types")
+
+
+def test_runtime_document_selection_checks_cross_source_lifecycle():
+    document = {"document_id": "fixture-doc", "text": "Preserved input.", "metadata": {"version_relationships": {"crossref": {"is-retracted-by": [{"id": "fixture-notice"}]}}}}
+    assert document_lifecycle_status(document) == "RETRACTED"
+    document["metadata"] = {}
+    assert document_lifecycle_status(document) == "ACTIVE_METADATA_ONLY"
+
+
 def compiled_fixture():
     question = {"question_id": "fixture-q", "question": "What does the recorded evidence establish?", "proposition_id": "fixture-p", "source_evidence_ids": ["fixture-e"]}
     evidence = [{"evidence_id": "fixture-e", "proposition_id": "fixture-p", "source_locator": "fixture:paragraph:1", "role": "background", "direction": "supports"}]
@@ -70,4 +91,3 @@ def test_dossier_rejects_broken_scientific_lineage(mutation):
         args[1]["contradictory_evidence_ids"] = ["not-in-bundle"]
     with pytest.raises(ValueError):
         build_dossier(*args)
-

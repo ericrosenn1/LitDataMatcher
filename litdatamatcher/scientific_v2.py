@@ -13,7 +13,12 @@ from datetime import date
 from typing import Any
 
 from .data_plane import digest
-from .modality_contract import MODALITY_FAMILIES, modality_contract, modality_families, same_organism
+from .modality_contract import (
+    MODALITY_FAMILIES,
+    modality_contract,
+    modality_families,
+    same_organism,
+)
 from .ontology import normalize_entity
 from .schemas import stable_id
 
@@ -120,7 +125,7 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             values = cap.value if isinstance(cap.value, list) else [cap.value]
             category = _entity_category(req.field)
             mappings = [(normalize_entity(str(req.expected), category), normalize_entity(str(value), category)) for value in values] if category else []
-            if any(left["status"] == right["status"] == "RESOLVED" and left["candidates"] == right["candidates"] for left, right in mappings):
+            if category == "assay" and str(req.expected).strip().casefold() in MODALITY_FAMILIES and any(str(req.expected).strip().casefold() in modality_families(value) for value in values) or any(left["status"] == right["status"] == "RESOLVED" and left["candidates"] == right["candidates"] for left, right in mappings):
                 status = "MATCH"
             elif any(left["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"} or right["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"} for left, right in mappings):
                 status = "UNKNOWN"
@@ -190,10 +195,11 @@ def _contract_requirement_status(field, expected, contract):
         # A family match does not equate RNA-seq and microarrays. Preserve
         # precise observed assay constraints when both names are qualified.
         observed = contract.get("observed_assays", [])
-        if str(expected).strip().casefold() not in MODALITY_FAMILIES and required_families and observed:
-            if not any(_equivalent(expected, value) for value in observed):
-                if all(modality_families(value) for value in observed):
-                    return "MISMATCH"
+        if (str(expected).strip().casefold() not in MODALITY_FAMILIES
+                and required_families and observed
+                and not any(_equivalent(expected, value) for value in observed)
+                and all(modality_families(value) for value in observed)):
+            return "MISMATCH"
     if field in {"organism", "species"}:
         observed = contract.get("organisms", [])
         if observed and not any(same_organism(expected, value) for value in observed):

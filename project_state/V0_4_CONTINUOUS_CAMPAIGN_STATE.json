@@ -2,13 +2,13 @@
   "schema_version": "v0.4-continuous-campaign-state-1.0",
   "campaign_id": "LITDATAMATCHER_V0_4_CONTINUOUS_20260914",
   "campaign_start": "2026-09-13T00:00:00Z",
-  "last_updated": "2026-09-14T02:21:06Z",
+  "last_updated": "2026-09-14T02:38:00Z",
   "current_stage": "A_CORPUS_INTEGRATION",
   "current_substage": "PUBMED_2026_BASELINE_NORMALIZATION_ACTIVE__DEVELOPMENT_BASELINES_COMPLETE",
   "overall_status": "WAITING_ON_LOCAL_JOB",
   "historical_checkpoint_status": "IMPLEMENTED_NOT_FULLY_VALIDATED",
-  "last_verified_source_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
-  "last_verified_remote_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
+  "last_verified_source_commit": "549674005dddd93a7a1ee0ec78b5035322250bbc",
+  "last_verified_remote_commit": "549674005dddd93a7a1ee0ec78b5035322250bbc",
   "active_worker": "primary sequential Codex controller; deterministic corpus acquisition is independently active",
   "review_rotation": {
     "enabled": true,
@@ -34,11 +34,11 @@
       "kind": "PUBMED_2026_BASELINE_NORMALIZATION",
       "command": "D:\\LitDataMatcher-Corpora\\staging\\venv\\Scripts\\python.exe D:\\LitDataMatcher-Corpora\\scripts\\normalize_pubmed.py --root D:\\LitDataMatcher-Corpora",
       "expected_progress_indicator": "NORMALIZED shard count and record count in manifests/acquisition/pubmed_2026_normalization_state.json",
-      "observed_at": "2026-09-14T02:21:06Z",
+      "observed_at": "2026-09-14T02:38:00Z",
       "observed_state": "ACTIVE_PROGRESS"
     }
   ],
-  "last_progress_timestamp": "2026-09-14T02:21:06Z",
+  "last_progress_timestamp": "2026-09-14T02:38:00Z",
   "current_input_artifacts": [
     "D:\\LitDataMatcher-Corpora\\handoff\\READY_FOR_V04.json",
     "D:\\LitDataMatcher-Corpora\\handoff\\V04_CORPUS_HANDOFF.json",
@@ -51,7 +51,8 @@
     "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\heartbeat_history.jsonl",
     "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\leakage_audit_snapshot_v1_20260914\\LEAKAGE_AUDIT.json",
     "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\baseline_dev_snapshot_v1_20260914_r2\\BASELINE_RECEIPT.json",
-    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\structured_pico_consistency_dev_v1_20260914_r4\\COMPILER_SOURCE_CONSISTENCY.json"
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\structured_pico_consistency_dev_v1_20260914_r4\\COMPILER_SOURCE_CONSISTENCY.json",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\baseline_current_compiler_dev_v1_20260914_r2\\BASELINE_RECEIPT.json"
   ],
   "completed_stages": [
     "Native compiler implementation and non-regression validation at 44526e0632248fc40a229bb698db83e2ca0ca66a",
@@ -60,6 +61,7 @@
     "Leakage audit development allocation: 14,291 questions in 4,788 connected groups, with zero paper or exact-question cross-split leaks"
     ,"PubMed 2026 baseline acquisition: 1,334/1,334 official shards checksum-passed with MD5 sidecars",
     "Development baseline receipt: deterministic compiler, no-compiler question-only baseline, and fixed 12-question verbatim proposal-interpreter sample",
+    "Source-aligned current compiler baseline on the frozen development allocation: 1780 COMPLETE and 363 QUESTION_UNDERDETERMINED; proposal sample reused by provenance reference rather than rerun",
     "Structured-PICO compiler repair: 1,601/1,601 relation-bearing development questions have all three source-explicit fields consistent with a source relation after documented terminal-punctuation normalization"
   ],
   "pending_stages": [

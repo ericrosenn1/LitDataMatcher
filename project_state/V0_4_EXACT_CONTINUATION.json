@@ -1,8 +1,8 @@
 {
   "schema_version": "v0.4-exact-continuation-1.0",
   "created_utc": "2026-09-14T02:36:23Z",
-  "exact_current_git_sha_before_continuation_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
-  "remote_sha_before_continuation_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
+  "exact_current_git_sha_before_continuation_commit": "549674005dddd93a7a1ee0ec78b5035322250bbc",
+  "remote_sha_before_continuation_commit": "549674005dddd93a7a1ee0ec78b5035322250bbc",
   "branch": "codex/litdatamatcher-v2-build",
   "campaign_stage": "A_CORPUS_INTEGRATION",
   "campaign_substage": "PUBMED_2026_BASELINE_NORMALIZATION_ACTIVE",

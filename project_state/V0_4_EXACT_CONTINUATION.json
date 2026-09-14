@@ -1,0 +1,49 @@
+{
+  "schema_version": "v0.4-exact-continuation-1.0",
+  "created_utc": "2026-09-14T02:36:23Z",
+  "exact_current_git_sha_before_continuation_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
+  "remote_sha_before_continuation_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
+  "branch": "codex/litdatamatcher-v2-build",
+  "campaign_stage": "A_CORPUS_INTEGRATION",
+  "campaign_substage": "PUBMED_2026_BASELINE_NORMALIZATION_ACTIVE",
+  "campaign_status": "WAITING_ON_LOCAL_JOB",
+  "active_jobs": [
+    {
+      "pid": 47620,
+      "command": "D:\\LitDataMatcher-Corpora\\staging\\venv\\Scripts\\python.exe D:\\LitDataMatcher-Corpora\\scripts\\normalize_pubmed.py --root D:\\LitDataMatcher-Corpora",
+      "progress_state": "D:\\LitDataMatcher-Corpora\\manifests\\acquisition\\pubmed_2026_normalization_state.json",
+      "expected_progress": "NORMALIZED shard count and record total increase",
+      "observed": "275 of 1334 shards, 8250000 records, latest checkpoint 2026-09-14T02:36:23Z"
+    }
+  ],
+  "completed_work": [
+    "Raw PubMed 2026 baseline download: 1334/1334 official shards CHECKSUM_PASS with sidecars.",
+    "Current source snapshot leakage allocation: 14291 questions, 4788 connected groups, zero normalized-paper/exact-question cross-split leaks.",
+    "Structured-PICO compiler repair and 10 focused compiler tests.",
+    "Current-compiler development baseline: 1780 COMPLETE and 363 QUESTION_UNDERDETERMINED across 2143 development questions.",
+    "Two independent review receipts consumed with dispositions."
+  ],
+  "unresolved_work": [
+    "Do not start retrieval/learning or corpus-dependent evaluation until normalized PubMed outputs have per-shard integrity qualification.",
+    "After PID 47620 exits, build/test the separate atomic normalizer/controller replacement; do not edit the live normalizer.",
+    "Regenerate current corpus handoff derivatives after an integrity-qualified corpus boundary.",
+    "Implement study-level/semantic identity review before release-grade leakage claims.",
+    "All benchmark, real-data inspection, held-out, clean-install, CUDA, skeptical-review, and release gates remain incomplete."
+  ],
+  "exact_next_action": "Observe PID 47620 with scripts/v04_campaign_watchdog.py. When it exits, verify its final state/output reconciliation, then implement and fixture-test the atomic per-shard normalization-resume/integrity replacement identified in controller/reviews/20260914T023400Z_corpus_leakage_review_01.json.",
+  "commands": [
+    "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe scripts\\v04_campaign_watchdog.py --state project_state\\V0_4_CONTINUOUS_CAMPAIGN_STATE.json --pid 47620 --corpus-root D:\\LitDataMatcher-Corpora --once",
+    "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe -m pytest tests/test_question_compiler.py tests/test_v2_integration_contracts.py -q",
+    "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe -m ruff check litdatamatcher/question_compiler.py scripts/v04_campaign_watchdog.py scripts/v04_build_leakage_splits.py scripts/v04_run_development_baselines.py scripts/v04_measure_structured_pico_consistency.py"
+  ],
+  "validation_required_after_resume": [
+    "Confirm PID liveness plus state/output progress before any recovery action.",
+    "Do not trust stale READY_FOR_V04.json or V04_CORPUS_HANDOFF.json counts.",
+    "Use new versioned receipts; never overwrite pre-repair or failed-attempt artifacts.",
+    "Run a fresh bounded read-only review at the next major stage boundary."
+  ],
+  "review_receipts": [
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\reviews\\20260914T022825Z_supervisor_status_review_01.json",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\reviews\\20260914T023400Z_corpus_leakage_review_01.json"
+  ]
+}

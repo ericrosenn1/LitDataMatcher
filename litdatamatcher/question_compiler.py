@@ -41,6 +41,11 @@ def _rulebook() -> dict[str, Any]:
 
 def _question_type(question: str) -> str:
     value = question.casefold()
+    if all(re.search(rf"\b{field}\s*:", value) for field in ("intervention", "comparator", "outcome")):
+        # A structured PICO-style source states a comparison even if it is not
+        # written as an interrogative sentence. This recognizes source text;
+        # it does not infer roles from a study annotation.
+        return "comparative"
     if re.search(r"\b(literature|published evidence|review (?:the )?evidence)\b", value):
         return "literature_only"
     if re.search(r"\b(predict|prediction|prognos|classif)\b", value):
@@ -86,6 +91,24 @@ def _role_matches(question: str, context: str, source_locator: str) -> list[dict
             }
         )
 
+    # Some sources present a question as explicit PICO fields. Preserve their
+    # source strings and spans exactly, without consulting relation annotations.
+    for field, label in (
+        ("intervention", "Intervention"),
+        ("comparator", "Comparator"),
+        ("outcome", "Outcome"),
+    ):
+        match = re.search(
+            rf"\b{label}\s*:\s*(.+?)(?=\s*\|\s*(?:Intervention|Comparator|Outcome)\s*:|$)",
+            question,
+            re.I,
+        )
+        if match:
+            observed = _clean(match.group(1)).rstrip("?.;")
+            if observed:
+                add(field, observed, observed)
+    structured_fields = {role["field"] for role in roles}
+
     species = [
         (r"\b(?:human|humans)\b", "human"),
         (r"\b(?:adult(?:s)?|patients?|participants?|people)\b", "human"),
@@ -102,38 +125,41 @@ def _role_matches(question: str, context: str, source_locator: str) -> list[dict
     if tissue:
         add("tissue", _clean(tissue.group(1)), tissue.group(1))
 
-    comparator = re.search(r"\b(?:compared with|versus|vs\.?|than) ([^?.;,]+)", question, re.I)
-    if comparator:
-        observed = _clean(comparator.group(1))
-        add("comparator", observed, observed)
+    if "comparator" not in structured_fields:
+        comparator = re.search(r"\b(?:compared with|versus|vs\.?|than) ([^?.;,]+)", question, re.I)
+        if comparator:
+            observed = _clean(comparator.group(1))
+            add("comparator", observed, observed)
 
     time = re.search(r"\b(?:over|after|at|within) ([0-9]+\s*(?:hours?|days?|weeks?|months?|years?))\b", question, re.I)
     if time:
         add("time", _clean(time.group(1)), time.group(1))
 
     # An intervention is a grammatical subject only when it precedes a relationship verb.
-    intervention = re.search(
-        r"(?:does|can|will|whether)\s+([A-Za-z0-9][A-Za-z0-9 -]{1,70}?)\s+"
-        r"(?:increase|decrease|reduce|alter|affect|improve|worsen|predict|cause|inhibit)",
-        question,
-        re.I,
-    )
-    if not intervention:
-        intervention = re.search(r"\b(?:treated with|exposed to|administered)\s+([A-Za-z0-9][A-Za-z0-9 -]{1,70}?)(?:\s+in\b|\s+compared\b|[?.;,])", question, re.I)
-    if intervention:
-        observed = _clean(intervention.group(1))
-        add("intervention", observed, observed)
+    if "intervention" not in structured_fields:
+        intervention = re.search(
+            r"(?:does|can|will|whether)\s+([A-Za-z0-9][A-Za-z0-9 -]{1,70}?)\s+"
+            r"(?:increase|decrease|reduce|alter|affect|improve|worsen|predict|cause|inhibit)",
+            question,
+            re.I,
+        )
+        if not intervention:
+            intervention = re.search(r"\b(?:treated with|exposed to|administered)\s+([A-Za-z0-9][A-Za-z0-9 -]{1,70}?)(?:\s+in\b|\s+compared\b|[?.;,])", question, re.I)
+        if intervention:
+            observed = _clean(intervention.group(1))
+            add("intervention", observed, observed)
 
-    outcome = re.search(
-        r"\b(?:increase|decrease|reduce|alter|affect|improve|worsen|predict|cause|inhibit)\s+"
-        r"(?:the )?(.+?)(?=\s+in\s+(?:humans?|mouse|mice|murine|rat|adults?|patients?|participants?)\b|\s+(?:compared with|versus|vs\.?)\b|\s+(?:over|after|within)\b|[?.;,])",
-        question,
-        re.I,
-    )
-    if outcome:
-        observed = _clean(outcome.group(1))
-        if observed and len(observed) <= 100:
-            add("outcome", observed, observed)
+    if "outcome" not in structured_fields:
+        outcome = re.search(
+            r"\b(?:increase|decrease|reduce|alter|affect|improve|worsen|predict|cause|inhibit)\s+"
+            r"(?:the )?(.+?)(?=\s+in\s+(?:humans?|mouse|mice|murine|rat|adults?|patients?|participants?)\b|\s+(?:compared with|versus|vs\.?)\b|\s+(?:over|after|within)\b|[?.;,])",
+            question,
+            re.I,
+        )
+        if outcome:
+            observed = _clean(outcome.group(1))
+            if observed and len(observed) <= 100:
+                add("outcome", observed, observed)
 
     # Bounded co-reference: resolve only a named risk target in supplied context.
     if re.search(r"\bthis risk\b", question, re.I):

@@ -80,6 +80,28 @@ def test_bounded_coreference_uses_context_and_preserves_the_question_span():
     assert outcome["provenance"]["evidence"]["text"] == "this risk"
 
 
+def test_structured_pico_source_compiles_a_verbatim_comparative_contract():
+    question = "Intervention: Liraglutide (1.2 mg) plus glimepiride | Comparator: Rosiglitazone plus glimepiride | Outcome: HbA1c at 26 weeks."
+    result = compile_question(question, source_locator="evidence-inference:prompt:100")
+    assert result["compilation_status"] == "COMPLETE"
+    assert result["question_purpose"] == "comparative"
+    requirements = {row["field"]: row for row in result["requirements"]}
+    assert requirements["intervention"]["expected"] == "Liraglutide (1.2 mg) plus glimepiride"
+    assert requirements["comparator"]["expected"] == "Rosiglitazone plus glimepiride"
+    assert requirements["outcome"]["expected"] == "HbA1c at 26 weeks"
+    assert all(requirements[field]["provenance"]["category"] == "SOURCE_EXPLICIT" for field in ("intervention", "comparator", "outcome"))
+    assert {role["field"] for role in result["entity_roles"]} >= {"intervention", "comparator", "outcome"}
+
+
+def test_structured_pico_fields_take_precedence_over_generic_pattern_matches():
+    question = "Intervention: famotidine administered at 0.4 mg/kg | Comparator: saline control | Outcome: reduce of glycaemic control versus baseline."
+    result = compile_question(question, source_locator="evidence-inference:prompt:2995")
+    requirements = {row["field"]: row for row in result["requirements"]}
+    assert requirements["intervention"]["expected"] == "famotidine administered at 0.4 mg/kg"
+    assert requirements["comparator"]["expected"] == "saline control"
+    assert requirements["outcome"]["expected"] == "reduce of glycaemic control versus baseline"
+
+
 def test_compile_cli_writes_machine_readable_artifact(tmp_path):
     output = tmp_path / "compiled.json"
     assert main(["compile", "--question", "Does semaglutide increase risk of NAION in adults?", "--out", str(output)]) == 0

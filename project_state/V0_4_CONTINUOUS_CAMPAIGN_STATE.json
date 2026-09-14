@@ -1,0 +1,106 @@
+{
+  "schema_version": "v0.4-continuous-campaign-state-1.0",
+  "campaign_id": "LITDATAMATCHER_V0_4_CONTINUOUS_20260914",
+  "campaign_start": "2026-09-13T00:00:00Z",
+  "last_updated": "2026-09-14T02:21:06Z",
+  "current_stage": "A_CORPUS_INTEGRATION",
+  "current_substage": "PUBMED_2026_BASELINE_NORMALIZATION_ACTIVE__DEVELOPMENT_BASELINES_COMPLETE",
+  "overall_status": "WAITING_ON_LOCAL_JOB",
+  "historical_checkpoint_status": "IMPLEMENTED_NOT_FULLY_VALIDATED",
+  "last_verified_source_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
+  "last_verified_remote_commit": "44526e0632248fc40a229bb698db83e2ca0ca66a",
+  "active_worker": "primary sequential Codex controller; deterministic corpus acquisition is independently active",
+  "review_rotation": {
+    "enabled": true,
+    "policy": "fresh bounded read-only review at major stage boundaries, major scientific decisions, repeated failures, held-out freeze/release checkpoints, or after 60-90 minutes of substantial implementation; never for healthy-job polling alone",
+    "lead_integration": "primary worker is the sole production-code integrator",
+    "current_review": null,
+    "consumed_receipts": [
+      {
+        "role": "SUPERVISOR_STATUS_REVIEW_01",
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\reviews\\20260914T022825Z_supervisor_status_review_01.json",
+        "status": "CONSUMED_ALL_FINDINGS_DISPOSITIONED"
+      },
+      {
+        "role": "CORPUS_LEAKAGE_REVIEW_01",
+        "path": "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\reviews\\20260914T023400Z_corpus_leakage_review_01.json",
+        "status": "CONSUMED_ALL_FINDINGS_DISPOSITIONED"
+      }
+    ]
+  },
+  "active_local_jobs": [
+    {
+      "pid": 47620,
+      "kind": "PUBMED_2026_BASELINE_NORMALIZATION",
+      "command": "D:\\LitDataMatcher-Corpora\\staging\\venv\\Scripts\\python.exe D:\\LitDataMatcher-Corpora\\scripts\\normalize_pubmed.py --root D:\\LitDataMatcher-Corpora",
+      "expected_progress_indicator": "NORMALIZED shard count and record count in manifests/acquisition/pubmed_2026_normalization_state.json",
+      "observed_at": "2026-09-14T02:21:06Z",
+      "observed_state": "ACTIVE_PROGRESS"
+    }
+  ],
+  "last_progress_timestamp": "2026-09-14T02:21:06Z",
+  "current_input_artifacts": [
+    "D:\\LitDataMatcher-Corpora\\handoff\\READY_FOR_V04.json",
+    "D:\\LitDataMatcher-Corpora\\handoff\\V04_CORPUS_HANDOFF.json",
+    "D:\\LitDataMatcher-Corpora\\manifests\\acquisition\\pubmed_2026_baseline_state.json",
+    "C:\\Codex\\LitDataMatcher-v2\\lead\\project_state\\V0_4_COMPILER_CAMPAIGN_STATE.json"
+  ],
+  "current_output_artifacts": [
+    "C:\\Codex\\LitDataMatcher-v2\\lead\\project_state\\V0_4_CONTINUOUS_CAMPAIGN_STATE.json",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\heartbeat.json",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller\\heartbeat_history.jsonl",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\leakage_audit_snapshot_v1_20260914\\LEAKAGE_AUDIT.json",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\baseline_dev_snapshot_v1_20260914_r2\\BASELINE_RECEIPT.json",
+    "C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\structured_pico_consistency_dev_v1_20260914_r4\\COMPILER_SOURCE_CONSISTENCY.json"
+  ],
+  "completed_stages": [
+    "Native compiler implementation and non-regression validation at 44526e0632248fc40a229bb698db83e2ca0ca66a",
+    "Partial corpus snapshot v1: PubMedQA PQA-L and EvidenceBench normalized; EBM-NLP and Evidence Inference source materials acquired",
+    "Question-only, no-match, and inspection-needed native examples",
+    "Leakage audit development allocation: 14,291 questions in 4,788 connected groups, with zero paper or exact-question cross-split leaks"
+    ,"PubMed 2026 baseline acquisition: 1,334/1,334 official shards checksum-passed with MD5 sidecars",
+    "Development baseline receipt: deterministic compiler, no-compiler question-only baseline, and fixed 12-question verbatim proposal-interpreter sample",
+    "Structured-PICO compiler repair: 1,601/1,601 relation-bearing development questions have all three source-explicit fields consistent with a source relation after documented terminal-punctuation normalization"
+  ],
+  "pending_stages": [
+    "A_CORPUS_INTEGRATION", "B_LEAKAGE_AUDIT_SPLITS", "C_BASELINES", "D_RETRIEVAL_AUGMENTED_COMPILER", "E_BOUNDED_LEARNING", "F_30_CASE_BENCHMARK", "G_REAL_DATA_INSPECTION", "H_HELDOUT_EVALUATION", "I_ADVERSARIAL_REVIEW", "J_RELEASE_VALIDATION", "K_RELEASE_CLOSEOUT"
+  ],
+  "blocked_stages": [
+    {
+      "stage": "BioASQ acquisition",
+      "status": "USER_INPUT_REQUIRED_NONBLOCKING",
+      "reason": "No locally authorized BioASQ archive; official registration/authentication may be required."
+    }
+  ],
+  "retry_counts": {
+    "pubmed_baseline_download": 0,
+    "cuda_qualification": 0,
+    "corpus_normalization": 0,
+    "development_baselines": 2
+  },
+  "current_experiment": "Resumable PubMed XML-to-Parquet normalization. Development baselines and structured-PICO source-consistency audit are complete; no held-out cases are selected or tuned.",
+  "corpus_snapshot": {
+    "id": "v1_partial_public_20260914",
+    "root_resolution": "LDM_CORPUS_ROOT if set, otherwise the declared corpus handoff root; physical root is not embedded in scientific outputs.",
+    "status": "ACTIVE_ACQUISITION_PLUS_PARTIAL_NORMALIZED",
+    "normalized_counts": {"questions": 1426, "question_paper_edges": 1426, "question_text": 1000, "snippets": 71781},
+    "pubmed_baseline": {"expected_shards": 1334, "checksum_pass_shards": 1334, "downloading_shards": 0, "pending_shards": 0, "normalization_state": "manifests/acquisition/pubmed_2026_normalization_state.json"}
+  },
+  "corpus_readiness": "PARTIAL_NOT_LEAKAGE_SAFE_FINAL_EVALUATION",
+  "benchmark_status": "NOT_STARTED__NO_SYNTHETIC_TEST_SUBSTITUTION",
+  "heldout_status": "NOT_STARTED__SEALED_HOLDOUT_UNTOUCHED",
+  "CUDA_status": "CPU_VALIDATED__CUDA_QUALIFICATION_PENDING_ISOLATED_ENVIRONMENT",
+  "clean_install_status": "NOT_STARTED_FOR_V0_4_RELEASE_CANDIDATE",
+  "final_review_status": "NOT_STARTED",
+  "release_status": "NOT_STARTED__NOT_A_V0_4_RELEASE",
+  "next_action": "Monitor PID 47620 for increasing NORMALIZED shard count. In parallel, design the retrieval-augmented compiler experiment using only the frozen training allocation; do not touch evaluation_candidate or the sealed holdout.",
+  "exact_resume_command": "C:\\Codex\\LitDataMatcher-v2\\env\\Scripts\\python.exe scripts\\v04_campaign_watchdog.py --state project_state\\V0_4_CONTINUOUS_CAMPAIGN_STATE.json --pid 47620 --corpus-root D:\\LitDataMatcher-Corpora --once",
+  "unresolved_findings": [
+    "PubMed 2026 XML normalization is active and must retain raw-shard provenance and per-shard resumability.",
+    "Cross-corpus identity graph and leakage-safe split views are not yet built.",
+    "The corpus handoff counts are stale relative to the reopened Parquet tables; all downstream counts must be derived from versioned input files and hashes.",
+    "No >=30-case benchmark, positive processed-data inspections, or frozen held-out evaluation exist.",
+    "CUDA remains unqualified; CPU inference is the validated execution path.",
+    "BioASQ requires separately authorized official access if its access route requires registration/authentication."
+  ]
+}

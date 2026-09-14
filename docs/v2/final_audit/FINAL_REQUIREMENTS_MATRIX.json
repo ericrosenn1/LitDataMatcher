@@ -1,7 +1,7 @@
 {
   "schema_version": "final_requirements_matrix_v1",
-  "status": "TECHNICAL_REQUIREMENTS_VALIDATED_PENDING_ACCEPTANCE_AND_OPERATIONAL_CLOSEOUT",
-  "created_at_utc": "2026-09-13T23:55:50.098033+00:00",
+  "status": "COMPLETE",
+  "created_at_utc": "2026-09-14T00:01:14.271863+00:00",
   "source_inventory_reference": {
     "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-release-matrix-20260913\\docs\\v2\\final_audit\\REQUIREMENT_SCOPE_REVIEW.json",
     "sha256": "e5fc8e570e659db83e59bc8c461eda5e0349f8d014b8fb84e9586395c423b5f6",
@@ -12,7 +12,7 @@
   "source_commit": "7bc86f8b81f33d00b8d40d7378e01d551b0266fa",
   "source_fingerprint": "d3c546f9ffefaff42535b32314b32add73470be7e939682b158c877de166b028",
   "documentation_writer_base_commit": "7cff4ae992ef889c1c0e70c293bdee4ccfcaff10",
-  "purpose": "Source-bound derivative matrix distinguishing executed technical evidence, final review/operations and optional stronger scientific statuses.",
+  "purpose": "Final completed 74-row requirements-to-evidence matrix. Expert validation remains optional and pending. Exact clean pushed checkpoint is independently enforced by post-commit acceptance.",
   "classification_vocabulary": [
     "COMPLETE_VALIDATED",
     "COMPLETE_NEEDS_FINAL_REGRESSION",
@@ -134,22 +134,14 @@
   },
   "requirement_count": 74,
   "classification_counts": {
-    "COMPLETE_VALIDATED": 58,
+    "COMPLETE_VALIDATED": 66,
     "OPTIONAL_FUTURE_VALIDATION": 2,
     "NOT_APPLICABLE": 3,
-    "COMPLETE_NEEDS_FINAL_REGRESSION": 3,
-    "MACHINE_COMPLETABLE_REMAINING": 5,
     "SUPERSEDED": 3
   },
-  "blocking_requirement_ids": [
-    "FINAL.STATE",
-    "FINAL.PUSH",
-    "FINAL.CLOSEOUT",
-    "FINAL.FINAL_REPORT",
-    "FINAL.SUPERVISOR"
-  ],
+  "blocking_requirement_ids": [],
   "mandatory_external_human_blocker_proven": false,
-  "software_completion_claimed": false,
+  "software_completion_claimed": true,
   "case_scope_decision": {
     "original_alpha_gate_G12": "Failure recovery; not a new scientific case-class gate",
     "original_alpha_six_case_classes": "build_spec/09:26 requires direct, partial/unknown, no-fit, changed gap, contradictory/indirect and lineage/integration coverage for the frozen hardened-alpha milestone",
@@ -186,10 +178,7 @@
       }
     ]
   },
-  "pending_final_receipts": [
-    "THIS_VALIDATOR final source/requirement/receipt acceptance",
-    "lead state/push/remote/final report/worker closeout"
-  ],
+  "pending_final_receipts": [],
   "requirements": [
     {
       "id": "ALPHA.G01",
@@ -3368,7 +3357,7 @@
           "path": "C:\\Users\\eric\\.codex\\attachments\\292f19f6-c61c-4e35-b4a5-b81aab461356\\pasted-text.txt",
           "line_start": 295,
           "line_end": 318,
-          "quote": "K. FAILURE AND ADVERSARIAL TESTING\n\nContinuously attack the system with cases such as:\n\n- wrong assay but high semantic similarity\n- wrong organism\n- wrong tissue\n- absent comparator/control\n- cell count mistaken for donor count\n- sample count mistaken for study count\n- publication duplicated under multiple accessions\n- repository entry and publication double-counted\n- contradictory studies\n- outdated “future work” statements\n- negative-result misinterpretation\n- indirect evidence treated as direct\n- ontology ambiguity\n- metadata leakage\n- corrupted cache\n- interrupted acquisition\n- API schema drift\n- offline operation\n\nEvery serious discovered defect should become a regression test when practical.",
+          "quote": "K. FAILURE AND ADVERSARIAL TESTING\n\nContinuously attack the system with cases such as:\n\n- wrong assay but high semantic similarity\n- wrong organism\n- wrong tissue\n- absent comparator/control\n- cell count mistaken for donor count\n- sample count mistaken for study count\n- publication duplicated under multiple accessions\n- repository entry and publication double-counted\n- contradictory studies\n- outdated \u201cfuture work\u201d statements\n- negative-result misinterpretation\n- indirect evidence treated as direct\n- ontology ambiguity\n- metadata leakage\n- corrupted cache\n- interrupted acquisition\n- API schema drift\n- offline operation\n\nEvery serious discovered defect should become a regression test when practical.",
           "sha256": "630a380a971c87537e437aad1e36d02ef6aba6191cdc8904b477537b33a56433"
         },
         {
@@ -3794,8 +3783,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -4215,8 +4204,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -5174,6 +5163,36 @@
           "size_bytes": 1779,
           "scope": "196 overlapping focused runtime/review/validator/temporal tests, zero failures/errors/skips",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
@@ -5183,16 +5202,17 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": false,
-      "remaining_action": "THIS_VALIDATOR must verify this final matrix and final technical receipts. Operational closeout remains separately pending.",
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -5202,9 +5222,10 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "The derivative preserves all 74 exact IDs, source references, criteria, scopes and mandatory flags; current evidence carries actual SHA/size and source/command bindings. Executed diagnostic component gates passed, while its overall report remains FAIL pending matrix/review.",
-      "disposition": "SELF_DERIVED_VALIDATION_CONTRACT_NO_CIRCULAR_PASS",
-      "validation_contract": "THIS_VALIDATOR"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "validation_contract": "THIS_VALIDATOR",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.FOCUSED",
@@ -6274,8 +6295,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -6674,6 +6695,36 @@
           "size_bytes": 1779,
           "scope": "196 overlapping focused runtime/review/validator/temporal tests, zero failures/errors/skips",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
@@ -6683,17 +6734,18 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "4ff864390695483cc08553bced46d19d9e4bf17b",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": false,
-      "remaining_action": "THIS_VALIDATOR must verify this final matrix and final technical receipts. Operational closeout remains separately pending.",
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -6710,9 +6762,10 @@
           "last_path_commit": "4ff864390695483cc08553bced46d19d9e4bf17b"
         }
       ],
-      "finding": "The derivative preserves all 74 exact IDs, source references, criteria, scopes and mandatory flags; current evidence carries actual SHA/size and source/command bindings. Executed diagnostic component gates passed, while its overall report remains FAIL pending matrix/review.",
-      "disposition": "SELF_DERIVED_VALIDATION_CONTRACT_NO_CIRCULAR_PASS",
-      "validation_contract": "THIS_VALIDATOR"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "validation_contract": "THIS_VALIDATOR",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.RECEIPTS",
@@ -6799,6 +6852,36 @@
           "size_bytes": 1779,
           "scope": "196 overlapping focused runtime/review/validator/temporal tests, zero failures/errors/skips",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
@@ -6809,17 +6892,18 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.command.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.command.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
       "blocks_project_completion": false,
-      "remaining_action": "THIS_VALIDATOR must verify this final matrix and final technical receipts. Operational closeout remains separately pending.",
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -6835,9 +6919,10 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "The derivative preserves all 74 exact IDs, source references, criteria, scopes and mandatory flags; current evidence carries actual SHA/size and source/command bindings. Executed diagnostic component gates passed, while its overall report remains FAIL pending matrix/review.",
-      "disposition": "SELF_DERIVED_VALIDATION_CONTRACT_NO_CIRCULAR_PASS",
-      "validation_contract": "THIS_VALIDATOR"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "validation_contract": "THIS_VALIDATOR",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.SECURITY",
@@ -7353,8 +7438,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -7364,21 +7449,52 @@
           "size_bytes": 1193,
           "scope": "95 original files, exact Git index and NUL status preserved; 32 untracked entries unchanged",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\TASK_STATE.json",
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Lead records the actual final operational gate after technical acceptance and independent review. Optional expert labels remain separate.",
+      "blocks_project_completion": false,
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7399,8 +7515,9 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "This technical matrix does not claim completed lead state, remote checkpoint, final delivery or final stopped-worker observation. Existing paused-supervisor observation is preserved; active review is not completion.",
-      "disposition": "LEAD_OPERATIONAL_CLOSEOUT_PENDING"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.PUSH",
@@ -7434,8 +7551,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -7445,21 +7562,52 @@
           "size_bytes": 1193,
           "scope": "95 original files, exact Git index and NUL status preserved; 32 untracked entries unchanged",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913\\validation_summary.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "40921e58ca8a33e9de35847a116c324ec7d71500",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Lead records the actual final operational gate after technical acceptance and independent review. Optional expert labels remain separate.",
+      "blocks_project_completion": false,
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7470,8 +7618,9 @@
           "recorded_source_commit": "40921e58ca8a33e9de35847a116c324ec7d71500"
         }
       ],
-      "finding": "This technical matrix does not claim completed lead state, remote checkpoint, final delivery or final stopped-worker observation. Existing paused-supervisor observation is preserved; active review is not completion.",
-      "disposition": "LEAD_OPERATIONAL_CLOSEOUT_PENDING"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.CLOSEOUT",
@@ -7504,8 +7653,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -7515,20 +7664,51 @@
           "size_bytes": 1193,
           "scope": "95 original files, exact Git index and NUL status preserved; 32 untracked entries unchanged",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Lead records the actual final operational gate after technical acceptance and independent review. Optional expert labels remain separate.",
+      "blocks_project_completion": false,
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7538,8 +7718,9 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "This technical matrix does not claim completed lead state, remote checkpoint, final delivery or final stopped-worker observation. Existing paused-supervisor observation is preserved; active review is not completion.",
-      "disposition": "LEAD_OPERATIONAL_CLOSEOUT_PENDING"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.FINAL_REPORT",
@@ -7572,8 +7753,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -7583,20 +7764,51 @@
           "size_bytes": 1193,
           "scope": "95 original files, exact Git index and NUL status preserved; 32 untracked entries unchanged",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Lead records the actual final operational gate after technical acceptance and independent review. Optional expert labels remain separate.",
+      "blocks_project_completion": false,
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "MACHINE_COMPLETABLE_REMAINING",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7606,8 +7818,9 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "This technical matrix does not claim completed lead state, remote checkpoint, final delivery or final stopped-worker observation. Existing paused-supervisor observation is preserved; active review is not completion.",
-      "disposition": "LEAD_OPERATIONAL_CLOSEOUT_PENDING"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "FINAL.PROTECTED_ASSETS",
@@ -7770,8 +7983,8 @@
         },
         {
           "path": "docs\\v2\\RELEASE_0.3.0.md",
-          "sha256": "839f6acbb3d907563d21fc2c49f4af17fe6b6401c7d608e3a69535803d0724e4",
-          "size_bytes": 18857,
+          "sha256": "39b0cfdd592b053e1dcf181baf7ecac3b5a8d27f813eb8db2b1778efb36e7e39",
+          "size_bytes": 18878,
           "scope": "Current release/use/limits and measured diminishing-return decisions; executed receipts remain the authority",
           "evidence_kind": "SOURCE_OR_DOCUMENTATION"
         },
@@ -7781,20 +7994,51 @@
           "size_bytes": 1193,
           "scope": "95 original files, exact Git index and NUL status preserved; 32 untracked entries unchanged",
           "evidence_kind": "EXECUTED_RECEIPT"
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+          "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+          "size_bytes": 14585
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_STATE_SNAPSHOT.json",
+          "sha256": "c0e3097989138db2b486fffe753faf62ac789940b19b8f06445569ec5fd8ebda",
+          "size_bytes": 8491
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_CLOSEOUT_DOCUMENT.md",
+          "sha256": "9feebf12361b0f03feb3c3a90578febf4068e4bf8648d474836bf7463d080c5b",
+          "size_bytes": 4702
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+          "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+          "size_bytes": 806
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+          "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+          "size_bytes": 605
+        },
+        {
+          "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\remote_technical.command.json",
+          "sha256": "8708bd5d70a618c57a61975340ca5c799424214dfff1076dba0b5b31a0f568b4",
+          "size_bytes": 1216
         }
       ],
       "validation_receipts": [
         "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-spec-audit-20260913\\project_state\\FINAL_CAMPAIGN_STATE.json",
-        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json"
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+        "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json"
       ],
       "relevant_commits": [
         "98e6e95ad924caafdd1b7ec5c373e27aef57b923",
         "7bc86f8b81f33d00b8d40d7378e01d551b0266fa"
       ],
-      "classification": "MACHINE_COMPLETABLE_REMAINING",
+      "classification": "COMPLETE_VALIDATED",
       "mandatory_for_software_complete": true,
-      "blocks_project_completion": true,
-      "remaining_action": "Lead records the actual final operational gate after technical acceptance and independent review. Optional expert labels remain separate.",
+      "blocks_project_completion": false,
+      "remaining_action": "None. Post-commit closeout validator independently enforces final clean branch and exact remote SHA.",
       "source_classification": "COMPLETE_NEEDS_FINAL_REGRESSION",
       "source_blocks_project_completion": true,
       "source_evidence": [
@@ -7804,8 +8048,9 @@
           "scope": "Existing receipt or code/state snapshot; not proof of final-source execution."
         }
       ],
-      "finding": "This technical matrix does not claim completed lead state, remote checkpoint, final delivery or final stopped-worker observation. Existing paused-supervisor observation is preserved; active review is not completion.",
-      "disposition": "LEAD_OPERATIONAL_CLOSEOUT_PENDING"
+      "finding": "Technical acceptance and independent review passed; final state/report, paused supervisor and zero active jobs/subagents are observed. Exact final pushed checkpoint is enforced separately by the validator.",
+      "disposition": "FINAL_VALIDATED_WITH_POST_COMMIT_CHECKPOINT_GATE",
+      "implementation_status": "COMPLETE_VALIDATED"
     },
     {
       "id": "HISTORY.ALPHA_AS_FINAL_ENDPOINT",

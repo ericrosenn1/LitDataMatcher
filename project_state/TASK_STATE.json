@@ -4,11 +4,11 @@
   "spec_version": "2.0.0",
   "spec_digest": "541f85b76311a425df0aed8aaf1ebccedb28405f4756a400f94e9b3a459a183c",
   "build_id": "litdatamatcher-v2-20260907",
-  "updated_at": "2026-09-13T23:15:10.628490+00:00",
-  "execution_status": "RUNNING",
-  "product_status": "HARDENED_ALPHA_COMPLETE",
-  "automation_status": "PAUSED_CONFIRMED_LOCAL_CONFIG",
-  "calibration_status": "SOURCE_ASSISTED_EVALUATION",
+  "updated_at": "2026-09-14T00:01:14.271863+00:00",
+  "execution_status": "COMPLETE",
+  "product_status": "COMPLETE",
+  "automation_status": "PAUSED_CONFIRMED_NO_JOBS",
+  "calibration_status": "UNCALIBRATED_HEURISTIC",
   "source": {
     "repository": "ericrosenn1/LitDataMatcher",
     "original_root": "C:\\Codex\\2026-05-31\\github-plugin-github-openai-curated-can\\work\\LitDataMatcher",
@@ -24,7 +24,7 @@
     "integration_lease_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\controller\\integration.lock",
     "lead_identity": "01a07b91-ebfb-7a50-b434-7aae855bbde2"
   },
-  "current_phase": "FINAL_COMPLETION_CAMPAIGN",
+  "current_phase": "COMPLETE",
   "manual_pause": false,
   "stop_requested": false,
   "capacity": {
@@ -39,7 +39,8 @@
       "status": "VALIDATED",
       "evidence": [
         "docs/v2/EXECUTION_OVERRIDE.md"
-      ]
+      ],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W02",
@@ -48,19 +49,22 @@
       "evidence": [
         "docs/v2/STARTING_STATE.md",
         "docs/v2/CURRENT_REPO_MIGRATION_MATRIX.tsv"
-      ]
+      ],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W03",
       "name": "External-component qualification and reuse",
       "status": "VALIDATED",
-      "evidence": []
+      "evidence": [],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W04",
       "name": "Local data plane",
       "status": "VALIDATED",
-      "evidence": []
+      "evidence": [],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W05",
@@ -69,19 +73,22 @@
       "evidence": [
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\alpha_baseline_non_regression.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_multisource\\qualification_receipt.json"
-      ]
+      ],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W06",
       "name": "Semantic evidence extraction",
       "status": "VALIDATED",
-      "evidence": []
+      "evidence": [],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W07",
       "name": "Question and requirement discovery",
       "status": "VALIDATED",
-      "evidence": []
+      "evidence": [],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W08",
@@ -91,13 +98,15 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_clinicaltrials\\qualification_receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_ena\\qualification_receipt.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\v2_1_mgnify\\qualification_receipt.json"
-      ]
+      ],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W09",
       "name": "Evidence compilation",
       "status": "VALIDATED",
-      "evidence": []
+      "evidence": [],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     },
     {
       "id": "W10",
@@ -107,7 +116,8 @@
         "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run\\RUN_MANIFEST.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\independent\\final_review.json",
         "C:\\Codex\\LitDataMatcher-v2\\data\\release\\ACCEPTANCE_REPORT.json"
-      ]
+      ],
+      "final_campaign_evidence": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json"
     }
   ],
   "coverage": {
@@ -121,20 +131,38 @@
     "case_dossiers": 20
   },
   "blockers": [],
-  "next_action": "Read FINAL_CAMPAIGN_STATE.json; finish final targeted repairs, regressions, package/install and machine acceptance.",
+  "next_action": "No mandatory machine-resolvable work remains. Optional expert validation requires genuine human labels and a new explicit task.",
   "checkpoint": {
-    "last_source_commit": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
-    "last_verified_remote_commit": "f89d4b4ff64a80e3abca052556476b7bc83ec304",
-    "push_pending": false
+    "last_source_commit": "7bc86f8b81f33d00b8d40d7378e01d551b0266fa",
+    "last_verified_remote_commit": "bd386a06df9c2b262ef5f54058b50c6a3ac4abbf",
+    "last_verified_remote_scope": "Observed technical checkpoint before this final documentation commit; final exact SHA is in final_checkpoint_reference.",
+    "push_pending": false,
+    "final_checkpoint_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_ACCEPTANCE.json"
   },
   "milestones": {
     "functional_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\hardened-alpha-candidate-01",
     "hardened_alpha_run": "C:\\Codex\\LitDataMatcher-v2\\data\\runs\\final-real-run-03",
     "final_holdout_run": "C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4\\run"
   },
-  "stop_reason": "",
+  "stop_reason": "All mandatory software requirements are complete; optional expert validation remains pending.",
   "bounded_task_status": "PASS",
   "validation": {
+    "scope": "final autonomous completion campaign",
+    "full_passed": 699,
+    "targeted_passed": 196,
+    "targeted_overlaps_full": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "technical_gates_passed": 12,
+    "receipt_root": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout",
+    "final_acceptance_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_ACCEPTANCE.json",
+    "protected_alpha_hashes_passed": 7,
+    "sealed_holdout_rerun": false
+  },
+  "final_campaign_state": "project_state/FINAL_CAMPAIGN_STATE.json",
+  "final_campaign": "project_state/FINAL_CAMPAIGN_STATE.json",
+  "historical_bounded_validation": {
     "scope": "bounded PMID/PMCID reconciliation",
     "targeted_passed": 67,
     "full_passed": 346,
@@ -144,6 +172,18 @@
     "receipt_root": "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\pmid_reconciliation_20260913",
     "protected_alpha_hashes_passed": 7
   },
-  "final_campaign_state": "project_state/FINAL_CAMPAIGN_STATE.json",
-  "final_campaign": "project_state/FINAL_CAMPAIGN_STATE.json"
+  "expert_validation": "PENDING_EXPERT_REVIEW",
+  "coverage_scope": "PRESERVED_FROZEN_HARDENED_ALPHA",
+  "phase2_coverage": {
+    "literature_identifiers": 1600,
+    "abstracts": 1456,
+    "metadata_only_literature": 144,
+    "dataset_identifiers": 552,
+    "independent_biological_units": null,
+    "new_cases": 6,
+    "domains": 4,
+    "accepted_claims": 2,
+    "context_only_cases": 4
+  },
+  "automatic_resume": false
 }

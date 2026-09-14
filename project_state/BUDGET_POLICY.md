@@ -18,3 +18,5 @@ Historical readings and former policies remain in Git history at `a2949ba` and
 its ancestors. The September 13 20:17:10 UTC account snapshot (97% remaining,
 reset September 20 19:24:15 UTC) is historical, not a current capacity assertion.
 No past measurement or waiting deadline controls the present campaign.
+
+Campaign closeout: COMPLETE. No automatic reasoning or supervisor resume is scheduled. The owner authorization remains historical authority for this completed campaign; optional new work requires a new task.

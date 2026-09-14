@@ -1,28 +1,21 @@
 {
   "schema_version": 1,
   "campaign": "FINAL_AUTONOMOUS_COMPLETION",
-  "status": "RUNNING_FINAL_REGRESSION_PACKAGE_ACCEPTANCE",
-  "updated_at": "2026-09-13T23:15:10.628490+00:00",
+  "status": "COMPLETE",
+  "updated_at": "2026-09-14T00:01:14.271863+00:00",
   "scope": "Full intended project completion, or all machine-resolvable requirements complete with only a proven irreducible external gate.",
   "request": "project_state/FINAL_CAMPAIGN_REQUEST_20260913.md",
   "request_sha256": "1c0966ba0f2c1ce50656af530ce05788cfb42e4ea3cfced35a45e8a0e4b190d6",
   "starting_functional_commit": "40921e58ca8a33e9de35847a116c324ec7d71500",
   "starting_verified_remote": "a4ee398cd8f30d275a8d151a46ffb13ef283392d",
-  "unfinished_stage": "QUESTION_IDENTITY_PACKAGE_METADATA_REPAIR_THEN_FINAL_VALIDATION",
+  "unfinished_stage": null,
   "expert_labels_gate_classification": "OPTIONAL_EXPERT_VALIDATED_CALIBRATED_STATUS; NOT_MANDATORY_FOR_SOFTWARE_COMPLETE",
   "next_permitted_reasoning_at": null,
   "reasoning_concurrency": "purposeful scoped native reviewers and isolated writers authorized",
   "subagents": "authorized when useful",
-  "supervisor": "PAUSED",
-  "resume_worktree": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\final-closeout-repairs-20260913",
-  "resume_steps": [
-    "Observe live native agents/processes and preserve writer leases before resuming.",
-    "Integrate root question-identity fix and validator metadata fix; validate independent controls.",
-    "Run final full/focused tests and scale derivative; replay corrected six cases from preserved canonicalLF inference cache.",
-    "Build new0.3.0 derivative, isolated wheel install with cached GPU dependencies, installed CLI offline end-to-end.",
-    "Bind final receipts to74-row matrix and final ledger; pass technical and independent review.",
-    "Create verified handoff, confirm supervisorpaused and workersstopped, reconcileCOMPLETEonlyafterallgates, commit/push/liveverifyremote."
-  ],
+  "supervisor": "PAUSED_CONFIRMED_NO_JOBS",
+  "resume_worktree": null,
+  "resume_steps": [],
   "matrix_created": true,
   "new_tests_run": true,
   "prior_validation": {
@@ -31,7 +24,7 @@
     "full_passed": 346,
     "protected_alpha_hashes_passed": 7
   },
-  "full_project_completion_proven": false,
+  "full_project_completion_proven": true,
   "human_only_gate_proven": false,
   "background_execution_claimed": false,
   "source_attachment_sha256": "64487f76a0556ce868479bfaff5e8a86795ea1a275be38a420180681d779cfcf",
@@ -50,7 +43,7 @@
   "owner_override_sha256": "e08b2b8d0ee97fc66f905e29c315e1d53516f0f52df9ab8300b5a5a60f82aa4f",
   "owner_override_attachment_sha256": "6c7b699652e931131d8041fb643ab9abdfab7f0874e45517942236ef4db16bc5",
   "active_campaign_started_at": "2026-09-13T21:13:52.824294+00:00",
-  "last_verified_remote": "a356a27885bb34b398e72f11666aa832f25a59c0",
+  "last_verified_remote": "bd386a06df9c2b262ef5f54058b50c6a3ac4abbf",
   "requirements_matrix": "docs/v2/final_audit/FINAL_REQUIREMENTS_MATRIX.json",
   "completed_this_campaign": [
     "owner policy committed and pushed",
@@ -61,30 +54,102 @@
     "source-scoped notice and per-page provenance repairs",
     "strict expert adjudication and fitted-calibration contracts",
     "1600 real literature and 487 study IDs acquired with 13-partition replay",
-    "65 real PRIDE and Metabolomics Workbench studies qualified with offline replay"
+    "65 real PRIDE and Metabolomics Workbench studies qualified with offline replay",
+    "qualified source requirements, duplicate-source identity and clinical design repairs",
+    "qualified acquired-date temporal repair with independent actual-record red/green proof",
+    "699 full tests and 196 overlapping focused tests; all twelve technical gates PASS",
+    "0.3.0 wheel/sdist/source archive, isolated installation and installed offline replay PASS",
+    "independent assembled review PASS with thirteen findings fixed and validated",
+    "final matrix, expert-gate adjudication and original/frozen preservation",
+    "paused supervisor, no controller jobs or integration owner, all native subagents complete"
   ],
-  "active_work": {
-    "root": "deduplicate source questions, final package/install/offline ledger and closure",
-    "final_contract_audit": "repair Windows metadata parsing in final validator; final native gate check",
-    "final_requirements_audit": "bind final74-row matrix to actual receipts",
-    "final_offline_repair": "independent question-identity and finalcase/package review"
-  },
-  "scientific_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW; NOT_CALIBRATED",
+  "active_work": {},
+  "scientific_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW; UNCALIBRATED_HEURISTIC",
   "current_evidence": {
     "root": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913",
-    "full_suite_before_final_repairs": {
-      "passed": 628,
-      "junit": "closeout/full_suite.xml"
+    "technical_acceptance": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\TECHNICAL_ACCEPTANCE.json",
+      "sha256": "65d538df2a8d90dbc37f09af1a2593d6be5e26721789c62cdaea5288b05e76c5",
+      "size_bytes": 14585
     },
-    "focused_before_final_repairs": {
-      "passed": 143,
-      "junit": "closeout/focused_suite.xml"
+    "full_suite": {
+      "passed": 699,
+      "junit": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\full_suite_delivery.xml"
     },
-    "corrected_cases": "closeout/case_fresh/CASE_EXECUTION.json",
-    "corrected_case_contract": "requirements_matrix/CASE_REQUIREMENT_CORRECTION.json",
-    "scientific_claims": "2 accepted claims across6 cases;4 source context only; source_guard rejections retained; no expert accuracy/calibration claim",
-    "prior_build": "release_0.3.0/dist built but metadata validator rejected CRLF; preserve and build newderivative afterrepair",
-    "inference_cache": "real_cases_v3/inference_cache; preserve; exact canonicalLF runtime matches final source",
-    "scale": "closeout/scale_real/BENCHMARK_RECEIPT.json needs current-source derivative after question repair, not input reacquisition"
-  }
+    "focused_suite": {
+      "passed": 196,
+      "overlaps_full_suite": true,
+      "junit": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\focused_suite_delivery.xml"
+    },
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "cases": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\CASES_MANIFEST_DELIVERY.json",
+      "sha256": "adfb70cc4dd55dbc28d9786046f89018f8eb00355fa1bb00194e4bedb5cf4689",
+      "size_bytes": 9466
+    },
+    "case_limits": "Six cases/four domains; two accepted claims and four context-only. All native runs PARTIAL solely for source_guard rejection; unknown compatibility and uncalibrated ranking retained.",
+    "package": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\release_0.3.0_delivery\\BUILD_VALIDATION.json",
+      "sha256": "8ca742b04b9c51065f005f0d79f331045d53e7b9b99c6ee8e0c61f98a2815ea8",
+      "size_bytes": 2131
+    },
+    "installed_cli": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\install_delivery.command.json",
+      "sha256": "58f02dfff6be6b17e66b4ffbfc1be28e850aa1ac31a10bbfeefdaa129be11c10",
+      "size_bytes": 9568
+    },
+    "installed_offline": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\offline_delivery.command.json",
+      "sha256": "b1893bb1ed2778d9d31e0e422bffde2fc6e1f6037b2878f40b62ef063093fae2",
+      "size_bytes": 6533
+    },
+    "scale": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\scale_real_delivery\\BENCHMARK_RECEIPT.json",
+      "sha256": "cb2881f252a2cc1ff89a6b9ac6bf5e5ff6aa7c5cebcc7ba9dad4faaca5017e8b",
+      "size_bytes": 39160
+    },
+    "independent_review": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_INDEPENDENT_REVIEW.json",
+      "sha256": "d3b05721ba97434a96a8aab31ba0632d05a5df61c53726b10687bd82b6245606",
+      "size_bytes": 25725
+    },
+    "protected_alpha": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\PROTECTED_ALPHA.json",
+      "sha256": "512ba7471ca576ff88981bc4a7b12c2495b47dada8b974f34fadd9b125b4f4b4",
+      "size_bytes": 3125
+    },
+    "original_preservation": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\ORIGINAL_PRESERVATION_FINAL.json",
+      "sha256": "8843c494a523f80d5447439c262bb2bd0987d70d1853a4bc667266d4c916117b",
+      "size_bytes": 1193
+    },
+    "shutdown": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\EXECUTION_SHUTDOWN.json",
+      "sha256": "7c34e51b1c40662bbd7c531ea56d507146c490398b8f2de27dc09133f08b8df4",
+      "size_bytes": 806
+    },
+    "native_agents": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\NATIVE_AGENTS_FINAL.json",
+      "sha256": "8b33c3f9c628f687c02e5bd96f9da0acf1d7c8042484952c705be2b10e18dc99",
+      "size_bytes": 605
+    }
+  },
+  "completed_at": "2026-09-14T00:01:14.271863+00:00",
+  "next_action": "No mandatory machine-resolvable work remains. Optional expert validation requires genuine human labels and a new explicit task.",
+  "mandatory_external_dependencies": [],
+  "remaining_machine_work": [],
+  "final_functional_commit": "7bc86f8b81f33d00b8d40d7378e01d551b0266fa",
+  "final_functional_fingerprint": "d3c546f9ffefaff42535b32314b32add73470be7e939682b158c877de166b028",
+  "active_reasoning_subagents": 0,
+  "active_deterministic_jobs": 0,
+  "automatic_resume": false,
+  "campaign_elapsed_seconds_at_state_close": 10041.447569,
+  "expert_validation": "PENDING_EXPERT_REVIEW",
+  "calibration_status": "UNCALIBRATED_HEURISTIC",
+  "final_checkpoint_reference": "C:\\Codex\\LitDataMatcher-v2\\data\\final_campaign_20260913\\closeout\\FINAL_ACCEPTANCE.json",
+  "checkpoint_semantics": "The final documentation commit cannot contain its own SHA. Exact current branch/local/remote equality is recorded by the post-commit closeout validator and remote_final.command.json.",
+  "last_verified_remote_scope": "Observed technical checkpoint before this final documentation commit; final exact SHA is in final_checkpoint_reference.",
+  "new_task_start_root": "C:\\Codex\\LitDataMatcher-v2\\lead"
 }

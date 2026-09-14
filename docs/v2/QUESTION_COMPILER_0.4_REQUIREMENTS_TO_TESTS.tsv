@@ -1,0 +1,10 @@
+requirement_id	acceptance_requirement	test_or_receipt	status
+QC-01	versioned answer specification with original and normalized question	tests/test_question_compiler.py::test_risk_question_compiles_estimable_contract_without_predicting_direction	IMPLEMENTED
+QC-02	method-derived requirements are not fake source quotations	tests/test_question_compiler.py::test_risk_question_compiles_estimable_contract_without_predicting_direction	IMPLEMENTED
+QC-03	unknown metadata remains inspection-needed	tests/test_question_compiler.py::test_missing_metadata_is_inspection_not_confirmed_absence	IMPLEMENTED
+QC-04	no empty contract is ranked as a scientific match	tests/test_question_compiler.py::test_ambiguous_question_cannot_produce_a_best_match_contract	IMPLEMENTED
+QC-05	user overrides retain provenance and conflicts	tests/test_question_compiler.py::test_user_override_preserves_conflict_and_wins_effective_mapping	IMPLEMENTED
+QC-06	bounded co-reference is source-linked	tests/test_question_compiler.py::test_bounded_coreference_uses_context_and_preserves_the_question_span	IMPLEMENTED
+QC-07	native compile-only API/CLI	tests/test_question_compiler.py::test_compile_cli_writes_machine_readable_artifact	IMPLEMENTED
+QC-08	native analyze integration and 30-case external benchmark	v0.4 campaign continuation	PENDING
+QC-09	paired-corpus import, split, learning experiment and held-out evaluation	v0.4 campaign continuation	PENDING

@@ -1,0 +1,43 @@
+{
+  "schema_version": "v0.4-campaign-state-1.0",
+  "campaign_id": "LITDATAMATCHER_V0_4_QUESTION_REQUIREMENTS_20260913",
+  "recorded_start_date": "2026-09-13",
+  "review_boundary_date": "2026-09-27",
+  "scope": "Automatic question-to-data-requirements compiler and native matching integration.",
+  "authorization": {
+    "requested_development_runtime": "gpt-5.6-terra high",
+    "runtime_verification": "No supported runtime-selection or telemetry interface is exposed to this session. The requested model/effort was not switched or asserted.",
+    "paid_services_authorized": false,
+    "supervisor_status": "PAUSED_CONFIRMED_NO_JOBS",
+    "schedules_created": false,
+    "prior_policy_history": "project_state/BUDGET_POLICY.md and project_state/FINAL_CAMPAIGN_STATE.json"
+  },
+  "protected_inputs": {
+    "frozen_alpha_and_sealed_holdout": "C:\\Codex\\LitDataMatcher-v2\\data\\releases and C:\\Codex\\LitDataMatcher-v2\\data\\evaluation\\final_holdout_v4",
+    "prechange_alpha_validation": "C:\\Codex\\LitDataMatcher-v2\\data\\phase2\\validation\\v04_prechange_alpha.json",
+    "prechange_alpha_status": "PASS"
+  },
+  "baseline": {
+    "source_commit_before_change": "4f61d41c4ea7fe0333fff8a47dc6c8829e7d2909",
+    "focused_regression_tests": 37,
+    "focused_regression_status": "PASS",
+    "catalog_and_models_inspected": true,
+    "hardware_observed": "32 logical CPUs, 93.6 GiB RAM, NVIDIA RTX 5090; local Qwen and MiniLM directories present"
+  },
+  "current_status": "IMPLEMENTED_NOT_FULLY_VALIDATED",
+  "implemented": [
+    "Versioned local compiler with source, normalization, method-derived and user-specified provenance.",
+    "Answer specification, analysis plans, bounded reference resolution and strict assessor mapping.",
+    "Native v2 analyze integration plus no-model compile-only CLI.",
+    "No-empty-contract ranking guard and explicit candidate classifications."
+  ],
+  "remaining_validation": [
+    "Run and inspect native end-to-end catalog retrieval with the compiler on fresh local inference.",
+    "Acquire/import permitted paired corpora, establish splits and conduct a bounded non-leaking learning experiment.",
+    "Construct the required 30-case benchmark, independent positive capability inspections and held-out evaluation.",
+    "Package, clean-install, skeptical review and release verification."
+  ],
+  "scientific_assumptions_changed": false,
+  "requires_human_review": true,
+  "next_action": "Validate the integrated native run, then add only corpus and evaluation components supported by acquired licensed inputs."
+}

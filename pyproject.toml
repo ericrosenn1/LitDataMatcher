@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "litdatamatcher"
-version = "0.3.0"
+version = "0.4.0"
 description = "A reproducible pipeline for extracting open scientific questions and ranking matching public datasets."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -30,6 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 nlp = [
+  "torch>=2.4",
   "sentence-transformers>=2.6",
   "transformers>=4.40",
   "spacy>=3.7",
@@ -54,7 +55,7 @@ where = ["."]
 include = ["litdatamatcher*"]
 
 [tool.setuptools.package-data]
-litdatamatcher = ["schemas_v2/*.json", "schemas_v2/*.lock"]
+litdatamatcher = ["schemas_v2/*.json", "schemas_v2/*.lock", "question_compiler_rules_v1.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

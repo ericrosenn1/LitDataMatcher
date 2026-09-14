@@ -1,16 +1,24 @@
 """Independent runtime follow-up fixtures; no model loading or scientific execution."""
 
-import json
-import importlib.util
 import copy
+import importlib.util
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-from litdatamatcher.semantic_runtime import parse_model_json, validate_extraction
 from litdatamatcher.scientific_v2 import compile_evidence
-from litdatamatcher.v2 import analyze, evidence_from_source_view, explicit_unresolved_questions, read_rows, rebase_runtime_item, source_chunks, write_rows
+from litdatamatcher.semantic_runtime import parse_model_json, validate_extraction
+from litdatamatcher.v2 import (
+    analyze,
+    evidence_from_source_view,
+    explicit_unresolved_questions,
+    read_rows,
+    rebase_runtime_item,
+    source_chunks,
+    write_rows,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -288,7 +296,13 @@ def test_source_question_dedup_retains_origins_without_merging_other_identities(
     source_questions = [question for question in questions if question["origin"] != "user"]
     assert len(source_questions) == expected_source_questions
     assert sum(question["origin"] == "user" for question in questions) == (layout == "user_origin")
-    assert len(read_rows(out / "matches.jsonl")) == len(questions)
+    # A future-work sentence with no target relationship stays source-linked,
+    # but is explicitly underdetermined rather than being ranked against an
+    # unrelated synthetic catalog.
+    assert read_rows(out / "matches.jsonl") == []
+    outcomes = read_rows(out / "candidate_outcomes.jsonl")
+    assert len(outcomes) == len(questions)
+    assert {item["classification"] for item in outcomes} == {"NO_ASSESSABLE_CONTRACT"}
     for question in source_questions:
         key = (question["source_document_id"], question["evidence_span"]["start"])
         assert set(question["extraction_origins"]) == {"explicit_unresolved", "explicit_unresolved_source"}

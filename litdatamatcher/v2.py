@@ -16,6 +16,7 @@ from pathlib import Path
 from .data_plane import Catalog, atomic_json, atomic_write, digest
 from .literature_integrity import consolidate_literature_rows
 from .modality_contract import modality_contract
+from .question_compiler import compile_question, matching_requirements
 from .schemas import stable_id
 from .scientific_v2 import compile_evidence, discover_cross_document_gaps, rank_candidates
 
@@ -86,6 +87,47 @@ def normalize_dataset(record):
         "raw_record_digest": digest(record),
         "changed_semantics": False,
     }
+    return result
+
+
+def requirement_aware_candidates(datasets: list[dict], relevance_terms: list[str]) -> list[dict]:
+    """Keep inspection candidates only when they mention a non-generic required role.
+
+    Semantic similarity and a shared organism can discover related records, but
+    neither establishes that an opaque study is worth targeted inspection for a
+    specific intervention/outcome question. Unknown metadata is still handled
+    as unknown after this relevance screen; it is never converted to absence.
+    """
+    normalized_terms = []
+    generic_tokens = {
+        "risk", "outcome", "effect", "change", "increase", "decrease", "response",
+        "disease", "condition", "treatment", "exposure", "cells", "tissue",
+    }
+    for term in relevance_terms:
+        value = str(term).casefold().strip()
+        if value and value not in {"human", "mouse", "rat", "adult", "adults"}:
+            normalized_terms.append(value)
+    if not normalized_terms:
+        return datasets
+    result = []
+    for dataset in datasets:
+        searchable = " ".join(
+            [
+                str(dataset.get("title", "")),
+                str(dataset.get("summary", "")),
+                json.dumps(dataset.get("capabilities", {}), sort_keys=True),
+            ]
+        ).casefold()
+        if any(
+            term in searchable
+            or any(
+                token in searchable
+                for token in re.findall(r"[a-z0-9]{4,}", term)
+                if token not in generic_tokens
+            )
+            for term in normalized_terms
+        ):
+            result.append(dataset)
     return result
 
 
@@ -375,6 +417,7 @@ def render_report(run: Path) -> Path:
     matches = read_rows(run / "matches.jsonl")
     questions = {q["question_id"]: q for q in read_rows(run / "questions.jsonl")}
     bundles = {b["question_id"]: b for b in read_rows(run / "evidence_bundles.jsonl")}
+    outcomes = read_rows(run / "candidate_outcomes.jsonl") if (run / "candidate_outcomes.jsonl").exists() else []
 
     def esc(value):
         return html.escape(str(value), quote=True)
@@ -395,7 +438,11 @@ def render_report(run: Path) -> Path:
         cards.append(
             f"<article><h2>{esc(q.get('question', q.get('text')))}</h2><h3>{esc(match['dataset_id'])}: {esc(a['eligibility'])}</h3><p>{esc(bundle['gap_status'])}, as of {esc(bundle['as_of'])}. Review priority {match['score']:.3f} (uncalibrated heuristic).</p><table><thead><tr><th>Requirement</th><th>Expected</th><th>Fit</th><th>Source</th></tr></thead><tbody>{rows}</tbody></table><p>Independent units: {esc(a['independent_units'])}. Statistical adequacy: {esc(a['statistical_adequacy'])}.</p><p>Next analysis: verify missing variables, usable contrasts and design-specific power; then analyze the submitted measurements under a documented estimand. No downstream experiment has been performed by this ranking.</p><details><summary>Evidence and dependence</summary><ul>{evidence}</ul><pre>{esc(json.dumps(bundle['dependence_groups'], indent=2))}</pre></details></article>"
         )
-    content = f"""<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>LitDataMatcher v2 review</title><style>body{{max-width:1100px;margin:auto;padding:2rem;font:16px system-ui;color:#20313a;background:#f4f7f7}}article{{background:white;border:1px solid #ccdada;border-radius:10px;margin:1rem 0;padding:1.5rem}}table{{border-collapse:collapse;width:100%;font-size:.9rem}}td,th{{border-bottom:1px solid #ddd;padding:.5rem;text-align:left;overflow-wrap:anywhere}}small,pre{{overflow-wrap:anywhere;white-space:pre-wrap}}h1{{color:#17515c}}</style><h1>LitDataMatcher v2 scientific review</h1><p>Run {esc(manifest["run_id"])} · {esc(manifest["execution_status"])}. Experimental fit and evidence remain inspectable; scores are not probabilities.</p><p>Acquisition coverage: {esc(json.dumps(manifest["coverage"]))}</p><p>Inference coverage is explicitly bounded to selected document sections. Metadata availability does not establish statistical answerability. Expert calibration pending.</p>{"".join(cards) or "<p>No assessable questions or matches. Inspect failures and source coverage.</p>"}</html>"""
+    outcome_cards = "".join(
+        f"<article><h2>{esc(item.get('classification'))}</h2><p>{esc(item.get('reason'))}</p><small>Question {esc(item.get('question_id'))}; compiler state {esc(item.get('compilation_status'))}</small></article>"
+        for item in outcomes
+    )
+    content = f"""<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><title>LitDataMatcher v2 review</title><style>body{{max-width:1100px;margin:auto;padding:2rem;font:16px system-ui;color:#20313a;background:#f4f7f7}}article{{background:white;border:1px solid #ccdada;border-radius:10px;margin:1rem 0;padding:1.5rem}}table{{border-collapse:collapse;width:100%;font-size:.9rem}}td,th{{border-bottom:1px solid #ddd;padding:.5rem;text-align:left;overflow-wrap:anywhere}}small,pre{{overflow-wrap:anywhere;white-space:pre-wrap}}h1{{color:#17515c}}</style><h1>LitDataMatcher v2 scientific review</h1><p>Run {esc(manifest["run_id"])} · {esc(manifest["execution_status"])}. Experimental fit and evidence remain inspectable; scores are not probabilities.</p><p>Acquisition coverage: {esc(json.dumps(manifest["coverage"]))}</p><p>Inference coverage is explicitly bounded to selected document sections. Metadata availability does not establish statistical answerability. Expert calibration pending.</p>{"".join(cards) or outcome_cards or "<p>No assessable questions or matches. Inspect failures and source coverage.</p>"}</html>"""
     target = run / "report.html"
     atomic_write(target, content.encode())
     return target
@@ -576,6 +623,50 @@ def analyze(
                 },
             )
         questions = deduplicate_questions(questions)
+        # Compile every native question before retrieval. The full compiler
+        # artifact remains inspectable; only its validated non-null assessor
+        # view reaches the existing experimental-contract matcher.
+        documents_by_id = {item["document_id"]: item for item in documents}
+        compilations = []
+        for q in questions:
+            source_document = documents_by_id.get(q.get("source_document_id"), {})
+            source_locator = str(
+                q.get("source_locator") or q.get("source_document_id") or "user-question"
+            )
+            compilation = compile_question(
+                q["question"],
+                source_text=source_document.get("text"),
+                source_locator=source_locator,
+                user_constraints=(q.get("requirements") or []) if q.get("origin") == "user" else None,
+            )
+            q["requirements"] = matching_requirements(
+                compilation,
+                expert_override=bool(q.get("origin") == "user" and q.get("requirements")),
+            )
+            q["compilation_status"] = compilation["compilation_status"]
+            q["answer_specification"] = compilation["answer_specification"]
+            q["question_purpose"] = compilation["question_purpose"]
+            q["compilation_id"] = stable_id(
+                "question_compilation", q["question_id"], compilation["ruleset_version"]
+            )
+            q["routing_terms"] = sorted(
+                {
+                    str(role["expected"])
+                    for role in compilation["entity_roles"]
+                    if role.get("expected") is not None
+                }
+            )
+            q["candidate_relevance_terms"] = sorted(
+                {
+                    str(role["expected"])
+                    for role in compilation["entity_roles"]
+                    if role.get("expected") is not None
+                    and role.get("field") not in {"species", "time"}
+                }
+            )
+            compilations.append(
+                {"question_id": q["question_id"], "compilation_id": q["compilation_id"], **compilation}
+            )
         index = PretrainedSemanticIndex(embedding_dir, device=device)
         if datasets:
             index.fit(
@@ -585,6 +676,7 @@ def analyze(
                 ]
             )
         matches = []
+        candidate_outcomes = []
         bundles = []
         dossiers = []
         reference_records = []
@@ -609,15 +701,47 @@ def analyze(
                 )
             bundle = compile_evidence(q, contextual, started[:10], [])
             bundles.append(bundle)
+            compiled_requirements = q["requirements"]
+            if not compiled_requirements:
+                candidate_outcomes.append(
+                    {
+                        "question_id": q["question_id"],
+                        "classification": "NO_ASSESSABLE_CONTRACT",
+                        "reason": "Question compiler returned no assessable necessities; no best scientific match is claimed.",
+                        "compilation_status": q["compilation_status"],
+                    }
+                )
+                continue
+            routing_query = " ".join([qtext, *q.get("routing_terms", [])])
             semantic = (
-                {r["id"]: r["score"] for r in index.search(qtext, k=min(50, len(datasets)))}
+                {r["id"]: r["score"] for r in index.search(routing_query, k=min(50, len(datasets)))}
                 if datasets
                 else {}
             )
-            lexical = set(catalog.search("dataset", qtext, 50))
-            candidates = [d for d in datasets if d["dataset_id"] in lexical | set(semantic)]
-            ranked = rank_candidates(q.get("requirements", []), candidates, semantic)
+            lexical = set(catalog.search("dataset", routing_query, 50))
+            initial_candidates = [d for d in datasets if d["dataset_id"] in lexical | set(semantic)]
+            candidates = requirement_aware_candidates(
+                initial_candidates, q.get("candidate_relevance_terms", [])
+            )
+            if not candidates:
+                candidate_outcomes.append(
+                    {
+                        "question_id": q["question_id"],
+                        "classification": "NO_RELEVANT_CANDIDATE_FOUND",
+                        "reason": "No candidate in the declared local catalog mentioned a required non-generic intervention, outcome, tissue, or comparator. Unknown metadata was not treated as confirmed absence.",
+                        "compilation_status": q["compilation_status"],
+                        "search_scope": "local catalog snapshot",
+                    }
+                )
+                continue
+            ranked = rank_candidates(compiled_requirements, candidates, semantic)
             for m in ranked[:10]:
+                m["candidate_classification"] = {
+                    "DIRECT_FIT": "POTENTIAL_DIRECT_ANALYSIS_FIT",
+                    "PARTIAL_FIT": "CONDITIONAL_OR_PARTIAL_FIT",
+                    "REQUIRES_INSPECTION": "INSPECTION_NEEDED",
+                    "NOT_QUALIFIED": "KNOWN_INCOMPATIBILITY",
+                }[m["assessment"]["eligibility"]]
                 m.update(
                     question_id=q["question_id"],
                     match_id=stable_id("match", q["question_id"], m["dataset_id"]),
@@ -640,6 +764,7 @@ def analyze(
         for name, rows in [
             ("claims", claims),
             ("questions", questions),
+            ("question_compilations", compilations),
             ("datasets", datasets),
             ("evidence_bundles", bundles),
             ("matches", matches),
@@ -647,6 +772,7 @@ def analyze(
             ("source_views", views),
             ("scientific_dossiers", dossiers),
             ("excluded_documents", excluded_documents),
+            ("candidate_outcomes", candidate_outcomes),
         ]:
             write_rows(out / f"{name}.jsonl", rows)
         inspected = read_rows(root / "catalog/processed_inspections.jsonl")
@@ -726,6 +852,7 @@ def analyze(
                         "question": question,
                         "question_source_id": question_source_id,
                         "requirements": requirements,
+                        "compiler_ruleset": "question-method-rules-1.0",
                         "topic": topic,
                         "limit": limit,
                         "chunks": chunks,
@@ -772,6 +899,13 @@ def analyze(
                 "holdout_exposed_to_tuning": False,
             },
             "coverage": coverage,
+            "question_compilation": {
+                "compiled_questions": len(compilations),
+                "assessable_questions": sum(bool(q["requirements"]) for q in questions),
+                "underdetermined_questions": sum(
+                    q["compilation_status"] == "QUESTION_UNDERDETERMINED" for q in questions
+                ),
+            },
             "artifacts": [],
             "network": {
                 "mode": "OFFLINE",
@@ -880,6 +1014,16 @@ def main(argv=None):
     run.add_argument("--fresh", action="store_true")
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
 
+    compile_only = sub.add_parser(
+        "compile",
+        help="Compile a question into an answer specification and assessable requirements without model inference.",
+    )
+    compile_only.add_argument("--question", required=True)
+    compile_only.add_argument("--source-text", help="Optional bounded literature context for reference resolution.")
+    compile_only.add_argument("--source-locator", default="question")
+    compile_only.add_argument("--requirements", help="Optional expert-override JSON file containing a list.")
+    compile_only.add_argument("--out", help="Optional JSON artifact path.")
+
     report = sub.add_parser("report")
     report.add_argument("--run", required=True)
 
@@ -949,6 +1093,29 @@ def main(argv=None):
 
         result = run_closeout_audit(args.root, args.source_root)
         write_closeout_audit(result, args.out)
+    elif args.command == "compile":
+        constraints = (
+            json.loads(Path(args.requirements).read_text(encoding="utf-8"))
+            if args.requirements
+            else None
+        )
+        result = compile_question(
+            args.question,
+            source_text=args.source_text,
+            source_locator=args.source_locator,
+            user_constraints=constraints,
+        )
+        result["matching_requirements"] = matching_requirements(
+            result, expert_override=bool(constraints)
+        )
+        if args.out:
+            atomic_json(args.out, result)
+            result = {
+                "status": "PASS",
+                "out": args.out,
+                "compilation_status": result["compilation_status"],
+                "matching_requirements": result["matching_requirements"],
+            }
     else:
         if args.limit < 1 or args.chunks < 1:
             raise ValueError("Positive limits required")

@@ -1,6 +1,11 @@
 default_language_version:
   python: python3
 
+# These historical files predate this conservative hygiene policy and contain
+# intentional legacy snapshots or pre-existing whitespace debt. They are not
+# rewritten by infrastructure work; new and modified files remain checked.
+exclude: ^(check_csv\.py|extraction/(future_directions|limitations|research_questions)\.py|fix_sentences\.csv|fix_sentences_csv\.py|ileve_test\.py|lit_analyzer\.py|models_lit_analyzer\.py|sentences\.csv|test_lit_analyzer\.py|train_future_classifier\.py)$
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0

@@ -9,8 +9,9 @@ an intermediate commit.
    workflows from the integration commit.
 2. Enable GitHub Pages with **GitHub Actions** as the publishing source, then
    confirm a successful `Documentation` deployment and its public URL.
-3. Install and authorize the Codecov GitHub App for this repository. Confirm a
-   coverage upload from the final CI before adding a Codecov badge.
+3. Install and authorize the Codecov GitHub App for this repository, set the
+   repository variable `CODECOV_ENABLED` to `true`, and confirm an OIDC coverage
+   upload from the final CI before adding a Codecov badge.
 4. Confirm that the OpenSSF Scorecard workflow published a public result before
    adding its badge.
 5. Create the approved GitHub release and immutable version tag only after the

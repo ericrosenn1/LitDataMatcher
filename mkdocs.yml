@@ -1,0 +1,27 @@
+site_name: LitDataMatcher
+site_description: Reproducible literature-derived question and public-dataset matching.
+site_url: https://ericrosenn1.github.io/LitDataMatcher/
+repo_url: https://github.com/ericrosenn1/LitDataMatcher
+repo_name: ericrosenn1/LitDataMatcher
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Installation and CLI: installation.md
+  - Architecture: architecture.md
+  - Corpus and data: corpus_and_data.md
+  - Question compiler: question_compiler.md
+  - Scientific limitations: limitations.md
+  - Reproducibility: reproducibility.md
+  - Citation: citation.md
+  - Development status: development_status.md
+  - Release infrastructure: RELEASE_INFRASTRUCTURE_CHECKLIST.md
+  - Node contracts: node_contracts.md
+  - Model robustness plan: model_robustness_plan.md
+  - Feature roadmap: feature_roadmap.md
+
+markdown_extensions:
+  - admonition
+  - tables

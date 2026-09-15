@@ -19,3 +19,4 @@ run/
 *.db
 *.log
 rejected_sentences.txt
+local/

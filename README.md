@@ -1,5 +1,33 @@
 # LitDataMatcher
 
+[![CI](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml/badge.svg?branch=codex%2Flitdatamatcher-badges-20260915)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml?query=branch%3Acodex%2Flitdatamatcher-badges-20260915)
+[![Package build](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml/badge.svg?branch=codex%2Flitdatamatcher-badges-20260915)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml?query=branch%3Acodex%2Flitdatamatcher-badges-20260915)
+[![Documentation](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml/badge.svg?branch=codex%2Flitdatamatcher-badges-20260915)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml?query=branch%3Acodex%2Flitdatamatcher-badges-20260915)
+[![CodeQL](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml/badge.svg?branch=codex%2Flitdatamatcher-badges-20260915)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml?query=branch%3Acodex%2Flitdatamatcher-badges-20260915)
+[![Pre-commit](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml/badge.svg?branch=codex%2Flitdatamatcher-badges-20260915)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml?query=branch%3Acodex%2Flitdatamatcher-badges-20260915)
+
+<br>
+
+[![Python](https://img.shields.io/badge/Python-%E2%89%A53.10-3776AB?logo=python&logoColor=white)](https://github.com/ericrosenn1/LitDataMatcher/blob/codex/litdatamatcher-badges-20260915/pyproject.toml)
+[![License](https://img.shields.io/github/license/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/blob/codex/litdatamatcher-badges-20260915/LICENSE)
+[![Citation](https://img.shields.io/badge/citation-CITATION.cff-5A2D81)](https://github.com/ericrosenn1/LitDataMatcher/blob/codex/litdatamatcher-badges-20260915/CITATION.cff)
+
+<br>
+
+[![Last commit](https://img.shields.io/github/last-commit/ericrosenn1/LitDataMatcher/codex/litdatamatcher-badges-20260915)](https://github.com/ericrosenn1/LitDataMatcher/commits/codex/litdatamatcher-badges-20260915)
+[![Contributors](https://img.shields.io/github/contributors/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/pulls)
+[![Stars](https://img.shields.io/github/stars/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
+[![Forks](https://img.shields.io/github/forks/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
+[![Repository size](https://img.shields.io/github/repo-size/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
+[![Top language](https://img.shields.io/github/languages/top/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
+
+> The workflow badges are deliberately qualified to this isolated infrastructure
+> branch while v0.4 remains active. They will move to `main` only after the
+> final validated v0.4 integration; unreleased-service badges are intentionally
+> absent.
+
 LitDataMatcher is a reproducible research-automation pipeline for turning
 scientific literature into ranked, reviewable question-data opportunities.
 

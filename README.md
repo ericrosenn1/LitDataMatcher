@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml?query=branch%3Amain)
 [![Package build](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml?query=branch%3Amain)
-[![Documentation](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml?query=branch%3Amain)
+[![Documentation](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml/badge.svg?branch=main)](https://ericrosenn1.github.io/LitDataMatcher/)
 [![CodeQL](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml?query=branch%3Amain)
 [![Pre-commit](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml?query=branch%3Amain)
 
@@ -22,9 +22,6 @@
 [![Forks](https://img.shields.io/github/forks/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
 [![Repository size](https://img.shields.io/github/repo-size/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
 [![Top language](https://img.shields.io/github/languages/top/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
-
-> Workflow badges track `main`. The v0.4 development campaign remains separate;
-> unreleased-service badges are intentionally absent.
 
 LitDataMatcher is a reproducible research-automation pipeline for turning
 scientific literature into ranked, reviewable question-data opportunities.
@@ -243,6 +240,7 @@ The main package modules are:
 
 Additional documentation:
 
+- [Documentation site](https://ericrosenn1.github.io/LitDataMatcher/)
 - `docs/architecture.md`
 - `docs/node_contracts.md`
 - `docs/reproducibility.md`

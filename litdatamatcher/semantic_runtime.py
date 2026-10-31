@@ -71,6 +71,7 @@ class RuntimeConfig:
     max_attempts: int = 2
     seed: int = 1729
     cpu_threads: int = 4
+    decoding_mode: str = "unconstrained"
 
     def __post_init__(self) -> None:
         if self.device not in {"cpu", "cuda"} or self.dtype not in {"float32", "bfloat16"}:
@@ -80,6 +81,8 @@ class RuntimeConfig:
                 raise ValueError(f"{field} must be a positive integer")
         if self.max_attempts > 3:
             raise ValueError("At most three repair attempts are permitted")
+        if self.decoding_mode not in {"unconstrained", "source_schema"}:
+            raise ValueError("decoding_mode must be unconstrained or source_schema")
 
 
 def _span(text: str, quote: Any) -> dict:
@@ -335,7 +338,20 @@ class LocalSemanticRuntime:
     ) -> tuple[str, int, int]:
         import torch
 
+        constrained = self.config.decoding_mode == "source_schema"
+        if constrained and system_prompt != SYSTEM_PROMPT:
+            raise ValueError("source_schema is an extraction-only profile; use unconstrained for requirement proposals")
         self._load()
+        generation_options = {}
+        if constrained:
+            from .structured_decoding import PROFILE_INSTRUCTION, prefix_constraint
+
+            system_prompt += "\n" + PROFILE_INSTRUCTION
+            prefix, tokenizer_data = prefix_constraint(
+                self._tokenizer, document, getattr(self, "_structured_tokenizer_data", None)
+            )
+            self._structured_tokenizer_data = tokenizer_data
+            generation_options["prefix_allowed_tokens_fn"] = prefix
         messages = [
             {"role": "system", "content": system_prompt},
             {
@@ -364,9 +380,33 @@ class LocalSemanticRuntime:
                 max_new_tokens=self.config.max_new_tokens,
                 do_sample=False,
                 pad_token_id=self._tokenizer.eos_token_id,
+                **generation_options,
             )
         generated = output[0, length:]
         return self._tokenizer.decode(generated, skip_special_tokens=True), length, len(generated)
+
+    def inference_fingerprint(self, document: dict) -> dict:
+        """Return the exact input/model/code/config identity used by extraction."""
+        import importlib.metadata
+
+        decoding = {"mode": self.config.decoding_mode}
+        effective_prompt = SYSTEM_PROMPT
+        if self.config.decoding_mode == "source_schema":
+            from .structured_decoding import PROFILE_INSTRUCTION, decoding_metadata
+
+            decoding.update(decoding_metadata(document))
+            effective_prompt += "\n" + PROFILE_INSTRUCTION
+        return {
+            "input_sha256": digest(document),
+            "model_manifest_sha256": digest(self.model_manifest),
+            "config_sha256": digest(asdict(self.config)),
+            "prompt_sha256": digest(effective_prompt),
+            "decoding": decoding,
+            "schema_version": SCHEMA_VERSION,
+            "implementation_sha256": _file_sha(Path(__file__)),
+            "transformers_version": importlib.metadata.version("transformers"),
+            "torch_version": importlib.metadata.version("torch"),
+        }
 
     def extract(
         self, document: dict, cache_root: str | Path | None = None, force_fresh: bool = False
@@ -381,16 +421,7 @@ class LocalSemanticRuntime:
             raise ValueError("Nonempty source text required")
         import importlib.metadata
 
-        fingerprint = {
-            "input_sha256": digest(document),
-            "model_manifest_sha256": digest(self.model_manifest),
-            "config_sha256": digest(asdict(self.config)),
-            "prompt_sha256": digest(SYSTEM_PROMPT),
-            "schema_version": SCHEMA_VERSION,
-            "implementation_sha256": _file_sha(Path(__file__)),
-            "transformers_version": importlib.metadata.version("transformers"),
-            "torch_version": importlib.metadata.version("torch"),
-        }
+        fingerprint = self.inference_fingerprint(document)
         key = digest(fingerprint)
         target = Path(cache_root) / (key + ".json") if cache_root else None
         if target and target.exists() and not force_fresh:
@@ -432,6 +463,10 @@ class LocalSemanticRuntime:
                 )
             try:
                 parsed = parse_model_json(raw)
+                if self.config.decoding_mode == "source_schema":
+                    from .structured_decoding import validate_source_schema
+
+                    validate_source_schema(parsed, document)
                 validated = validate_extraction(parsed, document)
                 accepted_claims.update({row["claim_id"]: row for row in validated["claims"]})
                 accepted_questions.update(
@@ -474,6 +509,7 @@ class LocalSemanticRuntime:
             "runtime_version": importlib.metadata.version("transformers"),
             "torch_version": importlib.metadata.version("torch"),
             "configuration": asdict(self.config),
+            "decoding": fingerprint["decoding"],
             "quantization": None,
             "prompt_version": PROMPT_VERSION,
             "origin": "fresh_local_inference",

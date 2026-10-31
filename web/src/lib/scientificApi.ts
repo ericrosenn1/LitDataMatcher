@@ -80,6 +80,7 @@ export interface ResearchJob {
   error?: unknown;
   mode?: string;
   result?: ResearchResult;
+  retryable?: boolean;
 }
 
 export interface EngineHealth {

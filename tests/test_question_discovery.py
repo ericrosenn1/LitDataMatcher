@@ -138,6 +138,11 @@ def test_source_instructions_and_research_methods_are_not_questions():
     assert discover_questions([doc(text)])["questions"] == []
 
 
+def test_future_prediction_and_negated_limitations_do_not_establish_unanswered_questions():
+    text = "The model predicted future glucose levels. We identified no limitations in this measurement."
+    assert discover_questions([doc(text)])["questions"] == []
+
+
 def test_repeated_sentences_abstain_instead_of_attaching_ambiguous_spans():
     text = "Further studies should examine glucose uptake in humans."
     assert discover_questions([doc(text + " " + text)])["questions"] == []
@@ -219,6 +224,12 @@ def test_addressing_check_never_promotes_related_result_to_answer_or_novelty():
     assert result["status"] == "POSSIBLY_ADDRESSED_NEEDS_REVIEW"
     assert result["question_answered"] is None
     assert result["global_novelty_established"] is False
+    assert (
+        check_addressed_evidence(
+            question["question"], [doc("Insulin increased glucose uptake in humans.")]
+        )["status"]
+        == result["status"]
+    )
     empty = check_addressed_evidence(question, [doc("Subjects provided informed consent.")])
     assert empty["status"] == "NO_ADDRESSING_EVIDENCE_IN_SEARCHED_DOCUMENTS"
     assert empty["question_answered"] is None

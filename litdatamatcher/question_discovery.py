@@ -18,9 +18,15 @@ from typing import Any
 from .data_plane import digest
 from .question_compiler import compile_question
 from .semantic_runtime import validate_extraction
-from .structured_decoding import FUTURE_CUE, complete_source_sentences
+from .structured_decoding import complete_source_sentences
 
 VERSION = "question-discovery-1.0"
+_UNRESOLVED = re.compile(
+    r"\b(?:future (?:studies|research|work|investigations|trials)|"
+    r"(?:remains?|is) (?:unclear|unknown|unresolved|uncertain)|not (?:yet )?known|"
+    r"further (?:studies|research)|warrants? (?:further )?(?:investigation|study|research))\b",
+    re.I,
+)
 _LIMITATION = re.compile(
     r"\b(?:limitations?|limited by|unable to (?:assess|determine|establish)|"
     r"could not (?:assess|determine|establish)|not generalizable)\b",
@@ -146,9 +152,11 @@ def _sentences(document: dict) -> list[dict]:
 def _category(text: str) -> str | None:
     if _INSTRUCTION.search(text):
         return None
-    if FUTURE_CUE.search(text):
+    if _UNRESOLVED.search(text):
         return "SOURCE_STATED_UNRESOLVED"
-    if _LIMITATION.search(text):
+    if _LIMITATION.search(text) and not re.search(
+        r"\b(?:no limitations?|without limitations?|not limited)\b", text, re.I
+    ):
         return "SOURCE_STATED_LIMITATION"
     if text.endswith("?"):
         return "SOURCE_RESEARCH_QUESTION"
@@ -416,6 +424,8 @@ def discover_questions(
                 result = runtime.extract(document, cache_root=cache_root)
                 if not isinstance(result, dict) or not isinstance(result.get("questions"), list):
                     raise ValueError("Runtime did not return a questions list")
+                if not all(isinstance(row, dict) for row in result["questions"]):
+                    raise ValueError("Runtime question entries must be objects")
                 manifest = result.get("inference_manifest")
                 if not isinstance(manifest, dict) or not manifest.get("model_id"):
                     raise ValueError(
@@ -479,7 +489,7 @@ def discover_questions(
 
 
 def check_addressed_evidence(
-    question_record: dict, documents: list[dict], *, limit: int = 5
+    question_record: dict | str, documents: list[dict], *, limit: int = 5
 ) -> dict:
     """Return answer-bearing related passages for review, without deciding novelty.
 
@@ -490,7 +500,11 @@ def check_addressed_evidence(
     _bounded_int(limit, "limit", 100)
     if not isinstance(documents, list) or len(documents) > 1000:
         raise ValueError("At most 1000 provided documents can be checked")
-    question = question_record.get("text") or question_record.get("question")
+    question = (
+        question_record
+        if isinstance(question_record, str)
+        else question_record.get("text") or question_record.get("question")
+    )
     terms = _terms(normalize_question(question))
     candidates, failures, checked = [], [], []
     for raw in documents:

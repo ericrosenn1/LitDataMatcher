@@ -100,7 +100,10 @@ export function ScientificWorkflow() {
     try {
       const info = await scientificRequest<EngineHealth>("health");
       if (!alive.current) return;
-      setHealth(info);
+      setHealth({
+        ...info,
+        paused: info.paused ?? info.mode.toUpperCase().includes("PAUSED"),
+      });
       setSources((previous) => ({
         literature: previous.literature.length
           ? previous.literature
@@ -263,7 +266,15 @@ export function ScientificWorkflow() {
         inspection_limit: inspect,
         extraction_mode: extraction,
         ranking,
-        documents,
+        documents: documents.map((document) => ({
+          title: document.title || document.document_id || "Submitted source",
+          text: document.text || document.abstract || "",
+          ...(safeScientificUrl(document.url || document.source_locator)
+            ? {
+                url: safeScientificUrl(document.url || document.source_locator),
+              }
+            : {}),
+        })),
       };
       const value = await scientificRequest<ResearchJob>("jobs", body);
       setJob(value);
@@ -462,7 +473,7 @@ export function ScientificWorkflow() {
                 onChange={(event) => setPaperTitle(event.target.value)}
               />
               <label htmlFor="scientific-paper-url">
-                Source URL or identifier
+                Source URL (optional)
               </label>
               <input
                 id="scientific-paper-url"
@@ -482,13 +493,16 @@ export function ScientificWorkflow() {
                 className="secondary-button"
                 disabled={!paperText.trim()}
                 onClick={() => {
+                  if (paperUrl.trim() && !safeScientificUrl(paperUrl.trim())) {
+                    setError("Use an HTTP(S) source URL or leave it empty.");
+                    return;
+                  }
                   setDocuments((previous) => [
                     ...previous,
                     {
                       title: paperTitle,
                       text: paperText,
-                      url: safeScientificUrl(paperUrl),
-                      source_locator: paperUrl || undefined,
+                      url: safeScientificUrl(paperUrl.trim()),
                     },
                   ]);
                   setPaperText("");
@@ -749,7 +763,7 @@ export function ScientificWorkflow() {
             disabled={
               !health ||
               !!busy ||
-              (!question.trim() && !query.trim() && !documents.length) ||
+              (!question.trim() && !query.trim()) ||
               !sources.datasets.length
             }
             onClick={() => void launch()}
@@ -808,9 +822,7 @@ export function ScientificWorkflow() {
               <LoaderCircle size={17} className="spin" />
             )}
             {!!job.error && <p>{text(job.error)}</p>}
-            {["FAILED", "PARTIAL", "INTERRUPTED"].includes(
-              job.status.toUpperCase(),
-            ) && (
+            {(job.retryable || job.status.toUpperCase() === "FAILED") && (
               <button
                 className="secondary-button"
                 disabled={!!busy}

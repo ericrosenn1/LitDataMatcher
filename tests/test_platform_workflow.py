@@ -316,6 +316,149 @@ def test_missing_configured_catalog_is_not_empty_search(tmp_path):
         )
 
 
+@pytest.mark.parametrize("failure", ["partial", "exception"])
+def test_public_retry_preserves_first_local_snapshot_and_new_job_sees_updates(
+    catalog, tmp_path, monkeypatch, failure
+):
+    from test_literature_index import event, fixture
+
+    from litdatamatcher import platform_workflow
+    from litdatamatcher.literature_index import materialize_pubmed
+
+    corpus, manifest, database, _ = fixture(tmp_path, [[event(1)], [event(1, 2), event(2)]])
+    materialize_pubmed(corpus, manifest, database, max_shards=1)
+    attempts = []
+
+    def public_discovery(plan, location, **kwargs):
+        attempts.append(location)
+        if len(attempts) == 1 and failure == "exception":
+            raise OSError("Simulated public transport interruption")
+        (location / "catalog").mkdir(parents=True, exist_ok=True)
+        for name in ("literature.jsonl", "studies.jsonl"):
+            (location / "catalog" / name).write_text("", encoding="utf-8")
+        return {"failed_source_jobs": int(len(attempts) == 1)}
+
+    monkeypatch.setattr(platform_workflow, "discover", public_discovery)
+    checked = validate_request(
+        request(query="cancer", document_ids=["test:paper", "PMID:1"], dataset_sources=["geo"])
+    )
+    configuration = {"catalog_root": str(catalog), "literature_index": str(database)}
+    out = tmp_path / "retry"
+    if failure == "exception":
+        with pytest.raises(OSError, match="transport interruption"):
+            run_workflow(checked, configuration, out)
+    else:
+        first = run_workflow(checked, configuration, out)
+        assert first["processing_status"] == "PARTIAL_RETRYABLE"
+    state_path = out / ".workflow/state.json"
+    state = json.loads(state_path.read_text())
+    local_receipt = state["stages"]["local_discovery"]
+    local_path = out / ".workflow" / local_receipt["file"]
+    frozen = local_path.read_bytes()
+    local = json.loads(frozen)
+    old_snapshot = next(
+        source["snapshot"]
+        for source in local["sources"]
+        if source["source"] == "materialized_pubmed"
+    )
+    assert old_snapshot["applied_shards"] == 1
+    assert any(row["dataset_id"] == "positive" for row in local["datasets"])
+    materialize_pubmed(corpus, manifest, database, max_shards=1)
+    recovered = run_workflow(checked, configuration, out)
+    assert recovered["processing_status"] == "COMPLETE"
+    assert local_path.read_bytes() == frozen
+    assert json.loads(state_path.read_text())["stages"]["local_discovery"] == local_receipt
+    assert recovered["documents"] == platform_workflow._merge_documents(local["documents"])
+    assert {row["document_id"] for row in recovered["documents"]} == {"test:paper", "PMID:1"}
+    assert (
+        next(row for row in recovered["documents"] if row["document_id"] == "PMID:1")["version"]
+        == 1
+    )
+    assert (
+        next(
+            source["snapshot"]
+            for source in recovered["sources"]
+            if source["source"] == "materialized_pubmed"
+        )
+        == old_snapshot
+    )
+    assert "positive" in {row["dataset_id"] for row in recovered["datasets"]}
+    fresh = run_workflow(checked, configuration, tmp_path / "fresh")
+    assert {row["document_id"] for row in fresh["documents"]} == {"test:paper", "PMID:1", "PMID:2"}
+    assert next(row for row in fresh["documents"] if row["document_id"] == "PMID:1")["version"] == 2
+    assert (
+        next(
+            source["snapshot"]
+            for source in fresh["sources"]
+            if source["source"] == "materialized_pubmed"
+        )["snapshot_sha256"]
+        != old_snapshot["snapshot_sha256"]
+    )
+    assert len(attempts) == 3
+
+
+@pytest.mark.parametrize("corruption", ["changed", "missing"])
+def test_corrupt_local_checkpoint_cannot_silently_requery_a_new_snapshot(
+    catalog, tmp_path, monkeypatch, corruption
+):
+    from litdatamatcher import platform_workflow
+
+    def public_discovery(plan, location, **kwargs):
+        (location / "catalog").mkdir(parents=True, exist_ok=True)
+        for name in ("literature.jsonl", "studies.jsonl"):
+            (location / "catalog" / name).write_text("", encoding="utf-8")
+        return {"failed_source_jobs": 1}
+
+    monkeypatch.setattr(platform_workflow, "discover", public_discovery)
+    checked = validate_request(request(dataset_sources=["geo"]))
+    configuration, out = {"catalog_root": str(catalog)}, tmp_path / "corrupt"
+    run_workflow(checked, configuration, out)
+    state_path = out / ".workflow/state.json"
+    state = json.loads(state_path.read_text())
+    path = out / ".workflow" / state["stages"]["local_discovery"]["file"]
+    if corruption == "changed":
+        path.write_text('{"documents": [], "datasets": [], "sources": []}', encoding="utf-8")
+    else:
+        path.unlink()
+
+    def unexpected(*args, **kwargs):
+        raise AssertionError("A corrupt saved snapshot must not trigger new local acquisition")
+
+    monkeypatch.setattr(platform_workflow, "_acquire_local", unexpected)
+    for _ in range(2):
+        with pytest.raises(ValueError, match="Saved local acquisition is unavailable or corrupt"):
+            run_workflow(checked, configuration, out)
+    state = json.loads(state_path.read_text())
+    assert any(repair["stage"] == "local_discovery" for repair in state["repairs"])
+    if corruption == "changed":
+        assert list((out / ".workflow/quarantine").glob("*.json"))
+
+
+def test_local_search_and_snapshot_identity_share_one_read_transaction(tmp_path, monkeypatch):
+    from test_literature_index import event, fixture
+
+    from litdatamatcher.literature_index import LiteratureIndex, materialize_pubmed
+    from litdatamatcher.platform_workflow import _acquire_local
+
+    corpus, manifest, database, _ = fixture(tmp_path, [[event(1)], [event(2)]])
+    materialize_pubmed(corpus, manifest, database, max_shards=1)
+    search = LiteratureIndex.search
+
+    def search_then_advance(index, *args, **kwargs):
+        assert index.conn.in_transaction
+        records = search(index, *args, **kwargs)
+        materialize_pubmed(corpus, manifest, database, max_shards=1)
+        return records
+
+    monkeypatch.setattr(LiteratureIndex, "search", search_then_advance)
+    checked = validate_request(request(query="cancer"))
+    acquired = _acquire_local(checked, {"literature_index": str(database)}, tmp_path)
+    assert {row["pmid"] for row in acquired["documents"]} == {"1"}
+    assert acquired["sources"][0]["snapshot"]["applied_shards"] == 1
+    with LiteratureIndex(database, read_only=True) as index:
+        assert index.snapshot_identity()["applied_shards"] == 2
+
+
 @pytest.fixture
 def api(tmp_path):
     web = tmp_path / "web"

@@ -14,6 +14,7 @@ import json
 import platform
 import re
 import time
+from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -216,7 +217,8 @@ def _merge_documents(documents):
     return list(unique.values())
 
 
-def _acquire(request, config, work):
+def _acquire_local(request, config, work):
+    """Read local records and their index identity in one source transaction."""
     query = request["query"] or request["question"]
     documents = list(request["documents"])
     datasets, sources = [], []
@@ -272,6 +274,19 @@ def _acquire(request, config, work):
             "Selected documents are unavailable in the configured source snapshot: "
             + ", ".join(sorted(unresolved))
         )
+    return {"documents": documents, "datasets": datasets, "sources": sources}
+
+
+def _acquire(request, config, work, local):
+    # Public retries must not re-query an index which may have advanced since
+    # this job first selected its local evidence. Keep the saved node immutable.
+    acquired = deepcopy(local)
+    documents, datasets, sources = (
+        acquired["documents"],
+        acquired["datasets"],
+        acquired["sources"],
+    )
+    query = request["query"] or request["question"]
     if request["literature_sources"] or request["dataset_sources"]:
         plan = {
             "schema_version": "discovery-plan-1.0",
@@ -627,7 +642,19 @@ def run_workflow(request, config, out: Path, *, progress_path=None):
                 prior = workflow.save(name, function(), parents)
             return prior
 
-        acquired = stage("discovery", lambda: _acquire(request, config, out))
+        # Unlike rebuildable derived stages, a lost local acquisition cannot be
+        # recreated from a mutable index without changing this job's evidence.
+        local_stage = "local_discovery"
+        local = workflow.load(local_stage)
+        if local is None:
+            if "discovery" in workflow.state["stages"] or any(
+                repair.get("stage") == local_stage for repair in workflow.state["repairs"]
+            ):
+                raise ValueError(
+                    "Saved local acquisition is unavailable or corrupt; preserve this run and start a new job"
+                )
+            local = workflow.save(local_stage, _acquire_local(request, config, out))
+        acquired = stage("discovery", lambda: _acquire(request, config, out, local), (local_stage,))
         extracted = stage(
             "questions", lambda: _extract(request, config, acquired, out), ("discovery",)
         )

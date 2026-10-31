@@ -1,10 +1,16 @@
 # Dataset inspection and qualification development
 
-The public dataset registry now includes BioStudies and its ArrayExpress collection.
+The public dataset registry now includes BioStudies, its ArrayExpress collection,
+BioProject, BioSample and Expression Atlas.
 Search results retain repository accessions, response snapshots, total-hit metadata,
 and bounded-page status. File counts and literature-associated BioStudies entries
 are never interpreted as reusable measurements. GEO, ENA/SRA, PRIDE, Metabolomics
 Workbench, clinical registries and DataCite continue using the existing adapters.
+BioProject/BioSample use bounded ESearch/ESummary pages. BioSample preserves explicit
+parent-project links and reported attributes while labeling the entity as sample
+metadata. Expression Atlas searches its cached experiment catalogue with an explicit
+all-query-token filter and returns at most 25 records. Its assay counts remain
+technical units; no individual-level measurements are inferred.
 
 `litdatamatcher.dataset_inspection.inspect_dataset(record, cache_dir, *,
 offline=False, max_samples=40, max_bytes=8_000_000)` returns an enriched record.
@@ -52,8 +58,14 @@ not precision or recall estimates. Large matrices, other repositories' sample
 inspection, systematic family closure, causal feasibility and independent
 scientific reference evaluation remain incomplete.
 
+The additional live smoke acquired 25 BioProject and 25 BioSample records for
+`"type 2 diabetes" AND "Homo sapiens"`, and 20 Expression Atlas records for `diabetes`
+from a catalogue of 4,562 experiments. Offline replay preserved all accession lists.
+
 The implementation follows the primary [GEO SOFT format](https://www.ncbi.nlm.nih.gov/geo/info/soft.html)
 and [BioStudies API documentation](https://www.ebi.ac.uk/biostudies/help).
+The additional adapters use [NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25499/)
+and the [Expression Atlas catalogue](https://www.ebi.ac.uk/gxa/json/experiments).
 Local executed evidence is in
 `C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\dataset-qualification-v2`;
 GEO inspection and the first attempt are in the adjacent `dataset-qualification-v1`.

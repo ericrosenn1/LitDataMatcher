@@ -32,6 +32,10 @@ class BioStudiesDatasetAdapter:
             or data["totalHits"] < 0
         ):
             raise ValueError("BioStudies schema drift: expected hits and totalHits")
+        if data["totalHits"] > 0 and not data["hits"]:
+            raise ValueError(
+                "BioStudies reported matches without returning its requested first page"
+            )
         records, seen = [], set()
         for index, item in enumerate(data["hits"]):
             if not isinstance(item, dict):

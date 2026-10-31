@@ -2,6 +2,15 @@
 
 A browser research workspace for literature-derived questions and candidate public datasets. Built with React, TypeScript, and Vite; paired with the Python package in the repository root.
 
+For the complete **Scientific workflow**, build this frontend and start the
+Python application service from the repository root. The
+[integrated application guide](../docs/full_platform.md) provides installation,
+model options and restart commands. It serves this build at
+`http://127.0.0.1:8765` and connects source extraction, requirements, dataset
+inspection, evidence and persistent jobs. The standalone Vite commands below
+provide the lightweight Discover/review workspace; the scientific view requires
+the Python service.
+
 From this directory, with Node.js 22.12 or newer:
 
 ```bash

@@ -2,6 +2,17 @@
 
 LitDataMatcher’s web app is an evidence-review workspace. It connects candidate research questions with dataset metadata and keeps the reason for a match available for inspection.
 
+The **Scientific workflow** view runs the integrated Python engine for source
+question extraction, typed requirements, dataset discovery/inspection,
+compatibility evidence and persistent jobs. Follow the
+[integrated application guide](full_platform.md) to build the frontend and start
+the local Python service. [Question selection](campaign_20261031/question_selection.md)
+explains source citations, explicit editing and extraction-first execution.
+
+The standalone frontend instructions and workspace modes below describe the
+lighter **Discover** and review views. Those remain available without Python;
+Scientific workflow uses the local Python service.
+
 ## Start locally
 
 Install Node.js 22.12 or newer. From the repository root:

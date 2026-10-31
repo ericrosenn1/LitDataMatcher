@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS versions(
   metadata_json TEXT NOT NULL, provenance_json TEXT NOT NULL,
   UNIQUE(pmid, version_key));
 CREATE INDEX IF NOT EXISTS version_selection ON versions(pmid, version DESC);
+CREATE INDEX IF NOT EXISTS unknown_versions ON versions(pmid) WHERE version IS NULL;
 CREATE TABLE IF NOT EXISTS unresolved_deletions(
   pmid TEXT NOT NULL, position TEXT NOT NULL, PRIMARY KEY(pmid, position));
 CREATE TABLE IF NOT EXISTS current_records(
@@ -118,8 +119,7 @@ def _manifest(path):
         _shard_identity(row)
     value["shards"] = sorted(shards, key=lambda row: row["shard_order"])
     if value["status"] == "PASS" and (
-        len(shards) != value.get("available_shards")
-        or sorted(orders) != list(range(len(shards)))
+        len(shards) != value.get("available_shards") or sorted(orders) != list(range(len(shards)))
     ):
         raise ValueError("A complete ledger must cover every consecutive shard position")
     return value
@@ -168,22 +168,68 @@ class LiteratureIndex:
     def _set_metadata(self, key, value):
         self.conn.execute("INSERT OR REPLACE INTO metadata VALUES (?,?)", (key, _json(value)))
 
-    def status(self):
-        """Return persisted scope and counts, without scanning the full FTS index."""
+    def snapshot_identity(self):
+        """Pin a committed corpus prefix without hashing the large database.
+
+        Each stored shard identity binds normalized/source-event checksums and
+        ordering. Reading the prefix in one transaction gives an immutable
+        scientific-input identity even while another connection builds ahead.
+        """
+        own_transaction = not self.conn.in_transaction
+        if own_transaction:
+            self.conn.execute("BEGIN")
+        try:
+            shards = [
+                list(row)
+                for row in self.conn.execute(
+                    "SELECT shard_order,identity FROM shards ORDER BY shard_order"
+                )
+            ]
+            identity = {
+                "schema_version": INDEX_VERSION,
+                "corpus_store_uuid": self._metadata("corpus_store_uuid"),
+                "selection_rule": SELECTION_RULE,
+                "applied_shards": shards,
+            }
+            return {
+                "snapshot_sha256": digest(identity),
+                "schema_version": INDEX_VERSION,
+                "corpus_store_uuid": identity["corpus_store_uuid"],
+                "applied_shards": len(shards),
+                "last_shard_order": shards[-1][0] if shards else None,
+                "status": self._metadata("status", "EMPTY"),
+            }
+        finally:
+            if own_transaction:
+                self.conn.rollback()
+
+    def status(self, *, include_counts=True):
+        """Return scope and optional exact counts; omit counts for fast polling.
+
+        ``include_counts=False`` never scans record tables. A persisted current
+        count is used when available; older in-progress builders report null
+        rather than presenting an outdated count as current.
+        """
+        current_count = self._metadata("current_records_count")
+        if current_count is None and include_counts:
+            current_count = self.conn.execute("SELECT count(*) FROM current_records").fetchone()[0]
         return {
             "schema_version": INDEX_VERSION,
             "selection_rule": SELECTION_RULE,
             "status": self._metadata("status", "EMPTY"),
             "applied_shards": self.conn.execute("SELECT count(*) FROM shards").fetchone()[0],
             "available_shards": self._metadata("available_shards", 0),
-            "current_records": self.conn.execute("SELECT count(*) FROM current_records").fetchone()[
-                0
-            ],
-            "active_versions": self.conn.execute("SELECT count(*) FROM versions").fetchone()[0],
+            "current_records": current_count,
+            "active_versions": self.conn.execute("SELECT count(*) FROM versions").fetchone()[0]
+            if include_counts
+            else None,
             "unresolved_pmids": self.conn.execute(
                 "SELECT count(*) FROM (SELECT pmid FROM versions WHERE version IS NULL "
                 "UNION SELECT pmid FROM unresolved_deletions)"
-            ).fetchone()[0],
+            ).fetchone()[0]
+            if include_counts
+            else None,
+            "counts_included": include_counts,
             "historical_events_applied": self._metadata("events_applied", 0),
             "corpus_store_uuid": self._metadata("corpus_store_uuid"),
             "last_shard_order": self.conn.execute("SELECT max(shard_order) FROM shards").fetchone()[
@@ -337,7 +383,9 @@ def _apply_batch(index, pairs, shard):
     conn.execute("DELETE FROM touched")
     conn.executemany("INSERT INTO touched VALUES(?)", ((pmid,) for pmid in pmids))
     # Remove old FTS text before any version payload is modified or deleted.
-    conn.execute("DELETE FROM current_records WHERE pmid IN (SELECT pmid FROM touched)")
+    removed_current = conn.execute(
+        "DELETE FROM current_records WHERE pmid IN (SELECT pmid FROM touched)"
+    ).rowcount
     for event, record in pairs:
         pmid, version = event["pmid"], event["version"]
         if event["event_type"] == "upsert":
@@ -387,12 +435,17 @@ def _apply_batch(index, pairs, shard):
             conn.execute("DELETE FROM unresolved_deletions WHERE pmid=?", (pmid,))
         else:
             conn.execute("DELETE FROM versions WHERE pmid=? AND version=?", (pmid, version))
-    conn.execute(
+    added_current = conn.execute(
         "INSERT INTO current_records(pmid,version_id) SELECT v.pmid,v.id FROM versions v JOIN touched t ON t.pmid=v.pmid "
         "WHERE v.version=(SELECT max(w.version) FROM versions w WHERE w.pmid=v.pmid) "
         "AND NOT EXISTS(SELECT 1 FROM versions u WHERE u.pmid=v.pmid AND u.version IS NULL) "
         "AND NOT EXISTS(SELECT 1 FROM unresolved_deletions d WHERE d.pmid=v.pmid)"
-    )
+    ).rowcount
+    current_count = index._metadata("current_records_count")
+    if current_count is not None:
+        index._set_metadata(
+            "current_records_count", current_count - removed_current + added_current
+        )
 
 
 def _paths(corpus_root, ledger_root, shard):
@@ -562,6 +615,11 @@ def materialize_pubmed(
             index._set_metadata("corpus_store_uuid", marker["store_uuid"])
             index._set_metadata("available_shards", len(manifest["shards"]))
             index._set_metadata("status", "PARTIAL")
+            if index._metadata("current_records_count") is None:
+                index._set_metadata(
+                    "current_records_count",
+                    index.conn.execute("SELECT count(*) FROM current_records").fetchone()[0],
+                )
         pending = manifest["shards"][len(applied) :]
         for shard in pending[:max_shards] if max_shards is not None else pending:
             if max_seconds is not None and time.perf_counter() - started >= max_seconds:

@@ -280,3 +280,35 @@ def test_semantic_rerank_preserves_explicit_shortlist_scope(tmp_path, monkeypatc
         assert result[0]["pmid"] == "2"
         assert result[0]["semantic_retrieval_scope"] == "reranked_lexical_shortlist"
         assert result[0]["source_provenance"]["event"]["pmid"] == "2"
+
+
+def test_snapshot_identity_changes_only_when_committed_prefix_changes(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)], [event(2)]])
+    materialize_pubmed(corpus, manifest, db, max_shards=1)
+    with LiteratureIndex(db, read_only=True) as reader:
+        first = reader.snapshot_identity()
+        assert first["applied_shards"] == 1
+        queries = []
+        reader.conn.set_trace_callback(queries.append)
+        assert reader.status(include_counts=False)["current_records"] == 1
+        assert not any(
+            "FROM versions" in query or "FROM current_records" in query for query in queries
+        )
+        materialize_pubmed(corpus, manifest, db, max_shards=1)
+        second = reader.snapshot_identity()
+        assert second["applied_shards"] == 2
+        assert second["snapshot_sha256"] != first["snapshot_sha256"]
+        assert reader.status(include_counts=False)["current_records"] == 2
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db, read_only=True) as reader:
+        assert reader.snapshot_identity() == second
+
+
+def test_fast_status_handles_older_builders_without_stale_counts(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)]])
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db) as index:
+        index.conn.execute("DELETE FROM metadata WHERE key='current_records_count'")
+        index.conn.commit()
+        assert index.status(include_counts=False)["current_records"] is None
+        assert index.status()["current_records"] == 1

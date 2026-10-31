@@ -46,6 +46,14 @@ python -m litdatamatcher.literature_index validate --database 'C:\Codex\LitDataM
 
 The API supports `LiteratureIndex(path, read_only=True)`, `search(query, limit)`,
 `get(pmid)`, `passages(pmid)`, `iter_records(batch_size)`, and `status()`.
+For job fingerprints, `snapshot_identity()` hashes the committed shard-receipt
+prefix (including source checksums) in a single read transaction. Its cost scales
+with shard count, not the number of articles or database bytes. Pin that identity
+when submitting a job; a changed prefix requires a new job or explicit policy.
+`status(include_counts=False)` avoids record-table scans for routine UI polling.
+Older active builders without incremental count metadata return `null` for that
+fast count; `status()` still computes exact counts. Never fill missing counts
+from an outdated run receipt.
 Use a separate connection per thread. Search uses literal-token FTS5 BM25;
 scores rank retrieval candidates and are not compatibility probabilities.
 Documents carry stable `PMID:` identifiers, source URLs, source-shard checksums,

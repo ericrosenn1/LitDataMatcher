@@ -1,352 +1,148 @@
 # LitDataMatcher
 
-[![CI](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml?query=branch%3Amain)
-[![Package build](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml?query=branch%3Amain)
-[![Documentation](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml/badge.svg?branch=main)](https://ericrosenn1.github.io/LitDataMatcher/)
-[![CodeQL](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml?query=branch%3Amain)
-[![Pre-commit](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml?query=branch%3Amain)
+### From open questions to research possibilities.
 
-<br>
+A research workspace that connects questions in scientific literature with public datasets worth investigating. Explore the evidence, understand the ranking, and build a reviewable shortlist—with a reproducible Python pipeline underneath.
 
-[![Python](https://img.shields.io/badge/Python-%E2%89%A53.10-3776AB?logo=python&logoColor=white)](https://github.com/ericrosenn1/LitDataMatcher/blob/main/pyproject.toml)
-[![License](https://img.shields.io/github/license/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/blob/main/LICENSE)
-[![Citation](https://img.shields.io/badge/citation-CITATION.cff-5A2D81)](https://github.com/ericrosenn1/LitDataMatcher/blob/main/CITATION.cff)
+[![Python CI](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml/badge.svg)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-16716b)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB)](pyproject.toml)
+[![TypeScript](https://img.shields.io/badge/frontend-TypeScript-3178C6)](web/)
 
-<br>
+<img src="docs/assets/workspace.png" width="1440" height="1100" alt="LitDataMatcher research workspace showing literature-derived questions, ranked dataset matches, and inspectable evidence">
 
-[![Last commit](https://img.shields.io/github/last-commit/ericrosenn1/LitDataMatcher/main)](https://github.com/ericrosenn1/LitDataMatcher/commits/main)
-[![Contributors](https://img.shields.io/github/contributors/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/graphs/contributors)
-[![Issues](https://img.shields.io/github/issues/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/issues)
-[![Pull requests](https://img.shields.io/github/issues-pr/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/pulls)
-[![Stars](https://img.shields.io/github/stars/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
-[![Forks](https://img.shields.io/github/forks/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
-[![Repository size](https://img.shields.io/github/repo-size/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
-[![Top language](https://img.shields.io/github/languages/top/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
+**[Run the app](#run-the-app)** · **[How it works](#how-it-works)** · **[Python pipeline](#use-the-python-pipeline)** · **[App guide](docs/web-app.md)** · **[Architecture](docs/architecture.md)**
 
-LitDataMatcher is a reproducible research-automation pipeline for turning
-scientific literature into ranked, reviewable question-data opportunities.
+## A workspace for the next question
 
-The motivating problem is simple: papers often describe unresolved questions,
-limitations, future directions, and under-tested hypotheses, while public
-repositories contain datasets that may already be able to address some of those
-questions. LitDataMatcher connects those two worlds by extracting open research
-questions from text, normalizing their data requirements, discovering relevant
-public datasets, and ranking the most plausible question-dataset pairs for
-expert review.
+The useful part of a paper is sometimes what remains unresolved. LitDataMatcher brings those open questions together with candidate data sources, while keeping the original evidence and the limits of each match visible.
 
-The current implementation is a functional research-software foundation. It is
-offline and reproducible by default, produces auditable JSONL/SQLite artifacts,
-and is organized into explicit scientific nodes that can be independently
-tested, benchmarked, replaced, or extended.
+| Explore | Inspect | Keep the work |
+| --- | --- | --- |
+| Start with an offline demo or search live literature and dataset metadata. | Open a question–dataset pair to see source text, ranking components, and caveats. | Save a shortlist, add review notes, and export CSV or JSON. |
+| Browse candidate datasets and follow their source links. | Distinguish illustrative records from live metadata and imported pipeline outputs. | Import a Python pipeline run into the same visual workspace. |
 
-## What It Does Today
+The web app runs in your browser. The bundled demo needs no account, API key, Python environment, or GPU.
 
-LitDataMatcher currently supports:
+## Run the app
 
-- Literature-driven open-question extraction from JSONL records containing
-  titles, abstracts, full text, and DOI/source metadata.
-- Future-direction and limitation-derived question generation.
-- Lightweight meta-analysis style clustering and evidence synthesis across
-  related questions.
-- Ontology-backed variable harmonization for biomedical concepts such as
-  antibiotic exposure, microbiome composition, transcriptomics, metabolomics,
-  disease activity, treatment, outcomes, and timepoints.
-- Dataset discovery through a curated offline biomedical catalog.
-- Dataset metadata normalization into stable `DatasetRecord` objects.
-- Governance and reuse-risk scoring for access, license, and human-subject
-  concerns.
-- Pair-level feasibility assessment, including variable coverage, population
-  fit, sample adequacy, assay fit, longitudinal fit, caveats, and recommended
-  statistical design.
-- Explainable ranking of question-dataset pairs.
-- Expert review exports as CSV and JSONL.
-- Evaluation utilities for question-extraction and ranking benchmarks.
-- Manuscript-style Markdown reports for run summaries.
-- A legacy streaming orchestrator for live topic-level demos.
+Install Node.js 22.12 or newer, then run from the repository root:
 
-## Scientific Workflow
-
-The package pipeline follows this conceptual flow:
-
-```text
-literature records
-  -> open-question identification
-  -> meta-analysis style clustering
-  -> dataset discovery and classification
-  -> governance and feasibility assessment
-  -> question-to-data ranking
-  -> JSONL, SQLite, expert review sheets, and publication report
+```bash
+npm --prefix web ci
+npm --prefix web run dev
 ```
 
-Each node writes inspectable outputs. This is intentional: the system is meant
-to support scientific audit, error analysis, and expert-in-the-loop validation,
-not just produce opaque scores.
+Open the local URL printed by Vite. The app starts with a clearly labeled demonstration workspace.
 
-## Repository Status
+To build and preview the production app:
 
-The repository has two execution paths:
+```bash
+npm --prefix web run build
+npm --prefix web run preview
+```
 
-- `litdatamatcher` package: the recommended reproducible pipeline for research
-  and publication-oriented analyses.
-- Top-level worker scripts: streaming subprocess entrypoints used by
-  `orchestrator.py` for topic-level demonstrations and resource-management
-  experiments.
+The static build is written to `web/dist/`. Publishing is a separate step; these commands do not deploy a site.
 
-The package path should be used for serious analyses. The orchestrator path is
-kept for live demos and future distributed-worker development.
+## How it works
 
-## Installation
+```mermaid
+flowchart LR
+    A[Scientific literature] --> B[Open questions]
+    C[Public dataset metadata] --> D[Candidate datasets]
+    B --> E[Explainable matching]
+    D --> E
+    E --> F[Evidence review]
+    F --> G[Shortlist and exports]
+    H[Python pipeline run] --> F
+```
 
-Python 3.10 or newer is required.
+The app supports three complementary workflows:
+
+1. **Explore the demo.** A reproducible example illustrates extraction, matching, and review. Its literature examples and catalog summaries are illustrative, not a validated scientific result.
+2. **Search live sources.** Query Europe PMC for literature and DataCite for dataset metadata. Inspect the returned records and follow their original links. The browser ranks candidate pairs with an explainable lexical method.
+3. **Review a pipeline run.** Import `matches.jsonl` produced by the Python package, or reopen an exported app workspace. Keep source evidence and recorded score components alongside review decisions.
+
+Pasted text can also be analyzed in the browser against the workspace’s candidate datasets. The interface distinguishes extracted future directions from broader topic matches.
+
+### What a score means
+
+A high score identifies a candidate to inspect. It does **not** establish that a dataset contains the necessary measurements, that access is permitted, or that a study can answer the question. Browser rankings are lexical heuristics; imported Python rankings retain their own component values. Neither is a calibrated probability or a validated measure of scientific feasibility.
+
+Dataset access, licenses, population compatibility, variables, and study design require review against the original records. Missing metadata remains unknown. See the [app methodology](docs/web-app.md#methodology-and-limits) and [scientific limitations](docs/limitations.md).
+
+## Use the Python pipeline
+
+The existing Python package remains the reproducible processing path: literature extraction, variable harmonization, candidate discovery, evidence synthesis, heuristic feasibility and governance checks, ranking, and auditable artifacts.
+
+Python 3.10 or newer:
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
+```
+
+Activate the environment with `.venv\Scripts\Activate.ps1` on Windows or `source .venv/bin/activate` on macOS/Linux, then:
+
+```bash
 python -m pip install -e ".[dev]"
-```
-
-Optional NLP/model dependencies can be installed with:
-
-```bash
-python -m pip install -e ".[dev,nlp,ml]"
-```
-
-The deterministic core pipeline does not require GPU access, external APIs, or
-network access.
-
-## Quickstart
-
-Run the built-in demo:
-
-```bash
-litdatamatcher demo --out run/demo
-```
-
-Equivalent module invocation:
-
-```bash
 python -m litdatamatcher.cli demo --out run/demo
 ```
 
-Run on a JSONL literature corpus:
+Run on your own JSONL literature corpus:
 
 ```bash
-litdatamatcher run --input test_input.jsonl --out run/full --top-n 100
+python -m litdatamatcher.cli run --input papers.jsonl --out run/research --top-n 100
 ```
 
-Each input row should include some combination of:
+Each input line is a JSON record:
 
 ```json
-{"title": "...", "abstract": "...", "text": "...", "doi": "..."}
+{"title":"Paper title","abstract":"Abstract text","text":"Optional full text","doi":"Optional DOI"}
 ```
 
-## Outputs
+Use an optional dataset catalog with `--catalog datasets.jsonl`. The default catalog supports deterministic offline demonstrations; it is not an exhaustive inventory of available data.
 
-A full run writes:
+| Artifact | Purpose |
+| --- | --- |
+| `matches.jsonl` | Ranked pairs with evidence and component scores; import into the app. |
+| `questions.jsonl`, `datasets.jsonl`, `syntheses.jsonl` | Inspectable outputs from individual processing stages. |
+| `review_sheet.csv`, `review_sheet.jsonl` | Expert annotation and external review. |
+| `litdatamatcher.sqlite` | Queryable run records. |
+| `summary.md`, `publication_report.md`, `metrics.jsonl` | Run reporting and computational accounting. |
 
-- `questions.jsonl`: extracted and normalized open research questions.
-- `datasets.jsonl`: normalized candidate dataset records.
-- `syntheses.jsonl`: question-cluster evidence summaries.
-- `matches.jsonl`: ranked question-dataset opportunities with component scores.
-- `summary.md`: concise human-readable ranking summary.
-- `publication_report.md`: manuscript-style methods/results summary.
-- `review_sheet.csv`: expert review sheet for relevance annotation.
-- `review_sheet.jsonl`: programmatic review export.
-- `litdatamatcher.sqlite`: queryable run database.
-- `metrics.jsonl`: run-level counts and accounting.
+The core pipeline does not require network access or a GPU. Optional NLP/model dependencies are available through `.[nlp,ml]`; installing them does not change the browser app’s matching method. Legacy streaming workers remain available for development and demonstration.
 
-The most important artifact for scientific review is usually `matches.jsonl` or
-`review_sheet.csv`. Each match includes the question, dataset, component scores,
-rationale, missing variables, feasibility assessment, governance assessment, and
-recommended study design.
+## Built for inspection
 
-## Evaluation And Review
+- **Evidence stays attached.** Source text, identifiers, links, and ranking components travel with candidate matches.
+- **Review remains a human decision.** Save pairs and record assessments without converting a ranking into a scientific claim.
+- **The offline path is reproducible.** Python stages write explicit JSONL and SQLite artifacts.
+- **The browser app is portable.** React, TypeScript, and Vite produce static assets with bundled fonts and no application server requirement.
+- **Data boundaries are visible.** Demo, live, and imported workspaces have distinct provenance.
 
-Evaluate a completed run against gold question labels:
+Saved matches and notes stay in the browser’s research library when you change workspaces or reload. Export from the library to retain that saved collection; exports elsewhere contain the active workspace. Live searches send the query to Europe PMC and DataCite. Imported files and pasted text are processed locally by the app; there is no account system or cloud synchronization. Export work that needs to be retained or shared.
 
-```bash
-litdatamatcher evaluate --run-dir run/full --gold-questions gold_questions.jsonl
-```
-
-Evaluate both extraction and ranking:
+## Development and validation
 
 ```bash
-litdatamatcher evaluate ^
-  --run-dir run/full ^
-  --gold-questions gold_questions.jsonl ^
-  --gold-ranking gold_ranking.jsonl ^
-  --out run/full/evaluation.jsonl
-```
-
-Export a review sheet:
-
-```bash
-litdatamatcher review-export --run-dir run/full --out run/full/review.csv
-```
-
-Summarize completed review labels:
-
-```bash
-litdatamatcher review-summary --labels run/full/review.csv
-```
-
-Generate a manuscript-style report:
-
-```bash
-litdatamatcher report --run-dir run/full --out run/full/publication_report.md
-```
-
-## Streaming Orchestrator Demo
-
-The legacy subprocess demo remains available:
-
-```bash
-python orchestrator.py --out run/orchestrator_matches.jsonl
-```
-
-Provide custom topics with:
-
-```bash
-python orchestrator.py --topics-file topics.txt --out run/orchestrator_matches.jsonl
-```
-
-`topics.txt` may be plain text, one topic per line, or JSONL with a `topic`,
-`question`, or `title` field.
-
-## Architecture
-
-The main package modules are:
-
-- `litdatamatcher.schemas`: validated dataclasses and stable IDs.
-- `litdatamatcher.text`: deterministic text normalization, sentence splitting,
-  sectioning, variable inference, and lexical similarity.
-- `litdatamatcher.literature`: open-question extraction and significance
-  scoring.
-- `litdatamatcher.meta_analysis`: question clustering and evidence synthesis.
-- `litdatamatcher.datasets`: dataset adapters, metadata normalization, and
-  classification.
-- `litdatamatcher.ontology`: variable harmonization and concept normalization.
-- `litdatamatcher.governance`: access, license, privacy, and reuse-risk scoring.
-- `litdatamatcher.feasibility`: pair-level design feasibility and caveat scoring.
-- `litdatamatcher.ranking`: explainable question-to-dataset scoring.
-- `litdatamatcher.storage`: JSONL and SQLite persistence.
-- `litdatamatcher.evaluation`: extraction and ranking benchmark metrics.
-- `litdatamatcher.review`: expert review exports and label summaries.
-- `litdatamatcher.reporting`: publication-oriented run reports.
-- `litdatamatcher.adapters`: optional live-source adapter scaffolds.
-- `litdatamatcher.pipeline`: end-to-end orchestration.
-- `litdatamatcher.cli`: command-line interface.
-
-Additional documentation:
-
-- [Documentation site](https://ericrosenn1.github.io/LitDataMatcher/)
-- `docs/architecture.md`
-- `docs/node_contracts.md`
-- `docs/reproducibility.md`
-- `docs/model_robustness_plan.md`
-- `docs/feature_roadmap.md`
-
-## Testing
-
-After installing development dependencies:
-
-```bash
+npm --prefix web run typecheck
+npm --prefix web test
+npm --prefix web run build
 python -m pytest
-python -m compileall litdatamatcher data_worker.py lit_gpu_worker.py matcher.py orchestrator.py
-python -m litdatamatcher.cli demo --out run/demo
-python -m litdatamatcher.cli report --run-dir run/demo
 ```
 
-The deterministic tests are designed to run without GPU access, network access,
-or external NLP models. Optional model-backed components should fail closed into
-deterministic lexical fallbacks where possible.
+For desktop/mobile browser checks and automated accessibility checks, install Chromium once and run:
 
-## Reproducibility
-
-LitDataMatcher is designed for auditable runs:
-
-- Core identifiers are deterministic SHA-1 based stable IDs.
-- Node outputs are JSONL and are also persisted to SQLite.
-- Generated runtime files are ignored by `.gitignore`.
-- Line-ending behavior is pinned through `.gitattributes`.
-- Default dataset discovery is offline and deterministic.
-- Optional HTTP adapters use caching and retry scaffolds.
-- Scores are decomposed into interpretable components.
-
-For a publication run, archive:
-
-- Git commit SHA.
-- Python version and environment.
-- Input literature JSONL.
-- Optional dataset catalog JSONL.
-- Output directory.
-- `litdatamatcher.sqlite`.
-- `metrics.jsonl`.
-- Expert review labels, if available.
-
-## Extending Data Sources
-
-Add a new dataset adapter by implementing the `DataSourceAdapter` protocol:
-
-```python
-class MyAdapter:
-    name = "my_repository"
-
-    def search(self, query: str) -> list[DatasetRecord]:
-        ...
+```bash
+cd web
+npx playwright install chromium
+npm run test:e2e
 ```
 
-Adapters should preserve raw repository metadata in `DatasetRecord.metadata`
-when possible. Live API adapters should include retry, caching, rate-limit,
-schema-drift tests, source timestamps, and provenance before being used for
-production ranking.
+Python and web CI run independently. The web workflow also packages the static build as an artifact. Playwright exercises the app at desktop and mobile sizes, and axe checks selected interface states. See the [validation record](docs/app-validation.md) for measured results and coverage limits. Passing software checks establishes computational behavior, not scientific validity.
 
-Optional scaffolds are already present for OpenAlex literature metadata and
-ClinicalTrials.gov study metadata. Priority future adapters include PubMed, GEO,
-SRA/ENA, MGnify, Qiita, Metabolomics Workbench, dbGaP, and domain-specific
-biomedical repositories.
+For technical details, see the [web app guide](docs/web-app.md), [node contracts](docs/node_contracts.md), [reproducibility notes](docs/reproducibility.md), and [model robustness plan](docs/model_robustness_plan.md).
 
-## Citation And License
+## Citation and license
 
-Citation metadata is provided in `CITATION.cff`. If this project contributes to
-academic work, cite the software repository and the exact commit or release used
-for the analysis.
-
-The project is distributed under the MIT License. See `LICENSE`.
-
-## Current Limitations
-
-LitDataMatcher is ready as a research-software foundation, not as a validated
-autonomous discovery engine. Important limitations remain:
-
-- Open-question extraction is currently deterministic and should be benchmarked
-  against expert annotations.
-- Ranking weights are interpretable heuristics, not yet calibrated from expert
-  relevance labels.
-- The default dataset catalog is curated and offline; production use requires
-  live source adapters and source-specific validation.
-- The meta-analysis node currently estimates recurrence and evidence strength;
-  it does not yet extract effect sizes or perform statistical meta-analysis.
-- Top-ranked pairs require manual review for study design, consent, license,
-  variable compatibility, confounding, missingness, and statistical power.
-
-## Path To Publication Readiness
-
-The next scientific milestones are:
-
-1. Build an expert-annotated benchmark corpus for open questions and
-   question-dataset relevance.
-2. Report extraction precision, recall, F1, calibration, and error taxonomy.
-3. Add live adapters for at least two major repositories.
-4. Calibrate ranking with expert labels and report precision@k, MRR, and nDCG.
-5. Produce case studies where ranked question-data opportunities are manually
-   validated by domain experts.
-6. Archive all inputs, outputs, environment metadata, and code at a stable
-   release commit.
-
-## Scientific Caveat
-
-LitDataMatcher ranks opportunities. It does not prove that a public dataset can
-answer a question. Its purpose is to accelerate expert review by making
-question-data connections explicit, traceable, and reproducible.
+Created by **Eric Rosenn**. Use [CITATION.cff](CITATION.cff) to cite the software. Source code is available under the [MIT license](LICENSE); external literature and datasets retain their own terms.

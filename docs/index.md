@@ -11,6 +11,9 @@ replace domain-expert review.
 
 ## Start here
 
+- Explore the [Web app guide](web-app.md) for the visual research workspace,
+  live metadata discovery, saved reviews, and pipeline imports. See
+  [App validation](app-validation.md) for the tested behavior and limits.
 - Follow [Installation and CLI](installation.md) for the offline deterministic
   demo.
 - Review [Architecture](architecture.md) and [Node contracts](node_contracts.md)

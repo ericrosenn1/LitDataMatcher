@@ -20,3 +20,9 @@ run/
 *.log
 rejected_sentences.txt
 local/
+
+# Web workspace build and dependency artifacts
+node_modules/
+*.tsbuildinfo
+test-results/
+playwright-report/

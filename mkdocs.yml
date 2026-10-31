@@ -9,6 +9,8 @@ theme:
 
 nav:
   - Home: index.md
+  - Web app guide: web-app.md
+  - App validation: app-validation.md
   - Installation and CLI: installation.md
   - Architecture: architecture.md
   - Corpus and data: corpus_and_data.md

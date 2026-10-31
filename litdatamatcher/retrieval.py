@@ -7,6 +7,7 @@ or truth probabilities. The default scientific assessor remains authoritative.
 from __future__ import annotations
 
 import hashlib
+import heapq
 import importlib.metadata
 import inspect
 import io
@@ -25,6 +26,27 @@ from .semantic_runtime import PretrainedSemanticIndex
 from .text import tokenize
 
 CACHE_VERSION = "semantic-vector-cache-1.0"
+
+
+def top_k_indices(scores: np.ndarray, identifiers: list[str], k: int) -> list[int]:
+    """Exact top-k with stable ID ties, avoiding a Python sort of every score.
+
+    Partitioning selects the score boundary in linear time. Every boundary tie
+    is considered before choosing the lexicographically smallest identifiers.
+    This is exact retrieval, not an approximate nearest-neighbor index.
+    """
+    if type(k) is not int or k < 1:
+        raise ValueError("k must be a positive integer")
+    if scores.ndim != 1 or len(scores) != len(identifiers) or not np.isfinite(scores).all():
+        raise ValueError("Finite scores and equally sized identifiers are required")
+    count = min(k, len(scores))
+    if not count:
+        return []
+    boundary = float(np.partition(scores, len(scores) - count)[len(scores) - count])
+    above = np.flatnonzero(scores > boundary).tolist()
+    tied = heapq.nsmallest(count - len(above), np.flatnonzero(scores == boundary).tolist(),
+                          key=lambda i: identifiers[i])
+    return sorted(above + tied, key=lambda i: (-float(scores[i]), identifiers[i]))
 
 
 def _validate_records(records: list[dict]) -> list[dict]:
@@ -84,7 +106,7 @@ class BM25Index:
                     1 - self.b + self.b * self.lengths[index] / max(self.average_length, 1.0)
                 )
                 scores[index] += idf * frequency * (self.k1 + 1) / (frequency + normalizer)
-        order = sorted(scores, key=lambda index: (-scores[index], self.records[index]["id"]))[:k]
+        order = heapq.nsmallest(k, scores, key=lambda index: (-scores[index], self.records[index]["id"]))
         return [
             {
                 "id": self.records[index]["id"],
@@ -211,11 +233,10 @@ class CachedSemanticIndex:
         if query_vectors.shape[1] != self.index.vectors.shape[1]:
             raise ValueError("Query/document vector dimensions differ")
         results = []
+        identifiers = [row["id"] for row in self.index.records]
         for query in query_vectors:
             scores = self.index.vectors @ query
-            order = sorted(
-                range(len(scores)), key=lambda i: (-float(scores[i]), self.index.records[i]["id"])
-            )[:k]
+            order = top_k_indices(scores, identifiers, k)
             results.append(
                 [
                     {

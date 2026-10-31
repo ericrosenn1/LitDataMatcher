@@ -11,6 +11,7 @@ import platform
 import re
 import subprocess
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 
 from .data_plane import Catalog, atomic_json, atomic_write, digest
@@ -25,7 +26,7 @@ from .strict_artifacts import strict_json_loads, validate_artifact
 def read_rows(path):
     return [
         strict_json_loads(line)
-        for line in Path(path).read_text(encoding="utf-8-sig").splitlines()
+        for line in Path(path).read_text(encoding="utf-8-sig").split("\n")
         if line.strip()
     ]
 
@@ -40,9 +41,56 @@ def write_rows(path, rows):
     )
 
 
+def _observed_metadata_values(record, field, capabilities, aliases):
+    metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
+    evidence = record.get("field_evidence") or metadata.get("field_evidence", {})
+    observation = evidence.get(field, {}) if isinstance(evidence, dict) else {}
+    values = record.get(field, [])
+    if (isinstance(observation, dict) and observation.get("status") in {"observed", "known"}
+            and observation.get("source_locator") and observation.get("mapping_type", "exact") in {"exact", "synonym"}
+            and isinstance(values, list) and observation.get("value") == values):
+        return values, observation["source_locator"]
+    for alias in aliases:
+        observation = capabilities.get(alias, {})
+        if (isinstance(observation, dict) and observation.get("status") == "observed"
+                and observation.get("source_locator") and observation.get("value") is not None
+                and observation.get("mapping_type", "exact") in {"exact", "synonym"}):
+            value = observation["value"]
+            return value if isinstance(value, list) else [value], observation["source_locator"]
+    return [], None
+
+
+def _geo_source_fields(record):
+    """Read only retained ESummary fields, never classifier-derived biology."""
+    metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
+    provenance = record.get("source_provenance") or metadata.get("source_provenance", {})
+    if not isinstance(provenance, dict):
+        return {}
+    if not (provenance.get("source_type") == "geo"
+            and provenance.get("adapter_name") == "geo"
+            and provenance.get("adapter_version") == "ncbi_geo_esummary_source_fidelity_v2"
+            and provenance.get("acquisition_method") == "ncbi_eutilities"
+            and provenance.get("raw_record_id") == record.get("dataset_id")
+            and metadata.get("accession") == record.get("dataset_id")):
+        return {}
+    uid = metadata.get("uid")
+    if not re.fullmatch(r"\d+", str(uid or "")):
+        return {}
+    locator = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gds&id={uid}&retmode=json#/result/{uid}"
+    fields = {}
+    for target, source in (("organisms", "taxon"), ("assay_types", "gdstype")):
+        value = metadata.get(source)
+        # Mixed-species strings stay intact. Neither sequencing wording nor
+        # repository membership establishes a more specific assay modality.
+        if isinstance(value, str) and value.strip():
+            fields[target] = ([value], f"{locator}/{source}")
+    return fields
+
+
 def normalize_dataset(record):
-    """Explicit acquisition-v2.1 -> experimental contract migration; raw retained."""
+    """Versioned source-evidence migration; retain raw/classifier fields separately."""
     result = dict(record)
+    metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
     result.setdefault("summary", record.get("description", ""))
     caps = {}
     for key, raw in record.get("capabilities", {}).items():
@@ -58,35 +106,44 @@ def normalize_dataset(record):
             if k in {"value", "status", "source_locator", "reason", "mapping_type"}
         }
         caps[key] = value
-    contract = modality_contract(dict(record, capabilities=caps))
-    provenance = record.get("source_provenance") or record.get("metadata", {}).get("source_provenance", {})
+    organisms, organism_locator = _observed_metadata_values(record, "organisms", caps, ("species", "organism"))
+    assays, assay_locator = _observed_metadata_values(record, "assay_types", caps, ("assay",))
+    geo_fields = _geo_source_fields(record)
+    if not organisms and "organisms" in geo_fields:
+        organisms, organism_locator = geo_fields["organisms"]
+    if not assays and "assay_types" in geo_fields:
+        assays, assay_locator = geo_fields["assay_types"]
+    contract = modality_contract(dict(record, capabilities=caps, organisms=organisms, assay_types=assays))
+    provenance = record.get("source_provenance") or metadata.get("source_provenance", {})
     locator = provenance.get("source_locator") or provenance.get("source_url") if isinstance(provenance, dict) else None
     # Source adapter fields can support narrow metadata compatibility. They do
     # not establish measured outcomes, participant access, or independent units.
-    if locator:
-        for field, values, source_field in (
-            ("species", record.get("organisms", []), "organisms"),
-            ("organism", record.get("organisms", []), "organisms"),
-            ("assay", record.get("assay_types", []), "assay_types"),
-            ("modality", [v for v in contract["modality"] if v != "UNKNOWN"], "assay_types"),
+    if locator or organism_locator or assay_locator:
+        for field, values, field_locator in (
+            ("species", organisms, organism_locator),
+            ("organism", organisms, organism_locator),
+            ("assay", assays, assay_locator),
+            ("modality", [v for v in contract["modality"] if v != "UNKNOWN"], assay_locator),
         ):
-            if values and field not in caps:
-                caps[field] = {"value": values, "status": "observed", "source_locator": f"{locator}#{source_field}", "mapping_type": "exact"}
-        metadata = record.get("metadata", {})
+            if values and field_locator and (field not in caps or caps[field].get("status") == "unknown"):
+                caps[field] = {"value": values, "status": "observed", "source_locator": field_locator,
+                               "mapping_type": "synonym" if field == "modality" else "exact"}
         protocol = metadata.get("protocolSection", {}) if isinstance(metadata, dict) else {}
         design = protocol.get("designModule", {}) if isinstance(protocol, dict) else {}
-        if isinstance(design, dict) and design.get("studyType") in {"OBSERVATIONAL", "INTERVENTIONAL"} and "study_design" not in caps:
+        if (locator and isinstance(design, dict) and design.get("studyType") in {"OBSERVATIONAL", "INTERVENTIONAL"}
+                and ("study_design" not in caps or caps["study_design"].get("status") == "unknown")):
             info = design.get("designInfo", {})
             allocation = info.get("allocation", "UNKNOWN") if isinstance(info, dict) else "UNKNOWN"
             caps["study_design"] = {"value": {"study_type": design["studyType"], "allocation": allocation}, "status": "observed", "source_locator": f"{locator}#/protocolSection/designModule", "mapping_type": "exact"}
     result["capabilities"] = caps
     result["modality_contract"] = contract
-    result["availability"] = record.get("access_status", record.get("metadata", {}).get("access_status", "UNKNOWN"))
+    result["availability"] = record.get("access_status", metadata.get("access_status", "UNKNOWN"))
     result["migration"] = {
         "from": record.get("schema_version"),
         "to": "experimental-contract-2.0",
         "raw_record_digest": digest(record),
-        "changed_semantics": False,
+        "changed_semantics": True,
+        "evidence_policy": "structured-source-field-evidence-v1",
     }
     return result
 
@@ -288,22 +345,41 @@ def rebase_runtime_item(item: dict, document: dict, view: dict, view_id: str) ->
 
 
 def qualified_runtime(qualification_path: Path, runtime) -> tuple[bool, str | None]:
-    """Accept a backend qualification only when its inspected model identity matches."""
+    """Bind a verified trial to the static backend, not its particular source text."""
     if not qualification_path.is_file():
         return False, None
     try:
-        qualification = json.loads(qualification_path.read_text(encoding="utf-8"))
+        from .semantic_runtime import digest as runtime_digest
+
+        content = qualification_path.read_bytes()
+        qualification = strict_json_loads(content)
+        backend = runtime.backend_identity()
+        expected = qualification["expected_identity"]
+        expected_backend = dict(expected)
+        source_hash = expected_backend.pop("input_sha256")
+        expected_backend["decoding"] = {
+            key: value for key, value in expected_backend["decoding"].items()
+            if key not in {"schema_sha256", "complete_sentence_choices"}
+        }
+        fresh = qualification["fresh"]
+        configuration = qualification["configuration"]
         passed = (
-            qualification.get("status") == "PASS"
-            and qualification["fresh"]["inference_manifest"]["origin"] == "fresh_local_inference"
-            and qualification["fresh"]["inference_manifest"]["model_revision"]
-            == runtime.model_manifest["revision"]
+            qualification.get("qualification_schema") == "runtime-qualification-v2.3"
+            and qualification.get("status") == "PASS"
+            and qualification["backend_identity"] == backend == expected_backend
+            and re.fullmatch(r"[a-f0-9]{64}", source_hash) is not None
+            and fresh["inference_manifest"]["fingerprint"] == expected == qualification["replay_identity"]
+            and fresh["inference_manifest"]["configuration"] == configuration == qualification["replay_configuration"]
+            and runtime_digest(configuration) == backend["config_sha256"]
+            and fresh["inference_manifest"]["origin"] == "fresh_local_inference"
+            and fresh["inference_manifest"]["model_revision"] == runtime.model_manifest["revision"]
+            and bool(fresh.get("claims") or fresh.get("questions"))
             and qualification.get("replay_origin") == "cache_replay"
             and qualification.get("network_control", {}).get("blocked_probe")
         )
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+    except (AttributeError, ImportError, KeyError, OSError, RuntimeError, TypeError, ValueError):
         return False, None
-    return bool(passed), hashlib.sha256(qualification_path.read_bytes()).hexdigest()
+    return bool(passed), hashlib.sha256(content).hexdigest()
 
 
 def validate_run_artifact(path: Path) -> str:
@@ -429,8 +505,10 @@ def analyze(
     root: Path, out: Path, model_dir: Path, embedding_dir: Path, *, question=None,
     requirements=None, limit=3, chunks=2, fresh=False, device="cpu", document_path=None,
     topic=None, reference_accessions=None, question_source_id=None, resume=False, vector_cache=None,
+    runtime_config=None, _session=None,
 ):
     """Run or resume fingerprint-checked extraction, compilation and matching stages."""
+    from .analysis_session import runtime_configuration, runtime_environment
     from .workflow_checkpoint import CheckpointRun, analysis_fingerprint
 
     if limit < 1 or chunks < 1:
@@ -439,17 +517,23 @@ def analyze(
     parameters = dict(question=question, requirements=requirements, limit=limit, chunks=chunks,
         fresh=fresh, device=device, document_path=str(Path(document_path).resolve()) if document_path else None,
         topic=topic, reference_accessions=reference_accessions, question_source_id=question_source_id,
-        vector_cache=str(Path(vector_cache).resolve()) if vector_cache else None)
-    fingerprint = analysis_fingerprint(root, model_dir, embedding_dir, parameters)
-    with CheckpointRun(out, fingerprint, resume) as workflow:
-        previous = workflow.completed()
-        if previous is not None:
-            return previous
-        result = _analyze_stages(root, out, model_dir, embedding_dir, **parameters, _workflow=workflow)
-        if analysis_fingerprint(root, model_dir, embedding_dir, parameters) != fingerprint:
-            raise ValueError("Analysis input, model or implementation changed during execution; output is not accepted")
-        workflow.finish(result)
-        return result
+        vector_cache=str(Path(vector_cache).resolve()) if vector_cache else None,
+        runtime_config=runtime_configuration(device, runtime_config))
+    owner = _session.claim(root, model_dir, embedding_dir, parameters) if _session else nullcontext()
+    with owner:
+        fingerprint = _session.fingerprint(parameters) if _session else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+        fingerprint["runtime_environment"] = runtime_environment()
+        with CheckpointRun(out, fingerprint, resume) as workflow:
+            previous = workflow.completed()
+            if previous is not None:
+                return previous
+            result = _analyze_stages(root, out, model_dir, embedding_dir, **parameters, _workflow=workflow, _session=_session)
+            current = _session.fingerprint(parameters) if _session else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+            current["runtime_environment"] = runtime_environment()
+            if current != fingerprint:
+                raise ValueError("Analysis input, model or implementation changed during execution; output is not accepted")
+            workflow.finish(result)
+            return result
 
 
 def _analyze_stages(
@@ -469,7 +553,9 @@ def _analyze_stages(
     reference_accessions=None,
     question_source_id=None,
     vector_cache=None,
+    runtime_config=None,
     _workflow=None,
+    _session=None,
 ):
     from .semantic_runtime import LocalSemanticRuntime, PretrainedSemanticIndex, RuntimeConfig
 
@@ -481,9 +567,34 @@ def _analyze_stages(
         from .ingestion import ingest_literature_sources
 
         localout = out / "local_ingestion"
-        localout.mkdir()
-        ingest_literature_sources([str(document_path)], localout / "literature.jsonl")
-        documents = read_rows(localout / "literature.jsonl")
+        localout.mkdir(exist_ok=True)
+        from .workflow_checkpoint import file_identity
+
+        local_state = _workflow.load("local_ingestion")
+        if local_state is not None:
+            try:
+                if not isinstance(local_state.get("records"), list) or not local_state.get("outputs"):
+                    raise ValueError("Invalid local ingestion checkpoint")
+                for row in local_state["outputs"]:
+                    path = (localout / row["name"]).resolve()
+                    if path.parent != localout.resolve():
+                        raise ValueError("Local ingestion checkpoint path escapes its stage")
+                    if file_identity(path) != row["identity"]:
+                        raise ValueError("Local ingestion artifact changed")
+                    validate_artifact(path)
+            except (OSError, KeyError, TypeError, ValueError) as error:
+                quarantine = out / ".workflow" / "quarantine" / f"ingestion-{dt.datetime.now().strftime('%Y%m%d%H%M%S%f')}"
+                quarantine.parent.mkdir(exist_ok=True)
+                localout.replace(quarantine)
+                localout.mkdir()
+                _workflow.state["repairs"].append({"stage": "local_ingestion", "reason": str(error), "quarantine": str(quarantine)})
+                local_state = None
+        if local_state is None:
+            ingest_literature_sources([str(document_path)], localout / "literature.jsonl")
+            local_state = {"records": read_rows(localout / "literature.jsonl"),
+                           "outputs": [{"name": path.name, "identity": file_identity(path)} for path in sorted(localout.iterdir()) if path.is_file()]}
+            _workflow.save("local_ingestion", local_state)
+        documents = local_state["records"]
     if topic:
         normalized_topic = topic.casefold().strip()
         exact_topic = [
@@ -524,9 +635,7 @@ def _analyze_stages(
         key=lambda d: d["document_id"],
     )[:limit]
     datasets = [d for d in all_datasets if d.get("split_context", "development") == "development"]
-    runtime = LocalSemanticRuntime(
-        model_dir, RuntimeConfig(device=device, dtype="bfloat16" if device == "cuda" else "float32")
-    )
+    runtime = _session.runtime if _session else LocalSemanticRuntime(model_dir, RuntimeConfig(**runtime_config))
     catalog = Catalog(root / "normalized")
     claims = []
     questions = []
@@ -693,18 +802,17 @@ def _analyze_stages(
                 matching[name] for name in ("matches", "candidate_outcomes", "bundles", "dossiers")
             )
         else:
-            if vector_cache:
+            records = [{"id": d["dataset_id"], "text": d["title"] + " " + d.get("summary", "")} for d in datasets]
+            if _session:
+                index = _session.retriever(records) if datasets else None
+            elif vector_cache:
                 from .retrieval import CachedSemanticIndex
                 index = CachedSemanticIndex(embedding_dir, vector_cache, device=device)
             else:
                 index = PretrainedSemanticIndex(embedding_dir, device=device)
             if datasets:
-                index.fit(
-                    [
-                        {"id": d["dataset_id"], "text": d["title"] + " " + d.get("summary", "")}
-                        for d in datasets
-                    ]
-                )
+                if not _session:
+                    index.fit(records)
                 if vector_cache:
                     atomic_json(out / "retrieval_cache.json", index.receipt)
             matches = []
@@ -890,6 +998,11 @@ def _analyze_stages(
                         "topic": topic,
                         "limit": limit,
                         "chunks": chunks,
+                        "runtime_config": runtime_config,
+                        "embedding_model": str(embedding_dir),
+                        "vector_cache": vector_cache,
+                        "fresh": fresh,
+                        "device": device,
                     }
                 ),
             },
@@ -1049,6 +1162,25 @@ def main(argv=None):
     run.add_argument("--resume", action="store_true", help="Resume this run only when source, model and configuration fingerprints match")
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
     run.add_argument("--vector-cache", help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores")
+    run.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
+    run.add_argument("--max-new-tokens", type=int, default=None)
+
+    batch = sub.add_parser("batch", help="Analyze development cases serially with one shared model session")
+    batch.add_argument("--root", required=True)
+    batch.add_argument("--out", required=True)
+    batch.add_argument("--inputs", required=True, help="Frozen cases.jsonl or pipeline_inputs.jsonl")
+    batch.add_argument("--model", required=True)
+    batch.add_argument("--embeddings", required=True)
+    batch.add_argument("--requirements")
+    batch.add_argument("--limit", type=int, default=1)
+    batch.add_argument("--chunks", type=int, default=2)
+    batch.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    batch.add_argument("--vector-cache")
+    batch.add_argument("--fresh", action="store_true")
+    batch.add_argument("--resume", action="store_true")
+    batch.add_argument("--stop-on-error", action="store_true")
+    batch.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
+    batch.add_argument("--max-new-tokens", type=int, default=None)
 
     compile_only = sub.add_parser(
         "compile",
@@ -1129,6 +1261,15 @@ def main(argv=None):
 
         result = run_closeout_audit(args.root, args.source_root)
         write_closeout_audit(result, args.out)
+    elif args.command == "batch":
+        from .analysis_batch import run_batch
+
+        runtime_options = {key: value for key, value in {"decoding_mode": args.decoding_mode, "max_new_tokens": args.max_new_tokens}.items() if value is not None}
+        result = run_batch(args.root, args.out, args.model, args.embeddings, args.inputs,
+                           resume=args.resume, stop_on_error=args.stop_on_error, device=args.device,
+                           vector_cache=args.vector_cache, fresh=args.fresh, limit=args.limit, chunks=args.chunks,
+                           requirements=strict_json_loads(Path(args.requirements).read_text(encoding="utf-8")) if args.requirements else None,
+                           runtime_config=runtime_options)
     elif args.command == "compile":
         constraints = (
             json.loads(Path(args.requirements).read_text(encoding="utf-8"))
@@ -1175,9 +1316,10 @@ def main(argv=None):
             reference_accessions=args.reference_accessions,
             question_source_id=args.question_source_id,
             vector_cache=args.vector_cache,
+            runtime_config={key: value for key, value in {"decoding_mode": args.decoding_mode, "max_new_tokens": args.max_new_tokens}.items() if value is not None},
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return int(result.get("status") == "FAIL")
+    return int(result.get("status") == "FAIL" or (args.command == "batch" and (result.get("failed", 0) or result.get("retryable", 0))))
 
 
 if __name__ == "__main__":

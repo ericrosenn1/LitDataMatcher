@@ -9,10 +9,18 @@ import pytest
 from litdatamatcher.adapters import search_dataset_sources, search_literature_sources
 from litdatamatcher.calibration_readiness import fit_validate_calibration, verify_calibration_result
 from litdatamatcher.data_plane import digest
-from litdatamatcher.literature_integrity import consolidate_literature_rows, invalidate_affected_derivations
+from litdatamatcher.literature_integrity import (
+    invalidate_affected_derivations,
+)
 from litdatamatcher.scientific_v2 import assess_requirements
 from litdatamatcher.semantic_runtime import _file_sha
-from litdatamatcher.v2 import analyze, document_lifecycle_status, normalize_dataset, read_rows, write_rows
+from litdatamatcher.v2 import (
+    analyze,
+    document_lifecycle_status,
+    normalize_dataset,
+    read_rows,
+    write_rows,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -136,6 +144,7 @@ def test_biological_unit_repair_preserves_explicit_absence_and_legacy_migration(
 ])
 def test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics(observed, expected, status):
     raw = {"dataset_id": "fixture-taxon", "organisms": [observed], "source_provenance": {"source_url": "fixture:organism"}}
+    raw["field_evidence"] = {"organisms": {"value": [observed], "status": "observed", "source_locator": "fixture:organism#/taxon"}}
     result = assess_requirements([{"field": "species", "expected": expected}], normalize_dataset(raw))
     assert result["eligibility"] == status
 
@@ -143,6 +152,7 @@ def test_taxonomy_repair_retains_unknown_and_qualified_identifier_semantics(obse
 @pytest.mark.parametrize("observed,expected", [("RNA-seq", "EFO:0002772"), ("EFO:0002772", "RNA-seq")])
 def test_qualified_assay_identifier_survives_precise_assay_guard(observed, expected):
     raw = {"dataset_id": "fixture-assay-identifier", "assay_types": [observed], "source_provenance": {"source_url": "fixture:assay"}}
+    raw["field_evidence"] = {"assay_types": {"value": [observed], "status": "observed", "source_locator": "fixture:assay#/experimentType"}}
     result = assess_requirements([{"field": "assay", "expected": expected}], normalize_dataset(raw))
     assert result["eligibility"] == "DIRECT_FIT"
 
@@ -292,7 +302,8 @@ def analyze_fixture(tmp_path, monkeypatch, fail_extraction=False):
     blocked = {**active, "document_id": "fixture-retracted", "version_relationships": {"is-retracted-by": [{"id": "fixture-notice"}]}}
     reserved = {**active, "document_id": "fixture-reserved", "split_context": "synthetic-reserved-family"}
     studies = [{"dataset_id": identifier, "title": "Clinical treatment response", "organisms": [species],
-                "source_provenance": {"source_url": f"fixture:{identifier}"}, "split_context": "development"}
+                "source_provenance": {"source_url": f"fixture:{identifier}"}, "split_context": "development",
+                "field_evidence": {"organisms": {"value": [species], "status": "observed", "source_locator": f"fixture:{identifier}#/taxon"}}}
                for identifier, species in (("fixture-compatible", "Homo sapiens"), ("fixture-wrong-species", "Mus musculus"))]
     root = tmp_path / "synthetic-root"
     out = tmp_path / "synthetic-run"

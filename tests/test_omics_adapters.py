@@ -20,7 +20,7 @@ class Client:
 
 
 def test_pride_preserves_protocols_and_never_infers_units_from_files():
-    client = Client([{"accession": "PXD123456", "title": "Fixture proteomics", "organisms": ["Homo sapiens (human)"], "projectFileNames": ["measurements.raw", "proteins.txt"], "sampleProcessingProtocol": "Fixture source method", "updatedDate": "2026-09-01"}])
+    client = Client([{"accession": "PXD123456", "title": "Fixture proteomics", "organisms": ["Homo sapiens (human)"], "experimentTypes": ["proteomics"], "projectFileNames": ["measurements.raw", "proteins.txt"], "sampleProcessingProtocol": "Fixture source method", "updatedDate": "2026-09-01"}])
     record = PRIDEDatasetAdapter(client).search("fixture")[0]
     assert len(client.calls) == 1 and record.sample_size == 0
     normalized = normalize_dataset(record.to_dict())
@@ -49,4 +49,23 @@ def test_title_query_is_encoded_as_one_path_value():
     client = Client({})
     assert MetabolomicsWorkbenchDatasetAdapter(client).search("diabetes / cancer?") == []
     assert "/study_title/diabetes%20%2F%20cancer%3F/summary" in client.calls[0][0]
+
+
+def test_repository_assay_defaults_are_not_observed_measurements():
+    pride = PRIDEDatasetAdapter(Client([{"accession": "PXD123456", "title": "Fixture project", "organisms": ["Homo sapiens"]}])).search("fixture")[0]
+    normalized = normalize_dataset(pride.to_dict())
+    assert normalized["capabilities"]["species"]["status"] == "observed"
+    assert "assay" not in normalized["capabilities"]
+    assert normalized["modality_contract"]["modality"] == ["UNKNOWN"]
+    assert pride.metadata["source_fields"] == {"organisms": ["Homo sapiens"]}
+    assert pride.metadata["field_evidence"]["organisms"]["source_locator"].endswith("#/0/organisms")
+
+
+def test_metabolomics_evidence_pointer_names_the_actual_response_field():
+    raw = {"study_id": "ST123456", "study_title": "Fixture", "subject_species": "Mus musculus", "analysis_type": "LC-MS"}
+    record = MetabolomicsWorkbenchDatasetAdapter(Client({"one": raw})).search("ST123456")[0]
+    proof = record.metadata["field_evidence"]["organisms"]
+    assert proof["source_locator"].endswith("#/one/subject_species")
+    assert record.metadata["source_fields"]["subject_species"] == "Mus musculus"
+    assert normalize_dataset(record.to_dict())["capabilities"]["species"]["value"] == ["Mus musculus"]
 

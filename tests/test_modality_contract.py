@@ -54,6 +54,10 @@ def test_v2_normalizer_attaches_contract_and_direct_profiles_stay_guarded():
         "assay_types": ["WGS"],
         "organisms": ["Homo sapiens"],
         "metadata": {"dependence": {"donor_links": "AMBIGUOUS_NOT_INFERRED"}},
+        "field_evidence": {
+            "organisms": {"value": ["Homo sapiens"], "status": "observed", "source_locator": "fixture:ena#/scientific_name"},
+            "assay_types": {"value": ["WGS"], "status": "observed", "source_locator": "fixture:ena#/library_strategy"},
+        },
         "capabilities": {},
     }
     normalized = normalize_dataset(raw)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
@@ -35,18 +35,22 @@ class PRIDEDatasetAdapter:
     name: str = "pride"
 
     def search(self, query: str):
+        endpoint = "https://www.ebi.ac.uk/pride/ws/archive/v2/search/projects"
+        params = {"keyword": query, "pageSize": 25, "page": 0}
         data = self.client.get_json(
-            "https://www.ebi.ac.uk/pride/ws/archive/v2/search/projects",
-            params={"keyword": query, "pageSize": 25, "page": 0},
+            endpoint, params=params,
         )
         if not isinstance(data, list) or not all(isinstance(item, dict) for item in data):
             raise ValueError("PRIDE schema drift: expected project list")
         records = []
-        for item in data:
+        for index, item in enumerate(data):
             identity = item.get("accession", "")
             if not isinstance(identity, str) or not re.fullmatch(r"PXD\d{6,}", identity) or not item.get("title"):
                 raise ValueError("PRIDE project lacks valid identity/title")
             url = f"https://www.ebi.ac.uk/pride/archive/projects/{identity}"
+            organisms = _strings(item.get("organisms"))
+            declared_assays = _strings(item.get("experimentTypes"))
+            field_locator = f"{endpoint}?{urlencode(params)}#/{index}"
             provenance = _provenance(self.client, self.name, identity, url, "pride_archive_v2_metadata_1", [
                 "Project/sample counts do not establish donors or independent units.",
                 "File names are availability metadata, not inspected processed measurements.",
@@ -67,11 +71,16 @@ class PRIDEDatasetAdapter:
                 "pagination": {"status": "BOUNDED_PAGE_NOT_COMPLETE_CENSUS", "page": 0, "page_size": 25, "returned_items": len(data)},
                 "access_status": "PUBLIC_METADATA_ONLY",
                 "missingness": {key: "UNKNOWN" for key in ("donors", "comparator", "outcomes", "temporal_design", "processed_alignment")},
+                "field_evidence": {
+                    "organisms": {"status": "observed" if organisms else "unknown", "value": organisms, "source_locator": field_locator + "/organisms", "mapping_type": "exact"},
+                    "assay_types": {"status": "observed" if declared_assays else "unknown", "value": declared_assays, "source_locator": field_locator + "/experimentTypes", "mapping_type": "exact"},
+                },
+                "source_fields": {key: item[key] for key in ("organisms", "experimentTypes") if key in item},
             }
             records.append(classify_dataset_record({
                 "dataset_id": identity, "title": item["title"], "description": item.get("projectDescription", ""),
-                "source": "PRIDE", "url": url, "organisms": _strings(item.get("organisms")),
-                "assay_types": ["proteomics"], "sample_size": 0, "variables": [],
+                "source": "PRIDE", "url": url, "organisms": organisms,
+                "assay_types": declared_assays or ["proteomics"], "sample_size": 0, "variables": [],
                 "access_type": "public metadata; file-level inspection required",
                 "license": "Source-specific terms require review before redistribution", "metadata": metadata,
             }))
@@ -88,7 +97,8 @@ class MetabolomicsWorkbenchDatasetAdapter:
         if not query or len(query) > 200:
             raise ValueError("A bounded study ID or title query is required")
         field = "study_id" if re.fullmatch(r"ST\d{6}", query) else "study_title"
-        data = self.client.get_json(f"https://www.metabolomicsworkbench.org/rest/study/{field}/{quote(query, safe='')}/summary")
+        endpoint = f"https://www.metabolomicsworkbench.org/rest/study/{field}/{quote(query, safe='')}/summary"
+        data = self.client.get_json(endpoint)
         if isinstance(data, dict) and "study_id" in data:
             items = [data]
         elif isinstance(data, dict) and all(isinstance(value, dict) for value in data.values()):
@@ -98,11 +108,18 @@ class MetabolomicsWorkbenchDatasetAdapter:
         else:
             raise ValueError("Metabolomics Workbench schema drift: expected study summaries")
         records = []
-        for item in items[:100]:
+        for index, item in enumerate(items[:100]):
             identity = item.get("study_id", "")
             if not isinstance(identity, str) or not re.fullmatch(r"ST\d{6}", identity) or not item.get("study_title"):
                 raise ValueError("Metabolomics study lacks valid identity/title")
             url = f"https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?StudyID={identity}"
+            organisms = _strings(item.get("species") or item.get("subject_species"))
+            declared_assays = _strings(item.get("analysis_type"))
+            if isinstance(data, dict):
+                pointer = "" if "study_id" in data else "/" + next(key.replace("~", "~0").replace("/", "~1") for key, value in data.items() if value is item)
+            else:
+                pointer = f"/{index}"
+            field_locator = endpoint + "#" + pointer
             provenance = _provenance(self.client, self.name, identity, url, "mw_rest_study_summary_1", [
                 "Summary records do not establish independent donors, aligned measurements, or controls.",
                 "No sample measurements, raw files, or matrix files were downloaded.",
@@ -118,12 +135,17 @@ class MetabolomicsWorkbenchDatasetAdapter:
                 "pagination": {"status": "BOUNDED_RESPONSE_NOT_COMPLETE_CENSUS", "returned_items": len(items), "retained_limit": 100},
                 "access_status": "PUBLIC_METADATA_ONLY",
                 "missingness": {key: "UNKNOWN" for key in ("donors", "comparator", "outcomes", "temporal_design", "processed_alignment")},
+                "field_evidence": {
+                    "organisms": {"status": "observed" if organisms else "unknown", "value": organisms, "source_locator": field_locator + ("/species" if item.get("species") else "/subject_species"), "mapping_type": "exact"},
+                    "assay_types": {"status": "observed" if declared_assays else "unknown", "value": declared_assays, "source_locator": field_locator + "/analysis_type", "mapping_type": "exact"},
+                },
+                "source_fields": {key: item[key] for key in ("species", "subject_species", "analysis_type") if key in item},
             }
             records.append(classify_dataset_record({
                 "dataset_id": identity, "title": item["study_title"], "description": item.get("study_summary", ""),
                 "source": "Metabolomics Workbench", "url": url,
-                "organisms": _strings(item.get("species") or item.get("subject_species")),
-                "assay_types": ["metabolomics"], "sample_size": 0, "variables": [],
+                "organisms": organisms,
+                "assay_types": declared_assays or ["metabolomics"], "sample_size": 0, "variables": [],
                 "access_type": "public metadata; file-level inspection required",
                 "license": item.get("license", "UNKNOWN; source-specific terms require review"), "metadata": metadata,
             }))

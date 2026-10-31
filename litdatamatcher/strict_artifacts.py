@@ -50,7 +50,7 @@ def validate_artifact(path: Path) -> str:
     if suffix == ".json":
         strict_json_loads(content)
     elif suffix == ".jsonl":
-        for number, line in enumerate(content.splitlines(), 1):
+        for number, line in enumerate(content.split("\n"), 1):
             if line.strip() and not isinstance(strict_json_loads(line), dict):
                 raise ValueError(f"JSONL row {number} is not an object")
     elif suffix == ".csv":

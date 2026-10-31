@@ -80,6 +80,11 @@ def test_adapter_capabilities_need_source_provenance_and_never_imply_units():
     raw["capabilities"] = {}
     assert normalize_dataset(raw)["capabilities"] == {}
     raw["source_provenance"] = {"source_url": "https://example.test/study"}
+    assert normalize_dataset(raw)["capabilities"] == {}
+    raw["field_evidence"] = {
+        field: {"value": raw[field], "status": "observed", "source_locator": f"https://example.test/study#{field}"}
+        for field in ("organisms", "assay_types")
+    }
     result = normalize_dataset(raw)
     assessment = assess_requirements([{"field": "modality", "expected": "bulk_transcriptomics"}, {"field": "species", "expected": "human"}], result)
     assert assessment["eligibility"] == "DIRECT_FIT"

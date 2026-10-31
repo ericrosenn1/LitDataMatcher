@@ -98,3 +98,45 @@ handling, and semantic shortlist labeling. The first real pilot materialized
 SQLite/FTS integrity checks. Pilot timing is not an extrapolated full-corpus
 performance result. The receipt and source-bound search demonstration are beside
 the local database; any subsequent larger run records its actual coverage there.
+
+## Bounded automatic continuation
+
+The existing durable `Controller` can run successive twenty-minute chunks with
+unique, immutable output receipts. This is a real foreground coordinator and
+native child process, not a schedule or the old supervisor. The cumulative
+allowance is capped at two hours, including a reserved two-minute termination
+margin per attempt. Completed attempts refund unused reserved time. If the
+coordinator is interrupted, its reservation remains charged conservatively;
+resuming does not reset the allowance.
+
+```powershell
+& 'C:\Codex\LitDataMatcher-v2\env\Scripts\python.exe' -m litdatamatcher.literature_campaign `
+  --corpus-root 'D:\LitDataMatcher-Corpora' `
+  --ledger-manifest 'C:\Codex\LitDataMatcher-v2\data\campaign_20261031\revision-ledger-full-v1\LEDGER_MANIFEST.json' `
+  --database 'C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\literature\pubmed-current.sqlite3' `
+  --root 'C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\literature_campaign' `
+  --chunk-seconds 1200 --max-total-seconds 7200
+if ($LASTEXITCODE -ne 0) { throw 'Corpus continuation stopped on a failure; inspect CORPUS_CAMPAIGN.json and controller logs.' }
+```
+
+Add `--resume` to resume that campaign with unchanged code, interpreter, source
+identity, and resource configuration. `CORPUS_CAMPAIGN.json` records coordinator
+PID/creation time, current job, charged budget, completed chunks, and the latest
+committed corpus snapshot. The existing controller database records native
+worker ownership, admission, retries, logs, and output hashes. A busy corpus
+writer returns exit code 75 and receives at most two retries. Schema/identity
+failures stop immediately. Ambiguous surviving workers are preserved and reported
+as `RECOVERY_REQUIRED`; the coordinator does not invent safe ownership.
+
+`--max-chunks` and `--shards-per-chunk` provide additional bounded development
+profiles. A budget-limited campaign can be followed by a new, explicitly launched
+campaign root using the same database; it reuses the applied corpus prefix.
+`COMPLETE` means every shard in the pinned ledger was materialized and chunk
+source checks/output receipts passed. Run the separate `validate` command for
+the full SQLite/FTS content integrity check before final corpus acceptance.
+
+The lower-level materialize command accepts `--receipt-out` for a unique
+controller output. Replaying a valid completed chunk verifies its immutable
+receipt and historical source prefix, republishes identical receipt bytes, and
+does not advance the database. `--expected-ledger-sha256` and
+`--expected-implementation-sha256` fence admission against changed inputs/code.

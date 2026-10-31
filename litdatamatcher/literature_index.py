@@ -16,7 +16,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from .controller import integration_lease
+from .controller import OwnershipConflict, integration_lease
 from .corpus_snapshot import PUBMED_FIELDS, file_digest
 from .data_plane import atomic_json, digest
 from .literature_integrity import consolidate_literature_rows
@@ -171,13 +171,15 @@ class LiteratureIndex:
     def _set_metadata(self, key, value):
         self.conn.execute("INSERT OR REPLACE INTO metadata VALUES (?,?)", (key, _json(value)))
 
-    def snapshot_identity(self):
+    def snapshot_identity(self, *, applied_shards=None):
         """Pin a committed corpus prefix without hashing the large database.
 
         Each stored shard identity binds normalized/source-event checksums and
         ordering. Reading the prefix in one transaction gives an immutable
         scientific-input identity even while another connection builds ahead.
         """
+        if applied_shards is not None and (type(applied_shards) is not int or applied_shards < 0):
+            raise ValueError("applied_shards must be a nonnegative integer")
         own_transaction = not self.conn.in_transaction
         if own_transaction:
             self.conn.execute("BEGIN")
@@ -185,9 +187,12 @@ class LiteratureIndex:
             shards = [
                 list(row)
                 for row in self.conn.execute(
-                    "SELECT shard_order,identity FROM shards ORDER BY shard_order"
+                    "SELECT shard_order,identity FROM shards ORDER BY shard_order LIMIT ?",
+                    (-1 if applied_shards is None else applied_shards,),
                 )
             ]
+            if applied_shards is not None and len(shards) != applied_shards:
+                raise ValueError("Requested snapshot prefix has not been materialized")
             identity = {
                 "schema_version": INDEX_VERSION,
                 "corpus_store_uuid": self._metadata("corpus_store_uuid"),
@@ -542,6 +547,8 @@ def _apply_shard(index, corpus_root, ledger_root, shard, batch_size):
     rows = pq.ParquetFile(legacy)
     if PUBMED_FIELDS - set(rows.schema_arrow.names):
         raise ValueError("Normalized corpus lacks required source fields")
+    if any(str(rows.schema_arrow.field(field).type) != "string" for field in PUBMED_FIELDS):
+        raise ValueError("Normalized corpus fields must retain the declared string schema")
     records = (
         record for batch in rows.iter_batches(batch_size=batch_size) for record in batch.to_pylist()
     )
@@ -620,6 +627,8 @@ def materialize_pubmed(
     max_seconds=None,
     batch_size=4096,
     rehash_applied=False,
+    expected_ledger_sha256=None,
+    expected_implementation_sha256=None,
 ):
     """Apply at most ``max_shards`` NEW shards; ``None`` explicitly allows all.
 
@@ -629,6 +638,11 @@ def materialize_pubmed(
     modifying, removing or inserting before any applied shard fails closed.
     The time bound is checked between atomic shards, never midway through one.
     """
+    if (
+        expected_implementation_sha256 is not None
+        and expected_implementation_sha256 != _IMPLEMENTATION_SHA256
+    ):
+        raise ValueError("Materializer implementation changed after campaign admission")
     if max_shards is not None:
         _positive_integer(max_shards, "max_shards")
     _positive_integer(batch_size, "batch_size", 65536)
@@ -648,6 +662,8 @@ def materialize_pubmed(
     if not marker.get("store_uuid"):
         raise ValueError("Missing corpus store identity")
     manifest_hash = file_digest(ledger_manifest)
+    if expected_ledger_sha256 is not None and expected_ledger_sha256 != manifest_hash:
+        raise ValueError("Ledger manifest changed after campaign admission")
     manifest = _manifest(ledger_manifest)
     started, new_shards = time.perf_counter(), []
     with (
@@ -714,17 +730,39 @@ def materialize_pubmed(
             database=str(database),
             ledger_manifest_sha256=manifest_hash,
             implementation_sha256_at_import=_IMPLEMENTATION_SHA256,
+            snapshot=index.snapshot_identity(),
             batch_size=batch_size,
             verification="New inputs SHA256 verified; applied inputs stat-checked and rehashed when changed.",
             historical_events_retain_source_ledger=True,
             semantic_index="optional bounded lexical-shortlist reranking",
         )
         index.conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        report["immutable_receipt_file"] = database.name + f".receipt-{time.time_ns()}.json"
+        atomic_json(database.parent / report["immutable_receipt_file"], report)
         atomic_json(database.with_suffix(database.suffix + ".receipt.json"), report)
-        atomic_json(
-            database.with_suffix(database.suffix + f".receipt-{time.time_ns()}.json"), report
-        )
         return report
+
+
+def _replay_chunk_receipt(path, database, ledger_manifest, expected_implementation):
+    """Republish a verified completed chunk without advancing the database."""
+    report = json.loads(path.read_text(encoding="utf-8"))
+    name = report.get("immutable_receipt_file", "")
+    if not re.fullmatch(re.escape(database.name) + r"\.receipt-[0-9]+\.json", name):
+        raise ValueError("Chunk receipt lacks its immutable materialization receipt")
+    original = database.parent / name
+    if (
+        json.loads(original.read_text(encoding="utf-8")) != report
+        or report.get("database") != str(database)
+        or report.get("ledger_manifest_sha256") != file_digest(ledger_manifest)
+        or report.get("implementation_sha256_at_import") != expected_implementation
+    ):
+        raise ValueError("Completed chunk receipt identity changed")
+    with LiteratureIndex(database, read_only=True) as index:
+        prefix = index.snapshot_identity(applied_shards=report["applied_shards"])
+        if prefix["snapshot_sha256"] != report["snapshot"]["snapshot_sha256"]:
+            raise ValueError("Completed chunk's source prefix changed")
+    atomic_json(path, report)
+    return report
 
 
 def main(argv=None):
@@ -739,6 +777,9 @@ def main(argv=None):
     build.add_argument("--max-seconds", type=float)
     build.add_argument("--batch-size", type=int, default=4096)
     build.add_argument("--rehash-applied", action="store_true")
+    build.add_argument("--receipt-out", type=Path)
+    build.add_argument("--expected-ledger-sha256")
+    build.add_argument("--expected-implementation-sha256")
     for command in ("search", "status", "validate"):
         sub = commands.add_parser(command)
         sub.add_argument("--database", required=True, type=Path)
@@ -747,15 +788,52 @@ def main(argv=None):
             sub.add_argument("--limit", type=int, default=20)
     args = parser.parse_args(argv)
     if args.command == "materialize":
-        result = materialize_pubmed(
-            args.corpus_root,
-            args.ledger_manifest,
-            args.database,
-            max_shards=None if args.all_shards else args.max_shards,
-            max_seconds=args.max_seconds,
-            batch_size=args.batch_size,
-            rehash_applied=args.rehash_applied,
-        )
+        if (
+            args.expected_implementation_sha256
+            and args.expected_implementation_sha256 != _IMPLEMENTATION_SHA256
+        ):
+            raise ValueError("Materializer implementation changed after campaign admission")
+        database = _resolved_path(args.database)
+        receipt_out = _resolved_path(args.receipt_out) if args.receipt_out else None
+        if receipt_out is not None:
+            if (
+                _is_inside(receipt_out, _resolved_path(args.corpus_root))
+                or _is_inside(receipt_out, _resolved_path(args.ledger_manifest.parent))
+                or receipt_out
+                in {database, Path(str(database) + "-wal"), Path(str(database) + "-shm")}
+            ):
+                raise ValueError("Chunk receipt must not replace source files or the database")
+            if receipt_out.exists():
+                if (
+                    args.expected_ledger_sha256
+                    and file_digest(args.ledger_manifest) != args.expected_ledger_sha256
+                ):
+                    raise ValueError("Ledger manifest changed after campaign admission")
+                result = _replay_chunk_receipt(
+                    receipt_out,
+                    database,
+                    args.ledger_manifest,
+                    args.expected_implementation_sha256 or _IMPLEMENTATION_SHA256,
+                )
+                print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
+                return 0
+        try:
+            result = materialize_pubmed(
+                args.corpus_root,
+                args.ledger_manifest,
+                args.database,
+                max_shards=None if args.all_shards else args.max_shards,
+                max_seconds=args.max_seconds,
+                batch_size=args.batch_size,
+                rehash_applied=args.rehash_applied,
+                expected_ledger_sha256=args.expected_ledger_sha256,
+                expected_implementation_sha256=args.expected_implementation_sha256,
+            )
+        except OwnershipConflict:
+            print(json.dumps({"status": "WRITER_BUSY", "retryable_exit_code": 75}))
+            return 75
+        if receipt_out is not None:
+            atomic_json(receipt_out, result)
     else:
         with LiteratureIndex(args.database, read_only=args.command != "validate") as index:
             result = (

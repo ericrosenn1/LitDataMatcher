@@ -1,0 +1,33 @@
+{
+  "schema_version": "research-engine-campaign-1.0",
+  "campaign": "biomedical-research-engine-20261031",
+  "status": "IN_PROGRESS",
+  "phase": "INTEGRATED_BASELINE_AND_SOURCE_INTEGRITY",
+  "started_utc": "2026-10-31T11:48:16Z",
+  "soft_target_hours": 24,
+  "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
+  "interface_base_commit": "07f74c86923612d456085ea25306c40fcbf42be6",
+  "branch": "codex/research-engine-campaign-20261031",
+  "scope": "Broad biomedical research; model quality/performance, source fidelity, multi-node recovery, source-backed benchmarking, reproducible delivery",
+  "specification": "docs/research_campaign_20261031.md",
+  "baseline_validation": "RUNNING",
+  "source_corpus_integrity": "NOT_YET_QUALIFIED_FOR_THIS_CAMPAIGN",
+  "source_corpus_root": "D:/LitDataMatcher-Corpora",
+  "run_root": "C:/Codex/LitDataMatcher-v2/data/campaign_20261031",
+  "existing_validated_work_preserved": true,
+  "sealed_holdout_accessed": false,
+  "original_checkouts_modified": false,
+  "supervisor_restarted": false,
+  "paid_services_used": false,
+  "scientific_validation_status": "PENDING; no expert validation or calibration claim",
+  "known_findings": [
+    "Sentence-level no-change/negation cues can contaminate another extracted relation",
+    "Compiler resolves risk coreference to an unrelated last acronym",
+    "Inferred/absent metadata can become observed capabilities",
+    "GEO error envelopes can produce placeholder observed records",
+    "Cache acquisition timestamps and digests are not consistently preserved",
+    "Controller can mark malformed JSONL successful; nonfinite JSON values are accepted",
+    "Durable analysis checkpoints and bounded retry orchestration need completion"
+  ],
+  "next_action": "Complete integrated baseline, qualify current corpus snapshot, then integrate isolated fixes with before/after evidence."
+}

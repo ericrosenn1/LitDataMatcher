@@ -482,3 +482,14 @@ The next scientific milestones are:
 LitDataMatcher ranks opportunities. It does not prove that a public dataset can
 answer a question. Its purpose is to accelerate expert review by making
 question-data connections explicit, traceable, and reproducible.
+
+## Browser review workspace
+
+The optional React/TypeScript interface provides a visual review surface alongside the research engine. It supports evidence inspection, saved notes, pipeline-result imports, and separate lexical live-search demonstrations. The Python semantic/requirements pipeline remains the research execution path.
+
+```bash
+npm --prefix web ci
+npm --prefix web run dev
+```
+
+See [the app guide](docs/web-app.md) and [interface validation](docs/app-validation.md). Browser-only scores are not the learned or semantic research model.

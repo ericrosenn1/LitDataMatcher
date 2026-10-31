@@ -29,3 +29,12 @@ data/legacy_fixtures/papers/*.pdf
 *.safetensors
 *.gguf
 *.bin
+.coverage
+coverage.xml
+.infra-validation/
+site/
+# Web workspace build and dependency artifacts
+node_modules/
+*.tsbuildinfo
+test-results/
+playwright-report/

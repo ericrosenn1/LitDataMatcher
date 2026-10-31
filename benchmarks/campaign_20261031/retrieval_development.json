@@ -1,0 +1,343 @@
+{
+  "schema_version": "public-retrieval-development-evidence-1.0",
+  "status": "PASS_WITH_LIMITATIONS",
+  "evaluation_scope": "Paper-disjoint development links from the same source corpora; not a source-corpus holdout, sealed holdout, dataset feasibility, or expert-validated scientific accuracy.",
+  "counts": {
+    "development": 175,
+    "documents": 1508,
+    "train": 1333
+  },
+  "methods": {
+    "bm25": {
+      "by_source": {
+        "Evidence Inference 2.0": {
+          "mrr_at_k": 0.9814814814814815,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "mrr_at_k": 1.0,
+          "queries": 100
+        }
+      },
+      "cutoff": 10,
+      "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+      "known_link_recall_at_1": 0.9885714285714285,
+      "known_link_recall_at_k": 1.0,
+      "mrr_at_k": 0.9920634920634921,
+      "mrr_query_bootstrap_95_interval": [
+        0.9783730158730158,
+        1.0
+      ],
+      "ndcg_at_k": 0.9938969128527739,
+      "queries": 175,
+      "source_strata": {
+        "Evidence Inference 2.0": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "mrr_at_k": 0.9814814814814815,
+              "queries": 75
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.9733333333333334,
+          "known_link_recall_at_k": 1.0,
+          "mrr_at_k": 0.9814814814814815,
+          "mrr_query_bootstrap_95_interval": [
+            0.9511111111111112,
+            1.0
+          ],
+          "ndcg_at_k": 0.9857594633231391,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "by_source": {
+            "PubMedQA": {
+              "mrr_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 1.0,
+          "known_link_recall_at_k": 1.0,
+          "mrr_at_k": 1.0,
+          "mrr_query_bootstrap_95_interval": [
+            1.0,
+            1.0
+          ],
+          "ndcg_at_k": 1.0,
+          "queries": 100
+        }
+      }
+    },
+    "hybrid": {
+      "by_source": {
+        "Evidence Inference 2.0": {
+          "mrr_at_k": 0.93,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "mrr_at_k": 1.0,
+          "queries": 100
+        }
+      },
+      "cutoff": 10,
+      "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+      "known_link_recall_at_1": 0.9657142857142857,
+      "known_link_recall_at_k": 0.9828571428571429,
+      "mrr_at_k": 0.97,
+      "mrr_query_bootstrap_95_interval": [
+        0.9471309523809525,
+        0.9904761904761905
+      ],
+      "ndcg_at_k": 0.9730679071153223,
+      "queries": 175,
+      "source_strata": {
+        "Evidence Inference 2.0": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "mrr_at_k": 0.93,
+              "queries": 75
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.92,
+          "known_link_recall_at_k": 0.96,
+          "mrr_at_k": 0.93,
+          "mrr_query_bootstrap_95_interval": [
+            0.8755555555555554,
+            0.981111111111111
+          ],
+          "ndcg_at_k": 0.9371584499357521,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "by_source": {
+            "PubMedQA": {
+              "mrr_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 1.0,
+          "known_link_recall_at_k": 1.0,
+          "mrr_at_k": 1.0,
+          "mrr_query_bootstrap_95_interval": [
+            1.0,
+            1.0
+          ],
+          "ndcg_at_k": 1.0,
+          "queries": 100
+        }
+      }
+    },
+    "pretrained": {
+      "by_source": {
+        "Evidence Inference 2.0": {
+          "mrr_at_k": 0.837126984126984,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "mrr_at_k": 1.0,
+          "queries": 100
+        }
+      },
+      "cutoff": 10,
+      "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+      "known_link_recall_at_1": 0.9142857142857143,
+      "known_link_recall_at_k": 0.9714285714285714,
+      "mrr_at_k": 0.9301972789115647,
+      "mrr_query_bootstrap_95_interval": [
+        0.8955760204081633,
+        0.9634437074829931
+      ],
+      "ndcg_at_k": 0.9398499613110901,
+      "queries": 175,
+      "source_strata": {
+        "Evidence Inference 2.0": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "mrr_at_k": 0.837126984126984,
+              "queries": 75
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8,
+          "known_link_recall_at_k": 0.9333333333333333,
+          "mrr_at_k": 0.837126984126984,
+          "mrr_query_bootstrap_95_interval": [
+            0.7611273809523811,
+            0.9089007936507937
+          ],
+          "ndcg_at_k": 0.8596499097258767,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "by_source": {
+            "PubMedQA": {
+              "mrr_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 1.0,
+          "known_link_recall_at_k": 1.0,
+          "mrr_at_k": 1.0,
+          "mrr_query_bootstrap_95_interval": [
+            1.0,
+            1.0
+          ],
+          "ndcg_at_k": 1.0,
+          "queries": 100
+        }
+      }
+    },
+    "trained_epoch_02": {
+      "by_source": {
+        "Evidence Inference 2.0": {
+          "mrr_at_k": 0.895111111111111,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "mrr_at_k": 0.995,
+          "queries": 100
+        }
+      },
+      "cutoff": 10,
+      "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+      "known_link_recall_at_1": 0.9371428571428572,
+      "known_link_recall_at_k": 0.9771428571428571,
+      "mrr_at_k": 0.9521904761904761,
+      "mrr_query_bootstrap_95_interval": [
+        0.9236190476190476,
+        0.979247619047619
+      ],
+      "ndcg_at_k": 0.9582836379876472,
+      "queries": 175,
+      "source_strata": {
+        "Evidence Inference 2.0": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "mrr_at_k": 0.895111111111111,
+              "queries": 75
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8666666666666667,
+          "known_link_recall_at_k": 0.9466666666666667,
+          "mrr_at_k": 0.895111111111111,
+          "mrr_query_bootstrap_95_interval": [
+            0.8297777777777778,
+            0.9551222222222223
+          ],
+          "ndcg_at_k": 0.907582758590224,
+          "queries": 75
+        },
+        "PubMedQA": {
+          "by_source": {
+            "PubMedQA": {
+              "mrr_at_k": 0.995,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.99,
+          "known_link_recall_at_k": 1.0,
+          "mrr_at_k": 0.995,
+          "mrr_query_bootstrap_95_interval": [
+            0.985,
+            1.0
+          ],
+          "ndcg_at_k": 0.9963092975357145,
+          "queries": 100
+        }
+      }
+    }
+  },
+  "training_selection": {
+    "candidates": [
+      {
+        "candidate": "epoch-01",
+        "eligible": true,
+        "paired": {
+          "improved_queries": 9,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.017612244897959185,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.002748809523809524,
+            0.03627908163265306
+          ],
+          "unchanged_queries": 165,
+          "worsened_queries": 1
+        },
+        "recall_at_10_delta": 0.005714285714285672
+      },
+      {
+        "candidate": "epoch-02",
+        "eligible": true,
+        "paired": {
+          "improved_queries": 9,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.021993197278911567,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.0033319727891156464,
+            0.04324132653061224
+          ],
+          "unchanged_queries": 163,
+          "worsened_queries": 3
+        },
+        "recall_at_10_delta": 0.005714285714285672
+      }
+    ],
+    "limitations": "Development selection only; source-link recovery is not scientific validity or independent test validation.",
+    "selected": "epoch-02",
+    "status": "EXPERIMENTAL_DEVELOPMENT_SELECTION",
+    "thresholds": {
+      "minimum_mrr_at_10_improvement": 0.01,
+      "minimum_recall_at_10_delta": -0.005
+    }
+  },
+  "independent_audit": {
+    "status": "PASS_WITH_LIMITATIONS",
+    "title_echo": {
+      "Evidence Inference 2.0": {
+        "n": 75,
+        "title_echo": 0
+      },
+      "PubMedQA": {
+        "n": 100,
+        "title_echo": 78
+      }
+    },
+    "conclusions": [
+      "Epoch2 passes the predeclared development criterion versus pretrained MiniLM, with independently reproduced paired metrics.",
+      "BM25 remains strongest on this benchmark; epoch2 is also below the original hybrid.",
+      "78 of100 PubMedQA questions exactly reproduce their source title ignoring punctuation; none of75 Evidence Inference questions do.",
+      "The measured improvement comes from Evidence Inference, while PubMedQA MRR decreases from1.0 to0.995.",
+      "Two epochs each performed84 optimizer steps.101 parameter tensors changed;2 unused mean-pooling-irrelevant pooler tensors remained unchanged.",
+      "All model, optimizer, code, protocol, data and result hash checks passed; all selected queries map to allowed train/development source metadata."
+    ],
+    "limitations": [
+      "175 paper-disjoint development queries from2 source corpora; no source-corpus holdout",
+      "Only original paper links judged; other papers remain unjudged",
+      "Fixed1508-paper pool is small versus open literature",
+      "Question-title overlap can reward lexical copying; inspect source strata"
+    ]
+  },
+  "source_receipts": {
+    "training_result_sha256": "e51115af5c78fb714b55ecfe1ab8413a1bff6014145132789463c736508935a7",
+    "independent_audit_sha256": "6db4780ae5ef1c327d659eea7337b1aba0b88bf10d09dba9576aaa16686c1438",
+    "benchmark_manifest_sha256": "7197c212259006be472ae9a5621b80333f16cbdf0692c09056b7fced44b3b7cf",
+    "experiment_fingerprint": "0df54818dce667a484d37d3bf2f9992ab2552db44b513cb6b8d709cac904a981"
+  },
+  "interpretation": "BM25 is the best measured overall method in this small source-link recovery benchmark. The trained encoder improves over its pretrained parent only; this is not independent test accuracy or dataset-feasibility validation."
+}

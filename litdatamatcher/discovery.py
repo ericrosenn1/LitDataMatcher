@@ -195,6 +195,11 @@ def discover(
                 raise ValueError("A new discovery requires an empty output directory")
             state = {"fingerprint": fingerprint, "identity": identity, "completed": {}}
             atomic_json(state_path, state)
+        inspections = out / "catalog" / "processed_inspections.jsonl"
+        if inspections.exists() and inspections.stat().st_size:
+            raise ValueError(
+                "Preserving nonempty processed-inspection catalog; use a new discovery output"
+            )
         pending = []
         for job in jobs:
             checkpoint = out / "checkpoints" / (job["job_id"] + ".json")
@@ -269,6 +274,18 @@ def discover(
                     "records": len(rows),
                 }
             )
+        # Metadata discovery performs no processed-data inspection. Native
+        # analysis still requires the explicit, valid zero-row catalogue.
+        atomic_write(inspections, b"")
+        outputs.append(
+            {
+                "path": inspections.relative_to(out).as_posix(),
+                "sha256": _hash(inspections),
+                "records": 0,
+                "record_count": 0,
+                "inspection_status": "NOT_PERFORMED",
+            }
+        )
         failures = sum(
             row["status"] in {"SOURCE_FAILURE", "PARTIAL_SOURCE_FAILURE"} for row in statuses
         )

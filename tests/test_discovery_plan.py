@@ -5,6 +5,7 @@ import json
 import pytest
 
 from litdatamatcher.discovery import discover, validate_plan
+from litdatamatcher.strict_artifacts import validate_artifact
 
 
 def plan():
@@ -72,6 +73,28 @@ def test_failure_is_retained_and_only_explicit_retry_replaces_it(tmp_path):
     final = discover(plan(), tmp_path, resume=True, retry_failed=True, _fetcher=result)
     assert final["failed_source_jobs"] == 0
     assert len(list((tmp_path / "attempt_history").glob("*.json"))) == 1
+
+
+def test_new_workspace_declares_no_processed_inspections(tmp_path):
+    report = discover(plan(), tmp_path, _fetcher=result)
+    path = tmp_path / "catalog/processed_inspections.jsonl"
+    assert path.read_bytes() == b""
+    assert validate_artifact(path) == "PASS"
+    receipt = next(
+        item for item in report["outputs"] if item["path"] == "catalog/processed_inspections.jsonl"
+    )
+    assert receipt["records"] == receipt["record_count"] == 0
+    assert receipt["inspection_status"] == "NOT_PERFORMED"
+
+
+def test_resume_preserves_populated_inspections(tmp_path):
+    discover(plan(), tmp_path, _fetcher=result)
+    path = tmp_path / "catalog/processed_inspections.jsonl"
+    content = b'{"dataset_id":"source-inspection"}\n'
+    path.write_bytes(content)
+    with pytest.raises(ValueError, match="Preserving nonempty"):
+        discover(plan(), tmp_path, resume=True, _fetcher=lambda *args: pytest.fail("No refetch"))
+    assert path.read_bytes() == content
 
 
 def test_changed_plan_and_corrupt_checkpoint_fail_closed(tmp_path):

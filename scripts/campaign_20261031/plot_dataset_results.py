@@ -41,7 +41,13 @@ def render(source: Path, out: Path):
         if not math.isfinite(value) or not 0 <= value <= 1 or abs(measured - value) > 1e-12:
             raise ValueError("Reported MRR does not match per-case measurements")
         rows.append({"method": key, "label": label, "mrr_at_5": value})
-    plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none"})
+    plt.rcParams.update(
+        {
+            "font.family": "DejaVu Sans",
+            "svg.fonttype": "none",
+            "svg.hashsalt": "ldm-dataset-development-1",
+        }
+    )
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
     fig.subplots_adjust(left=0.23, right=0.97, bottom=0.29, top=0.78, wspace=0.75)
     colors = ["#253c5b", "#147d80", "#8092a8", "#c5d5d9"]
@@ -93,14 +99,21 @@ def render(source: Path, out: Path):
     outputs = []
     for suffix in ("png", "svg", "pdf"):
         target = out / f"dataset-retrieval-development.{suffix}"
-        fig.savefig(target, dpi=180, bbox_inches="tight")
+        metadata = {"Creator": "LitDataMatcher"}
         if suffix == "svg":
-            ET.fromstring(target.read_text(encoding="utf-8"))
+            metadata["Date"] = None
+        elif suffix == "pdf":
+            metadata.update(CreationDate=None, ModDate=None)
+        fig.savefig(target, dpi=180, bbox_inches="tight", metadata=metadata)
+        if suffix == "svg":
+            svg = "\n".join(target.read_text(encoding="utf-8").splitlines()) + "\n"
+            target.write_text(svg, encoding="utf-8", newline="\n")
+            ET.fromstring(svg)
         outputs.append({"path": target.name, "sha256": sha(target), "bytes": target.stat().st_size})
     plt.close(fig)
     csv_path = out / "dataset-retrieval-development.csv"
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     outputs.append(
@@ -116,7 +129,7 @@ def render(source: Path, out: Path):
         "limitations": report["limitations"],
     }
     (out / "FIGURE_MANIFEST.json").write_text(
-        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
     return receipt
 

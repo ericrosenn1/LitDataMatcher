@@ -1,6 +1,6 @@
 import json
 
-from litdatamatcher.question_compiler import compile_question, matching_requirements
+from litdatamatcher.question_compiler import SCHEMA_VERSION, compile_question, matching_requirements
 from litdatamatcher.scientific_v2 import assess_requirements
 from litdatamatcher.v2 import main, requirement_aware_candidates
 
@@ -106,7 +106,7 @@ def test_compile_cli_writes_machine_readable_artifact(tmp_path):
     output = tmp_path / "compiled.json"
     assert main(["compile", "--question", "Does semaglutide increase risk of NAION in adults?", "--out", str(output)]) == 0
     artifact = json.loads(output.read_text(encoding="utf-8"))
-    assert artifact["schema_version"] == "question-requirements-compiler-1.0"
+    assert artifact["schema_version"] == SCHEMA_VERSION
     assert artifact["matching_requirements"]
 
 

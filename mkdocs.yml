@@ -49,6 +49,7 @@ nav:
       - Architecture: architecture.md
       - Question compiler: question_compiler.md
       - Question discovery: full_platform_questions.md
+      - 100,000-abstract continuation: campaign_20261031/question_scale_100000.md
   - Research practice:
       - Scientific limitations: limitations.md
       - Reproducibility: reproducibility.md

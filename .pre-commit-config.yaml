@@ -20,7 +20,7 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
         # Preserve historical source bytes and hash-bound campaign receipts.
-        exclude: ^(archive/legacy_literature/.*|project_state/(FINAL_CAMPAIGN_REQUEST_20260913|OWNER_CONTINUOUS_OVERRIDE_20260913|OWNER_UNRESTRICTED_OVERRIDE_20260913)\.md|benchmarks/v2/(E01_ROUND1|source_qualification_manifest)\.json)$
+        exclude: ^(archive/legacy_literature/.*|project_state/(FINAL_CAMPAIGN_REQUEST_20260913|OWNER_CONTINUOUS_OVERRIDE_20260913|OWNER_UNRESTRICTED_OVERRIDE_20260913)\.md|project_state/full_platform_20261031/REQUEST\.md|benchmarks/v2/(E01_ROUND1|source_qualification_manifest)\.json)$
       - id: trailing-whitespace
         # Syntax/schema checks above still apply to the archived source.
         exclude: ^archive/legacy_literature/

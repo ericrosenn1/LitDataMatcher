@@ -106,7 +106,10 @@ def render(source: Path, out: Path):
             metadata.update(CreationDate=None, ModDate=None)
         fig.savefig(target, dpi=180, bbox_inches="tight", metadata=metadata)
         if suffix == "svg":
-            svg = "\n".join(target.read_text(encoding="utf-8").splitlines()) + "\n"
+            svg = (
+                "\n".join(line.rstrip() for line in target.read_text(encoding="utf-8").splitlines())
+                + "\n"
+            )
             target.write_text(svg, encoding="utf-8", newline="\n")
             ET.fromstring(svg)
         outputs.append({"path": target.name, "sha256": sha(target), "bytes": target.stat().st_size})

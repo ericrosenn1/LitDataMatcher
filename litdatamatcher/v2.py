@@ -465,6 +465,33 @@ def validate_run_artifact(path: Path) -> str:
         return "FAIL"
 
 
+def _run_manifest_schema():
+    return strict_json_loads(
+        (Path(__file__).parent / "schemas_v2/RUN_MANIFEST.schema.json").read_text(encoding="utf-8")
+    )
+
+
+def _manifest_artifacts(out):
+    return [
+        {
+            "path": path.name,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "size_bytes": path.stat().st_size,
+            "kind": "run_output",
+            "validation": validate_run_artifact(path),
+        }
+        for path in out.iterdir()
+        if path.is_file() and path.name != "RUN_MANIFEST.json"
+    ]
+
+
+def _write_run_manifest(out, manifest):
+    from jsonschema import Draft202012Validator
+
+    Draft202012Validator(_run_manifest_schema()).validate(manifest)
+    atomic_json(out / "RUN_MANIFEST.json", manifest)
+
+
 def evidence_publication_date(document):
     """Use an explicit date or a full day from the qualified source adapter."""
     if document.get("publication_date"):
@@ -1340,7 +1367,8 @@ def _analyze_stages(
         }
         if qualification_digest:
             manifest["models"][0]["qualification_sha256"] = qualification_digest
-        atomic_json(out / "RUN_MANIFEST.json", manifest)
+        manifest["artifacts"] = _manifest_artifacts(out)
+        _write_run_manifest(out, manifest)
         report = render_report(out)
         import csv
         import io
@@ -1371,17 +1399,7 @@ def _analyze_stages(
                 ]
             )
         atomic_write(out / "review_sheet.csv", sheet.getvalue().encode())
-        manifest["artifacts"] = [
-            {
-                "path": p.name,
-                "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
-                "size_bytes": p.stat().st_size,
-                "kind": "run_output",
-                "validation": validate_run_artifact(p),
-            }
-            for p in out.iterdir()
-            if p.is_file() and p.name != "RUN_MANIFEST.json"
-        ]
+        manifest["artifacts"] = _manifest_artifacts(out)
         if any(item["validation"] == "FAIL" for item in manifest["artifacts"]):
             manifest["execution_status"] = "FAIL"
             manifest["failures"].append(
@@ -1390,7 +1408,7 @@ def _analyze_stages(
                     "description": "One or more persisted outputs failed parse validation",
                 }
             )
-        atomic_json(out / "RUN_MANIFEST.json", manifest)
+        _write_run_manifest(out, manifest)
         return {
             "run": str(out),
             "report": str(report),

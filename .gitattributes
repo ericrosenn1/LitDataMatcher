@@ -9,6 +9,8 @@
 *.svg text eol=lf
 benchmarks/campaign_20261031/*.json text eol=lf
 docs/assets/*.manifest.json text eol=lf
+# Runtime schema bytes are referenced by the packaged manifest.
+litdatamatcher/schemas_v2/RUN_MANIFEST.schema.json text eol=lf
 LICENSE text eol=lf
 
 # Frozen specification bytes must survive Windows checkout.

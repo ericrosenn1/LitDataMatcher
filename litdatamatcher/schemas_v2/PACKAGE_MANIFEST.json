@@ -150,8 +150,8 @@
     },
     {
       "path": "templates/RUN_MANIFEST.schema.json",
-      "size_bytes": 11866,
-      "sha256": "b5f35a71aad93f7eee8578854152c765771195589b9ca4713cd450e2116910b1"
+      "size_bytes": 11937,
+      "sha256": "132f8b7360c7cd8fa7bf8e94511e618c6f7070ad353a66f91a07002e00fed8d5"
     },
     {
       "path": "templates/RUN_MANIFEST.template.json",

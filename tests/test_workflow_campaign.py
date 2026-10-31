@@ -417,3 +417,77 @@ def test_early_manifest_matches_existing_schema_and_failed_run_is_not_pass(tmp_p
     manifest = json.loads((out / "RUN_MANIFEST.json").read_text())
     jsonschema.validate(manifest, schema)
     assert manifest["execution_status"] == "INTERRUPTED"
+
+
+def test_completed_native_manifest_validates_the_entire_packaged_contract(tmp_path, monkeypatch):
+    import jsonschema
+
+    import litdatamatcher.v2 as native
+
+    run, _, _, _ = native_fixture(tmp_path, monkeypatch)
+    output = tmp_path / "completed"
+    assert run(output)["status"] == "PASS"
+    manifest = json.loads((output / "RUN_MANIFEST.json").read_text())
+    jsonschema.Draft202012Validator(native._run_manifest_schema()).validate(manifest)
+    assert manifest["question_compilation"]["compiled_questions"] > 0
+    assert manifest["artifacts"]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"compiled_questions": -1, "assessable_questions": 0, "underdetermined_questions": 0},
+        {"compiled_questions": 1, "assessable_questions": 0.5, "underdetermined_questions": 0},
+        {"compiled_questions": 1, "assessable_questions": False, "underdetermined_questions": 0},
+        {"compiled_questions": 1, "assessable_questions": 0},
+        {
+            "compiled_questions": 1,
+            "assessable_questions": 0,
+            "underdetermined_questions": 0,
+            "extra": 1,
+        },
+    ],
+)
+def test_question_compilation_contract_rejects_invalid_counts(value):
+    import jsonschema
+
+    import litdatamatcher.v2 as native
+
+    manifest = initial_manifest("fixture", 0)
+    manifest["question_compilation"] = value
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.Draft202012Validator(native._run_manifest_schema()).validate(manifest)
+
+
+def test_final_writer_refuses_stale_schema_before_publishing_success(tmp_path, monkeypatch):
+    import jsonschema
+
+    import litdatamatcher.v2 as native
+
+    run, _, _, _ = native_fixture(tmp_path, monkeypatch)
+    stale = native._run_manifest_schema()
+    stale["properties"].pop("question_compilation")
+    monkeypatch.setattr(native, "_run_manifest_schema", lambda: stale)
+    output = tmp_path / "stale-schema"
+    with pytest.raises(jsonschema.ValidationError, match="question_compilation"):
+        run(output)
+    manifest = json.loads((output / "RUN_MANIFEST.json").read_text())
+    assert manifest["execution_status"] == "FAIL"
+    state = json.loads((output / ".workflow/state.json").read_text())
+    assert state["status"] == "FAILED" and "completed" not in state
+
+
+def test_packaged_manifest_binds_the_runtime_schema_bytes():
+    import hashlib
+    from pathlib import Path
+
+    import litdatamatcher.v2 as native
+
+    root = Path(native.__file__).parent / "schemas_v2"
+    schema = root / "RUN_MANIFEST.schema.json"
+    package = json.loads((root / "PACKAGE_MANIFEST.json").read_text())
+    entry = next(
+        item for item in package["files"] if item["path"] == "templates/RUN_MANIFEST.schema.json"
+    )
+    assert entry["sha256"] == hashlib.sha256(schema.read_bytes()).hexdigest()
+    assert entry["size_bytes"] == schema.stat().st_size

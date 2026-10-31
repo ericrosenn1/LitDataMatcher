@@ -342,6 +342,29 @@
       },
       "additionalProperties": false
     },
+    "question_compilation": {
+      "type": "object",
+      "required": [
+        "compiled_questions",
+        "assessable_questions",
+        "underdetermined_questions"
+      ],
+      "properties": {
+        "compiled_questions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "assessable_questions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "underdetermined_questions": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
     "artifacts": {
       "type": "array",
       "items": {

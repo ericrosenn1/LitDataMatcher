@@ -46,7 +46,7 @@ def main(argv=None) -> int:
         pass
     else:
         raise RuntimeError("Network denial control failed")
-    report = {"qualification_schema": "runtime-qualification-v2.2", "status": "FAIL",
+    report = {"qualification_schema": "runtime-qualification-v2.3", "status": "FAIL",
               "network_control": {"kind": "Python process audit hook", "blocked_probe": blocked,
                                   "limitation": "Does not claim OS firewall control over arbitrary native libraries."},
               "scientific_calibration": "NOT_RUN; smoke qualification only"}
@@ -59,6 +59,7 @@ def main(argv=None) -> int:
                     dtype="bfloat16" if args.device == "cuda" else "float32",
                     decoding_mode=args.decoding_mode, max_new_tokens=args.max_new_tokens))
         expected = runtime.inference_fingerprint(document)
+        report["backend_identity"] = runtime.backend_identity()
         report["expected_identity"] = expected
         report["configuration"] = asdict(runtime.config)
         stage = "fresh_extraction"
@@ -71,6 +72,8 @@ def main(argv=None) -> int:
         stage = "cached_replay"
         replay = runtime.extract(document, args.output.parent / "runtime-cache")
         report["replay_origin"] = replay["inference_manifest"]["origin"]
+        report["replay_identity"] = replay["inference_manifest"]["fingerprint"]
+        report["replay_configuration"] = replay["inference_manifest"]["configuration"]
         if not fresh["claims"] and not fresh["questions"]:
             raise RuntimeError("Fresh inference produced no accepted scientific records")
         if args.require_claims and not fresh["claims"]:
@@ -79,6 +82,10 @@ def main(argv=None) -> int:
             raise RuntimeError("Replay did not use validated cache")
         if replay["inference_manifest"]["fingerprint"] != expected or runtime.inference_fingerprint(document) != expected:
             raise RuntimeError("Runtime/code/config identity changed during qualification")
+        if runtime.backend_identity() != report["backend_identity"]:
+            raise RuntimeError("Static backend identity changed during qualification")
+        if report["replay_configuration"] != report["configuration"]:
+            raise RuntimeError("Replay configuration changed during qualification")
         if any(digest(fresh[key]) != digest(replay[key]) for key in ("claims", "questions")):
             raise RuntimeError("Cached scientific records differ")
         stage = "pretrained_retrieval"

@@ -70,3 +70,58 @@ $env:PYTHONPATH = (Get-Location).Path + ';C:\Codex\LitDataMatcher-v2\data\campai
 Python socket/DNS access is denied during qualification; this is not an OS
 firewall claim. A passing development smoke result does not establish
 calibration, general extraction accuracy, or scientific answerability.
+
+## Required-empty array repair (cycle 1)
+
+The first fresh Qwen qualification, preserved in
+`data/campaign_20261031/source-schema-positive-1`, failed. Its two generations
+included an invented future-work question although the source supplied no
+qualifying future sentence. JSON Schema validation correctly rejected both.
+This was a decoder defect, not a reason to relax the source guard.
+
+In pinned LMFE 0.11.3, `ListParsingState.add_character` pushes the first-item
+parser even when `maxItems` is zero; that limit only prevents later commas.
+The installed implementation also rejects array-valued `const` and `enum`
+alternatives. Profile `source-schema-decoding-1.1` therefore intersects the
+existing character grammar with a narrow required-empty-root-array constraint.
+It preserves the original schema, quote choices, independent guards, and
+unconstrained defaults. Nested strings and escaped punctuation are tracked as
+JSON string content; tokenizer shortcuts cannot bypass the empty-array check.
+
+`scripts/campaign_20261031/model_decoder_probe.py` compares the saved development
+generations against both grammars without loading model weights. It normalizes
+JSON serialization whitespace while preserving all strings and values, and
+records the original raw-file hashes. Its optional local-tokenizer probe checks
+actual Qwen token IDs after an empty questions-array opener. No GPU inference
+is performed. Probe and regression receipts are under
+`data/campaign_20261031/structured-decoding-repair-v1`; the initial probe receipt
+is retained and explicitly fails because raw indentation exceeds the parser's
+whitespace preference.
+
+The final focused suite passed 105 tests with no skips or failures. Both saved
+development outputs were permitted by the incumbent grammar after JSON
+whitespace normalization; the repaired grammar rejects both at the first
+invented question object. The real local Qwen tokenizer probe permits the
+closing bracket and forbids an opening object at that position (10.38 seconds
+including tokenizer setup and both grammar replays). An independent read-only
+review found no blocking issue. These are grammar and provenance checks, not
+fresh pretrained-model quality results.
+
+Fresh model qualification must use a new output directory after integration.
+This repair alone does not demonstrate that Qwen selects valid scientific
+relations or achieves useful coverage.
+
+## Shared backend qualification identity
+
+`LocalSemanticRuntime.backend_identity()` returns document-independent model,
+configuration, prompt/version, schema version, implementation, dependency, and
+decoder identity. It excludes input hashes, dynamic source-schema hashes, and
+sentence-choice counts. `inference_fingerprint(document)` contains that static
+identity plus the document-bound fields. Neither helper loads model weights.
+
+Qualification receipt version `runtime-qualification-v2.3` records the shared
+backend identity, full fresh/replay identities, and replay configuration. It
+requires those identities and configurations to remain equal. A batch gate can
+compare the static identity with a new analysis backend without requiring the
+new document to equal the original qualification source. Old qualification
+receipts require fresh qualification; they cannot establish this identity.

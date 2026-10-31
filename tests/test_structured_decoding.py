@@ -111,6 +111,23 @@ def test_runtime_fingerprint_includes_profile_and_source_schema(monkeypatch):
     assert result["claims"]
 
 
+def test_backend_identity_is_document_independent_and_tracks_configuration(monkeypatch):
+    monkeypatch.setattr(importlib.metadata, "version", lambda name: "0.11.3" if name == "lm-format-enforcer" else "synthetic-version")
+    runtime = LocalSemanticRuntime.__new__(LocalSemanticRuntime)
+    runtime.config = RuntimeConfig(decoding_mode="source_schema")
+    runtime.model_manifest = {"model_id": "synthetic-test", "revision": "0" * 40}
+    backend = runtime.backend_identity()
+    assert "input_sha256" not in backend
+    assert "schema_sha256" not in backend["decoding"]
+    assert "complete_sentence_choices" not in backend["decoding"]
+    for source in (document(), {"text": "A different complete source sentence."}):
+        bound = runtime.inference_fingerprint(source)
+        assert all(bound[key] == value for key, value in backend.items() if key != "decoding")
+        assert all(bound["decoding"][key] == value for key, value in backend["decoding"].items())
+    runtime.config = RuntimeConfig(decoding_mode="source_schema", max_new_tokens=384)
+    assert runtime.backend_identity()["config_sha256"] != backend["config_sha256"]
+
+
 def test_unconstrained_profile_does_not_require_optional_library(monkeypatch):
     def version(name):
         if name == "lm-format-enforcer":
@@ -152,19 +169,73 @@ def test_actual_character_parser_accepts_only_bounded_source_output():
     assert not _accepts(schema_parser(document()), value)
 
 
-def test_actual_tiny_cpu_generation_obeys_empty_source_schema():
-    """Real Transformers generate integration with random tiny CPU weights only."""
+@pytest.mark.parametrize("field", ["claims", "questions"])
+def test_actual_parser_forbids_first_item_in_required_empty_array(field):
     pytest.importorskip("lmformatenforcer")
-    torch = pytest.importorskip("torch")
+    source = {"text": "Incomplete source fragment"} if field == "claims" else {
+        "text": "Treatment reduced IL6 in human cells."
+    }
+    value = {"claims": [], "questions": []}
+    value[field] = [{"quote": "Invented future research."}]
+    assert not _accepts(schema_parser(source), value)
+    assert _accepts(schema_parser(source), {"claims": [], "questions": []})
+
+
+def test_actual_parser_keeps_claim_without_future_question():
+    pytest.importorskip("lmformatenforcer")
+    source = {"text": "Notably, treatment reduced IL6 in human cells."}
+    value = payload()
+    value["questions"] = []
+    assert _accepts(schema_parser(source), value)
+    value["questions"] = [{"quote": "Future studies should invent an endpoint."}]
+    assert not _accepts(schema_parser(source), value)
+
+
+def test_empty_array_guard_ignores_punctuation_in_nested_strings():
+    pytest.importorskip("lmformatenforcer")
+    source = {"text": "Notably, treatment reduced IL6 in human cells."}
+    value = payload()
+    value["questions"] = []
+    value["claims"][0]["object"] = 'IL6 {"questions": [ with \\ escaped punctuation'
+    assert _accepts(schema_parser(source), value)
+
+
+def _character_tokenizer():
     from tokenizers import Tokenizer, decoders, models, pre_tokenizers
-    from transformers import GPT2Config, GPT2LMHeadModel, PreTrainedTokenizerFast
+    from transformers import PreTrainedTokenizerFast
 
     vocabulary = {"<unk>": 0, "<eos>": 1}
     vocabulary.update({char: index + 2 for index, char in enumerate(string.printable)})
     tokenizer_impl = Tokenizer(models.WordLevel(vocabulary, unk_token="<unk>"))
     tokenizer_impl.pre_tokenizer = pre_tokenizers.Split("", behavior="isolated")
     tokenizer_impl.decoder = decoders.Fuse()
-    tokenizer = PreTrainedTokenizerFast(tokenizer_object=tokenizer_impl, unk_token="<unk>", eos_token="<eos>", pad_token="<eos>")
+    return PreTrainedTokenizerFast(tokenizer_object=tokenizer_impl, unk_token="<unk>", eos_token="<eos>", pad_token="<eos>")
+
+
+def test_actual_prefix_hook_forbids_nonempty_question_after_array_opener():
+    pytest.importorskip("lmformatenforcer")
+    torch = pytest.importorskip("torch")
+    tokenizer = _character_tokenizer()
+    prefix, _ = prefix_constraint(tokenizer, {"text": "Treatment reduced IL6 in human cells."})
+    sequence = tokenizer.encode("0")
+    for char in '{"claims": [], "questions": [':
+        allowed = prefix(0, torch.tensor(sequence))
+        token = tokenizer.encode(char)[0]
+        assert token in allowed
+        sequence.append(token)
+    allowed = prefix(0, torch.tensor(sequence))
+    assert tokenizer.encode("]")[0] in allowed
+    assert tokenizer.encode("{")[0] not in allowed
+    assert tokenizer.encode('"')[0] not in allowed
+
+
+def test_actual_tiny_cpu_generation_obeys_empty_source_schema():
+    """Real Transformers generate integration with random tiny CPU weights only."""
+    pytest.importorskip("lmformatenforcer")
+    torch = pytest.importorskip("torch")
+    from transformers import GPT2Config, GPT2LMHeadModel
+
+    tokenizer = _character_tokenizer()
     torch.manual_seed(1729)
     model = GPT2LMHeadModel(GPT2Config(vocab_size=len(tokenizer), n_positions=256, n_embd=16, n_layer=1, n_head=2, eos_token_id=1, pad_token_id=1)).eval()
     source = {"text": "Incomplete source fragment"}

@@ -385,28 +385,37 @@ class LocalSemanticRuntime:
         generated = output[0, length:]
         return self._tokenizer.decode(generated, skip_special_tokens=True), length, len(generated)
 
-    def inference_fingerprint(self, document: dict) -> dict:
-        """Return the exact input/model/code/config identity used by extraction."""
+    def backend_identity(self) -> dict:
+        """Return document-independent model/code/config identity for qualification."""
         import importlib.metadata
 
         decoding = {"mode": self.config.decoding_mode}
         effective_prompt = SYSTEM_PROMPT
         if self.config.decoding_mode == "source_schema":
-            from .structured_decoding import PROFILE_INSTRUCTION, decoding_metadata
+            from .structured_decoding import PROFILE_INSTRUCTION, backend_decoding_metadata
 
-            decoding.update(decoding_metadata(document))
+            decoding.update(backend_decoding_metadata())
             effective_prompt += "\n" + PROFILE_INSTRUCTION
         return {
-            "input_sha256": digest(document),
             "model_manifest_sha256": digest(self.model_manifest),
             "config_sha256": digest(asdict(self.config)),
             "prompt_sha256": digest(effective_prompt),
             "decoding": decoding,
+            "prompt_version": PROMPT_VERSION,
             "schema_version": SCHEMA_VERSION,
             "implementation_sha256": _file_sha(Path(__file__)),
             "transformers_version": importlib.metadata.version("transformers"),
             "torch_version": importlib.metadata.version("torch"),
         }
+
+    def inference_fingerprint(self, document: dict) -> dict:
+        """Return the exact input/model/code/config identity used by extraction."""
+        identity = self.backend_identity()
+        if self.config.decoding_mode == "source_schema":
+            from .structured_decoding import decoding_metadata
+
+            identity["decoding"].update(decoding_metadata(document))
+        return {**identity, "input_sha256": digest(document)}
 
     def extract(
         self, document: dict, cache_root: str | Path | None = None, force_fresh: bool = False

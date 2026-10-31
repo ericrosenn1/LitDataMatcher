@@ -22,6 +22,7 @@ class DeniedProbe:
 class FakeRuntime:
     claims = []
     changed_identity = False
+    changed_backend = False
 
     def __init__(self, model, config):
         self.config = config
@@ -29,6 +30,10 @@ class FakeRuntime:
 
     def inference_fingerprint(self, document):
         return {"identity": "synthetic-expected", "config": asdict(self.config)}
+
+    def backend_identity(self):
+        return {"backend": "changed" if self.changed_backend and self.calls else "synthetic-test-double",
+                "config": asdict(self.config)}
 
     def extract(self, document, cache, force_fresh=False):
         self.calls += 1
@@ -48,6 +53,7 @@ def qualifier(monkeypatch, tmp_path):
     monkeypatch.setattr(runtime_qualify, "LocalSemanticRuntime", FakeRuntime)
     monkeypatch.setattr(FakeRuntime, "claims", [])
     monkeypatch.setattr(FakeRuntime, "changed_identity", False)
+    monkeypatch.setattr(FakeRuntime, "changed_backend", False)
     source = tmp_path / "development.json"
     source.write_text(json.dumps({"document_id": "synthetic-development", "title": "Test", "text": "Test source."}))
     output = tmp_path / "qualification.json"
@@ -63,6 +69,9 @@ def test_no_accepted_records_writes_diagnostic_fail_receipt(qualifier):
     assert report["fresh"]["claims"] == []
     assert report["failure"]["stage"] == "cached_replay"
     assert report["expected_identity"]["config"]["max_new_tokens"] == 1024
+    assert report["replay_identity"] == report["expected_identity"]
+    assert report["backend_identity"]["backend"] == "synthetic-test-double"
+    assert report["replay_configuration"] == report["configuration"]
 
 
 def test_changed_runtime_identity_cannot_qualify(qualifier, monkeypatch):
@@ -79,6 +88,14 @@ def test_source_profile_cli_records_explicit_configuration(qualifier):
     report = json.loads(output.read_text())
     assert report["configuration"]["decoding_mode"] == "source_schema"
     assert report["configuration"]["max_new_tokens"] == 384
+
+
+def test_changed_static_backend_cannot_qualify(qualifier, monkeypatch):
+    args, output = qualifier
+    monkeypatch.setattr(FakeRuntime, "claims", [{"id": "synthetic"}])
+    monkeypatch.setattr(FakeRuntime, "changed_backend", True)
+    assert runtime_qualify.main(args) == 1
+    assert "Static backend identity changed" in json.loads(output.read_text())["failure"]["message"]
 
 
 def test_existing_receipt_is_preserved(qualifier):

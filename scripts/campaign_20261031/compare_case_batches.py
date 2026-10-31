@@ -446,7 +446,7 @@ def compare(baseline, candidate, inputs):
             "Accepted output counts are not accuracy, completeness, or scientific validity.",
             "A closed batch can retain partial, failed, or retryable cases; all statuses remain visible.",
             "Counts cover observed model records only; caller and deterministic questions are excluded.",
-            "Missing view timings are not zero. Returned inference elapsed time includes bounded attempts, not model load or total case time.",
+            "Missing view timings are not zero. Returned inference elapsed time includes bounded attempts and any lazy model initialization inside the extraction call; it excludes earlier manifest verification and later pipeline work.",
             "Cache replay elapsed fields describe the stored original inference; timing origins must be consulted.",
             "Configuration, model, dependency, implementation or input differences prevent isolated causal claims.",
         ],

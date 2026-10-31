@@ -18,7 +18,6 @@ from urllib.parse import quote
 from .dataset_inspection import _hash, _observed, inspect_tabular_dataset
 
 VERSION = "tabular-comparison-evidence-1.0"
-METHOD_FIELDS = {"joint_observation", "outcome_ascertainment"}
 
 
 def _fingerprint(value):
@@ -181,10 +180,14 @@ def scope_tabular_comparison(dataset, requirements):
     """
     result = deepcopy(dataset)
     previous = result.pop("comparison_scope", None)
+    result.pop("comparison_scope_conflict", None)
     if previous:
         caps = result.setdefault("capabilities", {})
         for field in previous.get("projected_fields", []):
-            caps.pop(field, None)
+            if field in previous.get("original_capabilities", {}):
+                caps[field] = deepcopy(previous["original_capabilities"][field])
+            else:
+                caps.pop(field, None)
     values = {}
     for row in requirements:
         if row["field"] in values:
@@ -235,30 +238,57 @@ def scope_tabular_comparison(dataset, requirements):
             raise ValueError("Comparison evidence integrity mismatch")
         caps = result.setdefault("capabilities", {})
         locator = evidence["source_locator"] + "&comparison=" + evidence["evidence_id"]
-        projected = [row["field"] for row in required if row["field"] not in caps]
+        projected = {}
         for row in required:
             if row["field"].startswith("comparison_group:"):
                 group = row["field"].removeprefix(f"comparison_group:{grouping}:")
-                caps[row["field"]] = _observed(evidence["joint_rows_by_group"][group] > 0, locator)
+                projected[row["field"]] = _observed(
+                    evidence["joint_rows_by_group"][group] > 0, locator
+                )
             elif row["field"] in {"outcome_variable", "grouping_variable"}:
-                caps[row["field"]] = _observed(row["expected"], locator)
-        caps["joint_observation"] = _observed(
+                projected[row["field"]] = _observed(row["expected"], locator)
+        projected["joint_observation"] = _observed(
             all(count > 0 for count in evidence["joint_rows_by_group"].values()), locator
         )
         outcome_definition = next(
             row for row in evidence["definition_evidence"] if row["variable"] == outcome
         )
-        caps["outcome_ascertainment"] = _observed(
+        projected["outcome_ascertainment"] = _observed(
             evidence["joint_observed_rows"] > 0,
             outcome_definition["source_locator"] + "; " + locator + "&column=" + quote(outcome),
         )
+        conflicts = [
+            field
+            for field, value in projected.items()
+            if field in caps
+            and (
+                caps[field].get("status") == "absent"
+                or caps[field].get("status") == "observed"
+                and (
+                    type(caps[field].get("value")) is not type(value["value"])
+                    or caps[field].get("value") != value["value"]
+                )
+            )
+        ]
+        if conflicts:
+            result["comparison_scope_conflict"] = {
+                "fields": sorted(conflicts),
+                "evidence_id": evidence["evidence_id"],
+                "reason": "Existing observed capabilities contradict this comparison; no evidence was replaced.",
+            }
+            return result
+        original_capabilities = {
+            field: deepcopy(caps[field]) for field in projected if field in caps
+        }
+        caps.update(projected)
         result["comparison_scope"] = {
             "evidence_id": evidence["evidence_id"],
             "requirement_fingerprint": _fingerprint(requirements),
             "outcome_variable": outcome,
             "grouping_variable": grouping,
             "group_values": sorted(requested_groups),
-            "projected_fields": sorted(set(projected) | METHOD_FIELDS),
+            "projected_fields": sorted(projected),
+            "original_capabilities": original_capabilities,
             "usage": "one exact compiled contract; do not cache as a general dataset profile",
         }
         return result

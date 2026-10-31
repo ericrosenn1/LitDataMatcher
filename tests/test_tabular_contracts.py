@@ -136,6 +136,51 @@ def test_group_with_no_joint_measured_rows_is_a_mismatch(tmp_path):
     assert assess_requirements(requirements, scoped)["eligibility"] == "NOT_QUALIFIED"
 
 
+def test_existing_contradiction_is_preserved_without_projection(tmp_path):
+    dataset, requirements, *_ = build(tmp_path)
+    for field, value in [
+        ("joint_observation", False),
+        ("outcome_variable", "prior"),
+        ("grouping_variable", "prior_group"),
+    ]:
+        dataset["capabilities"][field] = {
+            "value": value,
+            "status": "observed",
+            "source_locator": "prior source",
+        }
+    original = deepcopy(dataset["capabilities"])
+    scoped = scope_tabular_comparison(dataset, requirements)
+    assert scoped["capabilities"] == original
+    assert "comparison_scope" not in scoped
+    assert scoped["comparison_scope_conflict"]["fields"] == [
+        "grouping_variable",
+        "joint_observation",
+        "outcome_variable",
+    ]
+    assert assess_requirements(requirements, scoped)["eligibility"] == "NOT_QUALIFIED"
+
+
+def test_reused_projection_restores_exact_original_capabilities(tmp_path):
+    dataset, requirements, *_ = build(tmp_path)
+    for field, value in [
+        ("joint_observation", True),
+        ("outcome_variable", "value"),
+        ("grouping_variable", "group"),
+        ("comparison_group:group:A", True),
+    ]:
+        dataset["capabilities"][field] = {
+            "value": value,
+            "status": "observed",
+            "source_locator": "prior source",
+            "reason": "original reason",
+        }
+    original = deepcopy(dataset["capabilities"])
+    scoped = scope_tabular_comparison(dataset, requirements)
+    assert scoped["comparison_scope"]
+    reset = scope_tabular_comparison(scoped, comparison_constraints("other", "group", ["A", "B"]))
+    assert reset["capabilities"] == original
+
+
 def test_timing_and_independence_remain_unknown_with_real_comparison_evidence(tmp_path):
     dataset, requirements, *_ = build(tmp_path)
     for field, expected in [

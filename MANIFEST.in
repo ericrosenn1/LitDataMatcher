@@ -2,6 +2,7 @@ include LICENSE CITATION.cff CHANGELOG.md requirements-v2.lock requirements-docs
 recursive-include scripts *.py
 recursive-include examples *.json
 recursive-include docs *.md *.json *.png *.svg
+include docs/assets/dataset-retrieval-development.pdf docs/assets/dataset-retrieval-development.csv
 recursive-include benchmarks *.py *.json *.jsonl *.md *.csv
 recursive-include tests/fixtures *
 recursive-include project_state/campaign_20261031 *.json

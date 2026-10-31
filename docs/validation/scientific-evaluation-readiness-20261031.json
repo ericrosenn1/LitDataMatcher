@@ -1,0 +1,392 @@
+{
+  "checks": {
+    "blank_addendum_hash_unchanged": true,
+    "frozen_42_case_packet_hash_unchanged": true,
+    "live_api_full_method_contracts_checked": [
+      {
+        "case_id": "descriptive-comparison-01",
+        "dataset_id": "UCI:17",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-02",
+        "dataset_id": "UCI:17",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-03",
+        "dataset_id": "UCI:17",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-04",
+        "dataset_id": "UCI:17",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-05",
+        "dataset_id": "UCI:17",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-06",
+        "dataset_id": "UCI:17",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-07",
+        "dataset_id": "UCI:45",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-08",
+        "dataset_id": "UCI:45",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-09",
+        "dataset_id": "UCI:45",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-10",
+        "dataset_id": "UCI:45",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-11",
+        "dataset_id": "UCI:45",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      },
+      {
+        "case_id": "descriptive-comparison-12",
+        "dataset_id": "UCI:45",
+        "eligibility": "DIRECT_FIT",
+        "method_requirements": {
+          "joint_observation": "MATCH",
+          "outcome_ascertainment": "MATCH"
+        },
+        "statistical_adequacy": "UNKNOWN"
+      }
+    ],
+    "model_application_candidates": 0,
+    "model_application_documents": 2,
+    "model_application_retained_questions": 1,
+    "model_inference_run": false,
+    "original_association_cases": 12,
+    "original_association_full_fits": 0,
+    "original_request_bytes_hashed_without_modification": true,
+    "relative_document_links_checked": 17,
+    "reserved_final_assets_accessed": false,
+    "reviewer_labels_filled": 0,
+    "scale_counts_reconciled": true,
+    "scientific_evaluation_run": false,
+    "source_inputs_modified": false,
+    "thresholds_changed": false,
+    "versioned_request_differs_only_in_line_endings": true
+  },
+  "document_sha256": "e739971b36104556e6f63a9c67e9a2b63a22c782354edb3a5f0e5782fdb88add",
+  "final_protocol_status": "DRAFT_NOT_APPROVED",
+  "limitations": [
+    "Read-only downstream evidence/protocol audit, not independent biomedical reference annotation.",
+    "Source-family selection, judged labels, prospective scope approval, calibration and final evaluation remain pending.",
+    "Immutable corpus receipt covers 957 of 1,621 shards; no full-corpus acceptance inferred.",
+    "Exact-head whole-product acceptance is not asserted; parallel application review remains outside this scoped audit."
+  ],
+  "observed_at_utc": "2026-10-31T18:47:39.328401+00:00",
+  "schema_version": "scientific-evaluation-readiness-review-1.0",
+  "scientific_acceptance": "PENDING_NOT_EVALUATED",
+  "source_commit": "b9f1cf3905e693953a64a74888f400504f87d2fc",
+  "source_inputs": [
+    {
+      "bytes": 29484,
+      "path": "C:\\Users\\eric\\.codex\\attachments\\223edbcb-8f42-400f-92cf-68eed686baad\\Pasted text.txt",
+      "role": "original_master_request",
+      "sha256": "7f03df6b99e994839d2ffc3c9578c186ae19f6073cfe0d9ef97525f2f875db98"
+    },
+    {
+      "bytes": 28721,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\project_state\\full_platform_20261031\\REQUEST.md",
+      "role": "versioned_request_copy_line_endings_normalized",
+      "sha256": "c65d5f6841c12fcd258fd85e857300f2011f8c82de05a706c622711885b3a8ae"
+    },
+    {
+      "bytes": 7518,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\v2\\EVALUATION_PROTOCOL.md",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "ed0f12de62282c556a651372f5c8e23596ebe3339d9e6e24993bb204ebf58e51"
+    },
+    {
+      "bytes": 3335,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\v2\\EVALUATION_ROUND2.md",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "e56450b8d1cc2c77da35497602b059936a372b76f3b5e8e3297d3c432a3f65ec"
+    },
+    {
+      "bytes": 11104,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\v2\\build_spec\\08_VALIDATION_AND_ACCEPTANCE_GATES.md",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "e40bf2bfa88c1bf9ef197150eb7e52f6b1e8e3737b6ecca4af780f93b3860afc"
+    },
+    {
+      "bytes": 6180,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\v2\\build_spec\\templates\\BUILD_SPEC.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "acc466252a2456c27ac53e89341ad86eef9626c81870653d98f5cfbfaa332077"
+    },
+    {
+      "bytes": 8158,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\v2\\final_audit\\PHASE2_BENCHMARK_PROTOCOL.md",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "3370dfc4566545bbabccbb449e45f91fcd02de189121c9a28b8c514375e46115"
+    },
+    {
+      "bytes": 3219,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\campaign_20261031\\retrieval_protocol.md",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "d65c84c7cae1e6e294faf7ad53855d896b1638075f47dbb40160321690c41736"
+    },
+    {
+      "bytes": 5708,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\campaign_20261031\\extraction_protocol.md",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "71ce4044b34083dde650477864813add706d5ee048956c08e372a3e8e855eb56"
+    },
+    {
+      "bytes": 1364,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\benchmarks\\campaign_20261031\\scientific_review_packet.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "d31f9209b09be441ede3133d285f5f4fdd02439ff9641a74af10ab5edb038f75"
+    },
+    {
+      "bytes": 1333,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\benchmarks\\campaign_20261031\\comparative_review_addendum.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "066e2a8c4981d613a19981d193734ca5f36d8b27fb3b3cb30d50fab6908579f3"
+    },
+    {
+      "bytes": 10093,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\benchmarks\\campaign_20261031\\model_qualification.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "ba6649216a7cc2fbfd00a3fc39dc1975d60b6ca76e5c3316ee7585ad361a1fb9"
+    },
+    {
+      "bytes": 12993,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\benchmarks\\campaign_20261031\\extraction_literal.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "1ead2508d2d86a871ab14b8fe49eb4ae9aecd40b73cf42909b8d30e4c58e0f9d"
+    },
+    {
+      "bytes": 10867,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\benchmarks\\campaign_20261031\\dataset_ranking.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "b209dc4383ebfbc8f1c0e130f09e5ac8866f97b7a8198e762c59906e8929f6e0"
+    },
+    {
+      "bytes": 12004,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\benchmarks\\campaign_20261031\\retrieval_development.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "7e0bb8eb1b435c833ef9d6d4603c45c1b24afabf76ba783c0e56a189002d4928"
+    },
+    {
+      "bytes": 3132,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\validation\\question-discovery-scale-20261031.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "7c4120e611ef88578159b0db1f16d39db0ec6e4337ec0dda5951fee75bdfd263"
+    },
+    {
+      "bytes": 17725,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\validation\\question-discovery-10000-scale-20261031.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "1329c93105646b0368693f7eb80bc6cbac9482724e2458b1232c2fa3b3d9adff"
+    },
+    {
+      "bytes": 709,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\validation\\question-discovery-10000-audit-20261031.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "2db6cc4e57adc25f135cb94ea352c45828169fa9c525f67ba87a63dc595e7ce1"
+    },
+    {
+      "bytes": 1449,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-sources\\docs\\validation\\question-discovery-10000-global-20261031.json",
+      "role": "existing_protocol_or_evidence_receipt",
+      "sha256": "4eb54e4a285429166915fe7cd3ca1811004524770737f466ba671a3c2dddf9df"
+    },
+    {
+      "bytes": 283627,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\COMPARISON_DEVELOPMENT.json",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "0136af6a8fff7c6134cf21c93521dd59c0056333e60763c9b1f3933237bfa457"
+    },
+    {
+      "bytes": 150671,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\dataset-qualification-v2\\QUALIFICATION_DEMONSTRATION.json",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "68a1583d4a334ea895e413072dfa8d48838b523a5578fb655846024f86b79a1a"
+    },
+    {
+      "bytes": 12997,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\API_DEMONSTRATION.json",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "f267b8c055c0fd49cb69b88a2b9cab57ac19c2a73639119e5642dbd6a5351123"
+    },
+    {
+      "bytes": 927,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\questions\\VALIDATION.json",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "6fa66984f5179ed3941599ff9f85e6a0953dbd0e5baf8b7554dc3096a4f52a7a"
+    },
+    {
+      "bytes": 1513,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\literature_campaign_v2\\chunks\\corpus-000001.json",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "04c72812668c4894c74952fbeb3f7b08689c078e79a57955c44157458a95b1d1"
+    },
+    {
+      "bytes": 494917,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\scientific-review-v3\\LitDataMatcher-development-scientific-review.zip",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "915372311bc45337fea7f8daa25c78981253c4619bf71a797c7605bcadccfc9b"
+    },
+    {
+      "bytes": 18474,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-review-v1\\LitDataMatcher-descriptive-review-addendum.zip",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "a241857bd12d5d163fed5bd47bde488e3317becd7d28bf90fe9d921a9be3235f"
+    },
+    {
+      "bytes": 234046,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-v1\\jobs\\041f39b700814d92aff0a51867dea689\\run\\result.json",
+      "role": "immutable_development_evidence_or_review_packet",
+      "sha256": "bcbf49e6a06bf30162f39763a544d9eb57af2ae122ff30f7a57336d048b25fac"
+    },
+    {
+      "bytes": 1495274,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-01.json",
+      "role": "live_api_case_checked",
+      "sha256": "3b6b124b3a9286731c96158bbb79c433987fcd3aa444a3388038eb75b15290a3"
+    },
+    {
+      "bytes": 1495343,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-02.json",
+      "role": "live_api_case_checked",
+      "sha256": "791c695fb51adb5add35f43258261cfecc31c22763b11cd8033a45b9539a258b"
+    },
+    {
+      "bytes": 1495488,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-03.json",
+      "role": "live_api_case_checked",
+      "sha256": "87854728b6d9e8a0935251d579c5d3f42aed1f97422620b7a92ff0031e88f094"
+    },
+    {
+      "bytes": 1503375,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-04.json",
+      "role": "live_api_case_checked",
+      "sha256": "286ccc5ee558ea1a44e807d9f045b4a9529510419cf96bd97665ea5c83782b0c"
+    },
+    {
+      "bytes": 1495562,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-05.json",
+      "role": "live_api_case_checked",
+      "sha256": "0c80f4e2667cd9fc6399cb3c7f7c5d2d65dd6099828c6d2b28b36cfc1818cbf1"
+    },
+    {
+      "bytes": 1495632,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-06.json",
+      "role": "live_api_case_checked",
+      "sha256": "5ec35fa27f3f7b3a14503031f60d0417480a13f3e7895eabb46b561e4d6c0e4f"
+    },
+    {
+      "bytes": 956211,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-07.json",
+      "role": "live_api_case_checked",
+      "sha256": "d947d9097be102d5dd2e8e72e11760c576587bf9e8761b41ea2d64816d2c1e1e"
+    },
+    {
+      "bytes": 215753,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-08.json",
+      "role": "live_api_case_checked",
+      "sha256": "c433304c14906604eed0a17a56778b851c2d5ebcb5f9ee68d19c020a0ac4ac46"
+    },
+    {
+      "bytes": 215620,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-09.json",
+      "role": "live_api_case_checked",
+      "sha256": "483d9ef08f795bec327938365748bac7da4b7e164f6104d83b18efcdca6340dd"
+    },
+    {
+      "bytes": 215720,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-10.json",
+      "role": "live_api_case_checked",
+      "sha256": "f1d6fdabf46a61440918d6f8d1d2ff1c0b9289fe49e6c0acec4715d8ac21e3dd"
+    },
+    {
+      "bytes": 215722,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-11.json",
+      "role": "live_api_case_checked",
+      "sha256": "3222db8c610d99d8185222f791cd4d02db4ba5292b3a163b25a8df3c58b09224"
+    },
+    {
+      "bytes": 215656,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-comparisons-v1\\descriptive-comparison-12.json",
+      "role": "live_api_case_checked",
+      "sha256": "fe352433f26d77e669278d0d542eb67e8a60112d3319f6bbae0b7d53c3aa2dfc"
+    }
+  ],
+  "technical_status": "PASS"
+}

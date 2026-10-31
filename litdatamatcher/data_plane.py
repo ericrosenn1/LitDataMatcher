@@ -11,6 +11,7 @@ import json
 import os
 import sqlite3
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +35,16 @@ def atomic_write(path: str | Path, data: bytes) -> None:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temporary, path)
+        # Windows readers briefly hold a handle without delete sharing. Preserve
+        # atomic publication while retrying that transient sharing violation.
+        for attempt in range(6):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError as exc:
+                if getattr(exc, "winerror", None) not in {5, 32, 33} or attempt == 5:
+                    raise
+                time.sleep(0.01 * (2**attempt))
     finally:
         Path(temporary).unlink(missing_ok=True)
 

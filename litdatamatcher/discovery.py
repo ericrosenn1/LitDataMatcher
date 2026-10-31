@@ -162,6 +162,7 @@ def discover(
     offline: bool = False,
     resume: bool = False,
     retry_failed: bool = False,
+    cache_root: Path | None = None,
     _fetcher=None,
 ) -> dict:
     """Build a native workspace from an explicit plan, retaining node-level evidence."""
@@ -214,7 +215,12 @@ def discover(
         fetcher = _fetcher or _fetch
         with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="discovery") as pool:
             futures = {
-                pool.submit(fetcher, job, out / "http_cache" / job["job_id"], offline): job
+                pool.submit(
+                    fetcher,
+                    job,
+                    (Path(cache_root) if cache_root else out / "http_cache") / job["job_id"],
+                    offline,
+                ): job
                 for job in pending
             }
             for future in as_completed(futures):

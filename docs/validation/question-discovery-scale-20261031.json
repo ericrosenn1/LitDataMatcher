@@ -1,0 +1,69 @@
+{
+  "started_utc": "2026-10-31T18:00:52.436699+00:00",
+  "completed_utc": "2026-10-31T18:00:52.594529+00:00",
+  "requested_documents": 1000,
+  "source_view_corrections": 744,
+  "extraction_and_clustering_seconds": 0.08224729995708913,
+  "submitted_documents_per_second": 12158.453840086298,
+  "text_bearing_processed_documents_per_second": 3112.5641830620925,
+  "memory": {
+    "method": "Process RSS sampled every20ms during extraction+clustering; process-lifetime peak separate",
+    "extraction_baseline_rss_bytes": 44306432,
+    "extraction_sampled_peak_rss_bytes": 50511872,
+    "extraction_peak_rss_increase_bytes": 6205440,
+    "sample_count": 4,
+    "process_lifetime_peak_working_set_bytes": 67825664
+  },
+  "snapshot": {
+    "snapshot_sha256": "8f52ace2d63cd5ac0ac7fab7b3d5cbee477c3410a161bb82cc492b3de44eb51c",
+    "schema_version": "pubmed-current-index-1.0",
+    "corpus_store_uuid": "1f5ee098-3e86-4b85-a8d8-49cc3bcdc906",
+    "applied_shards": 563,
+    "last_shard_order": 562,
+    "status": "PARTIAL"
+  },
+  "coverage": {
+    "requested_documents": 1000,
+    "processed_documents": 256,
+    "failed_documents": 0,
+    "excluded_documents": 0,
+    "metadata_only_documents": 744,
+    "candidate_questions": 18,
+    "retained_questions": 18,
+    "truncated": false,
+    "source_scope": "Caller-supplied source views only",
+    "global_novelty_established": false
+  },
+  "document_status_counts": {
+    "METADATA_ONLY_NOT_EXTRACTED": 744,
+    "EMPTY": 239,
+    "SUCCESS": 17
+  },
+  "no_candidate_question_in_processed_source_text_documents": 239,
+  "question_category_counts": {
+    "SOURCE_STATED_UNRESOLVED": 15,
+    "SOURCE_STATED_LIMITATION": 2,
+    "SOURCE_RESEARCH_QUESTION": 1
+  },
+  "clusters": 18,
+  "clusters_with_multiple_members": 0,
+  "original_input_sha256": "bf682b405829b2bf6973e0e23b24ed16f87dda8e6932fade2bbb20e549af367e",
+  "corrected_input_sha256": "6fbc7ce74186f5e3eb513161d29be15eb70465427bd0a3426883c6f037ee2b4a",
+  "result_sha256": "d821769b8a596a8dcf22a50c00642e9aebe72a682a40c6bda070dde57b91ced4",
+  "python_version": "3.12.13",
+  "repository_commit": "4f8b8970673506e3fe0b3a4f701b150191d7bd3e",
+  "implementation_sha256": {
+    "question_discovery.py": "7b9c58fcd6556fca1b8e57ccb6a98d8ab0dddf83bc6bcd1e0a482de9c48e2ea6",
+    "question_compiler.py": "ba800cc635acc934f01e3777c96edd98d0900abe1293aa76c930235a462c06b2",
+    "question_compiler_rules_v1.json": "ea2a86ff26cbc7ea5ddd84aa31aef416c0b562b04fc5e2ff5294928f65e1ff0b"
+  },
+  "validation": {
+    "status": "PASS",
+    "checked_question_records": 18,
+    "all_source_views_equal_native_abstract_including_empty": "PASS",
+    "literal_span_hash_citation_locator_native_provenance_fidelity": "PASS",
+    "input_status_accounting_and_metadata_only_separation": "PASS",
+    "unique_question_ids_and_complete_cluster_membership": "PASS"
+  },
+  "scientific_scope": "Engineering throughput/accounting/source fidelity only. Partial historical corpus, topic-selected cohort; no precision/recall, outcome, novelty or dataset-fit claim. Metadata-only inputs were not extracted."
+}

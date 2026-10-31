@@ -1,8 +1,9 @@
 # Research workflow and evidence contracts
 
-LitDataMatcher produces reviewable question–dataset candidates. Its primary
-research path is `litdatamatcher-v2`; the deterministic `litdatamatcher demo`
-remains a lightweight installation check and teaching example.
+LitDataMatcher produces reviewable question–dataset candidates. The
+[Scientific workflow](full_platform.md) is the integrated browser entry point;
+`litdatamatcher-v2` retains the native research CLI. The deterministic
+`litdatamatcher demo` remains a lightweight installation check and teaching example.
 
 ```mermaid
 flowchart LR
@@ -25,6 +26,8 @@ flowchart LR
 
 | Path | Purpose | Runtime requirements |
 | --- | --- | --- |
+| `litdatamatcher-app` | Serve the browser workflow, evidence exports and durable jobs | Core Python; verified local models for optional model modes |
+| `litdatamatcher-campaign` | Execute bounded dependency-ordered local development plans through the existing controller | Resources of the explicitly configured commands |
 | `litdatamatcher-discover` | Execute a bounded user-defined source query plan | Network for acquisition; cached offline replay available |
 | `litdatamatcher-v2 compile` | Inspect the typed answer specification for a question | CPU, no model |
 | `litdatamatcher-v2 analyze` | Extract, compile, assess, and report one research run | Explicit locally prepared extractor and encoder |
@@ -35,7 +38,8 @@ flowchart LR
 See [configurable discovery](campaign_20261031/discovery.md),
 [model preparation and structured decoding](campaign_20261031/model_source_schema.md),
 and [workflow recovery](campaign_20261031/workflow_recovery.md) for commands and
-failure behavior. The browser workspace is an optional review interface.
+failure behavior. The [integrated browser guide](full_platform.md) covers the
+interactive workflow and its single-user local-service boundary.
 
 ## What each boundary guarantees
 

@@ -179,6 +179,20 @@ def normalize_dataset(record):
     result["capabilities"] = caps
     result["modality_contract"] = contract
     result["availability"] = record.get("access_status", metadata.get("access_status", "UNKNOWN"))
+    inspected = record.get("inspection", {})
+    processed = caps.get("processed_measurements", {})
+    if (
+        record.get("availability") == "PUBLIC_FILE_INSPECTED"
+        and record.get("inspection_status") == "INSPECTED_MEASUREMENTS"
+        and isinstance(inspected, dict)
+        and re.fullmatch(r"[a-f0-9]{64}", str(inspected.get("source_sha256", "")))
+        and str(inspected.get("source_url", "")).startswith("https://")
+        and processed.get("value") is True
+        and processed.get("status") == "observed"
+        and processed.get("source_locator")
+        == inspected["source_url"] + "#sha256=" + inspected["source_sha256"]
+    ):
+        result["availability"] = "PUBLIC_FILE_INSPECTED"
     result["migration"] = {
         "from": record.get("schema_version"),
         "to": "experimental-contract-2.0",

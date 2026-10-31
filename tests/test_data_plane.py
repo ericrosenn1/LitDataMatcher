@@ -5,6 +5,40 @@ import pytest
 from litdatamatcher.data_plane import Catalog, atomic_json
 
 
+@pytest.mark.parametrize("failures,winerror", [(2, 5), (6, 32), (1, None)])
+def test_atomic_publication_handles_bounded_windows_sharing(
+    tmp_path, monkeypatch, failures, winerror
+):
+    from litdatamatcher import data_plane
+
+    path = tmp_path / "progress.json"
+    path.write_bytes(b"old")
+    replace, attempts = data_plane.os.replace, []
+
+    def publish(source, target):
+        attempts.append(1)
+        assert path.read_bytes() == b"old"
+        if len(attempts) <= failures:
+            exc = PermissionError("denied")
+            if winerror is not None:
+                exc.winerror = winerror
+            raise exc
+        return replace(source, target)
+
+    monkeypatch.setattr(data_plane.os, "replace", publish)
+    monkeypatch.setattr(data_plane.time, "sleep", lambda _: None)
+    if failures == 2:
+        data_plane.atomic_write(path, b"new")
+        assert path.read_bytes() == b"new"
+        assert len(attempts) == 3
+    else:
+        with pytest.raises(PermissionError):
+            data_plane.atomic_write(path, b"new")
+        assert path.read_bytes() == b"old"
+        assert len(attempts) == (6 if winerror else 1)
+    assert list(tmp_path.iterdir()) == [path]
+
+
 def test_invalidation_preserves_unrelated_and_replays(tmp_path):
     c = Catalog(tmp_path)
     assert c.upsert("document", "d", {"text": "first"})

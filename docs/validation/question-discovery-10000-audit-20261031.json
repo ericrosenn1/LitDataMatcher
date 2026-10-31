@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "independent_count_reconciliation": true,
+  "unique_native_input_ids": 10000,
+  "unique_source_question_ids": 935,
+  "document_status_counts": {
+    "EMPTY": 9120,
+    "EXCLUDED_SOURCE_LIFECYCLE": 24,
+    "SUCCESS": 856
+  },
+  "question_category_counts": {
+    "SOURCE_STATED_UNRESOLVED": 686,
+    "SOURCE_STATED_LIMITATION": 204,
+    "SOURCE_RESEARCH_QUESTION": 45
+  },
+  "input_null_values": 8137,
+  "result_null_values": 17851,
+  "max_sampled_rss_bytes": 73568256,
+  "all_manifest_archive_bytes_verified": true,
+  "archive_sha256": "575e550397c0f29f97daf7140debf9550a1b046d328b259bded7a5b0c3ee7cfe",
+  "archive_bytes": 11250660,
+  "checkpoint_complete": true
+}

@@ -40,8 +40,10 @@ import {
 } from "./lib/engine";
 import type { Dataset, Opportunity, Workspace } from "./lib/types";
 import { Score, Modal, EvidenceMap } from "./components/ResearchPrimitives";
+import ScientificWorkflow from "./components/ScientificWorkflow";
 
-type Page = "overview" | "discover" | "datasets" | "library" | "methods";
+type Page =
+  "overview" | "scientific" | "discover" | "datasets" | "library" | "methods";
 type Review = { saved: boolean; status: string; note: string };
 type Reviews = Record<string, Review>;
 const emptyReview: Review = { saved: false, status: "unreviewed", note: "" };
@@ -62,12 +64,14 @@ const emptyLibrary: Workspace = {
 };
 const navItems = [
   { id: "overview" as Page, label: "Overview", icon: LayoutDashboard },
+  { id: "scientific" as Page, label: "Scientific workflow", icon: Microscope },
   { id: "discover" as Page, label: "Discover", icon: Search },
   { id: "datasets" as Page, label: "Dataset catalog", icon: Database },
   { id: "library" as Page, label: "Saved library", icon: Bookmark },
 ];
 const labels: Record<Page, string> = {
   overview: "Overview",
+  scientific: "Scientific workflow",
   discover: "Discover",
   datasets: "Dataset catalog",
   library: "Saved library",
@@ -708,6 +712,7 @@ export default function App() {
               keep your work.
             </div>
           )}
+          {page === "scientific" && <ScientificWorkflow />}
           {page === "overview" && (
             <>
               <section className="page-intro">

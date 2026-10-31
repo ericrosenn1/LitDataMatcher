@@ -58,6 +58,8 @@ litdatamatcher = "litdatamatcher.cli:main"
 litdatamatcher-controller = "litdatamatcher.controller:main"
 litdatamatcher-v2 = "litdatamatcher.v2:main"
 litdatamatcher-discover = "litdatamatcher.discovery:main"
+litdatamatcher-app = "litdatamatcher.platform_server:main"
+litdatamatcher-campaign = "litdatamatcher.development_campaign:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

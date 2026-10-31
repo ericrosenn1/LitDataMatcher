@@ -10,6 +10,8 @@ theme:
 nav:
   - Home: index.md
   - Research workflow: research_workflow.md
+  - Integrated application: full_platform.md
+  - Source question selection: campaign_20261031/question_selection.md
   - Installation and CLI: installation.md
   - Models and evaluation:
       - Model card: model_card.md
@@ -19,14 +21,22 @@ nav:
       - Source-index experiment: campaign_20261031/model_source_index.md
       - Extraction protocol: campaign_20261031/extraction_protocol.md
       - Extraction evidence: campaign_20261031/extraction_results.md
+      - Same-source extraction comparison: campaign_20261031/extraction_mode_comparison.md
       - Retrieval protocol: campaign_20261031/retrieval_protocol.md
       - Retriever training: campaign_20261031/retriever_training.md
       - Large-pool retrieval: campaign_20261031/retrieval_scale.md
       - Source-backed cases: campaign_20261031/research_cases.md
+      - Dataset ranking: campaign_20261031/dataset_ranking.md
+      - Descriptive feasibility examples: campaign_20261031/descriptive_comparisons.md
+      - Comparative review addendum: campaign_20261031/comparative_review_addendum.md
+      - Scientific review packet: campaign_20261031/scientific_review_packet.md
+      - Scientific evaluation draft: campaign_20261031/scientific_evaluation_readiness.md
   - Data and provenance:
       - Source discovery: campaign_20261031/discovery.md
       - Corpus and data: corpus_and_data.md
       - Revision ledger: campaign_20261031/pubmed_revision_ledger.md
+      - Current literature index: literature_index.md
+      - Dataset inspection: campaign_20261031/dataset_inspection.md
       - Source fidelity: campaign_20261031/sources_fidelity.md
       - Source validation: campaign_20261031/sources_validation.md
       - Ingestion provenance: source_ingestion_and_provenance.md
@@ -38,6 +48,8 @@ nav:
       - Node contracts: node_contracts.md
       - Architecture: architecture.md
       - Question compiler: question_compiler.md
+      - Question discovery: full_platform_questions.md
+      - 100,000-abstract continuation: campaign_20261031/question_scale_100000.md
   - Research practice:
       - Scientific limitations: limitations.md
       - Reproducibility: reproducibility.md

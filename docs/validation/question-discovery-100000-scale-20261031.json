@@ -1,0 +1,290 @@
+{
+  "schema_version": "bounded-question-scale-evidence-1.0",
+  "status": "PASS_WITH_LIMITATIONS",
+  "implementation_commit": "55c73cd",
+  "runner": {
+    "path": "C:\\Codex\\LitDataMatcher-v2\\worktrees\\campaign-20261031-workflow\\scripts\\validate_question_discovery_batches.py",
+    "sha256": "65a3a0acda5ce6165a6b988c52dc61d086ad0263a21dd1ba25a13e3268ae5526",
+    "size_bytes": 37394
+  },
+  "documents": 100000,
+  "batch_count": 100,
+  "processed_documents": 99909,
+  "document_status_counts": {
+    "EMPTY": 92759,
+    "EXCLUDED_SOURCE_LIFECYCLE": 91,
+    "SUCCESS": 7150
+  },
+  "retained_literal_passages": 7883,
+  "passage_categories": {
+    "SOURCE_STATED_UNRESOLVED": 5549,
+    "SOURCE_STATED_LIMITATION": 1659,
+    "SOURCE_RESEARCH_QUESTION": 675
+  },
+  "prior_completed_batches_reused": 10,
+  "new_extraction_batches": 90,
+  "timing_seconds": {
+    "read_only_feasibility_count": 40.16812619997654,
+    "preparation": 26.7564000999555,
+    "stop_invocation": 4.9398376,
+    "resume_and_verified_package_invocation": 79.4625868,
+    "new_extraction_and_within_batch_grouping": 44.153093599830754
+  },
+  "new_extraction_max_sampled_rss_bytes": 84525056,
+  "memory_scope": "Maximum per-batch 20ms-sampled process RSS during new rules extraction and within-batch grouping; not preparation, packaging, or end-to-end peak.",
+  "input_null_values_preserved": 114517,
+  "result_null_values_retained": 168759,
+  "snapshot_applied_shards": [
+    677,
+    885,
+    886,
+    887,
+    1353
+  ],
+  "resume_validation": {
+    "imported_prior_results_this_invocation": [],
+    "loaded_without_extraction_this_invocation": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "new_extraction_calls_this_invocation": [
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100
+    ],
+    "planned_interruption_observed": true,
+    "pre_stop_stage_hashes_and_mtimes_unchanged": true,
+    "stop_receipt": {
+      "checkpoint_loaded_batches": [],
+      "completed_batch_count": 12,
+      "imported_prior_batches": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "newly_computed_batches": [
+        11,
+        12
+      ],
+      "resume_command": "Repeat the run command with --resume and without --stop-after",
+      "stage_evidence": {
+        "extract-01": {
+          "file": "49f4767e7a13f11daa1eb8cea0775ac2ce0f971dfb808926b2aadb266fa66a67.json",
+          "mtime_ns": 1793474281840409700,
+          "sha256": "07525b09f64c0946d8e1736fc80e53328a3cd96a246119e0446ea28df792491c"
+        },
+        "extract-02": {
+          "file": "934310d7ebfe8af1c71908cb724661914a56c8c888b399f685fd021dc150f903.json",
+          "mtime_ns": 1793474282020953000,
+          "sha256": "96dd9a885a682cb66d7ec545aed7bc7f8b8779a8898eabdccbb50ea58d3ba8c1"
+        },
+        "extract-03": {
+          "file": "4a23a5b7467d6564e7c42e66f6c113b0b64e62f4f4ed78304689e6ba42d829e4.json",
+          "mtime_ns": 1793474282200941900,
+          "sha256": "0fec32eaf03e0864801c94065ca3f1503acf3cfa64048e669bd6d3c75ccb4b1e"
+        },
+        "extract-04": {
+          "file": "20ae0a93cf9ba3863d716de742eb8ebff1e719634155db9d4ce9c0adb15e4a32.json",
+          "mtime_ns": 1793474282372840600,
+          "sha256": "b6bee9766b26f8af29f015cbb3598c0b0cf8aa66b4d1b546d79a793b1b639dc2"
+        },
+        "extract-05": {
+          "file": "10409c2b416da22233b9cd53012fb19016310aaad84c1ea2de9446bb6a1afc6c.json",
+          "mtime_ns": 1793474282557843300,
+          "sha256": "58d37b0fa1009d77e29690b11724dcf6539838146508859aea4b06d0525b0807"
+        },
+        "extract-06": {
+          "file": "e770fc8d800b9c5159ebfb25c5033bd7d76a02c78de3c96cee0adcb3261637b0.json",
+          "mtime_ns": 1793474282750404000,
+          "sha256": "c641f744932add054a4ecf0114389f73faa25d7cb9015bd08024991a356207d5"
+        },
+        "extract-07": {
+          "file": "91dc6fa990fbf65036fc57a330f6480e87f721c4387f032c613b0a143e90a0ee.json",
+          "mtime_ns": 1793474282933998500,
+          "sha256": "3f85e894b1a598c566688c23a163974a0abebd008c5c2702d2c5c7b99105fb7a"
+        },
+        "extract-08": {
+          "file": "58b71cdc061fbb2926db57e47eca482e1f4fb562e9d4d49668e43acfb283de80.json",
+          "mtime_ns": 1793474283112832200,
+          "sha256": "667b358e44b938b910f8af16017e33daf269cfd219a54272e228e48a9b68c550"
+        },
+        "extract-09": {
+          "file": "16f237975a0fd4723491116b63faeb928565a6244cc96e0c228970a48b38acbb.json",
+          "mtime_ns": 1793474283291499800,
+          "sha256": "3096bc5ec2455c3c5cff61e94060f1b53f7b85a2026c366b34150ddc1affb65e"
+        },
+        "extract-10": {
+          "file": "a4bd91287b1718d1a7c399347af5ff69079e5e087b749953d199710458b96093.json",
+          "mtime_ns": 1793474283478803000,
+          "sha256": "ee13d9d115c8558638d2af30379ba7c9c75b9ae96d358694c9c70f1f2631df1e"
+        },
+        "extract-11": {
+          "file": "cf79279a4ab6ac702cbbce5bd302151bd06ba82573683a4f7b4ae5e3c231cef2.json",
+          "mtime_ns": 1793474284304654600,
+          "sha256": "3569525bab32d3b5f23895f3d6ed9385870c7b77daa5b5f9ddf40dd919d24488"
+        },
+        "extract-12": {
+          "file": "718c9f64e8af2a763661a770a979c8890b56a345f96707502a821b61ee685217.json",
+          "mtime_ns": 1793474285360985500,
+          "sha256": "80cc364de19ec6a348a2f50cdc2fd2e893568e352b463881a2b3d3b2e51afe43"
+        }
+      },
+      "status": "PLANNED_BOUNDED_INTERRUPTION",
+      "stopped_utc": "2026-10-31T19:18:05.490615+00:00"
+    }
+  },
+  "sampling_scope": "All previously completed inputs/results retained. Additional nonempty breast-oncology abstracts follow descending numeric PMID below the prior cohort cutoff. Candidate IDs are frozen from one committed partial snapshot; source views have per-batch committed snapshots. This mixed cohort is not representative or one corpus snapshot.",
+  "literal_fidelity_checks": 7883,
+  "grouping_scope": "Within each 1000-document batch only; 7875 groups summed across batches, not globally deduplicated.",
+  "source_artifacts": {
+    "input_manifest": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\question-scale-100000-inputs-v1\\INPUT_MANIFEST.json",
+      "sha256": "f935d496ec10ce88e17fc78f9749f632064a8e27f187a8e5431ad76c18a26062",
+      "size_bytes": 373512
+    },
+    "summary": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\question-scale-100000-v1\\SUMMARY.json",
+      "sha256": "b87b177095be05ec07b0c214d34a6b6ed578558500ee103a0e81bd918ee02da3",
+      "size_bytes": 160097
+    },
+    "checkpoint_state": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\question-scale-100000-v1\\.workflow\\state.json",
+      "sha256": "be5166e492e5ba1b66ab1164ce06a69d41e3bca9434b4c7f6a65bbfb4aec9a9e",
+      "size_bytes": 230058
+    },
+    "archive": {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\question-scale-100000-v1.zip",
+      "sha256": "3e1e58dc20c852eacd948c965e0d4142ee44ea6c9b03733cf882aebf9b312f1d",
+      "size_bytes": 108811618
+    }
+  },
+  "package_verification": "Every archived member matched MANIFEST.tsv size and SHA256; ZIP CRC and member list verified by runner; process exit 0.",
+  "scientific_limits": [
+    "Rules extraction and source-fidelity engineering demonstration only.",
+    "No new model inference, remote retrieval, dataset inspection, qualification, or global clustering.",
+    "No accuracy, global novelty, independent evidence, adequacy, or end-to-end model/matching throughput claim.",
+    "EMPTY means no configured cue in the supplied abstract, not absence of a research gap."
+  ],
+  "validation": {
+    "focused_script_regressions_passed": 8,
+    "independent_artifact_audit": {
+      "status": "PASS",
+      "reviewer": "dataset subagent; read-only independent recomputation",
+      "old_files_unchanged": 42,
+      "old_bytes_unchanged": 95538270,
+      "archive_members_verified": 215,
+      "checks": [
+        "100000 native unique IDs and input hashes",
+        "7883 exact spans and recomputed question IDs",
+        "per-document counts and lifecycle eligibility",
+        "all10 prior payloads and12 resumed checkpoint hashes+mtimes",
+        "input/result null counts and timing attribution",
+        "ZIP CRC and every member compared to disk",
+        "8 focused regressions"
+      ],
+      "scientific_labels_provided": false
+    }
+  }
+}

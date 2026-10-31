@@ -19,9 +19,12 @@ from pathlib import Path
 from typing import Protocol
 from urllib.parse import parse_qs, urlsplit
 
+from .biostudies_adapter import ArrayExpressDatasetAdapter, BioStudiesDatasetAdapter
 from .datasets import classify_dataset_record
+from .expression_atlas_adapter import ExpressionAtlasDatasetAdapter
 from .http_cache import CachedHttpClient
 from .literature_integrity import consolidate_literature_rows
+from .ncbi_metadata_adapters import BioProjectDatasetAdapter, BioSampleDatasetAdapter
 from .omics_adapters import MetabolomicsWorkbenchDatasetAdapter, PRIDEDatasetAdapter
 from .provenance import remote_source_provenance, source_profile
 from .schemas import DatasetRecord, JsonDict
@@ -1391,6 +1394,11 @@ class DataCiteDatasetAdapter:
 
 
 DATASET_ADAPTERS = {
+    "arrayexpress": ArrayExpressDatasetAdapter,
+    "biostudies": BioStudiesDatasetAdapter,
+    "bioproject": BioProjectDatasetAdapter,
+    "biosample": BioSampleDatasetAdapter,
+    "expressionatlas": ExpressionAtlasDatasetAdapter,
     "clinicaltrials": ClinicalTrialsDatasetAdapter,
     "ena": ENASRADatasetAdapter,
     "geo": GEODatasetAdapter,

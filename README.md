@@ -7,6 +7,12 @@ requirements, source-linked evidence, and ranked dataset candidates. Unknowns,
 failed retrievals, conflicting evidence, and underdetermined questions remain
 visible throughout the workflow.
 
+The integrated [scientific application](docs/full_platform.md) now runs the Python
+engine from the browser, with persistent jobs, requirement-level evidence and
+reproducible dossier exports. [Current PubMed indexing](docs/literature_index.md)
+and [dataset inspection](docs/campaign_20261031/dataset_inspection.md) provide the
+underlying source interfaces. Independent scientific validation remains pending.
+
 [Research workflow](docs/research_workflow.md) Â· [Methods](docs/campaign_20261031/retrieval_protocol.md) Â· [Recovery](docs/campaign_20261031/workflow_recovery.md) Â· [Scientific limits](docs/limitations.md) Â· [MIT license](LICENSE)
 
 ## Research capabilities
@@ -163,13 +169,26 @@ still required inspection.
 The independently audited [revision ledger](docs/campaign_20261031/pubmed_revision_ledger.md)
 covers **1,621 PubMed shards**, preserving **45,477,637 citation upsert events**
 and **11,293 deletion events**. It records historical revisions without claiming
-a materialized current view. The final integrated suite passed **1,317 tests**
-with two platform-specific skips.
+a materialized current view. That earlier campaign's integrated suite passed
+**1,317 tests** with two platform-specific skips; this is a historical result.
 
-The active campaign's
-[specification](docs/research_campaign_20261031.md) and
-[structured state](project_state/campaign_20261031/TASK_STATE.json) track completed
-work and the separate public-release boundary.
+The earlier [specification](docs/research_campaign_20261031.md) and
+[state](project_state/campaign_20261031/TASK_STATE.json) remain preserved.
+The current full-platform campaign has its own
+[request](project_state/full_platform_20261031/REQUEST.md) and
+[structured state](project_state/full_platform_20261031/STATE.json).
+[Integrated source-selection acceptance](docs/campaign_20261031/question_selection.md)
+records 1,491 passing Python tests with two platform skips, 43 passing browser
+checks with one intentional skip, actual source-reference workflows, and a fresh
+installed-package HTTP demonstration. Subsequent corpus and scale repairs have
+their own targeted checks and commit-bound receipts.
+
+The [100,000-abstract continuation](docs/campaign_20261031/question_scale_100000.md)
+preserved completed work and produced 7,883 literal passages, with explicit
+sampling and timing limits. [Twelve descriptive comparisons](docs/campaign_20261031/descriptive_comparisons.md)
+pass source-scoped contracts over two datasets; they are not twelve independent
+or newly unanswered opportunities. Independent scientific review and final
+evaluation remain pending under the [protocol draft](docs/campaign_20261031/scientific_evaluation_readiness.md).
 
 ## Outputs and review
 
@@ -179,8 +198,10 @@ and a local HTML dossier. Rejected model attempts remain diagnostic artifacts.
 Blank expert-review fields are intentional. Scores are uncalibrated review
 priorities; scientific validity and dataset answerability require further evidence.
 
-The optional [web workspace](docs/web-app.md) provides a visual review surface.
-The Python engine, CLI, and research artifacts are the primary application.
+The [integrated browser workflow](docs/full_platform.md) runs the Python engine
+and exposes persistent jobs, requirements, compatibility evidence and exports.
+The CLI and native research artifacts remain available, alongside the lighter
+browser-only Discover mode.
 
 ## Repository map
 

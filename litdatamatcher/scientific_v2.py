@@ -137,6 +137,9 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             )
             if (
                 category == "assay"
+                and modality_families(req.expected)
+                and any(_equivalent(req.expected, value) for value in values)
+                or category == "assay"
                 and str(req.expected).strip().casefold() in MODALITY_FAMILIES
                 and any(
                     str(req.expected).strip().casefold() in modality_families(value)

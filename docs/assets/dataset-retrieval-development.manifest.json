@@ -1,0 +1,37 @@
+{
+  "status": "PASS_WITH_LIMITATIONS",
+  "source": "C:\\Users\\eric\\OneDrive\\AI project\\LitDataMatcher-main\\LitDataMatcher-research\\benchmarks\\campaign_20261031\\dataset_ranking.json",
+  "source_sha256": "b209dc4383ebfbc8f1c0e130f09e5ac8866f97b7a8198e762c59906e8929f6e0",
+  "script_sha256": "d8b442027977024eb22142588d31e3d63ef33938bb282703ccf3a9f4f919168b",
+  "matplotlib_version": "3.11.2",
+  "outputs": [
+    {
+      "path": "dataset-retrieval-development.png",
+      "sha256": "dcd04a02706ce15eab96375bd350729ac37cfc6beb4efa08a1e9e252a3b75f33",
+      "bytes": 101220
+    },
+    {
+      "path": "dataset-retrieval-development.svg",
+      "sha256": "166f58e9ab33cfba44b7c90608e7b466a1f0606661d7cc74297b6c3dac1bb600",
+      "bytes": 13612
+    },
+    {
+      "path": "dataset-retrieval-development.pdf",
+      "sha256": "42b552771a4c7cf9c47812bff488f11ce162da1ca0200a009b5cdf5e10a760f2",
+      "bytes": 21783
+    },
+    {
+      "path": "dataset-retrieval-development.csv",
+      "sha256": "dc73d953175f805c9b7e2b166db1d698d63a318a9d7a278070a8385ad2000d46",
+      "bytes": 178
+    }
+  ],
+  "limitations": [
+    "Twelve availability questions reuse two processed datasets; they are not independent scientific evaluation cases.",
+    "Labels come from source-variable availability and are not independent expert judgements or novel unanswered questions.",
+    "Metadata-only alternatives are unjudged. Known-target recovery is not scientific precision or exhaustive candidate recall.",
+    "Requirement-aware ranking checks the same declared availability contract used to construct labels; its success is engineering consistency, not external validation.",
+    "Small fixed development pool; no significance claim, training, tuned thresholds or sealed holdout use.",
+    "Full scientific contracts remain uncertain, including temporal order and outcome ascertainment."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "archive": {
+    "bytes": 18474,
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-review-v1\\LitDataMatcher-descriptive-review-addendum.zip",
+    "role": "review_addendum",
+    "sha256": "a241857bd12d5d163fed5bd47bde488e3317becd7d28bf90fe9d921a9be3235f"
+  },
+  "frozen_prior_packet": {
+    "bytes": 494917,
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\scientific-review-v3\\LitDataMatcher-development-scientific-review.zip",
+    "role": "frozen_prior_42_case_packet_not_modified",
+    "sha256": "915372311bc45337fea7f8daa25c78981253c4619bf71a797c7605bcadccfc9b"
+  },
+  "generator_sha256": "197275d03ff4ae7507fd17326d14d986403a4592d05f8bd4ca2a14770a86bc27",
+  "independent_validation": {
+    "blank_review_cells_verified": 180,
+    "exact_questions_scopes_and_compilations_verified": 12,
+    "external_hashes_reverified": 8,
+    "manifest_payloads_verified": 10
+  },
+  "members": 11,
+  "status": "PASS_WITH_LIMITATIONS",
+  "validation": {
+    "context_rows": 12,
+    "distinct_datasets": 2,
+    "filled_reviewer_fields": 0,
+    "frozen_prior_packet_unchanged": true,
+    "input_hashes_verified": 7,
+    "machine_decision_rows": 12,
+    "raw_data_duplicated": false,
+    "reviewer_fields_per_row": 15,
+    "worksheet_rows": 12
+  }
+}

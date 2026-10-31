@@ -1,0 +1,242 @@
+{
+  "started_utc": "2026-10-31T18:06:46.660759+00:00",
+  "completed_utc": "2026-10-31T18:06:47.268154+00:00",
+  "requested_documents": 1000,
+  "source_view_corrections": 0,
+  "extraction_and_clustering_seconds": 0.5080484000500292,
+  "submitted_documents_per_second": 1968.3164043062172,
+  "text_bearing_processed_documents_per_second": 1964.379771497605,
+  "memory": {
+    "method": "Process RSS sampled every20ms during extraction+clustering; process-lifetime peak separate",
+    "extraction_baseline_rss_bytes": 49811456,
+    "extraction_sampled_peak_rss_bytes": 57769984,
+    "extraction_peak_rss_increase_bytes": 7958528,
+    "sample_count": 15,
+    "process_lifetime_peak_working_set_bytes": 78077952
+  },
+  "snapshot": {
+    "snapshot_sha256": "68ac3ba6c2dd71caa2450ec1929df490febdee863f089ce7d00fbd304b461573",
+    "schema_version": "pubmed-current-index-1.0",
+    "corpus_store_uuid": "1f5ee098-3e86-4b85-a8d8-49cc3bcdc906",
+    "applied_shards": 677,
+    "last_shard_order": 676,
+    "status": "PARTIAL"
+  },
+  "selection_protocol": {
+    "selected_utc": "2026-10-31T18:06:26.076370+00:00",
+    "database": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\literature\\pubmed-current.sqlite3",
+    "snapshot": {
+      "snapshot_sha256": "68ac3ba6c2dd71caa2450ec1929df490febdee863f089ce7d00fbd304b461573",
+      "schema_version": "pubmed-current-index-1.0",
+      "corpus_store_uuid": "1f5ee098-3e86-4b85-a8d8-49cc3bcdc906",
+      "applied_shards": 677,
+      "last_shard_order": 676,
+      "status": "PARTIAL"
+    },
+    "transaction": "One read-only BEGIN snapshot, closed before extraction",
+    "sql": "SELECT c.pmid FROM literature_fts JOIN current_records c ON c.rowid=literature_fts.rowid JOIN versions v ON v.id=c.version_id WHERE literature_fts MATCH ? AND length(trim(v.abstract)) > 0 ORDER BY CAST(c.pmid AS INTEGER) DESC LIMIT ?",
+    "parameters": [
+      "\"breast cancer\" OR \"breast carcinoma\" OR \"mammary carcinoma\" OR \"breast neoplasms\"",
+      4000
+    ],
+    "ordering": "Current numeric PMID descending",
+    "requested_documents": 1000,
+    "selected_documents": 1000,
+    "bounded_candidate_ids_returned": 4000,
+    "candidate_ids_considered": 1035,
+    "required_source_view": "Nonempty unchanged native PubMed abstract; no title substitution",
+    "topic_regex": "\\b(?:breast|mammary)\\s+(?:cancers?|carcinomas?|neoplasms?|tumou?rs?)\\b",
+    "excluded_wording_regex": "\\b(?:viruses|virus|viral|pathogens?|bacteria\\w*|infect\\w*|vaccin\\w*|SARS\\w*|HIV|hepatitis|tuberculosis)\\b",
+    "rejections": [
+      {
+        "document_id": "PMID:20980434",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20979543",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20979123",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20975075",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20974626",
+        "reason": "outside_explicit_topic_phrase"
+      },
+      {
+        "document_id": "PMID:20964733",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20961975",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20960451",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20958072",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20957756",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20956724",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20953803",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20951657",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20950610",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20950334",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20950138",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20947696",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20941526",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20937226",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20937033",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20937023",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20935133",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20927554",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20926248",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20921544",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20890603",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20887831",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20883766",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20881860",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20881168",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20878487",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20875323",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20869792",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20864727",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      },
+      {
+        "document_id": "PMID:20864236",
+        "reason": "pathogen_wording_outside_demonstration_scope"
+      }
+    ],
+    "selection_seconds": 6.822093600057997,
+    "input_sha256": "50c8cf0a7867f3972c8077e7cd23b4dfccee87b0c5dd81d38e2fa52fa960ddae",
+    "protocol_sha256": "6f6051c0374602c4f67ca026261717da04b49cc967260b400b6c12dbde655c42",
+    "scope": "Purposive engineering throughput cohort from a partial historical PubMed snapshot, not random or representative scientific evaluation; no novelty or precision/recall claim.",
+    "prior_cohort_preserved": "question-scale-1000-v2 retains the separate same-cohort metadata-only correction demonstration."
+  },
+  "coverage": {
+    "requested_documents": 1000,
+    "processed_documents": 998,
+    "failed_documents": 0,
+    "excluded_documents": 2,
+    "metadata_only_documents": 0,
+    "candidate_questions": 102,
+    "retained_questions": 102,
+    "truncated": false,
+    "source_scope": "Caller-supplied source views only",
+    "global_novelty_established": false
+  },
+  "document_status_counts": {
+    "EMPTY": 906,
+    "SUCCESS": 92,
+    "EXCLUDED_SOURCE_LIFECYCLE": 2
+  },
+  "no_candidate_question_in_processed_source_text_documents": 906,
+  "question_category_counts": {
+    "SOURCE_STATED_UNRESOLVED": 74,
+    "SOURCE_STATED_LIMITATION": 26,
+    "SOURCE_RESEARCH_QUESTION": 2
+  },
+  "clusters": 102,
+  "clusters_with_multiple_members": 0,
+  "original_input_sha256": "50c8cf0a7867f3972c8077e7cd23b4dfccee87b0c5dd81d38e2fa52fa960ddae",
+  "corrected_input_sha256": "50c8cf0a7867f3972c8077e7cd23b4dfccee87b0c5dd81d38e2fa52fa960ddae",
+  "result_sha256": "9c4e6fc77f05e641702eb1d2574f77733a7666fa2e7a7fd1222e126adc73e919",
+  "python_version": "3.12.13",
+  "repository_commit": "02bce864fcdeb2f96309f10151a3338a9f41e4af",
+  "implementation_sha256": {
+    "question_discovery.py": "7b9c58fcd6556fca1b8e57ccb6a98d8ab0dddf83bc6bcd1e0a482de9c48e2ea6",
+    "question_compiler.py": "ba800cc635acc934f01e3777c96edd98d0900abe1293aa76c930235a462c06b2",
+    "question_compiler_rules_v1.json": "ea2a86ff26cbc7ea5ddd84aa31aef416c0b562b04fc5e2ff5294928f65e1ff0b"
+  },
+  "validation": {
+    "status": "PASS",
+    "checked_question_records": 102,
+    "all_source_views_equal_native_abstract_including_empty": "PASS",
+    "literal_span_hash_citation_locator_native_provenance_fidelity": "PASS",
+    "input_status_accounting_and_metadata_only_separation": "PASS",
+    "unique_question_ids_and_complete_cluster_membership": "PASS"
+  },
+  "scientific_scope": "Engineering throughput/accounting/source fidelity only. Partial historical corpus, topic-selected cohort; no precision/recall, outcome, novelty or dataset-fit claim. Metadata-only inputs were not extracted."
+}

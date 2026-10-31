@@ -8,12 +8,13 @@ standard.
 
 ```powershell
 python -m litdatamatcher.v2 batch `
-  --root C:\Codex\LitDataMatcher-v2\data `
-  --inputs C:\Codex\LitDataMatcher-v2\data\campaign_20261031\research-cases-v1\pipeline_inputs.jsonl `
-  --out C:\Codex\LitDataMatcher-v2\data\campaign_20261031\native-batch-v1 `
-  --model C:\path\to\qualified-extraction-model `
-  --embeddings C:\path\to\qualified-embedding-model `
-  --device cpu
+  --root C:\research\data `
+  --inputs C:\research\cases.jsonl `
+  --out C:\research\runs\batch-01 `
+  --model C:\models\extractor `
+  --embeddings C:\models\encoder `
+  --device cuda --decoding-mode source_literal --max-new-tokens 384 `
+  --runtime-qualification C:\research\qualification\QUALIFICATION.json
 ```
 
 Choose a new output directory. Repeat the same command with `--resume` to reuse
@@ -27,6 +28,13 @@ Default runtime settings remain unchanged: unconstrained extraction and 1,024
 maximum generated tokens. After qualification of the optional structured
 decoder, `--decoding-mode source_schema --max-new-tokens 384` explicitly selects
 that extraction profile. The command never switches decoding profiles silently.
+The current development-qualified profile is
+`--decoding-mode source_literal --max-new-tokens 384`; it uses the same source
+schema and prompt with an escape-safe grammar. See the
+[literal decoder guide](model_source_literal.md) and
+[measured development outcomes](extraction_results.md). Its acceptance checks
+do not establish scientific accuracy. CPU execution requires a matching CPU
+qualification receipt and `--device cpu` on both commands.
 User questions use the existing deterministic question compiler; no model-based
 requirement proposal is invoked. `--requirements FILE` supplies the existing
 explicit override for every case. `--fresh` requests fresh extraction on executed

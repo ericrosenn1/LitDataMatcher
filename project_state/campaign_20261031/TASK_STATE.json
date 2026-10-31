@@ -2,7 +2,7 @@
   "schema_version": "research-engine-campaign-1.0",
   "campaign": "biomedical-research-engine-20261031",
   "status": "IN_PROGRESS",
-  "phase": "QUALIFIED_LITERAL_REAL_CASE_REGRESSION",
+  "phase": "FINAL_CORPUS_AND_RELEASE_VALIDATION",
   "started_utc": "2026-10-31T11:48:16Z",
   "soft_target_hours": 24,
   "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
@@ -46,7 +46,7 @@
     "The original constrained decoder mishandles escaped source literals; index alternative failed the positive acceptance rule; literal repair remains under review",
     "CI exposed a pre-admission pause race in the controller; repair in progress"
   ],
-  "next_action": "Finish and audit literal7Bbatch, perform exact-code offline resume, then qualify1.5Bliteral. Finishfullledger and integrate namespacefix onlyafteractivefingerprintedruns; finalvalidationanddelivery.",
+  "next_action": "Complete the ledger, independently verify it, then apply the namespace repair and finish release validation without rerunning successful research experiments.",
   "integration_commits": {
     "sources": "30cfb84",
     "model_guard": "ecda49d",
@@ -71,16 +71,16 @@
     "fresh_offline_and_cache_replay": "PASS",
     "smaller_candidate": "1.5B fails positive document2 with zero accepted records",
     "scope": "Previously seen development smoke inputs; surface-language source guards, no expert accuracy claim",
-    "receipt": "qualified-literal-gpu-7b-doc1/QUALIFICATION.json",
+    "receipt": "qualified-final-literal-7b-doc1/QUALIFICATION.json",
     "source_index_followup": "NOT_PROMOTED:7B passes1/2 positive docs;1.5B CPU passes0/2; all failures preserved",
-    "independent_audit": "qualification-literal-independent-v1/AUDIT.json"
+    "independent_audit": "qualification-literal-independent-v1/AUDIT.json",
+    "current_asset_policy_confirmation": "PASS on both positive development documents; prior outputs preserved"
   },
   "active_work": [
-    "Full1621-shard revision ledger; implementation frozen",
-    "Fresh30-case source_literal7B batch with public offline runner; wholepackage frozen",
-    "Potential1.5B literal qualification and same-profile comparison after GPU release",
-    "Corrected source-archive full test suite",
-    "Final namespace integration, tests, CI, docs and handoff"
+    "Complete the 1,621-shard revision ledger and its independent audit",
+    "Integrate the already tested Windows namespace repair after ledger completion",
+    "Run final integrated tests, source/wheel validation, and installed native smoke",
+    "Assemble a verified source and evidence handoff"
   ],
   "integration_round_1": {
     "status": "PASS",
@@ -171,8 +171,7 @@
     "cause": "Windows Path.resolve may return equivalent extended DOS prefix; isolated fix tested, deferred until fingerprinted jobs finish"
   },
   "pending_repairs": [
-    "Integrate Windows namespace containment after all fingerprintedjobsfinish",
-    "Integrate fd94951 optional-dependency test fixture repair"
+    "Windows namespace containment commit27ce123 deferred until the ledger completes"
   ],
   "external_prerequisites": [
     "GitHub dependency graph is disabled; existing dependency-review action retained"
@@ -249,5 +248,24 @@
     "real_baseline_manifests_validated": 30,
     "root_integrated_tests": 39,
     "source_artifacts_changed": false
+  },
+  "integration_round_4": {
+    "status": "PASS",
+    "tests_passed": 1213,
+    "skipped": 1,
+    "skip_reason": "POSIX sendmsg unavailable on Windows",
+    "failures": 0,
+    "seconds": 196.21,
+    "source_commit": "43ca9a854b82229bc4656127ce7d523f7f85a6aa",
+    "receipt": "local/campaign_20261031/integration-round-4.xml",
+    "scope": "Integrated pre-final source; model-asset and Windows namespace hardening remain pending"
+  },
+  "loaded_model_assets": {
+    "status": "PASS",
+    "known_model_directories_preserved": 5,
+    "root_targeted_tests_passed": 78,
+    "root_platform_skips": 1,
+    "independent_posix_tests_passed": 44,
+    "scope": "File selection, reference containment, and cache identity; not model quality"
   }
 }

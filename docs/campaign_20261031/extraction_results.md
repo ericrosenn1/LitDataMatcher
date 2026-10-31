@@ -77,7 +77,7 @@ are not a controlled model-speed comparison.
 ## Completed source-literal follow-up
 
 The 7B literal profile passed both positive development qualification documents,
-then completed the same 30-case pack. The [literal evidence record](../../benchmarks/campaign_20261031/extraction_literal.json)
+then completed the same 30-case pack. The [literal evidence record](https://github.com/ericrosenn1/LitDataMatcher/blob/666393facde8375c971c83bd33d9f0caa252c9ea/benchmarks/campaign_20261031/extraction_literal.json)
 preserves its fresh-run state, comparison, audit, and resume hashes separately
 from the unchanged baseline JSON.
 
@@ -104,7 +104,7 @@ The root artifact, source-span, and question-linkage audit passed for all
 **480 artifacts across 30 cases**. Verified resume reused all **30 cases**, created
 **zero new attempts**, and preserved case outputs and attempt receipts. The
 replay audit passed. Independent review passed with limitations after checking
-571 comparison-input receipts, 480 artifacts per run, and 43 timing pairs.
+571 comparison-input file hashes, 480 artifacts per run, and 43 timing pairs.
 It found no lost accepted claim/question spans or changed same-span claim
 content. These are computational-integrity checks, not expert scientific review.
 

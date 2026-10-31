@@ -46,7 +46,9 @@ available participant-level data.
 
 **Extraction** uses explicitly supplied local model files. Runtime inference
 does not download a model, execute remote model code, or call a paid API. The
-optional source-schema decoder restricts quotes to complete source sentences.
+optional structured decoders restrict quotes to complete source sentences.
+The [literal profile](campaign_20261031/model_source_literal.md) preserves escaped
+source text; earlier profiles remain available for reproducing older runs.
 The independent guard still verifies subject–predicate–object spans, direction,
 negation, and context. Unsupported output is rejected, with diagnostic evidence.
 

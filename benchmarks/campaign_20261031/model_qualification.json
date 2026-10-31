@@ -169,17 +169,102 @@
       "failure": null,
       "receipt_sha256": "eea76df4140a2db2418a293f5277d356bb162d2cb60c14a9cae6e4183722fdbe",
       "qualification_phase": "post_repair_development"
+    },
+    {
+      "model_size": "1_5b",
+      "decoding_mode": "source_literal",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "development_document": 1,
+      "status": "FAIL",
+      "accepted_claims": 0,
+      "accepted_questions": 0,
+      "inference_seconds": 15.173574600019492,
+      "cache_replay_origin": "cache_replay",
+      "failure": {
+        "stage": "cached_replay",
+        "error_type": "RuntimeError",
+        "message": "Fresh inference produced no accepted scientific records"
+      },
+      "receipt_sha256": "02c8ecb68444ae5115d21239c4b283008e1711d093102da554a51ee3611ce8eb",
+      "qualification_phase": "same_profile_smaller_model"
+    },
+    {
+      "model_size": "1_5b",
+      "decoding_mode": "source_literal",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "development_document": 2,
+      "status": "FAIL",
+      "accepted_claims": 0,
+      "accepted_questions": 0,
+      "inference_seconds": 13.515872500021942,
+      "cache_replay_origin": "cache_replay",
+      "failure": {
+        "stage": "cached_replay",
+        "error_type": "RuntimeError",
+        "message": "Fresh inference produced no accepted scientific records"
+      },
+      "receipt_sha256": "dca799d2a701585d78f32a99fc9caed28bf32b957fdd107de10476f686533cfb",
+      "qualification_phase": "same_profile_smaller_model"
+    },
+    {
+      "model_size": "7b",
+      "decoding_mode": "source_literal",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "development_document": 1,
+      "status": "PASS",
+      "accepted_claims": 1,
+      "accepted_questions": 0,
+      "inference_seconds": 24.950263099977747,
+      "cache_replay_origin": "cache_replay",
+      "failure": null,
+      "receipt_sha256": "5cc14283657696ae7a50dbe8af6fa65d0b261b6a620b11f8a967d00b4b564eea",
+      "qualification_phase": "complete_asset_policy_confirmation"
+    },
+    {
+      "model_size": "7b",
+      "decoding_mode": "source_literal",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "development_document": 2,
+      "status": "PASS",
+      "accepted_claims": 1,
+      "accepted_questions": 1,
+      "inference_seconds": 25.82003139995504,
+      "cache_replay_origin": "cache_replay",
+      "failure": null,
+      "receipt_sha256": "98b1144c85b46c0d0e95ced97a409fd2c253aba63c686d6dbcbe2a85ba4f6950",
+      "qualification_phase": "complete_asset_policy_confirmation"
     }
   ],
   "interpretation": "Runtime/source-guard qualification on development inputs, not expert scientific validation or general extraction accuracy.",
-  "smaller_model_decision": "Not recommended: source_schema failed one GPU positive document; source_index failed both CPU positive documents. CPU/GPU timing is not a controlled comparison.",
+  "smaller_model_decision": "The1.5Bsource_literal CUDA configuration failed both positive documents. It did not qualify for the30-case comparison, so no model-size speed or accuracy advantage is established.",
   "selected_profile": "source_literal",
-  "selection_scope": "Passed the unchanged two-positive-document software qualification rule; 30-case post-repair development regression remains in progress.",
+  "selection_scope": "The7Bsource_literal profile passed the unchanged two-positive-document rule and completed the30-case development regression with no retryable technical failures. This is not expert scientific validation.",
   "comparison_limitations": [
     "Previously seen development inputs; no expert-labelled accuracy or unseen-test claim.",
     "Historical trials use different implementation hashes; all original receipts remain preserved.",
     "CPU and CUDA latency values must not be compared as a controlled model-size study.",
     "Source_index remains unpromoted despite successful transport tests.",
     "Accepted surface-language triples need not identify canonical biological entities or causal relationships."
-  ]
+  ],
+  "completed_development_batch": {
+    "cases": 30,
+    "pass": 11,
+    "terminal_partial": 19,
+    "failed": 0,
+    "retryable": 0,
+    "validated_source_claims": 20,
+    "expert_accuracy_measured": false,
+    "verified_resume_cases": 30
+  },
+  "current_backend_confirmation": {
+    "implementation_commit": "85fc0fcaea31f1fe20f747bfdaae1ac912928394",
+    "status": "PASS_BOTH_POSITIVE_DOCUMENTS",
+    "semantic_guard_changed": false,
+    "model_assets_changed": false,
+    "note": "Repeated after loaded-asset verification was hardened; earlier trials and full-case outputs remain preserved."
+  }
 }

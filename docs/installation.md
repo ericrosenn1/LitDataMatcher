@@ -43,3 +43,6 @@ Model preparation is explicit, and runtime inference uses only verified local
 files. Consult the [model guide](campaign_20261031/model_source_schema.md) for
 identity, hardware, offline, and qualification details. Install `.[report]` to
 recreate the research figures with Matplotlib.
+The current development-qualified
+[literal profile](campaign_20261031/model_source_literal.md) must use the same
+device, precision, and output-token budget in qualification and analysis.

@@ -1,5 +1,12 @@
 # Optional source-schema decoding candidate
 
+This page records the original quote-enumeration profile and its repair history.
+For the current development-qualified transport, use the
+[source-literal guide](model_source_literal.md). The original profile remains
+available for reproducing earlier runs. The separate
+[source-index experiment](model_source_index.md) did not meet the positive-source
+qualification rule and is not the recommended configuration.
+
 The unrestricted Qwen failure retained in
 `data/campaign_20261031/runtime-positive-v1` returned multiple claims, shortened
 quotes, unsupported context, and a generated future question. The source guard

@@ -69,8 +69,13 @@ and an immutable revision, or provide existing directories with verified
 `MODEL_MANIFEST.json` files. The research configuration uses Qwen2.5-7B-Instruct
 and all-MiniLM-L6-v2. Model weights are not bundled in Git.
 
+Qualify the chosen runtime on a known positive development document. The JSON
+input supplies `document_id`, `title`, and `text`; this is an execution and
+source-checking smoke test, not a scientific accuracy benchmark.
+
 ```bash
-litdatamatcher-v2 analyze --root runs/biomedical --out runs/analysis-01 --model /path/to/extractor --embeddings /path/to/encoder --limit 3 --chunks 2 --device cuda
+python scripts/v2/runtime_qualify.py --model-dir /path/to/extractor --embedding-dir /path/to/encoder --document /path/to/positive-source.json --output runs/qualification/QUALIFICATION.json --device cuda --decoding-mode source_literal --max-new-tokens 384 --require-claims
+litdatamatcher-v2 analyze --root runs/biomedical --out runs/analysis-01 --model /path/to/extractor --embeddings /path/to/encoder --limit 3 --chunks 2 --device cuda --decoding-mode source_literal --max-new-tokens 384 --runtime-qualification runs/qualification/QUALIFICATION.json
 ```
 
 Use `--device cpu` where suitable. Repeat the same command with `--resume`
@@ -85,12 +90,15 @@ For many papers, the [batch command](docs/campaign_20261031/native_batch.md)
 reuses one model session while keeping separate case journals and outputs:
 
 ```bash
-litdatamatcher-v2 batch --root runs/biomedical --inputs cases.jsonl --out runs/batch-01 --model /path/to/extractor --embeddings /path/to/encoder --device cuda --decoding-mode source_schema --max-new-tokens 384 --runtime-qualification /path/to/qualification.json
+litdatamatcher-v2 batch --root runs/biomedical --inputs cases.jsonl --out runs/batch-01 --model /path/to/extractor --embeddings /path/to/encoder --device cuda --decoding-mode source_literal --max-new-tokens 384 --runtime-qualification runs/qualification/QUALIFICATION.json
 ```
 
 Each case supplies a source document and optional explicit question. The
 [model card](docs/model_card.md) describes training data, selection rules,
 qualified configurations, and limits on interpretation.
+The [literal decoder](docs/campaign_20261031/model_source_literal.md) preserves
+exact source text through escaped JSON. The earlier profiles remain available
+for reproducibility.
 
 ## Measured development evidence
 
@@ -135,8 +143,19 @@ Other evidence includes a frozen 30-case development pack, real processed-table
 inspections, source-adapter replay, and an annual PubMed baseline integrity audit.
 The [case and data notes](docs/campaign_20261031/research_cases.md) distinguish
 measured values from missing evidence. The
-[extraction baseline](docs/campaign_20261031/extraction_results.md) retains all
-30 case outcomes, including abstentions and unresolved dataset suitability.
+[extraction comparison](docs/campaign_20261031/extraction_results.md) retains all
+30 case outcomes, including abstentions and unresolved dataset suitability:
+
+| Development endpoint | Original decoder | Literal decoder |
+| --- | ---: | ---: |
+| Returned source views | 43 / 45 | 45 / 45 |
+| Source-guard-accepted claims | 16 | 20 |
+| Cases requiring a technical retry | 2 | 0 |
+
+All 30 literal-run cases passed the artifact and source-span audit and were
+reused unchanged on resume. These are software and source-fidelity results;
+accepted counts are not scientific accuracy, and all 140 dataset candidates
+still required inspection.
 The active campaign's
 [specification](docs/research_campaign_20261031.md) and
 [structured state](project_state/campaign_20261031/TASK_STATE.json) track completed

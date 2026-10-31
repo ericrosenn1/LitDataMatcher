@@ -18,6 +18,10 @@ truth, causal identification, clinical utility, or access to participant data.
 The language models are not trained by this project. Manifests retain revision,
 tokenizer, file hashes, and upstream license information. Runtime inference
 does not download weights or execute remote model code.
+The [model-file contract](campaign_20261031/model_asset_integrity.md) covers the
+complete local inference asset set and validates referenced weight/configuration
+files. This loader accepts full local checkpoints; adapter-only checkpoints
+requiring an external base model are outside its supported contract.
 
 ## Retrieval adaptation
 

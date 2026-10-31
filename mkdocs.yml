@@ -10,33 +10,46 @@ theme:
 nav:
   - Home: index.md
   - Research workflow: research_workflow.md
-  - Model and evaluation card: model_card.md
-  - Configurable source discovery: campaign_20261031/discovery.md
-  - Local structured inference: campaign_20261031/model_source_schema.md
-  - Source-index decoding: campaign_20261031/model_source_index.md
-  - Exact source literals: campaign_20261031/model_source_literal.md
-  - Batch analysis: campaign_20261031/native_batch.md
-  - Retrieval protocol: campaign_20261031/retrieval_protocol.md
-  - Model training: campaign_20261031/retriever_training.md
-  - Source-backed cases: campaign_20261031/research_cases.md
-  - Extraction evidence: campaign_20261031/extraction_results.md
-  - Recovery: campaign_20261031/workflow_recovery.md
-  - Worker process admission: campaign_20261031/workflow_controller_admission.md
-  - Manifest contract: campaign_20261031/manifest_contract.md
   - Installation and CLI: installation.md
-  - Architecture: architecture.md
-  - Corpus and data: corpus_and_data.md
-  - Question compiler: question_compiler.md
-  - Scientific limitations: limitations.md
-  - Reproducibility: reproducibility.md
-  - Citation: citation.md
-  - Development status: development_status.md
-  - Release infrastructure: RELEASE_INFRASTRUCTURE_CHECKLIST.md
-  - Node contracts: node_contracts.md
-  - Model robustness plan: model_robustness_plan.md
-  - Feature roadmap: feature_roadmap.md
-  - Optional web workspace: web-app.md
-  - Web workspace validation: app-validation.md
+  - Models and evaluation:
+      - Model card: model_card.md
+      - Model file integrity: campaign_20261031/model_asset_integrity.md
+      - Exact source literals: campaign_20261031/model_source_literal.md
+      - Original structured profile: campaign_20261031/model_source_schema.md
+      - Source-index experiment: campaign_20261031/model_source_index.md
+      - Extraction protocol: campaign_20261031/extraction_protocol.md
+      - Extraction evidence: campaign_20261031/extraction_results.md
+      - Retrieval protocol: campaign_20261031/retrieval_protocol.md
+      - Retriever training: campaign_20261031/retriever_training.md
+      - Large-pool retrieval: campaign_20261031/retrieval_scale.md
+      - Source-backed cases: campaign_20261031/research_cases.md
+  - Data and provenance:
+      - Source discovery: campaign_20261031/discovery.md
+      - Corpus and data: corpus_and_data.md
+      - Revision ledger: campaign_20261031/pubmed_revision_ledger.md
+      - Source fidelity: campaign_20261031/sources_fidelity.md
+      - Source validation: campaign_20261031/sources_validation.md
+      - Ingestion provenance: source_ingestion_and_provenance.md
+  - Execution:
+      - Batch analysis: campaign_20261031/native_batch.md
+      - Checkpoint recovery: campaign_20261031/workflow_recovery.md
+      - Worker admission: campaign_20261031/workflow_controller_admission.md
+      - Manifest contract: campaign_20261031/manifest_contract.md
+      - Node contracts: node_contracts.md
+      - Architecture: architecture.md
+      - Question compiler: question_compiler.md
+  - Research practice:
+      - Scientific limitations: limitations.md
+      - Reproducibility: reproducibility.md
+      - Citation: citation.md
+  - Development:
+      - Current status: development_status.md
+      - Release infrastructure: RELEASE_INFRASTRUCTURE_CHECKLIST.md
+      - Model robustness plan: model_robustness_plan.md
+      - Feature roadmap: feature_roadmap.md
+  - Optional web workspace:
+      - Usage: web-app.md
+      - Validation: app-validation.md
 
 markdown_extensions:
   - admonition

@@ -76,6 +76,12 @@ view, avoiding a second stored abstract copy. Work is streamed in configurable
 batches (default 4,096), SQLite's page cache is capped at approximately 64 MiB,
 temporary storage is disk-backed, and one writer is protected by the existing
 integration lease. SQLite WAL allows concurrent read-only search between commits.
+Current-version refreshes use the touched batch as the outer SQL loop, so each
+batch does indexed PMID lookups rather than rescanning the accumulated corpus.
+The regression suite bounds SQLite virtual-machine work for a single-record
+update against thousands of existing records. Each invocation preserves an
+immutable receipt and refreshes the latest receipt; receipts bind the source
+implementation hash captured at module import.
 `validate()` checks SQLite and exact FTS external-content agreement; its full
 FTS pass may take time on a multi-million-record index.
 

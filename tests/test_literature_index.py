@@ -342,3 +342,30 @@ def test_current_records_preserve_explicit_lifecycle_notices(tmp_path, publicati
                 record["metadata"]["literature_integrity"]["evidence_eligibility"]
                 == "INELIGIBLE_REQUIRES_VERSION_REVIEW"
             )
+
+
+def test_one_record_update_does_not_scan_the_existing_corpus(tmp_path):
+    from litdatamatcher.literature_index import _apply_batch
+
+    corpus, manifest, db, events = fixture(
+        tmp_path, [[event(i) for i in range(1, 5001)], [event(9999)]]
+    )
+    materialize_pubmed(corpus, manifest, db, max_shards=1)
+    shard = json.loads(manifest.read_text())["shards"][1]
+    record = pq.read_table(corpus / shard["legacy_relative_path"]).to_pylist()[0]
+    steps = 0
+
+    def bounded_sql_work():
+        nonlocal steps
+        steps += 1000
+        return int(steps > 30000)
+
+    with LiteratureIndex(db) as index:
+        index.conn.set_progress_handler(bounded_sql_work, 1000)
+        try:
+            with index.conn:
+                _apply_batch(index, [(events[-1], record)], shard)
+        finally:
+            index.conn.set_progress_handler(None, 0)
+        assert index.get(9999)["pmid"] == "9999"
+        assert steps <= 30000

@@ -23,6 +23,7 @@ from .pubmed_revision_ledger import LEDGER_VERSION, _inside, _is_inside, _resolv
 
 INDEX_VERSION = "pubmed-current-index-1.0"
 SELECTION_RULE = "highest_numeric_version_then_latest_event_within_version"
+_IMPLEMENTATION_SHA256 = file_digest(Path(__file__))
 
 _DDL = """
 CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -466,7 +467,10 @@ def _apply_batch(index, pairs, shard):
         else:
             conn.execute("DELETE FROM versions WHERE pmid=? AND version=?", (pmid, version))
     added_current = conn.execute(
-        "INSERT INTO current_records(pmid,version_id) SELECT v.pmid,v.id FROM versions v JOIN touched t ON t.pmid=v.pmid "
+        # CROSS JOIN pins the small touched batch as the outer loop. Without
+        # this, SQLite can scan every historical active version for each batch,
+        # making full-corpus materialization quadratic despite indexed lookups.
+        "INSERT INTO current_records(pmid,version_id) SELECT v.pmid,v.id FROM touched t CROSS JOIN versions v ON t.pmid=v.pmid "
         "WHERE v.version=(SELECT max(w.version) FROM versions w WHERE w.pmid=v.pmid) "
         "AND NOT EXISTS(SELECT 1 FROM versions u WHERE u.pmid=v.pmid AND u.version IS NULL) "
         "AND NOT EXISTS(SELECT 1 FROM unresolved_deletions d WHERE d.pmid=v.pmid)"
@@ -674,6 +678,7 @@ def materialize_pubmed(
             elapsed_seconds=time.perf_counter() - started,
             database=str(database),
             ledger_manifest_sha256=manifest_hash,
+            implementation_sha256_at_import=_IMPLEMENTATION_SHA256,
             batch_size=batch_size,
             verification="New inputs SHA256 verified; applied inputs stat-checked and rehashed when changed.",
             historical_events_retain_source_ledger=True,
@@ -681,6 +686,9 @@ def materialize_pubmed(
         )
         index.conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
         atomic_json(database.with_suffix(database.suffix + ".receipt.json"), report)
+        atomic_json(
+            database.with_suffix(database.suffix + f".receipt-{time.time_ns()}.json"), report
+        )
         return report
 
 

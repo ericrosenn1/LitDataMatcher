@@ -13,11 +13,13 @@ def main():
     parser.add_argument("--snapshot", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--executor", choices=("thread", "process"), default="thread")
     parser.add_argument("--max-shards", type=int)
     parser.add_argument("--shard", action="append", help="Exact shard filename; any explicit subset is PARTIAL")
     args = parser.parse_args()
     result = build_revision_ledger(args.corpus_root, args.snapshot, args.out,
-        workers=args.workers, max_shards=args.max_shards, shard_names=args.shard)
+        workers=args.workers, max_shards=args.max_shards, shard_names=args.shard,
+        executor=args.executor)
     print(json.dumps({key: value for key, value in result.items() if key != "shards"}, indent=2))
     return 1 if result["status"] == "FAIL" else 0
 

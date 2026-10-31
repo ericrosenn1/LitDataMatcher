@@ -201,3 +201,36 @@ def test_book_citation_uses_direct_book_pmid():
     rows = events(xml)
     assert len(rows) == 1
     assert rows[0]["pmid"] == "123" and rows[0]["version"] == 3
+
+
+def test_spawned_process_matches_thread_sidecars_and_resumes(tmp_path):
+    corpus = tmp_path / "corpus"
+    shards = [create_shard(corpus, name) for name in ["pubmed26n1339.xml.gz", "pubmed26n1340.xml.gz"]]
+    snapshot = tmp_path / "snapshot.json"
+    snapshot.write_text(json.dumps({"status": "FAIL", "shards": shards}))
+    threaded = build_revision_ledger(corpus, snapshot, tmp_path / "thread", executor="thread")
+    processed = build_revision_ledger(corpus, snapshot, tmp_path / "process", executor="process")
+    assert threaded["status"] == processed["status"] == "PASS"
+    assert processed["process_start_method"] == "spawn"
+    assert processed["pool_startup_included"] is True
+    for thread_shard, process_shard in zip(threaded["shards"], processed["shards"], strict=True):
+        assert thread_shard["sidecar_sha256"] == process_shard["sidecar_sha256"]
+        assert thread_shard["pmid_sequence_sha256"] == process_shard["pmid_sequence_sha256"]
+    resumed = build_revision_ledger(corpus, snapshot, tmp_path / "process", executor="process")
+    assert resumed["reused_shards"] == 2
+
+
+def test_process_worker_failure_is_reported_without_false_success(tmp_path):
+    corpus = tmp_path / "corpus"
+    shard = create_shard(corpus, pmids=["wrong", "123"])
+    snapshot = tmp_path / "snapshot.json"
+    snapshot.write_text(json.dumps({"status": "FAIL", "shards": [shard]}))
+    report = build_revision_ledger(corpus, snapshot, tmp_path / "ledger", executor="process")
+    assert report["status"] == "FAIL"
+    assert report["verified_shards"] == 0
+    assert report["failures"][0]["error_type"] == "ValueError"
+
+
+def test_invalid_executor_is_rejected(tmp_path):
+    with pytest.raises(ValueError, match="executor"):
+        build_revision_ledger(tmp_path / "corpus", tmp_path / "snapshot", tmp_path / "output", executor="unbounded")

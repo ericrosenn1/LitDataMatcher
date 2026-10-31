@@ -96,7 +96,7 @@ $env:PYTHONPATH = (Get-Location).Path
   --corpus-root D:\LitDataMatcher-Corpora `
   --snapshot C:\Codex\LitDataMatcher-v2\data\campaign_20261031\corpus-snapshot-v1\CORPUS_SNAPSHOT.json `
   --out C:\Codex\LitDataMatcher-v2\data\campaign_20261031\revision-ledger-full `
-  --workers 2
+  --workers 2 --executor process
 ```
 
 Add `--max-shards 2 --shard pubmed26n0001.xml.gz --shard pubmed26n1339.xml.gz`
@@ -104,3 +104,30 @@ and use a new pilot output path for the bounded check. Full sidecar construction
 does not itself perform a global current-version materialization; consumers can
 group sidecar events by PMID and apply the documented pure resolver. Accessions,
 version lineage, and deletion events must remain available in that derivative.
+
+## Optional spawned-process executor
+
+`--executor process` uses a top-level worker and an explicit `spawn` context,
+including on Windows. Arrow worker CPU/I/O pools are each bounded to one.
+The compatibility default remains `thread`; there is no silent executor fallback.
+
+The same two real shards were run once per mode with two workers, warm filesystem
+state, distinct output directories, and identical source/code checksums:
+
+| Mode | Elapsed including pool startup | Result |
+| --- | ---: | --- |
+| Thread | 17.77 s | 60,000 upserts, 13 deletions |
+| Spawned process | 11.34 s | 60,000 upserts, 13 deletions |
+| Process verified resume | 0.91 s | Both partitions reused |
+
+Process execution was 1.57 times as fast in this bounded comparison. Both Parquet
+files were byte-identical between modes, and all logical rows and source input
+hashes matched. Twenty tests passed, including actual process-mode publication,
+resume, and worker-failure reporting. Parent CLI/module import time is outside
+the recorded timer; process pool spawn and child initialization are included.
+
+The fastest **measured** setting is `--workers 2 --executor process`. Four workers
+and a full 1,621-shard workload have not been benchmarked; the two-shard result is
+not a full-scale guarantee. The complete comparison receipt is
+`C:\Codex\LitDataMatcher-v2\data\campaign_20261031\revision-ledger-process-v3\EXECUTOR_COMPARISON.json`;
+the source-preserving thread run is in sibling `revision-ledger-thread-v3`.

@@ -9,6 +9,7 @@ import datetime as dt
 import gzip
 import hashlib
 import json
+import multiprocessing
 import re
 import time
 import uuid
@@ -275,11 +276,26 @@ def build_shard(corpus_root: Path, output: Path, shard: dict, shard_order: int) 
         raise
 
 
-def build_revision_ledger(corpus_root: Path, snapshot_path: Path, output: Path, *, workers=2, max_shards=None, shard_names=None) -> dict:
+def _process_initializer():
+    """Bound Arrow pools in spawned workers instead of multiplying CPU pools."""
+    import pyarrow as pa
+
+    pa.set_cpu_count(1)
+    pa.set_io_thread_count(1)
+
+
+def _build_shard_task(corpus_root, output, shard, shard_order):
+    """Top-level picklable target shared by thread and spawned-process pools."""
+    return build_shard(Path(corpus_root), Path(output), shard, shard_order)
+
+
+def build_revision_ledger(corpus_root: Path, snapshot_path: Path, output: Path, *, workers=2, max_shards=None, shard_names=None, executor="thread") -> dict:
     if type(workers) is not int or not 1 <= workers <= 4:
         raise ValueError("workers must be between one and four")
     if max_shards is not None and (type(max_shards) is not int or max_shards < 1):
         raise ValueError("max_shards must be a positive integer")
+    if executor not in {"thread", "process"}:
+        raise ValueError("executor must be thread or process")
     corpus_root, output = Path(corpus_root).resolve(), Path(output).resolve()
     if output.is_relative_to(corpus_root) or corpus_root.is_relative_to(output):
         raise ValueError("Ledger output must be outside and separate from the original corpus")
@@ -299,9 +315,16 @@ def build_revision_ledger(corpus_root: Path, snapshot_path: Path, output: Path, 
     started = time.perf_counter()
     completed, failed = [], []
     with integration_lease(output, "pubmed-revision-ledger"):
-        pool = concurrent.futures.ThreadPoolExecutor(max_workers=workers)
+        pool = (
+            concurrent.futures.ProcessPoolExecutor(
+                max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
+                initializer=_process_initializer,
+            )
+            if executor == "process"
+            else concurrent.futures.ThreadPoolExecutor(max_workers=workers)
+        )
         try:
-            futures = {pool.submit(build_shard, corpus_root, output, shard, order): shard for order, shard in selected}
+            futures = {pool.submit(_build_shard_task, str(corpus_root), str(output), shard, order): shard for order, shard in selected}
             for future in concurrent.futures.as_completed(futures):
                 shard = futures[future]
                 try:
@@ -324,7 +347,10 @@ def build_revision_ledger(corpus_root: Path, snapshot_path: Path, output: Path, 
             "available_shards": len(shards), "selected_shards": len(selected),
             "verified_shards": len(completed), "reused_shards": sum(item["reused"] for item in completed),
             "upserts": sum(item["upserts"] for item in completed), "deletions": sum(item["deletions"] for item in completed),
-            "workers": workers, "elapsed_seconds": time.perf_counter() - started,
+            "workers": workers, "executor": executor,
+            "process_start_method": "spawn" if executor == "process" else None,
+            "pool_startup_included": True,
+            "elapsed_seconds": time.perf_counter() - started,
             "shards": sorted(completed, key=lambda item: item["shard_order"]), "failures": failed,
             "limitations": ["This additive ledger verifies citation identity/order, not biomedical truth.", "No missing citation version is inferred.", "Current-view resolution is a separate operation; every historical event remains retained."],
         }

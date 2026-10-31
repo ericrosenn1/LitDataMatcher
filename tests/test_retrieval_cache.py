@@ -57,6 +57,21 @@ def test_second_fit_uses_verified_vectors_without_encoding(encoder, tmp_path):
     assert np.array_equal(first.index.vectors, second.index.vectors)
 
 
+def test_dependency_drift_uses_new_vector_cache_without_overwriting_old(
+    encoder, monkeypatch, tmp_path
+):
+    versions = {"tokenizers": "fixture-1", "safetensors": "fixture-1"}
+    monkeypatch.setattr(retrieval, "runtime_dependency_versions", lambda: dict(versions))
+    first = retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS)
+    old = tmp_path / first.fingerprint / "vectors.npy"
+    original = old.read_bytes()
+    versions["tokenizers"] = "fixture-2"
+    second = retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS)
+    assert second.fingerprint != first.fingerprint
+    assert encoder.calls == 2
+    assert old.read_bytes() == original
+
+
 def test_text_order_and_model_changes_invalidate_cache(encoder, tmp_path):
     first = retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS)
     reordered = retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS[::-1])

@@ -7,7 +7,6 @@ and none of its scores or development metrics establish scientific suitability.
 from __future__ import annotations
 
 import hashlib
-import importlib.metadata
 import os
 import random
 import time
@@ -19,7 +18,7 @@ from .controller import integration_lease
 from .data_plane import atomic_json, digest
 from .retrieval import BM25Index, CachedSemanticIndex, reciprocal_rank_fusion
 from .retrieval_evaluation import evaluate_retrieval, paired_comparison
-from .semantic_runtime import verify_model
+from .semantic_runtime import runtime_dependency_versions, verify_model
 from .strict_artifacts import strict_json_loads
 
 
@@ -194,12 +193,7 @@ def training_fingerprint(benchmark, parent_manifest, config, device):
             )
         ],
     ]
-    versions = {}
-    for name in ("torch", "transformers", "numpy", "safetensors"):
-        try:
-            versions[name] = importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
-            versions[name] = None
+    versions = runtime_dependency_versions()
     protocol = Path(__file__).with_name("protocols") / "retrieval-training-v1.md"
     if not protocol.is_file():
         raise FileNotFoundError(

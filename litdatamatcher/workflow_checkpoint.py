@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
-import importlib.metadata
 import platform
 import sys
 import time
@@ -91,14 +90,11 @@ def file_identity(path):
 
 
 def analysis_fingerprint(root, model_dir, embedding_dir, parameters):
+    from .semantic_runtime import runtime_dependency_versions
+
     root = Path(root).resolve()
     package = Path(__file__).parent
-    versions = {}
-    for name in ("torch", "transformers", "numpy"):
-        try:
-            versions[name] = importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
-            versions[name] = None
+    versions = runtime_dependency_versions()
     return {
         "parameters": parameters,
         "inputs": [

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import hashlib
 import heapq
-import importlib.metadata
 import inspect
 import io
 import json
@@ -22,7 +21,7 @@ import numpy as np
 
 from .controller import integration_lease
 from .data_plane import atomic_json, atomic_write, digest
-from .semantic_runtime import PretrainedSemanticIndex
+from .semantic_runtime import PretrainedSemanticIndex, runtime_dependency_versions
 from .text import tokenize
 
 CACHE_VERSION = "semantic-vector-cache-1.0"
@@ -155,12 +154,7 @@ class CachedSemanticIndex:
 
     def fit(self, records: list[dict], *, force_rebuild: bool = False) -> CachedSemanticIndex:
         records = _validate_records(records)
-        versions = {}
-        for name in ("numpy", "torch", "transformers"):
-            try:
-                versions[name] = importlib.metadata.version(name)
-            except importlib.metadata.PackageNotFoundError:
-                versions[name] = "not-installed"
+        versions = runtime_dependency_versions()
         fingerprint = digest(
             {
                 "version": CACHE_VERSION,

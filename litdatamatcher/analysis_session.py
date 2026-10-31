@@ -7,7 +7,6 @@ import threading
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import asdict, is_dataclass
-from importlib import metadata
 from pathlib import Path
 
 from .controller import OwnershipConflict
@@ -29,11 +28,14 @@ def runtime_configuration(device, overrides=None):
 
 def runtime_environment():
     """Bind optional decoder versions even before a lazy backend is constructed."""
-    try:
-        version = metadata.version("lm-format-enforcer")
-    except metadata.PackageNotFoundError:
-        version = None
-    return {"lm_format_enforcer": version}
+    from .semantic_runtime import DEPENDENCY_IDENTITY_VERSION, runtime_dependency_versions
+
+    versions = runtime_dependency_versions()
+    return {
+        "lm_format_enforcer": versions["lm-format-enforcer"],
+        "dependency_identity_version": DEPENDENCY_IDENTITY_VERSION,
+        "dependency_versions": versions,
+    }
 
 
 def _identity_paths(value):

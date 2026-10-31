@@ -43,3 +43,36 @@ scientifically validated on this evidence.
 Any model/configuration changes prompted by inspection of the 30 cases turn
 those cases into explicit further development evidence. They cannot later be
 described as an untouched final test.
+
+## Transport repair and follow-up development checks
+
+The first `source_schema` batch exposed incomplete quote output for a source
+sentence containing embedded quotation marks. The independent schema validator
+rejected that output. Preserve this batch as the original baseline, including
+failed generations and rejected records.
+
+The candidate `source_index` profile replaces generated quote strings with
+integer selections from an immutable, document-bound sentence table. The
+runtime restores the exact source string before applying the existing schema
+and scientific source guard. This is a transport repair: it does not relax
+relation, direction, negation, context, or future-work requirements. Synthetic
+quoted, Unicode, newline, malformed-index, and cardinality cases are used for
+implementation development; the biomedical prompt is not tuned to the 30-case
+results.
+
+After freezing the candidate implementation, repeat the two previously seen
+qualification documents in new output directories. An initial CPU/float32,
+four-thread check of the 1.5B model may run while the original GPU batch finishes.
+It establishes CPU execution and source acceptance only. Do not compare its
+latency to CUDA/bfloat16 measurements or apply the smaller-model speed rule to
+mixed hardware. GPU qualification and any size comparison retain the original
+hardware, output-token budget, seed, source guard, and two-document acceptance
+rule.
+
+If the candidate qualifies, run the same 30 inputs under the new profile and
+audit source spans, input identities, artifact hashes, and workflow completion.
+Call this a post-repair development regression, because a failure observed in
+the original batch motivated the change. Report baseline and repaired-profile
+outcomes separately, including fully rejected cases, retryable failures, and
+terminal abstentions. More accepted records or valid serialization alone do
+not establish better scientific interpretation.

@@ -7,7 +7,7 @@ requirements, source-linked evidence, and ranked dataset candidates. Unknowns,
 failed retrievals, conflicting evidence, and underdetermined questions remain
 visible throughout the workflow.
 
-[Research workflow](docs/research_workflow.md) Â· [Methods](docs/campaign_20261031/retrieval_protocol.md) Â· [Recovery](docs/campaign_20261031/workflow_recovery.md) Â· [Scientific limits](docs/limitations.md) Â· [MIT license](LICENSE)
+[Research workflow](docs/research_workflow.md) · [Methods](docs/campaign_20261031/retrieval_protocol.md) · [Recovery](docs/campaign_20261031/workflow_recovery.md) · [Scientific limits](docs/limitations.md) · [MIT license](LICENSE)
 
 ## Research capabilities
 

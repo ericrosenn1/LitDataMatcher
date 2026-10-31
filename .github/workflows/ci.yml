@@ -52,6 +52,25 @@ jobs:
           path: coverage.xml
           if-no-files-found: error
 
+  windows-recovery:
+    name: Windows recovery and corpus contracts
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development and corpus dependencies
+        run: python -m pip install -e ".[dev,corpus]"
+      - name: Exercise process spawning, path containment, and recovery
+        run: >-
+          python -m pytest tests/test_pubmed_revision_ledger.py
+          tests/test_controller.py tests/test_workflow_campaign.py
+          tests/test_analysis_batch.py
+
   codecov-upload:
     name: Upload coverage to Codecov
     needs: test

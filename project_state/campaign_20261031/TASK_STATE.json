@@ -2,7 +2,7 @@
   "schema_version": "research-engine-campaign-1.0",
   "campaign": "biomedical-research-engine-20261031",
   "status": "IN_PROGRESS",
-  "phase": "FROZEN_REAL_DATA_EXECUTION_AND_INDEPENDENT_VALIDATION",
+  "phase": "EXTRACTION_REGRESSION_AND_FAULT_RECOVERY_REPAIR",
   "started_utc": "2026-10-31T11:48:16Z",
   "soft_target_hours": 24,
   "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
@@ -42,7 +42,7 @@
     "Controller can mark malformed JSONL successful; nonfinite JSON values are accepted",
     "Durable analysis checkpoints and bounded retry orchestration need completion"
   ],
-  "next_action": "Finish GPU scale evaluation, run source-backed case batch and replay, audit evidence, then integrate namespace fix and final release validation.",
+  "next_action": "Finish original source_schema30-case baseline; integrate and qualify source_index plus dependency identity; run post-repair development regression. Finish full ledger before namespace repair, then final integration/package validation.",
   "integration_commits": {
     "sources": "30cfb84",
     "model_guard": "ecda49d",
@@ -70,10 +70,11 @@
     "receipt": "model-selection-v1/SELECTION.json"
   },
   "active_work": [
-    "Full1621-shard revision/deletion ledger with original source hash preserved",
-    "Frozen50k/100k source-link retrieval evaluation, full and abstract-only views",
-    "30-case native batch pending GPU availability",
-    "Independent package and output-audit validation"
+    "Full1621-shard revision/deletion ledger; original ledger source frozen",
+    "Original30-case source_schema native batch; original package source frozen",
+    "source_index dependency identity follow-up and7B qualification pending GPU",
+    "Controller startup-admission repair for reproduced orphan crash window",
+    "Final source release and independent output audits"
   ],
   "integration_round_1": {
     "status": "PASS",
@@ -145,7 +146,7 @@
   "source_style_audit": {
     "existing_package_lint_findings": 134,
     "existing_total_lint_findings": 352,
-    "next_action": "Apply reviewed formatting after active model/corpus source fingerprints freeze; no scientific changes"
+    "next_action": "Maintained Python lint passes; reviewed formatting integrated. Final style/build validation follows pending repairs."
   },
   "pull_request": "https://github.com/ericrosenn1/LitDataMatcher/pull/9",
   "style_validation": {
@@ -164,9 +165,60 @@
     "cause": "Windows Path.resolve may return equivalent extended DOS prefix; isolated fix tested, deferred until fingerprinted jobs finish"
   },
   "pending_repairs": [
-    "Integrate proven Windows namespace containment fix after active fingerprinted jobs finish"
+    "Integrate proven Windows namespace containment fix only after full ledger finishes",
+    "Integrate independently reviewed source-archive Git provenance fix after original native batch",
+    "Repair controller crash between worker spawn and durable registration using explicit admission handshake",
+    "Fingerprint runtime/validator dependency versions across inference and checkpoints"
   ],
   "external_prerequisites": [
     "GitHub dependency graph is disabled; existing dependency-review action retained"
-  ]
+  ],
+  "retrieval_scale": {
+    "status": "PASS_INDEPENDENT_AUDIT",
+    "development_queries": 175,
+    "conditions": 4,
+    "ranking_lists_checked": 3500,
+    "largest_pool": 100000,
+    "fine_tuned_vs_pretrained_mrr_gain_100k_full": 0.05280952380952386,
+    "fine_tuned_vs_pretrained_mrr_gain_100k_abstract": 0.042322,
+    "best_method_all_conditions": "BM25",
+    "limitations": [
+      "Source-paper recovery, not dataset suitability",
+      "PubMedQA abstract-only performance decreases after fine-tuning",
+      "Same development queries used for method comparison; no untouched-test claim"
+    ],
+    "summary": "benchmarks/campaign_20261031/retrieval_scale.json"
+  },
+  "source_index_cpu_trial": {
+    "status": "FAIL_BOTH_POSITIVE_DOCUMENTS",
+    "model": "Qwen2.5-1.5B-Instruct",
+    "device": "cpu",
+    "dtype": "float32",
+    "cpu_threads": 4,
+    "accepted_claims": [
+      0,
+      0
+    ],
+    "valid_transport": true,
+    "reason": [
+      "Relation-direction source guard rejections",
+      "Empty output"
+    ],
+    "promotion": false,
+    "timing_comparable_to_gpu": false,
+    "source_commit": "056acb4725c861db2921a095a23d2fb97d1f54f0"
+  },
+  "ci_latest_verified": {
+    "commit": "cc346123589ad2c9c115478fa91354d02f7483f2",
+    "successful": [
+      "CI Python3.10/3.13",
+      "Local model contracts",
+      "CodeQL",
+      "Web app",
+      "Documentation",
+      "Pre-commit",
+      "Package build"
+    ],
+    "external_failure": "Dependency review: repository dependency graph disabled; security action retained"
+  }
 }

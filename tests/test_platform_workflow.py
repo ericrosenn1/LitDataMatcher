@@ -271,7 +271,12 @@ def api(tmp_path):
 def test_http_rejects_cross_origin_dns_rebinding_and_invalid_contract(api):
     url, service = api
     assert requests.get(url + "/api/health", timeout=5).json()["status"] == "ok"
-    assert requests.get(url + "/", timeout=5).status_code == 200
+    page = requests.get(url + "/", timeout=5)
+    assert page.status_code == 200
+    # The existing lightweight workflow calls both public endpoints in the browser.
+    policy = page.headers["Content-Security-Policy"]
+    assert "https://api.datacite.org" in policy
+    assert "https://www.ebi.ac.uk" in policy
     assert (
         requests.post(
             url + "/api/jobs",

@@ -286,7 +286,7 @@ def make_server(service, *, host="127.0.0.1", port=8765):
             self.send_header("Referrer-Policy", "no-referrer")
             self.send_header(
                 "Content-Security-Policy",
-                "default-src 'self'; connect-src 'self' https://www.ebi.ac.uk https://eutils.ncbi.nlm.nih.gov https://api.openalex.org; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'",
+                "default-src 'self'; connect-src 'self' https://www.ebi.ac.uk https://eutils.ncbi.nlm.nih.gov https://api.openalex.org https://api.datacite.org; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'",
             )
             self.end_headers()
             self.wfile.write(body)

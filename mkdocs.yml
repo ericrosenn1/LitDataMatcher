@@ -25,6 +25,8 @@ nav:
       - Large-pool retrieval: campaign_20261031/retrieval_scale.md
       - Source-backed cases: campaign_20261031/research_cases.md
       - Dataset ranking: campaign_20261031/dataset_ranking.md
+      - Descriptive feasibility examples: campaign_20261031/descriptive_comparisons.md
+      - Comparative review addendum: campaign_20261031/comparative_review_addendum.md
       - Scientific review packet: campaign_20261031/scientific_review_packet.md
   - Data and provenance:
       - Source discovery: campaign_20261031/discovery.md

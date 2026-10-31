@@ -78,9 +78,18 @@ it does not claim an ongoing scheduler.
 
 Software checks and development examples are not independent scientific
 evaluation. Twelve variable-availability checks across two datasets do not
-establish twelve scientifically qualified opportunities. Full contracts retain
-unresolved timing, ascertainment and independence requirements. Scientific
-criteria were not weakened to produce positives.
+establish twelve scientifically qualified opportunities. The original twelve
+association contracts retain unresolved timing and other design requirements.
+
+A separate [descriptive development demonstration](campaign_20261031/descriptive_comparisons.md)
+passes twelve full comparative contracts over the same two inspected public
+tables. Exact columns and literal group codes bind joint observations and source
+definitions to one question; no global method capability is added to the dataset.
+These twelve cases also completed through the live API with their method checks
+and dossiers verified. They are user-specified descriptive questions, not twelve
+independent or newly unanswered research opportunities. Independence, statistical
+power, timing and causal interpretation are not established. Scientific criteria
+and the original uncertain cases were preserved.
 
 The GSE279879 final holdout remains excluded from development inspection. The
 final protocol, independent scientific review and calibration remain pending.

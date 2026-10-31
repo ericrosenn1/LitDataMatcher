@@ -1,6 +1,6 @@
 # Replacement final holdout preparation
 
-GSE112372 cannot be claimed as untouched because its detailed metadata was exposed during targeted acquisition. The replacement reservation is [replacement_final_holdout_reservation.json](../../benchmarks/v2/replacement_final_holdout_reservation.json).
+GSE112372 cannot be claimed as untouched because its detailed metadata was exposed during targeted acquisition. The replacement reservation is [replacement_final_holdout_reservation.json](https://github.com/ericrosenn1/LitDataMatcher/blob/068f32618754a822a8bbdb53244b515d11e2050d/benchmarks/v2/replacement_final_holdout_reservation.json).
 
 The reservation selects GSE282859 using only the persisted catalog order and explicit identifier fields. It excludes every family used for development or transfer scoring, the five challenge-development families, the retired GSE112372 family, and both transfer reservations. No source title, summary, outcome field, generated label, rank, or prediction for GSE282859 was read by this evaluator.
 

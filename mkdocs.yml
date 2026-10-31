@@ -9,8 +9,13 @@ theme:
 
 nav:
   - Home: index.md
-  - Web app guide: web-app.md
-  - App validation: app-validation.md
+  - Research workflow: research_workflow.md
+  - Configurable source discovery: campaign_20261031/discovery.md
+  - Local structured inference: campaign_20261031/model_source_schema.md
+  - Retrieval protocol: campaign_20261031/retrieval_protocol.md
+  - Model training: campaign_20261031/retriever_training.md
+  - Source-backed cases: campaign_20261031/research_cases.md
+  - Recovery: campaign_20261031/workflow_recovery.md
   - Installation and CLI: installation.md
   - Architecture: architecture.md
   - Corpus and data: corpus_and_data.md
@@ -23,6 +28,8 @@ nav:
   - Node contracts: node_contracts.md
   - Model robustness plan: model_robustness_plan.md
   - Feature roadmap: feature_roadmap.md
+  - Optional web workspace: web-app.md
+  - Web workspace validation: app-validation.md
 
 markdown_extensions:
   - admonition

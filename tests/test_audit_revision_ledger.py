@@ -423,7 +423,11 @@ def test_symlink_escape_is_rejected(tmp_path):
         with pytest.raises(audit.AuditError, match="escapes"):
             audit._inside(root, "link/file")
     finally:
-        os.rmdir(root / "link")
+        # Windows directory junctions use rmdir; POSIX symlinks use unlink.
+        if os.name == "nt":
+            os.rmdir(root / "link")
+        else:
+            (root / "link").unlink()
 
 
 def test_report_publication_preserves_existing_and_protected_paths(tmp_path):

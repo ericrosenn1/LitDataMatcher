@@ -18,6 +18,15 @@ MODELS = {
 }
 
 
+def file_sha256(path: Path) -> str:
+    """Hash model bytes with bounded memory on every supported Python version."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
@@ -44,8 +53,7 @@ def main() -> None:
             path = (folder / item["path"]).resolve(strict=True)
             if not path.is_relative_to(folder.resolve()):
                 raise ValueError("Existing manifest path escapes model directory")
-            with path.open("rb") as stream:
-                actual = hashlib.file_digest(stream, "sha256").hexdigest()
+            actual = file_sha256(path)
             if actual != item["sha256"]:
                 raise ValueError(
                     f"Existing model corruption at {item['path']}; refusing to re-bless or overwrite"
@@ -88,8 +96,7 @@ def main() -> None:
                 while chunk := response.read(1024 * 1024):
                     output.write(chunk)
             temporary.replace(dest)
-        with dest.open("rb") as stream:
-            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+        digest = file_sha256(dest)
         return {"path": name, "bytes": dest.stat().st_size, "sha256": digest}
 
     with ThreadPoolExecutor(max_workers=3) as pool:

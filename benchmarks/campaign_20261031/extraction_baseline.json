@@ -1,0 +1,411 @@
+{
+  "schema_version": "extraction-baseline-evidence-v1",
+  "status": "COMPLETED_PARTIAL_BASELINE",
+  "published_evidence_as_of_utc": "2026-10-31T13:04:26.954282+00:00",
+  "scope": "Source-backed development execution and source-guard evidence; not scientific accuracy or an untouched evaluation.",
+  "raw_source_text_included": false,
+  "case_pack": {
+    "count": 30,
+    "frozen_utc": "2026-10-31T12:00:23.156151+00:00",
+    "selected_before_runtime_results": true,
+    "sources": {
+      "Evidence Inference 2.0": 15,
+      "PubMedQA": 15
+    },
+    "expert_gold_labels": false,
+    "role_after_transport_repair": "development_regression",
+    "text_coverage": "annual baseline abstracts; no update stream or complete article bodies",
+    "manifest": {
+      "artifact": "research-cases-v1/CASES_MANIFEST.json",
+      "sha256": "a22d50cd6793efbbc110c7e3dde54e1df3518513848a91388bf5f280721bf99b",
+      "size_bytes": 1272
+    },
+    "cases": {
+      "artifact": "research-cases-v1/cases.jsonl",
+      "sha256": "e0ac16e1c2dc8b977c8a40a243a2e51bf8bce0ed6458882cfd5c355ba98621aa",
+      "size_bytes": 136040
+    },
+    "pipeline_input": {
+      "artifact": "research-cases-v1/pipeline_inputs.jsonl",
+      "sha256": "9b259ae42cd8b1eb8c71890d6674d53e46bb2fc3cad29d6225a69a69cd186024",
+      "size_bytes": 125589
+    }
+  },
+  "baseline": {
+    "decoding_mode": "source_schema",
+    "profile": "source-schema-decoding-1.1",
+    "model": {
+      "id": "Qwen/Qwen2.5-7B-Instruct",
+      "license_status": "apache-2.0",
+      "prompt_version": "f8e840d7b6304b7991fc95d4efa221460e2c63748fc502c5aeddf8c66d477365",
+      "qualification_sha256": "1b24a4c6efedd1aaa5487e0056dffb532ccbbba5f6dd326d374e24e426d37c86",
+      "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "runtime": "transformers"
+    },
+    "configuration": {
+      "cpu_threads": 4,
+      "decoding_mode": "source_schema",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "max_attempts": 2,
+      "max_input_tokens": 4096,
+      "max_new_tokens": 384,
+      "seed": 1729
+    },
+    "source_identity": {
+      "commit": "dd9a8179a847d2d8c5a0cf5b182127ad5750ce5f",
+      "config_digest": "4629b0aac69f5ebf0016b40820dd3f159489c716eff4bbc6d9d93b57ad5fde7b",
+      "repository": "ericrosenn1/LitDataMatcher",
+      "spec_digest": "ef55c99b1f31b22c75734849e58e528f3e463c6825a13506a06c0f92f9dc65b8",
+      "working_tree_digest": "efdbbe68b69332af3fa9e172a5eed8aac1063e695b0b64e3bc9d30a5177db014"
+    },
+    "runtime_identity": {
+      "config_sha256": "b8c08dc5b3201af66542b3f8af38e0ac41b9356f121755ce571162965aa71671",
+      "decoding": {
+        "implementation_sha256": "cd4b507efa75bbe34d73f7c2f23550e90cef6ef2c247afbac31e9f0c5d67913a",
+        "instruction_sha256": "a7374203ca7006e03d860608fc639247400dfdbc7572a756a4e78065214d539c",
+        "library": "lm-format-enforcer",
+        "library_version": "0.11.3",
+        "mode": "source_schema",
+        "parser_configuration": {
+          "force_json_field_order": true,
+          "max_consecutive_whitespaces": 2,
+          "required_empty_array_guard": "root-array-intersection-1"
+        },
+        "profile": "source-schema-decoding-1.1"
+      },
+      "implementation_sha256": "ad6d8071ff7c88118a341a2fe41ffeda059979088f58f744627a91890bc048a1",
+      "model_manifest_sha256": "b4c0259eb28bb9ec3a42287728f890b38463d062d365f5dcb1db25c6b837d6c6",
+      "prompt_sha256": "f8e840d7b6304b7991fc95d4efa221460e2c63748fc502c5aeddf8c66d477365",
+      "prompt_version": "source-extractive-v2.4",
+      "schema_version": "semantic-extraction-v2.2",
+      "torch_version": "2.11.0+cu128",
+      "transformers_version": "4.57.6"
+    },
+    "batch_fingerprint": "5a14a67565c46a2e0960650012934bd631f1b02f77c275dbf2203f1e67a2d189",
+    "started_utc": "2026-10-31T12:33:57.295715+00:00",
+    "finished_utc": "2026-10-31T12:51:17.774490+00:00",
+    "execution": {
+      "status": "PARTIAL",
+      "cases": 30,
+      "passed": 9,
+      "partial": 21,
+      "failed": 0,
+      "retryable": 2,
+      "terminal": 28,
+      "verified_skips": 0
+    },
+    "persisted_outputs": {
+      "accepted_claims": 16,
+      "cases_with_claims": 14,
+      "questions_total": 35,
+      "caller_questions": 30,
+      "source_extracted_future_questions": 5,
+      "source_question_origins": {
+        "explicit_unresolved_source": 2,
+        "explicit_unresolved": 3
+      },
+      "cases_with_source_questions": 4,
+      "dataset_candidate_rows": 140,
+      "inspection_needed_rows": 140,
+      "scientifically_qualified_rows": 0,
+      "cases_without_qualified_match": 30
+    },
+    "question_outcomes": {
+      "NO_ASSESSABLE_CONTRACT": {
+        "questions": 20,
+        "cases": 17,
+        "caller_questions": 15,
+        "source_extracted_questions": 5
+      },
+      "NO_RELEVANT_CANDIDATE_FOUND": {
+        "questions": 1,
+        "cases": 1,
+        "caller_questions": 1,
+        "source_extracted_questions": 0
+      },
+      "INSPECTION_NEEDED": {
+        "questions": 14,
+        "caller_questions": 14,
+        "source_extracted_questions": 0,
+        "candidate_rows": 140
+      }
+    },
+    "source_views": {
+      "attempted": 45,
+      "returned_runtime_records": 43,
+      "runtime_statuses": {
+        "abstained_no_valid_records": 24,
+        "validated": 14,
+        "validated_with_rejections": 5
+      },
+      "technical_failures": {
+        "source_schema_validation_failed_after_bounded_attempts": 1,
+        "unsatisfiable_prefix_constraint_before_raw_output": 1
+      },
+      "manifest_failure_events": {
+        "inference": 2,
+        "source_guard": 26
+      },
+      "manifest_guard_rejection_reasons": {
+        "Direction lacks source support": 12,
+        "Relation crosses clauses and requires scope review": 2,
+        "predicate is not verbatim in evidence": 4,
+        "object is not verbatim in evidence": 2,
+        "Relation requires unique nonoverlapping subject-predicate-object spans": 3,
+        "Negation contradicts the selected source relation": 2,
+        "subject is not verbatim in evidence": 1
+      }
+    },
+    "generation_attempts": {
+      "recorded_in_returned_runtime_records": 71,
+      "preserved_completed_raw_generations": 73,
+      "raw_categories": {
+        "schema_rejection": 2,
+        "source_guard_rejection": 54,
+        "source_guard_accepted_records": 16,
+        "valid_empty_output": 1
+      },
+      "rejection_containing_generations_with_accepted_records": 6,
+      "attempt_level_guard_rejection_reasons": {
+        "Direction lacks source support": 25,
+        "Relation crosses clauses and requires scope review": 4,
+        "predicate is not verbatim in evidence": 7,
+        "object is not verbatim in evidence": 5,
+        "Relation requires unique nonoverlapping subject-predicate-object spans": 6,
+        "Direction belongs to another predicate in the source sentence": 1,
+        "Negation contradicts the selected source relation": 4,
+        "subject is not verbatim in evidence": 2
+      },
+      "constraint_failure_before_raw_output": 1,
+      "unrecorded_attempt_count": null,
+      "interpretation": "Raw categories count generations; reasons count rejected records; final claims/questions are deduplicated. Pre-output failure has no invented attempt count."
+    },
+    "timing_seconds": {
+      "batch_wall": 1040.478775,
+      "case_attempts": {
+        "count": 30,
+        "total": 1028.492965,
+        "minimum": 3.742746,
+        "median": 28.798022500000002,
+        "maximum": 98.758172
+      },
+      "returned_runtime_views": {
+        "count": 43,
+        "total": 925.1253283004044,
+        "minimum": 1.9574261999223381,
+        "median": 22.544864000054076,
+        "maximum": 48.983232200029306
+      },
+      "missing_runtime_view_durations": 2
+    },
+    "timing_limitations": [
+      "One local run, not repeated controlled latency measurements.",
+      "Concurrent CPU retrieval scoring and a two-process corpus ledger; one heavy GPU job.",
+      "Two failed views have no returned inference duration."
+    ],
+    "model_reuse": {
+      "runtime_record_count": 43,
+      "process_ids": {
+        "38976": 43
+      },
+      "inference_origins": {
+        "fresh_local_inference": 43
+      },
+      "identical_retrieval_receipts": 30,
+      "retrieval_receipt_sha256": "1d21ecdc0b13af418dd4eed83730ca08b4171b345e6400ed3236913ab78fda81",
+      "interpretation": "Shared-session source and process/receipt identities support in-process reuse; no weight-load counter or captured loading stderr."
+    },
+    "network": {
+      "control": "Python socket/DNS audit hook",
+      "blocked_probe": true,
+      "subsequent_blocked_events": 0,
+      "os_firewall_claim": false,
+      "external_requests_count": null
+    },
+    "receipts": {
+      "state": {
+        "artifact": "native-batch-v1/BATCH_STATE.json",
+        "sha256": "fef64d3a048b89ccd5d8c8be8331c40920fe8df38a5aa8a9f80d6e623366ba38",
+        "size_bytes": 225117
+      },
+      "result": {
+        "artifact": "native-batch-v1/BATCH_RESULT.json",
+        "sha256": "9ae6247210aaad2df9c9d6c922defacdfcdafbb655fd67b539646372e3367038",
+        "size_bytes": 202
+      },
+      "network": {
+        "artifact": "native-batch-v1-network.json",
+        "sha256": "3ba01af8aaa67cb5e139178a1840a4dd46dad4caf697c1acd4b1316a2a39916c",
+        "size_bytes": 540
+      },
+      "closed_engineering_snapshot": {
+        "artifact": "baseline-engineering-final-20261031T125228Z/ENGINEERING_SNAPSHOT.json",
+        "sha256": "d566c4f080ed6df75fd9e155e60c828eb47c951079e28789e9786847694ec948",
+        "size_bytes": 207688
+      },
+      "snapshot_validation": {
+        "artifact": "baseline-engineering-final-20261031T125228Z/VALIDATION.json",
+        "sha256": "659e358966b5eabbca63260e7ee3af664938e5e8833610b83afd089aac89e55e",
+        "size_bytes": 848
+      },
+      "snapshot_archive": {
+        "artifact": "baseline-engineering-final-20261031T125228Z.zip",
+        "sha256": "8242951cbe0185feb8637d4d8a7fa7c6b17a65242db5ab99b47394a3daeae2bd",
+        "size_bytes": 799744
+      }
+    },
+    "verification": {
+      "original_output_hashes_verified": 480,
+      "raw_files_rechecked": 73,
+      "prior_snapshot_preserved": true,
+      "scope": "Byte integrity, source offsets, inference fingerprints and counts; not expert truth adjudication."
+    }
+  },
+  "source_index_follow_up": {
+    "status": "NOT_PROMOTED",
+    "rule": "Both pre-existing positive development documents must pass fresh offline inference and verified replay with at least one accepted claim each.",
+    "cpu_pair_status": "FAIL",
+    "gpu_pair_status": "FAIL",
+    "trials": [
+      {
+        "document": 1,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "configuration": {
+          "device": "cpu",
+          "dtype": "float32",
+          "max_input_tokens": 4096,
+          "max_new_tokens": 384,
+          "max_attempts": 2,
+          "seed": 1729,
+          "cpu_threads": 4,
+          "decoding_mode": "source_index"
+        },
+        "qualification_status": "FAIL",
+        "runtime_status": "abstained_no_valid_records",
+        "accepted_claims": 0,
+        "source_extracted_questions": 0,
+        "generation_attempts": 2,
+        "attempt_guard_rejections": {
+          "Direction belongs to another predicate in the source sentence": 1,
+          "Direction lacks source support": 1
+        },
+        "fresh_inference_seconds": 112.87670770008117,
+        "failure_category": "SOURCE_GUARD_REJECTION",
+        "failure_message": "Fresh inference produced no accepted scientific records",
+        "source_input_sha256": "f349185daa406557b2b904cce322b5c3d24af6a98bc1ede3c0ba8852993d6b4d",
+        "receipt": {
+          "artifact": "qualified-index-cpu-1_5b-doc1/QUALIFICATION.json",
+          "sha256": "42cd6a489e26508d3ba10387342a1a14459bc831e54a329936d372a59d496e62",
+          "size_bytes": 19699
+        }
+      },
+      {
+        "document": 2,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "configuration": {
+          "device": "cpu",
+          "dtype": "float32",
+          "max_input_tokens": 4096,
+          "max_new_tokens": 384,
+          "max_attempts": 2,
+          "seed": 1729,
+          "cpu_threads": 4,
+          "decoding_mode": "source_index"
+        },
+        "qualification_status": "FAIL",
+        "runtime_status": "abstained_no_valid_records",
+        "accepted_claims": 0,
+        "source_extracted_questions": 0,
+        "generation_attempts": 1,
+        "attempt_guard_rejections": {},
+        "fresh_inference_seconds": 25.938286599935964,
+        "failure_category": "VALID_EMPTY_OUTPUT",
+        "failure_message": "Fresh inference produced no accepted scientific records",
+        "source_input_sha256": "e1d8fa93eb63e00d34b89fdfbc5028af316990f849d94f173260e8c4d48bb9c7",
+        "receipt": {
+          "artifact": "qualified-index-cpu-1_5b-doc2/QUALIFICATION.json",
+          "sha256": "898cddc09aa84d63afc6bf14cd6ed504d485f39a0b65e3928891dcf9c5a6aaf9",
+          "size_bytes": 13786
+        }
+      },
+      {
+        "document": 1,
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+        "configuration": {
+          "device": "cuda",
+          "dtype": "bfloat16",
+          "max_input_tokens": 4096,
+          "max_new_tokens": 384,
+          "max_attempts": 2,
+          "seed": 1729,
+          "cpu_threads": 4,
+          "decoding_mode": "source_index"
+        },
+        "qualification_status": "PASS",
+        "runtime_status": "validated",
+        "accepted_claims": 1,
+        "source_extracted_questions": 0,
+        "generation_attempts": 1,
+        "attempt_guard_rejections": {},
+        "fresh_inference_seconds": 29.24381029990036,
+        "failure_category": null,
+        "failure_message": null,
+        "source_input_sha256": "f349185daa406557b2b904cce322b5c3d24af6a98bc1ede3c0ba8852993d6b4d",
+        "receipt": {
+          "artifact": "qualified-index-gpu-7b-doc1/QUALIFICATION.json",
+          "sha256": "0dfea8e67748a7282687e4200b4bacb11b2a1b639a1aac20502c866a4eb2a5d2",
+          "size_bytes": 21922
+        }
+      },
+      {
+        "document": 2,
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "model_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+        "configuration": {
+          "device": "cuda",
+          "dtype": "bfloat16",
+          "max_input_tokens": 4096,
+          "max_new_tokens": 384,
+          "max_attempts": 2,
+          "seed": 1729,
+          "cpu_threads": 4,
+          "decoding_mode": "source_index"
+        },
+        "qualification_status": "FAIL",
+        "runtime_status": "validated_with_rejections",
+        "accepted_claims": 0,
+        "source_extracted_questions": 1,
+        "generation_attempts": 2,
+        "attempt_guard_rejections": {
+          "Negation contradicts the selected source relation": 2
+        },
+        "fresh_inference_seconds": 44.44807869999204,
+        "failure_category": "NO_ACCEPTED_CLAIM",
+        "failure_message": "The declared positive source produced no guard-accepted claim",
+        "source_input_sha256": "e1d8fa93eb63e00d34b89fdfbc5028af316990f849d94f173260e8c4d48bb9c7",
+        "receipt": {
+          "artifact": "qualified-index-gpu-7b-doc2/QUALIFICATION.json",
+          "sha256": "af6b2e95ed0d125383749b9b6b3f70271633bc0eed2e8d2af223de2967bfcd75",
+          "size_bytes": 21617
+        }
+      }
+    ],
+    "interpretation": "Correct index transport did not guarantee a guard-accepted claim. CPU float32 and GPU bfloat16 timings are not a speed comparison."
+  },
+  "source_literal_follow_up": {
+    "status": "PENDING",
+    "promoted": false,
+    "scope": "Separate lead-controlled qualification; no outcome or acceptance metric is asserted in this baseline publication."
+  },
+  "limitations": [
+    "PASS/PARTIAL are native execution statuses, not labels of scientific correctness.",
+    "Passing the extractive guard is not expert validation; no accuracy, recall or calibrated discovery score is estimated.",
+    "Metadata-only candidates require inspection; lack of qualification does not establish dataset absence.",
+    "An explicit source future-work statement does not establish research novelty.",
+    "The inspected 30-case pack is development/regression evidence after transport repair, not untouched final evaluation."
+  ]
+}

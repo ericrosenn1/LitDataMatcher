@@ -1,5 +1,19 @@
 # Current PubMed corpus and local search
 
+Complete snapshots can receive an independent bounded acceptance check with
+`python -m litdatamatcher.literature_validation --corpus-root CORPUS --ledger-manifest LEDGER_MANIFEST.json --database pubmed-current.sqlite3 --out NEW_VALIDATION_DIRECTORY`.
+The validator replays hashed event sidecars into a separate NumPy projection,
+compares every current PMID/version, checks evenly spaced winning source events,
+and performs full SQLite plus external-content FTS integrity checks. Its default
+bound is 50 million events and an estimated 6 GiB memory ceiling; no source files
+are changed. This oracle explicitly requires positive known versions, including
+version-specific deletion events, as present in the audited 2026 ledger. Other
+histories fail its admission rather than receiving an incomplete comparison.
+The materializer itself retains its broader unknown-version and deletion rules.
+`VALIDATION.json` is written only after every check passes; `PROGRESS.json` records
+the running phase or a failure. This validates computational/source fidelity,
+not biomedical conclusions.
+
 `litdatamatcher.literature_index` materializes the existing verified revision
 ledger and normalized Parquet records into a SQLite database. The source corpus,
 revision ledger, frozen research outputs, and evaluation holdouts remain unchanged.

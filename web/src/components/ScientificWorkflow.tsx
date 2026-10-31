@@ -838,7 +838,11 @@ export function ScientificWorkflow() {
           <div className="scientific-panel-heading">
             <div>
               <h2 id="scientific-results-title">Evidence and compatibility</h2>
-              <p>{result.question}</p>
+              <p>
+                {typeof result.question === "string"
+                  ? result.question
+                  : result.question?.question}
+              </p>
             </div>
             <div className="scientific-exports">
               {(["dossier.md", "result.json", "candidates.csv"] as const).map(

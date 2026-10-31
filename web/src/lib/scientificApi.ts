@@ -60,7 +60,14 @@ export interface ScientificCandidate {
 }
 
 export interface ResearchResult {
-  question?: string;
+  question?:
+    | string
+    | {
+        question: string;
+        question_id?: string;
+        source_locator?: string;
+        novelty_status?: string;
+      };
   compilation?: CompiledQuestion;
   candidates: ScientificCandidate[];
   questions?: {

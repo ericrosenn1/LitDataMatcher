@@ -13,7 +13,12 @@ const contract = {
 };
 
 const result = {
-  question: "Does insulin increase glucose uptake in humans?",
+  question: {
+    question: "Does insulin increase glucose uptake in humans?",
+    question_id: "fixture-selected",
+    source_locator: "user question",
+    novelty_status: "NOT_ESTABLISHED",
+  },
   compilation: contract,
   status: "PARTIAL",
   scientific_status: "UNVALIDATED_DEVELOPMENT_FIXTURE",
@@ -181,7 +186,7 @@ test("explicit requirements reach a queued job and source evidence remains inspe
   ).toHaveAttribute("disabled", "");
   await page
     .getByLabel("Research question", { exact: true })
-    .fill(result.question);
+    .fill(result.question.question);
   await page
     .getByRole("button", { name: "Add requirement", exact: true })
     .click();
@@ -294,7 +299,7 @@ test("an absent engine is a visible connection failure and cannot launch a job",
   );
   await page
     .getByLabel("Research question", { exact: true })
-    .fill(result.question);
+    .fill(result.question.question);
   await expect(
     page.getByRole("button", { name: "Launch research workflow" }),
   ).toBeDisabled();
@@ -320,29 +325,41 @@ test("live local catalog completes a browser research workflow and exports its d
     page.getByText("Engine connected", { exact: false }),
   ).toBeVisible();
   const question = "Is cholesterol associated with heart disease in humans?";
-  await page
-    .getByLabel("Literature search", { exact: true })
-    .fill("heart disease cholesterol");
-  await page.getByLabel("Research question", { exact: true }).fill(question);
-  await page.getByRole("button", { name: "Preview requirements" }).click();
-  await expect(page.locator(".scientific-contract")).toContainText(
-    "cholesterol",
-  );
-  await page.getByText("Public sources", { exact: true }).click();
-  for (const checkbox of await page
-    .locator(".scientific-source-groups input:checked")
-    .all())
-    await checkbox.uncheck();
-  await page.getByLabel("Datasets to inspect").fill("0");
-  const submitted = page.waitForResponse(
-    (response) =>
-      new URL(response.url()).pathname === "/api/jobs" &&
-      response.request().method() === "POST",
-  );
-  await page.getByRole("button", { name: "Launch research workflow" }).click();
-  const submission = await submitted;
-  expect(submission.status()).toBe(202);
-  const job = await submission.json();
+  let job: { id: string };
+  if (process.env.LDM_LIVE_JOB_ID) {
+    job = { id: process.env.LDM_LIVE_JOB_ID };
+    await page.getByLabel("Saved research job").selectOption(job.id);
+  } else {
+    await page
+      .getByLabel("Literature search", { exact: true })
+      .fill("heart disease cholesterol");
+    await page.getByLabel("Research question", { exact: true }).fill(question);
+    await page.getByRole("button", { name: "Preview requirements" }).click();
+    await expect(page.locator(".scientific-contract")).toContainText(
+      "cholesterol",
+    );
+    await page.getByText("Public sources", { exact: true }).click();
+    while (
+      await page.locator(".scientific-source-groups input:checked").count()
+    ) {
+      await page
+        .locator(".scientific-source-groups input:checked")
+        .first()
+        .uncheck();
+    }
+    await page.getByLabel("Datasets to inspect").fill("0");
+    const submitted = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/jobs" &&
+        response.request().method() === "POST",
+    );
+    await page
+      .getByRole("button", { name: "Launch research workflow" })
+      .click();
+    const submission = await submitted;
+    expect(submission.status()).toBe(202);
+    job = await submission.json();
+  }
   await expect(
     page.getByRole("heading", {
       name: "Evidence and compatibility",
@@ -355,7 +372,9 @@ test("live local catalog completes a browser research workflow and exports its d
   expect(response.ok()).toBe(true);
   const completed = await response.json();
   expect(completed.status).toBe("SUCCEEDED");
-  expect(completed.result.question).toBe(question);
+  expect(completed.result.question.question || completed.result.question).toBe(
+    question,
+  );
   expect(
     completed.result.compilation.matching_requirements.length,
   ).toBeGreaterThan(0);

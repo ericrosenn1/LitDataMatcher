@@ -382,3 +382,187 @@ c=module.Controller(root/'state'); c.run_next()
             runner.kill()
             runner.wait(timeout=5)
         c.close()
+
+
+def test_parent_rechecks_pause_before_releasing_gate(tmp_path, monkeypatch):
+    import litdatamatcher.controller as module
+
+    c = Controller(tmp_path / "state")
+    output = register(c, tmp_path)
+    original = module._start_gated_worker
+
+    def pause_after_spawn(*args, **kwargs):
+        process, gate = original(*args, **kwargs)
+        c.set_mode("PAUSED_BY_USER")
+
+        class Gate:
+            def write(self, value):
+                pytest.fail("Pause before admission must keep the gate closed")
+
+            def close(self):
+                gate.close()
+
+        return process, Gate()
+
+    monkeypatch.setattr(module, "_start_gated_worker", pause_after_spawn)
+    try:
+        assert c.run_next()["status"] == "QUEUED"
+        assert not output.exists() and c.jobs()[0]["attempts"] == 0
+    finally:
+        c.close()
+
+
+@pytest.mark.parametrize("mode", ["PAUSED_BY_USER", "WAITING_FOR_CAPACITY", "STOPPED"])
+@pytest.mark.parametrize("resume_before_parent_returns", [False, True])
+def test_worker_rechecks_mode_when_parent_monitor_is_delayed(
+    tmp_path, monkeypatch, mode, resume_before_parent_returns
+):
+    import litdatamatcher.controller as module
+
+    c = Controller(tmp_path / "state")
+    output = register(c, tmp_path)
+    original = module._start_gated_worker
+
+    def delayed_parent(*args, **kwargs):
+        process, gate = original(*args, **kwargs)
+
+        class Gate:
+            def write(self, value):
+                # The parent's pre-admission read already saw RUNNING. Hold its
+                # monitor until the child exits so only the worker can enforce
+                # this pause, reproducing a heavily delayed/covered parent.
+                c.set_mode(mode)
+                result = gate.write(value)
+                process.wait(timeout=10)
+                if resume_before_parent_returns:
+                    c.set_mode("RUNNING")
+                return result
+
+            def close(self):
+                gate.close()
+
+        return process, Gate()
+
+    monkeypatch.setattr(module, "_start_gated_worker", delayed_parent)
+    try:
+        result = c.run_next()
+        assert result["status"] == "QUEUED" and result["error"] == mode
+        assert not output.exists() and c.jobs()[0]["attempts"] == 0
+        monkeypatch.setattr(module, "_start_gated_worker", original)
+        c.set_mode("RUNNING")
+        assert c.run_next()["status"] == "SUCCEEDED"
+        assert output.exists() and c.jobs()[0]["attempts"] == 1
+    finally:
+        c.close()
+
+
+def test_worker_rechecks_mode_before_payload_launch(tmp_path):
+    from types import SimpleNamespace
+
+    from litdatamatcher.controller_worker import _admitted_job, _phase
+
+    c = Controller(tmp_path / "state")
+    register(c, tmp_path)
+    token = "fixture-token"
+    with c.db:
+        c.db.execute(
+            "UPDATE jobs SET status='RUNNING',admission_state='WAITING',admission_token=?,pid=?,created=?,owner_pid=?,owner_created=?",
+            (
+                token,
+                os.getpid(),
+                psutil.Process().create_time(),
+                os.getpid(),
+                psutil.Process().create_time(),
+            ),
+        )
+    args = SimpleNamespace(root=c.root, job_id="one", token=token)
+    try:
+        _admitted_job(args)
+        c.set_mode("PAUSED_BY_USER")
+        with pytest.raises(ValueError, match="prevents payload launch"):
+            _phase(args, "LAUNCHING")
+        assert c.jobs()[0]["admission_state"] == "PAUSED_BY_USER"
+    finally:
+        c.close()
+
+
+def test_completed_payload_is_not_requeued_by_a_later_pause(tmp_path, monkeypatch):
+    c = Controller(tmp_path / "state")
+    output = register(c, tmp_path)
+    original = c._check_outputs
+
+    def pause_after_completion(*args, **kwargs):
+        c.set_mode("PAUSED_BY_USER")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(c, "_check_outputs", pause_after_completion)
+    try:
+        assert c.run_next()["status"] == "SUCCEEDED"
+        assert output.exists() and c.jobs()[0]["attempts"] == 1
+        assert c.run_next()["status"] == "PAUSED_BY_USER"
+    finally:
+        c.close()
+
+
+def test_committed_completion_wins_pause_before_wrapper_exit(tmp_path, monkeypatch):
+    import threading
+
+    import litdatamatcher.controller as module
+
+    proxy = tmp_path / "finished_worker.py"
+    proxy.write_text(
+        """import sys,time
+from pathlib import Path
+import litdatamatcher.controller_worker as worker
+root=Path(sys.argv[sys.argv.index('--root')+1]).parent
+original=worker._phase
+def held(*args,**kwargs):
+    value=original(*args,**kwargs)
+    if args[1]=='FINISHED':
+        (root/'finished').touch()
+        deadline=time.monotonic()+8
+        while not (root/'release').exists():
+            if time.monotonic()>deadline: raise RuntimeError('test barrier timed out')
+            time.sleep(.01)
+    return value
+worker._phase=held
+raise SystemExit(worker.main())
+""",
+        encoding="utf-8",
+    )
+    original_popen = module.subprocess.Popen
+
+    def substitute(command, *args, **kwargs):
+        command = list(command)
+        if len(command) > 1 and command[1].endswith("controller_worker.py"):
+            command[1] = str(proxy)
+        return original_popen(command, *args, **kwargs)
+
+    monkeypatch.setattr(module.subprocess, "Popen", substitute)
+    c = Controller(tmp_path / "state")
+    output = register(c, tmp_path)
+    original_state = c._admission_state
+
+    def observed(job_id):
+        state = original_state(job_id)
+        if state == "FINISHED":
+            (tmp_path / "release").touch()
+        return state
+
+    monkeypatch.setattr(c, "_admission_state", observed)
+
+    def pause():
+        wait_for(lambda: (tmp_path / "finished").exists())
+        control = Controller(c.root)
+        control.set_mode("PAUSED_BY_USER")
+        control.close()
+
+    thread = threading.Thread(target=pause)
+    thread.start()
+    try:
+        assert c.run_next()["status"] == "SUCCEEDED"
+        assert output.exists() and c.jobs()[0]["attempts"] == 1
+        assert c.mode() == "PAUSED_BY_USER"
+    finally:
+        thread.join(timeout=10)
+        c.close()

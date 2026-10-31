@@ -33,3 +33,19 @@ Synthetic tests exercise repeated deaths before PID registration and before
 token release, stale identity/token, timeout/EOF, failed PID writes, inherited
 stdin, exit/log behavior, and owner death around launch and during a payload
 with a grandchild. No corpus or model execution is required.
+
+Pause is checked again before releasing the gate and within the worker's
+transactional admission and `LAUNCHING` transitions. A pause committed before
+either worker transition prevents payload execution. The worker also monitors
+the current mode while the payload runs, independently of the controller's
+poll interval. A stopped attempt records its mode durably, so an immediate
+explicit resume cannot turn cancellation into a native failure or consume an
+attempt. Such work returns to `QUEUED`; it runs only after mode returns to
+`RUNNING`.
+
+Once the worker has durably recorded `FINISHED`, a later pause preserves that
+completed attempt while the wrapper exits and the controller validates its
+outputs. Barrier-based regressions cover this boundary, both admission checks,
+and cancellation followed by resume while the parent's monitor is delayed.
+The active-pause regression waits for a payload marker instead of inferring
+payload start from the earlier database `RUNNING` state.

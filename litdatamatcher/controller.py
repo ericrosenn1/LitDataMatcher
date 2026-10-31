@@ -230,6 +230,11 @@ class Controller:
     def jobs(self) -> list[dict]:
         return [dict(r) for r in self.db.execute("SELECT * FROM jobs ORDER BY id")]
 
+    def _admission_state(self, job_id):
+        return self.db.execute("SELECT admission_state FROM jobs WHERE id=?", (job_id,)).fetchone()[
+            0
+        ]
+
     def _receipt(self, job_id):
         return self.root / "receipts" / (hashlib.sha256(job_id.encode()).hexdigest() + ".json")
 
@@ -387,8 +392,15 @@ class Controller:
                         "UPDATE jobs SET pid=?,created=? WHERE id=?",
                         (process.pid, created, job["id"]),
                     )
-                # Commit the identity before permitting any payload code to execute.
-                gate.write((admission_token + "\n").encode("ascii"))
+                # A pause can arrive during process startup. Never release the
+                # gate merely because the job was RUNNING before the spawn.
+                admission_mode = self.mode()
+                if admission_mode == "RUNNING":
+                    gate.write((admission_token + "\n").encode("ascii"))
+                else:
+                    failure = admission_mode
+                    gate.close()
+                    gate = None
                 import threading
 
                 drain_errors = []
@@ -407,8 +419,13 @@ class Controller:
                 reader = threading.Thread(target=drain, daemon=True)
                 reader.start()
                 while process.poll() is None:
-                    if time.time() - started > timeout or self.mode() != "RUNNING":
-                        failure = "Timeout" if self.mode() == "RUNNING" else self.mode()
+                    current_mode = self.mode()
+                    if current_mode != "RUNNING" and self._admission_state(job["id"]) == "FINISHED":
+                        # The payload already committed its completion. A later
+                        # pause must not discard it while the wrapper exits.
+                        current_mode = "RUNNING"
+                    if time.time() - started > timeout or current_mode != "RUNNING":
+                        failure = "Timeout" if current_mode == "RUNNING" else current_mode
                         if is_alive(process.pid, created):
                             owned = psutil.Process(process.pid)
                             children = owned.children(recursive=True)
@@ -428,6 +445,9 @@ class Controller:
                     raise RuntimeError("Output drain incomplete")
                 if drain_errors:
                     raise RuntimeError("Output drain failed: " + drain_errors[0])
+                worker_state = self._admission_state(job["id"])
+                if worker_state in {"PAUSED_BY_USER", "WAITING_FOR_CAPACITY", "STOPPED"}:
+                    failure = worker_state
                 if failure or code != 0:
                     raise RuntimeError(failure or f"Native exit {code}")
                 outputs = self._check_outputs(job)

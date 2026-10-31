@@ -16,6 +16,7 @@ from pathlib import Path
 import psutil
 
 ADMISSION_FAILURE = 78
+PAUSE_MODES = {"PAUSED_BY_USER", "WAITING_FOR_CAPACITY", "STOPPED"}
 
 
 def _gate_read(descriptor, limit=129):
@@ -72,7 +73,13 @@ def _database(root):
 
 
 def _phase(args, phase, payload=None, payload_created=None):
+    pause = None
     with _database(args.root) as db:
+        if phase == "LAUNCHING":
+            db.execute("BEGIN IMMEDIATE")
+            mode = db.execute("SELECT value FROM settings WHERE key='mode'").fetchone()[0]
+            if mode != "RUNNING":
+                phase = pause = mode
         changed = db.execute(
             "UPDATE jobs SET admission_state=?,payload_pid=?,payload_created=? "
             "WHERE id=? AND admission_token=? AND pid=? AND status='RUNNING'",
@@ -87,10 +94,14 @@ def _phase(args, phase, payload=None, payload_created=None):
         ).rowcount
         if changed != 1:
             raise ValueError("Stale controller admission state")
+    if pause is not None:
+        raise ValueError("Controller mode prevents payload launch: " + pause)
 
 
 def _admitted_job(args):
+    pause = None
     with _database(args.root) as db:
+        db.execute("BEGIN IMMEDIATE")
         db.row_factory = sqlite3.Row
         row = db.execute("SELECT * FROM jobs WHERE id=?", (args.job_id,)).fetchone()
         identity_matches = (
@@ -108,12 +119,15 @@ def _admitted_job(args):
             raise ValueError("Worker identity was not durably admitted")
         # Windows venv redirectors create a child Python process. Bind that actual
         # wrapper before it can execute payload code, not just its launcher PID.
+        mode = db.execute("SELECT value FROM settings WHERE key='mode'").fetchone()[0]
+        phase = "ADMITTED" if mode == "RUNNING" else mode
         changed = db.execute(
-            "UPDATE jobs SET pid=?,created=?,admission_state='ADMITTED' "
+            "UPDATE jobs SET pid=?,created=?,admission_state=? "
             "WHERE id=? AND admission_token=? AND pid=? AND created=? AND admission_state='WAITING'",
             (
                 os.getpid(),
                 psutil.Process().create_time(),
+                phase,
                 args.job_id,
                 args.token,
                 row["pid"],
@@ -122,10 +136,19 @@ def _admitted_job(args):
         ).rowcount
         if changed != 1:
             raise ValueError("Admission changed during worker registration")
+        if mode != "RUNNING":
+            pause = mode
+    if pause is not None:
+        raise ValueError("Controller mode prevents admission: " + pause)
     command = json.loads(row["command"])
     if not command or any(not isinstance(value, str) or "\x00" in value for value in command):
         raise ValueError("Invalid registered payload command")
     return command, row["cwd"]
+
+
+def _controller_mode(root):
+    with _database(root) as db:
+        return db.execute("SELECT value FROM settings WHERE key='mode'").fetchone()[0]
 
 
 def _terminate_owned(process, known):
@@ -204,7 +227,12 @@ def run(args):
                 _phase(args, "PAYLOAD", process, known[process.pid])
             except psutil.NoSuchProcess:
                 pass  # A short payload may have exited; it is reaped below.
+            pause = None
             while process.poll() is None and not lost_owner.is_set():
+                mode = _controller_mode(args.root)
+                if mode != "RUNNING":
+                    pause = mode
+                    break
                 with contextlib.suppress(psutil.NoSuchProcess):
                     known.update(
                         {
@@ -214,10 +242,14 @@ def run(args):
                     )
                 time.sleep(0.02)
             code = process.poll()
-            if lost_owner.is_set():
+            if lost_owner.is_set() and code is None:
+                mode = _controller_mode(args.root)
+                if mode in PAUSE_MODES:
+                    pause = mode
+            if lost_owner.is_set() or pause is not None:
                 code = ADMISSION_FAILURE
             _terminate_owned(process, known)
-            _phase(args, "FINISHED")
+            _phase(args, pause or "FINISHED")
             return code if code is not None else ADMISSION_FAILURE
         finally:
             if process is not None:

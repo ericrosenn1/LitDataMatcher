@@ -108,19 +108,25 @@ def test_nonzero_native_exit_never_succeeds(tmp_path):
 def test_user_pause_during_active_job_can_resume_after_explicit_resume(tmp_path):
     output = tmp_path / "result.json"
     controller = Controller(tmp_path / "state")
-    code = "import time,pathlib; time.sleep(.7); pathlib.Path('result.json').write_text('{}')"
+    code = (
+        "import time,pathlib\n"
+        "started=pathlib.Path('payload_started')\n"
+        "if not started.exists():\n"
+        " started.touch(); time.sleep(20)\n"
+        "pathlib.Path('result.json').write_text('{}')"
+    )
     controller.register("pausable", [sys.executable, "-c", code], tmp_path, [output])
 
     def pause_after_start():
         control = Controller(tmp_path / "state")
         try:
-            deadline = time.monotonic() + 4
+            deadline = time.monotonic() + 10
             while time.monotonic() < deadline:
-                if control.jobs()[0]["status"] == "RUNNING":
+                if (tmp_path / "payload_started").exists():
                     control.set_mode("PAUSED_BY_USER")
                     return
                 time.sleep(0.01)
-            raise AssertionError("worker never started")
+            raise AssertionError("payload never reached its synchronization marker")
         finally:
             control.close()
 

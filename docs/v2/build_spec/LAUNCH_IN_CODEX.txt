@@ -1,0 +1,46 @@
+Implement and harden LitDataMatcher v2 using the finalized build package
+LitDataMatcher_V2_Codex_Build_20260907.
+
+Locate the extracted package in the current workspace or
+C:\Users\eric\Downloads. If only its ZIP is present, inspect archive paths and
+extract to a new directory without overwriting an existing package or project.
+If there are duplicate downloads, prefer an intact package with the matching
+specification version and hashes; do not choose between divergent source
+repositories by timestamp.
+
+Verify PACKAGE_MANIFEST.json using the included tools/verify_package.py or an
+equivalent SHA-256 check. Read 00_START_HERE.md,
+01_MASTER_CODEX_BUILD_PROMPT.md, and the referenced companion specifications
+in full, in multiple bounded reads if needed. Follow their authority order.
+
+Execute the complete assignment, not merely planning or auditing. Locate the
+actual ericrosenn1/LitDataMatcher project and preserve all newer local work;
+benchmark snapshots are not the active project. Use actual Codex-native
+subagents and isolated writer worktrees. Do not delegate to OpenCode or Muse
+or repeat their qualification experiments.
+
+Use the highest sustainable substantive reasoning effort, starting from the
+selected Astra High configuration. Use Extra High/Max selectively if supported
+and sustainable. Do not use Ultra, pay for Fast speed, buy credits, bypass
+usage limits, or silently switch to paid APIs. Keep independent computation
+and useful development progressing whenever capacity permits.
+
+Automatically checkpoint and push safe project code and compact evidence to
+codex/litdatamatcher-v2-build after verifying the remote and branch. WIP commits
+are allowed and must describe test status honestly. Do not merge into main,
+force-push, publish a release, upload secrets, or commit raw corpora/models.
+
+Build a real end-to-end path early, provide an interim functional alpha, then
+continue worker-level refinement, integrated adversarial evaluation, recovery
+and performance tests, and delivery of the hardened alpha defined in the package.
+Days or weeks are acceptable, but do not create idle loops or busywork.
+
+Prepare and exercise the corrective supervisor described in file 10. Activate
+only a supported, authorized local scheduling path that has passed its repair,
+access, no-duplicate-writer, and pause tests. Otherwise report the exact setup
+step and keep the build moving. Do not claim an uncreated schedule is running.
+
+Preserve durable state and exact continuation instructions at interruptions.
+Continue without routine stage-boundary confirmations. Stop successfully only
+at the machine-validated hardened-alpha and closeout criteria, or pause honestly
+for a genuine runtime/access/user-decision barrier.

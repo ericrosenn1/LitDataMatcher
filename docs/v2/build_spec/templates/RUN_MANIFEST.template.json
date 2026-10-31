@@ -1,0 +1,52 @@
+{
+  "schema_version": "2.0",
+  "run_id": null,
+  "execution_status": "NOT_RUN",
+  "started_at": null,
+  "finished_at": null,
+  "source": {
+    "repository": "ericrosenn1/LitDataMatcher",
+    "commit": null,
+    "working_tree_digest": null,
+    "spec_digest": null,
+    "config_digest": null
+  },
+  "environment": {
+    "python": null,
+    "platform": null,
+    "dependency_lock_digest": null,
+    "hardware_record": null
+  },
+  "models": [],
+  "source_snapshots": [],
+  "commands": [],
+  "evaluation": {
+    "protocol_version": null,
+    "split_id": null,
+    "split_role": "UNASSIGNED",
+    "label_origins": [],
+    "holdout_exposed_to_tuning": false
+  },
+  "coverage": {
+    "unique_literature_records": 0,
+    "parsed_full_texts": 0,
+    "unique_accession_studies": 0,
+    "sample_profiled_studies": 0,
+    "inspected_processed_studies": 0,
+    "external_structured_resources": 0,
+    "distinct_pilot_contexts": 0,
+    "case_dossiers": 0
+  },
+  "artifacts": [],
+  "network": {
+    "mode": "UNSET",
+    "offline_block_test": false,
+    "external_requests_observed": null
+  },
+  "inference": {
+    "fresh_calls": 0,
+    "cache_replays": 0,
+    "backend_qualified": false
+  },
+  "failures": []
+}

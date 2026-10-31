@@ -1,0 +1,19 @@
+{
+  "protocol_id": "EP-20260907-1",
+  "label_origin": "source_determined",
+  "annotator": "Codex independent evaluation worker; no expert validation claimed",
+  "selection_rule": "Stable order in acquired studies.jsonl; retain the first records in each topic whose declared study_lineage has no token overlap with a previously retained record; exclude every reserved family before selection.",
+  "reserved_excluded": ["GSE112372", "GSE214695", "GSE226875"],
+  "holdout_exposure": {
+    "GSE112372": "detailed source metadata was exposed during targeted acquisition before this evaluation; no evaluation prediction or label was generated. It is not claimed untouched."
+  },
+  "primary_ids": ["GSE278521", "GSE275189", "GSE271810", "GSE267066", "GSE263125", "GSE262638", "GSE255144", "GSE248047", "GSE247134", "GSE234612", "GSE232352", "GSE229937", "GSE228684", "GSE212865", "GSE210175", "GSE189320", "GSE254179", "GSE213737", "GSE193185", "GSE285174"],
+  "transfer_ids": ["GSE243444", "GSE276837", "GSE186963", "GSE268929", "GSE245890", "GSE261334", "GSE244981", "GSE248578", "GSE246987", "GSE223481"],
+  "field_labels": {
+    "organism": "observed exact source metadata",
+    "assay": "observed exact source metadata",
+    "study_title": "observed exact source metadata",
+    "reported_sample_count": "observed source-reported count; never an independent-donor count",
+    "comparator": "unknown unless a source field is explicitly assessed; this fixture deliberately makes no comparator inference from title/summary"
+  }
+}

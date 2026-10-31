@@ -1,0 +1,2319 @@
+{
+  "schema_version": "public-retrieval-scale-evidence-1.0",
+  "status": "PASS",
+  "fingerprint": "86f4b58cac5138882dba0089552763564a3ea26c3e7784fddeb34ea6c85a014e",
+  "query_count": 175,
+  "training_queries": 1333,
+  "conditions": {
+    "100000/abstract_only": {
+      "candidate_count": 100000,
+      "candidate_manifest_sha256": "f567e975fe4fbabea4d315f50ea276c4a072aa03eb5cd334f4e81200e6ca1452",
+      "metrics": {
+        "bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.8933333333333333,
+              "known_link_recall_at_k": 0.9733333333333334,
+              "mrr_at_k": 0.9193333333333333,
+              "mrr_query_bootstrap_95_interval": [
+                0.8586555555555556,
+                0.9693333333333334
+              ],
+              "ndcg_at_k": 0.9324746141274515,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.93,
+              "known_link_recall_at_k": 0.98,
+              "mrr_at_k": 0.9475,
+              "mrr_query_bootstrap_95_interval": [
+                0.905,
+                0.9825
+              ],
+              "ndcg_at_k": 0.9554874325232433,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.9142857142857143,
+          "known_link_recall_at_k": 0.9771428571428571,
+          "mrr_at_k": 0.9354285714285714,
+          "mrr_query_bootstrap_95_interval": [
+            0.8994238095238095,
+            0.9657142857142857
+          ],
+          "ndcg_at_k": 0.945624796067904,
+          "queries": 175,
+          "timings": {
+            "index_build_seconds": 10.685410400037654,
+            "mean_query_ranking_seconds": 0.29722337542833493,
+            "query_ranking_seconds": 52.014090699958615
+          }
+        },
+        "bm25_pretrained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.76,
+              "known_link_recall_at_k": 0.9466666666666667,
+              "mrr_at_k": 0.8152751322751323,
+              "mrr_query_bootstrap_95_interval": [
+                0.7362735449735449,
+                0.8930164021164021
+              ],
+              "ndcg_at_k": 0.8464022979952209,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.92,
+              "known_link_recall_at_k": 0.99,
+              "mrr_at_k": 0.9478333333333333,
+              "mrr_query_bootstrap_95_interval": [
+                0.9073166666666667,
+                0.98
+              ],
+              "ndcg_at_k": 0.9584124837959377,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8514285714285714,
+          "known_link_recall_at_k": 0.9714285714285714,
+          "mrr_at_k": 0.8910226757369615,
+          "mrr_query_bootstrap_95_interval": [
+            0.8515667233560091,
+            0.9291578231292517
+          ],
+          "ndcg_at_k": 0.9104081184527734,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.00028157771431974,
+            "query_ranking_seconds": 0.049276100005954504
+          }
+        },
+        "bm25_trained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.7866666666666666,
+              "known_link_recall_at_k": 0.9466666666666667,
+              "mrr_at_k": 0.8368888888888889,
+              "mrr_query_bootstrap_95_interval": [
+                0.7628888888888891,
+                0.9073444444444444
+              ],
+              "ndcg_at_k": 0.8634769000857848,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.93,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.9539285714285713,
+              "mrr_query_bootstrap_95_interval": [
+                0.9167708333333333,
+                0.9847678571428572
+              ],
+              "ndcg_at_k": 0.9651300633922912,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8685714285714285,
+          "known_link_recall_at_k": 0.9771428571428571,
+          "mrr_at_k": 0.9037687074829932,
+          "mrr_query_bootstrap_95_interval": [
+            0.8655710884353741,
+            0.9423520408163265
+          ],
+          "ndcg_at_k": 0.9215644219752169,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0002531599998474121,
+            "query_ranking_seconds": 0.04430299997329712
+          }
+        },
+        "pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.6133333333333333,
+              "known_link_recall_at_k": 0.7866666666666666,
+              "mrr_at_k": 0.6620370370370371,
+              "mrr_query_bootstrap_95_interval": [
+                0.5626268518518518,
+                0.7660101851851852
+              ],
+              "ndcg_at_k": 0.6911188544145863,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.84,
+              "known_link_recall_at_k": 0.96,
+              "mrr_at_k": 0.8865277777777777,
+              "mrr_query_bootstrap_95_interval": [
+                0.8297152777777778,
+                0.9361319444444445
+              ],
+              "ndcg_at_k": 0.904636797055233,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.7428571428571429,
+          "known_link_recall_at_k": 0.8857142857142857,
+          "mrr_at_k": 0.7903174603174602,
+          "mrr_query_bootstrap_95_interval": [
+            0.7300623015873016,
+            0.8440337301587301
+          ],
+          "ndcg_at_k": 0.8131291073520986,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0043210365709715655,
+            "query_ranking_seconds": 0.756181399920024
+          }
+        },
+        "trained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.7333333333333333,
+              "known_link_recall_at_k": 0.8666666666666667,
+              "mrr_at_k": 0.7734074074074074,
+              "mrr_query_bootstrap_95_interval": [
+                0.6837092592592593,
+                0.8565092592592592
+              ],
+              "ndcg_at_k": 0.7952474875522639,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.83,
+              "known_link_recall_at_k": 0.97,
+              "mrr_at_k": 0.877063492063492,
+              "mrr_query_bootstrap_95_interval": [
+                0.8230843253968254,
+                0.9315505952380951
+              ],
+              "ndcg_at_k": 0.8994796163323951,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.7885714285714286,
+          "known_link_recall_at_k": 0.9257142857142857,
+          "mrr_at_k": 0.8326394557823128,
+          "mrr_query_bootstrap_95_interval": [
+            0.7810664399092969,
+            0.880071768707483
+          ],
+          "ndcg_at_k": 0.8548087039980533,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.004438142285549215,
+            "query_ranking_seconds": 0.7766748999711126
+          }
+        }
+      },
+      "ordered_candidate_ids_sha256": "1266feaa5e04c272bd5d5b3ebb28363fd6184bc8e24e7b49a00d7c750667a7fc",
+      "paired": {
+        "bm25_pretrained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 4,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.10405820105820106,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.18590066137566136,
+                -0.03465833333333334
+              ],
+              "unchanged_queries": 56,
+              "worsened_queries": 15
+            },
+            "PubMedQA": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.00033333333333333213,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.035,
+                0.033666666666666664
+              ],
+              "unchanged_queries": 92,
+              "worsened_queries": 3
+            }
+          },
+          "improved_queries": 9,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.04440589569160998,
+          "ndcg_at_10_delta": -0.03521667761513059,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.0852409297052154,
+            -0.005975510204081631
+          ],
+          "recall_at_10_delta": -0.005714285714285672,
+          "recall_at_1_delta": -0.06285714285714283,
+          "unchanged_queries": 148,
+          "worsened_queries": 18
+        },
+        "bm25_pretrained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 25,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.15323809523809526,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.08564126984126985,
+                0.22137169312169314
+              ],
+              "unchanged_queries": 49,
+              "worsened_queries": 1
+            },
+            "PubMedQA": {
+              "improved_queries": 15,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.06130555555555556,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.01230625,
+                0.11140972222222222
+              ],
+              "unchanged_queries": 81,
+              "worsened_queries": 4
+            }
+          },
+          "improved_queries": 40,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.10070521541950114,
+          "ndcg_at_10_delta": 0.09727901110067472,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.06110958049886622,
+            0.14273837868480727
+          ],
+          "recall_at_10_delta": 0.08571428571428574,
+          "recall_at_1_delta": 0.10857142857142854,
+          "unchanged_queries": 130,
+          "worsened_queries": 5
+        },
+        "bm25_trained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.08244444444444445,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.158,
+                -0.013088888888888907
+              ],
+              "unchanged_queries": 57,
+              "worsened_queries": 13
+            },
+            "PubMedQA": {
+              "improved_queries": 6,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.006428571428571426,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.030729166666666665,
+                0.04166666666666667
+              ],
+              "unchanged_queries": 91,
+              "worsened_queries": 3
+            }
+          },
+          "improved_queries": 11,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.03165986394557824,
+          "ndcg_at_10_delta": -0.02406037409268702,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.06957414965986396,
+            0.006153401360544215
+          ],
+          "recall_at_10_delta": 0.0,
+          "recall_at_1_delta": -0.04571428571428571,
+          "unchanged_queries": 148,
+          "worsened_queries": 16
+        },
+        "bm25_trained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 25,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.17485185185185184,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.10500000000000001,
+                0.2502259259259259
+              ],
+              "unchanged_queries": 49,
+              "worsened_queries": 1
+            },
+            "PubMedQA": {
+              "improved_queries": 16,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.06740079365079364,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.017910714285714283,
+                0.11958730158730159
+              ],
+              "unchanged_queries": 80,
+              "worsened_queries": 4
+            }
+          },
+          "improved_queries": 41,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.11345124716553288,
+          "ndcg_at_10_delta": 0.10843531462311828,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.07158492063492064,
+            0.1567599206349206
+          ],
+          "recall_at_10_delta": 0.09142857142857141,
+          "recall_at_1_delta": 0.12571428571428567,
+          "unchanged_queries": 129,
+          "worsened_queries": 5
+        },
+        "bm25_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 28,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.2572962962962963,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.15766481481481479,
+                0.3651111111111111
+              ],
+              "unchanged_queries": 44,
+              "worsened_queries": 3
+            },
+            "PubMedQA": {
+              "improved_queries": 16,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.060972222222222226,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.006531249999999999,
+                0.1258472222222222
+              ],
+              "unchanged_queries": 78,
+              "worsened_queries": 6
+            }
+          },
+          "improved_queries": 44,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.1451111111111111,
+          "ndcg_at_10_delta": 0.1324956887158053,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.08742301587301589,
+            0.20265079365079364
+          ],
+          "recall_at_10_delta": 0.09142857142857141,
+          "recall_at_1_delta": 0.17142857142857137,
+          "unchanged_queries": 122,
+          "worsened_queries": 9
+        },
+        "pretrained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.2572962962962963,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.3651111111111111,
+                -0.15766481481481479
+              ],
+              "unchanged_queries": 44,
+              "worsened_queries": 28
+            },
+            "PubMedQA": {
+              "improved_queries": 6,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.060972222222222226,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.12584722222222222,
+                0.006531249999999995
+              ],
+              "unchanged_queries": 78,
+              "worsened_queries": 16
+            }
+          },
+          "improved_queries": 9,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.1451111111111111,
+          "ndcg_at_10_delta": -0.1324956887158053,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.20265079365079364,
+            -0.08742301587301589
+          ],
+          "recall_at_10_delta": -0.09142857142857141,
+          "recall_at_1_delta": -0.17142857142857137,
+          "unchanged_queries": 122,
+          "worsened_queries": 44
+        },
+        "trained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.14592592592592593,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.2394675925925926,
+                -0.05897037037037038
+              ],
+              "unchanged_queries": 53,
+              "worsened_queries": 17
+            },
+            "PubMedQA": {
+              "improved_queries": 6,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.07043650793650794,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.138421626984127,
+                -0.003278769841269852
+              ],
+              "unchanged_queries": 77,
+              "worsened_queries": 17
+            }
+          },
+          "improved_queries": 11,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.10278911564625852,
+          "ndcg_at_10_delta": -0.09081609206985064,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.15738384353741497,
+            -0.04930249433106576
+          ],
+          "recall_at_10_delta": -0.05142857142857138,
+          "recall_at_1_delta": -0.12571428571428567,
+          "unchanged_queries": 130,
+          "worsened_queries": 34
+        },
+        "trained_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 17,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.11137037037037037,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.04680185185185185,
+                0.18593333333333334
+              ],
+              "unchanged_queries": 55,
+              "worsened_queries": 3
+            },
+            "PubMedQA": {
+              "improved_queries": 6,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.009464285714285717,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.041886904761904764,
+                0.022145833333333313
+              ],
+              "unchanged_queries": 85,
+              "worsened_queries": 9
+            }
+          },
+          "improved_queries": 23,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.04232199546485261,
+          "ndcg_at_10_delta": 0.041679596645954664,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.007725850340136055,
+            0.0780158163265306
+          ],
+          "recall_at_10_delta": 0.040000000000000036,
+          "recall_at_1_delta": 0.04571428571428571,
+          "unchanged_queries": 140,
+          "worsened_queries": 12
+        }
+      },
+      "query_sha256": "27990a9e59a16b5f829f48fd65f6dfa177c5bded215d59a64465ff36aa9a7f1d",
+      "view": "abstract_only"
+    },
+    "100000/full": {
+      "candidate_count": 100000,
+      "candidate_manifest_sha256": "7c9a1d96ef072114abc037ede6e7883c3c11529129858f071e2a84efa069da16",
+      "metrics": {
+        "bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.9066666666666666,
+              "known_link_recall_at_k": 0.9733333333333334,
+              "mrr_at_k": 0.9352380952380952,
+              "mrr_query_bootstrap_95_interval": [
+                0.8818809523809523,
+                0.98
+              ],
+              "ndcg_at_k": 0.9447606979682555,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 1.0,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 1.0,
+              "mrr_query_bootstrap_95_interval": [
+                1.0,
+                1.0
+              ],
+              "ndcg_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.96,
+          "known_link_recall_at_k": 0.9885714285714285,
+          "mrr_at_k": 0.9722448979591837,
+          "mrr_query_bootstrap_95_interval": [
+            0.9481428571428571,
+            0.9914285714285714
+          ],
+          "ndcg_at_k": 0.9763260134149667,
+          "queries": 175,
+          "timings": {
+            "index_build_seconds": 10.014614499988966,
+            "mean_query_ranking_seconds": 0.2824614634285016,
+            "query_ranking_seconds": 49.430756099987775
+          }
+        },
+        "bm25_pretrained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.7866666666666666,
+              "known_link_recall_at_k": 0.96,
+              "mrr_at_k": 0.8318306878306878,
+              "mrr_query_bootstrap_95_interval": [
+                0.7527925925925926,
+                0.9040499999999999
+              ],
+              "ndcg_at_k": 0.8619454394674066,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 1.0,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 1.0,
+              "mrr_query_bootstrap_95_interval": [
+                1.0,
+                1.0
+              ],
+              "ndcg_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.9085714285714286,
+          "known_link_recall_at_k": 0.9828571428571429,
+          "mrr_at_k": 0.9279274376417234,
+          "mrr_query_bootstrap_95_interval": [
+            0.8941776643990929,
+            0.9615530612244898
+          ],
+          "ndcg_at_k": 0.9408337597717457,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.00026274914321090494,
+            "query_ranking_seconds": 0.045981100061908364
+          }
+        },
+        "bm25_trained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.8133333333333334,
+              "known_link_recall_at_k": 0.9466666666666667,
+              "mrr_at_k": 0.857111111111111,
+              "mrr_query_bootstrap_95_interval": [
+                0.7808611111111112,
+                0.924888888888889
+              ],
+              "ndcg_at_k": 0.8789697733365114,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.99,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.995,
+              "mrr_query_bootstrap_95_interval": [
+                0.985,
+                1.0
+              ],
+              "ndcg_at_k": 0.9963092975357145,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.9142857142857143,
+          "known_link_recall_at_k": 0.9771428571428571,
+          "mrr_at_k": 0.9359047619047619,
+          "mrr_query_bootstrap_95_interval": [
+            0.9041857142857144,
+            0.9657190476190477
+          ],
+          "ndcg_at_k": 0.9460209300217703,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0002463685714506677,
+            "query_ranking_seconds": 0.04311450000386685
+          }
+        },
+        "pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.64,
+              "known_link_recall_at_k": 0.7866666666666666,
+              "mrr_at_k": 0.6862751322751323,
+              "mrr_query_bootstrap_95_interval": [
+                0.5882439153439153,
+                0.7842883597883598
+              ],
+              "ndcg_at_k": 0.7101956871321197,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.97,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.9816666666666666,
+              "mrr_query_bootstrap_95_interval": [
+                0.9583333333333335,
+                1.0
+              ],
+              "ndcg_at_k": 0.9863092975357145,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8285714285714286,
+          "known_link_recall_at_k": 0.9085714285714286,
+          "mrr_at_k": 0.8550702947845804,
+          "mrr_query_bootstrap_95_interval": [
+            0.8073281179138321,
+            0.904164739229025
+          ],
+          "ndcg_at_k": 0.867974893077031,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.004338712571854038,
+            "query_ranking_seconds": 0.7592747000744566
+          }
+        },
+        "trained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.76,
+              "known_link_recall_at_k": 0.8933333333333333,
+              "mrr_at_k": 0.79505291005291,
+              "mrr_query_bootstrap_95_interval": [
+                0.7068895502645501,
+                0.878603835978836
+              ],
+              "ndcg_at_k": 0.8177986711495422,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.99,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.9925,
+              "mrr_query_bootstrap_95_interval": [
+                0.9775,
+                1.0
+              ],
+              "ndcg_at_k": 0.994306765580734,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8914285714285715,
+          "known_link_recall_at_k": 0.9542857142857143,
+          "mrr_at_k": 0.9078798185941043,
+          "mrr_query_bootstrap_95_interval": [
+            0.8651215986394557,
+            0.9458316326530611
+          ],
+          "ndcg_at_k": 0.9186604393959373,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.004157605142598705,
+            "query_ranking_seconds": 0.7275808999547735
+          }
+        }
+      },
+      "ordered_candidate_ids_sha256": "1266feaa5e04c272bd5d5b3ebb28363fd6184bc8e24e7b49a00d7c750667a7fc",
+      "paired": {
+        "bm25_pretrained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.10340740740740739,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.18218518518518517,
+                -0.033584391534391536
+              ],
+              "unchanged_queries": 58,
+              "worsened_queries": 14
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.0,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.0
+              ],
+              "unchanged_queries": 100,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 3,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.04431746031746031,
+          "ndcg_at_10_delta": -0.03549225364322106,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.08401428571428571,
+            -0.01174183673469388
+          ],
+          "recall_at_10_delta": -0.005714285714285672,
+          "recall_at_1_delta": -0.05142857142857138,
+          "unchanged_queries": 158,
+          "worsened_queries": 14
+        },
+        "bm25_pretrained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 24,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.14555555555555555,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.0884425925925926,
+                0.20630740740740738
+              ],
+              "unchanged_queries": 51,
+              "worsened_queries": 0
+            },
+            "PubMedQA": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.018333333333333333,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.04333333333333334
+              ],
+              "unchanged_queries": 97,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 27,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.07285714285714286,
+          "ndcg_at_10_delta": 0.07285886669471464,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.04645011337868481,
+            0.10428004535147394
+          ],
+          "recall_at_10_delta": 0.07428571428571429,
+          "recall_at_1_delta": 0.07999999999999996,
+          "unchanged_queries": 148,
+          "worsened_queries": 0
+        },
+        "bm25_trained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 4,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.07812698412698413,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.1521547619047619,
+                -0.00525000000000002
+              ],
+              "unchanged_queries": 58,
+              "worsened_queries": 13
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.005,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.015,
+                0.0
+              ],
+              "unchanged_queries": 99,
+              "worsened_queries": 1
+            }
+          },
+          "improved_queries": 4,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.03634013605442177,
+          "ndcg_at_10_delta": -0.030305083393196375,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.06982040816326532,
+            -0.004380272108843539
+          ],
+          "recall_at_10_delta": -0.011428571428571455,
+          "recall_at_1_delta": -0.04571428571428571,
+          "unchanged_queries": 157,
+          "worsened_queries": 14
+        },
+        "bm25_trained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 22,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.17083597883597884,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.10231058201058202,
+                0.25191296296296295
+              ],
+              "unchanged_queries": 52,
+              "worsened_queries": 1
+            },
+            "PubMedQA": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.013333333333333334,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.03333333333333333
+              ],
+              "unchanged_queries": 97,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 25,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.0808344671201814,
+          "ndcg_at_10_delta": 0.07804603694473933,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.047141269841269845,
+            0.11545634920634919
+          ],
+          "recall_at_10_delta": 0.0685714285714285,
+          "recall_at_1_delta": 0.08571428571428563,
+          "unchanged_queries": 149,
+          "worsened_queries": 1
+        },
+        "bm25_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 26,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.24896296296296294,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.15777328042328045,
+                0.35499708994708995
+              ],
+              "unchanged_queries": 47,
+              "worsened_queries": 2
+            },
+            "PubMedQA": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.018333333333333333,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.04333333333333334
+              ],
+              "unchanged_queries": 97,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 29,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.11717460317460318,
+          "ndcg_at_10_delta": 0.1083511203379357,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.0730374149659864,
+            0.16356938775510205
+          ],
+          "recall_at_10_delta": 0.07999999999999996,
+          "recall_at_1_delta": 0.13142857142857134,
+          "unchanged_queries": 144,
+          "worsened_queries": 2
+        },
+        "pretrained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 2,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.24896296296296294,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.35499708994708995,
+                -0.15777328042328048
+              ],
+              "unchanged_queries": 47,
+              "worsened_queries": 26
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.018333333333333333,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.04333333333333334,
+                0.0
+              ],
+              "unchanged_queries": 97,
+              "worsened_queries": 3
+            }
+          },
+          "improved_queries": 2,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.11717460317460318,
+          "ndcg_at_10_delta": -0.1083511203379357,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.16356938775510205,
+            -0.0730374149659864
+          ],
+          "recall_at_10_delta": -0.07999999999999996,
+          "recall_at_1_delta": -0.13142857142857134,
+          "unchanged_queries": 144,
+          "worsened_queries": 29
+        },
+        "trained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 4,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.1401851851851852,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.23476785714285714,
+                -0.057073412698412714
+              ],
+              "unchanged_queries": 54,
+              "worsened_queries": 17
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.0075,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.0225,
+                0.0
+              ],
+              "unchanged_queries": 99,
+              "worsened_queries": 1
+            }
+          },
+          "improved_queries": 4,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.06436507936507936,
+          "ndcg_at_10_delta": -0.057665574019029386,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.10590617913832201,
+            -0.025968537414965995
+          ],
+          "recall_at_10_delta": -0.03428571428571425,
+          "recall_at_1_delta": -0.0685714285714285,
+          "unchanged_queries": 153,
+          "worsened_queries": 18
+        },
+        "trained_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 17,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.10877777777777778,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.04102632275132275,
+                0.18403267195767192
+              ],
+              "unchanged_queries": 55,
+              "worsened_queries": 3
+            },
+            "PubMedQA": {
+              "improved_queries": 2,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.010833333333333335,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.0016666666666666663,
+                0.030833333333333338
+              ],
+              "unchanged_queries": 97,
+              "worsened_queries": 1
+            }
+          },
+          "improved_queries": 19,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.05280952380952381,
+          "ndcg_at_10_delta": 0.050685546318906316,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.0216765873015873,
+            0.08413713151927438
+          ],
+          "recall_at_10_delta": 0.04571428571428571,
+          "recall_at_1_delta": 0.06285714285714283,
+          "unchanged_queries": 152,
+          "worsened_queries": 4
+        }
+      },
+      "query_sha256": "27990a9e59a16b5f829f48fd65f6dfa177c5bded215d59a64465ff36aa9a7f1d",
+      "view": "full"
+    },
+    "50000/abstract_only": {
+      "candidate_count": 50000,
+      "candidate_manifest_sha256": "475d0decd18e6753d1e4307437f452331e3c44bb7f98854110a9aaf1e11cc0fd",
+      "metrics": {
+        "bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.8933333333333333,
+              "known_link_recall_at_k": 0.9733333333333334,
+              "mrr_at_k": 0.9226666666666667,
+              "mrr_query_bootstrap_95_interval": [
+                0.8648555555555557,
+                0.9711111111111113
+              ],
+              "ndcg_at_k": 0.9353161641916995,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.94,
+              "known_link_recall_at_k": 0.99,
+              "mrr_at_k": 0.9579166666666665,
+              "mrr_query_bootstrap_95_interval": [
+                0.92,
+                0.9883333333333333
+              ],
+              "ndcg_at_k": 0.9657732438392864,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.92,
+          "known_link_recall_at_k": 0.9828571428571429,
+          "mrr_at_k": 0.9428095238095239,
+          "mrr_query_bootstrap_95_interval": [
+            0.910897619047619,
+            0.9704761904761904
+          ],
+          "ndcg_at_k": 0.9527202097046064,
+          "queries": 175,
+          "timings": {
+            "index_build_seconds": 5.442587699973956,
+            "mean_query_ranking_seconds": 0.1522517022856378,
+            "query_ranking_seconds": 26.644047899986617
+          }
+        },
+        "bm25_pretrained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.7866666666666666,
+              "known_link_recall_at_k": 0.9466666666666667,
+              "mrr_at_k": 0.8398888888888888,
+              "mrr_query_bootstrap_95_interval": [
+                0.7631027777777778,
+                0.9117083333333332
+              ],
+              "ndcg_at_k": 0.8657431192298719,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.93,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.9578333333333333,
+              "mrr_query_bootstrap_95_interval": [
+                0.9236666666666666,
+                0.985
+              ],
+              "ndcg_at_k": 0.9684124837959377,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8685714285714285,
+          "known_link_recall_at_k": 0.9771428571428571,
+          "mrr_at_k": 0.9072857142857144,
+          "mrr_query_bootstrap_95_interval": [
+            0.870329761904762,
+            0.9424797619047619
+          ],
+          "ndcg_at_k": 0.924411327553338,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0002895834283637149,
+            "query_ranking_seconds": 0.05067709996365011
+          }
+        },
+        "bm25_trained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.8133333333333334,
+              "known_link_recall_at_k": 0.96,
+              "mrr_at_k": 0.8681481481481482,
+              "mrr_query_bootstrap_95_interval": [
+                0.8007222222222222,
+                0.931111111111111
+              ],
+              "ndcg_at_k": 0.8908251460083906,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.94,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.9616666666666666,
+              "mrr_query_bootstrap_95_interval": [
+                0.9291666666666667,
+                0.9883333333333333
+              ],
+              "ndcg_at_k": 0.971232126232897,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8857142857142857,
+          "known_link_recall_at_k": 0.9828571428571429,
+          "mrr_at_k": 0.9215873015873015,
+          "mrr_query_bootstrap_95_interval": [
+            0.8888849206349206,
+            0.9539722222222222
+          ],
+          "ndcg_at_k": 0.9367719918509657,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0002500091433258993,
+            "query_ranking_seconds": 0.04375160008203238
+          }
+        },
+        "pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.6266666666666667,
+              "known_link_recall_at_k": 0.8133333333333334,
+              "mrr_at_k": 0.6854603174603174,
+              "mrr_query_bootstrap_95_interval": [
+                0.5896007936507938,
+                0.7834793650793651
+              ],
+              "ndcg_at_k": 0.7166404550919748,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.89,
+              "known_link_recall_at_k": 0.98,
+              "mrr_at_k": 0.9191785714285714,
+              "mrr_query_bootstrap_95_interval": [
+                0.8671026785714285,
+                0.96125
+              ],
+              "ndcg_at_k": 0.9337689939694737,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.7771428571428571,
+          "known_link_recall_at_k": 0.9085714285714286,
+          "mrr_at_k": 0.8190136054421767,
+          "mrr_query_bootstrap_95_interval": [
+            0.7643445578231292,
+            0.8680459183673469
+          ],
+          "ndcg_at_k": 0.840713905879117,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.002028706285969487,
+            "query_ranking_seconds": 0.35502360004466027
+          }
+        },
+        "trained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.7466666666666667,
+              "known_link_recall_at_k": 0.88,
+              "mrr_at_k": 0.7907936507936508,
+              "mrr_query_bootstrap_95_interval": [
+                0.7015793650793651,
+                0.8719126984126984
+              ],
+              "ndcg_at_k": 0.8124109311730934,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.89,
+              "known_link_recall_at_k": 0.97,
+              "mrr_at_k": 0.915,
+              "mrr_query_bootstrap_95_interval": [
+                0.8633333333333334,
+                0.96
+              ],
+              "ndcg_at_k": 0.9281761800914645,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8285714285714286,
+          "known_link_recall_at_k": 0.9314285714285714,
+          "mrr_at_k": 0.8617687074829932,
+          "mrr_query_bootstrap_95_interval": [
+            0.81578231292517,
+            0.9064098639455782
+          ],
+          "ndcg_at_k": 0.8785625019835912,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0019070137139143687,
+            "query_ranking_seconds": 0.33372739993501455
+          }
+        }
+      },
+      "ordered_candidate_ids_sha256": "83e480176e3015384c149de7c55c0e0dd1ae3f3bbcc078e1b53bcae33c656320",
+      "paired": {
+        "bm25_pretrained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.08277777777777778,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.15745555555555557,
+                -0.013105555555555558
+              ],
+              "unchanged_queries": 56,
+              "worsened_queries": 14
+            },
+            "PubMedQA": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -8.333333333333303e-05,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.033418750000000004,
+                0.03209166666666666
+              ],
+              "unchanged_queries": 90,
+              "worsened_queries": 5
+            }
+          },
+          "improved_queries": 10,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.03552380952380953,
+          "ndcg_at_10_delta": -0.028308882151268366,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.07486071428571427,
+            0.002913095238095228
+          ],
+          "recall_at_10_delta": -0.005714285714285783,
+          "recall_at_1_delta": -0.05142857142857149,
+          "unchanged_queries": 146,
+          "worsened_queries": 19
+        },
+        "bm25_pretrained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 24,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.15442857142857144,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.0883936507936508,
+                0.22143214285714286
+              ],
+              "unchanged_queries": 50,
+              "worsened_queries": 1
+            },
+            "PubMedQA": {
+              "improved_queries": 10,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.03865476190476191,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.002997916666666667,
+                0.07616279761904761
+              ],
+              "unchanged_queries": 88,
+              "worsened_queries": 2
+            }
+          },
+          "improved_queries": 34,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.08827210884353742,
+          "ndcg_at_10_delta": 0.083697421674221,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.05403622448979592,
+            0.12704608843537415
+          ],
+          "recall_at_10_delta": 0.0685714285714285,
+          "recall_at_1_delta": 0.09142857142857141,
+          "unchanged_queries": 138,
+          "worsened_queries": 3
+        },
+        "bm25_trained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.054518518518518515,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.12504074074074073,
+                0.014388888888888873
+              ],
+              "unchanged_queries": 58,
+              "worsened_queries": 12
+            },
+            "PubMedQA": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.00375,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.027510416666666666,
+                0.03334374999999999
+              ],
+              "unchanged_queries": 92,
+              "worsened_queries": 3
+            }
+          },
+          "improved_queries": 10,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.02122222222222222,
+          "ndcg_at_10_delta": -0.015948217853640645,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.0554047619047619,
+            0.01362619047619047
+          ],
+          "recall_at_10_delta": 0.0,
+          "recall_at_1_delta": -0.034285714285714364,
+          "unchanged_queries": 150,
+          "worsened_queries": 15
+        },
+        "bm25_trained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 25,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.18268783068783068,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.11718148148148147,
+                0.2560227513227514
+              ],
+              "unchanged_queries": 50,
+              "worsened_queries": 0
+            },
+            "PubMedQA": {
+              "improved_queries": 11,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.04248809523809524,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0013101190476190487,
+                0.08574226190476189
+              ],
+              "unchanged_queries": 86,
+              "worsened_queries": 3
+            }
+          },
+          "improved_queries": 36,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.10257369614512472,
+          "ndcg_at_10_delta": 0.09605808597184873,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.0635312925170068,
+            0.14201632653061225
+          ],
+          "recall_at_10_delta": 0.07428571428571429,
+          "recall_at_1_delta": 0.10857142857142854,
+          "unchanged_queries": 136,
+          "worsened_queries": 3
+        },
+        "bm25_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 26,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.23720634920634923,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.143065873015873,
+                0.33844920634920633
+              ],
+              "unchanged_queries": 46,
+              "worsened_queries": 3
+            },
+            "PubMedQA": {
+              "improved_queries": 11,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.03873809523809523,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.019175,
+                0.09438333333333333
+              ],
+              "unchanged_queries": 84,
+              "worsened_queries": 5
+            }
+          },
+          "improved_queries": 37,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.12379591836734694,
+          "ndcg_at_10_delta": 0.11200630382548937,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.07102465986394559,
+            0.1766207482993197
+          ],
+          "recall_at_10_delta": 0.07428571428571429,
+          "recall_at_1_delta": 0.1428571428571429,
+          "unchanged_queries": 130,
+          "worsened_queries": 8
+        },
+        "pretrained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.23720634920634923,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.33844920634920633,
+                -0.14306587301587306
+              ],
+              "unchanged_queries": 46,
+              "worsened_queries": 26
+            },
+            "PubMedQA": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.03873809523809523,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.09438333333333333,
+                0.019174999999999994
+              ],
+              "unchanged_queries": 84,
+              "worsened_queries": 11
+            }
+          },
+          "improved_queries": 8,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.12379591836734694,
+          "ndcg_at_10_delta": -0.11200630382548937,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.17662074829931973,
+            -0.0710246598639456
+          ],
+          "recall_at_10_delta": -0.07428571428571429,
+          "recall_at_1_delta": -0.1428571428571429,
+          "unchanged_queries": 130,
+          "worsened_queries": 37
+        },
+        "trained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.1318730158730159,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.22299206349206352,
+                -0.04977460317460318
+              ],
+              "unchanged_queries": 54,
+              "worsened_queries": 16
+            },
+            "PubMedQA": {
+              "improved_queries": 5,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.04291666666666668,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.10004166666666668,
+                0.015427083333333322
+              ],
+              "unchanged_queries": 84,
+              "worsened_queries": 11
+            }
+          },
+          "improved_queries": 10,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.08104081632653061,
+          "ndcg_at_10_delta": -0.07415770772101515,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.13011003401360546,
+            -0.03279370748299321
+          ],
+          "recall_at_10_delta": -0.05142857142857149,
+          "recall_at_1_delta": -0.09142857142857141,
+          "unchanged_queries": 138,
+          "worsened_queries": 27
+        },
+        "trained_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 16,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.10533333333333333,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.050204761904761905,
+                0.17122301587301586
+              ],
+              "unchanged_queries": 57,
+              "worsened_queries": 2
+            },
+            "PubMedQA": {
+              "improved_queries": 3,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.004178571428571431,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.02475029761904762,
+                0.014493749999999994
+              ],
+              "unchanged_queries": 92,
+              "worsened_queries": 5
+            }
+          },
+          "improved_queries": 19,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.04275510204081633,
+          "ndcg_at_10_delta": 0.03784859610447422,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.012079761904761902,
+            0.07190697278911565
+          ],
+          "recall_at_10_delta": 0.022857142857142798,
+          "recall_at_1_delta": 0.05142857142857149,
+          "unchanged_queries": 149,
+          "worsened_queries": 7
+        }
+      },
+      "query_sha256": "27990a9e59a16b5f829f48fd65f6dfa177c5bded215d59a64465ff36aa9a7f1d",
+      "view": "abstract_only"
+    },
+    "50000/full": {
+      "candidate_count": 50000,
+      "candidate_manifest_sha256": "5e9c8bc0b75662c93aa2fa398dfac06a26571aa84be9d405bebac82c401fb263",
+      "metrics": {
+        "bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.92,
+              "known_link_recall_at_k": 0.9866666666666667,
+              "mrr_at_k": 0.9421111111111111,
+              "mrr_query_bootstrap_95_interval": [
+                0.8891027777777778,
+                0.9844444444444443
+              ],
+              "ndcg_at_k": 0.9528556958821759,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 1.0,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 1.0,
+              "mrr_query_bootstrap_95_interval": [
+                1.0,
+                1.0
+              ],
+              "ndcg_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.9657142857142857,
+          "known_link_recall_at_k": 0.9942857142857143,
+          "mrr_at_k": 0.9751904761904764,
+          "mrr_query_bootstrap_95_interval": [
+            0.952277380952381,
+            0.9925714285714285
+          ],
+          "ndcg_at_k": 0.9797952982352182,
+          "queries": 175,
+          "timings": {
+            "index_build_seconds": 5.311540199909359,
+            "mean_query_ranking_seconds": 0.1414390902859824,
+            "query_ranking_seconds": 24.75184080004692
+          }
+        },
+        "bm25_pretrained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.8133333333333334,
+              "known_link_recall_at_k": 0.96,
+              "mrr_at_k": 0.8531640211640211,
+              "mrr_query_bootstrap_95_interval": [
+                0.7787597883597884,
+                0.9235703703703704
+              ],
+              "ndcg_at_k": 0.8786713575091286,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 1.0,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 1.0,
+              "mrr_query_bootstrap_95_interval": [
+                1.0,
+                1.0
+              ],
+              "ndcg_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.92,
+          "known_link_recall_at_k": 0.9828571428571429,
+          "mrr_at_k": 0.9370702947845806,
+          "mrr_query_bootstrap_95_interval": [
+            0.9040132653061224,
+            0.9680257369614512
+          ],
+          "ndcg_at_k": 0.9480020103610549,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0002589394285210541,
+            "query_ranking_seconds": 0.04531439999118447
+          }
+        },
+        "bm25_trained_rrf": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.84,
+              "known_link_recall_at_k": 0.96,
+              "mrr_at_k": 0.8842222222222221,
+              "mrr_query_bootstrap_95_interval": [
+                0.8173333333333334,
+                0.9404999999999999
+              ],
+              "ndcg_at_k": 0.9030413491577106,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 1.0,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 1.0,
+              "mrr_query_bootstrap_95_interval": [
+                1.0,
+                1.0
+              ],
+              "ndcg_at_k": 1.0,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.9314285714285714,
+          "known_link_recall_at_k": 0.9828571428571429,
+          "mrr_at_k": 0.9503809523809523,
+          "mrr_query_bootstrap_95_interval": [
+            0.9230380952380952,
+            0.9766714285714286
+          ],
+          "ndcg_at_k": 0.9584462924961616,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0002669634284185512,
+            "query_ranking_seconds": 0.046718599973246455
+          }
+        },
+        "pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.6666666666666666,
+              "known_link_recall_at_k": 0.8133333333333334,
+              "mrr_at_k": 0.7188148148148148,
+              "mrr_query_bootstrap_95_interval": [
+                0.6256259259259259,
+                0.8134814814814815
+              ],
+              "ndcg_at_k": 0.7417869299470786,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.98,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.99,
+              "mrr_query_bootstrap_95_interval": [
+                0.975,
+                1.0
+              ],
+              "ndcg_at_k": 0.9926185950714291,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8457142857142858,
+          "known_link_recall_at_k": 0.92,
+          "mrr_at_k": 0.8737777777777779,
+          "mrr_query_bootstrap_95_interval": [
+            0.8291920634920633,
+            0.9178539682539683
+          ],
+          "ndcg_at_k": 0.885119310018136,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.0022828142857179044,
+            "query_ranking_seconds": 0.3994925000006333
+          }
+        },
+        "trained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.76,
+              "known_link_recall_at_k": 0.8933333333333333,
+              "mrr_at_k": 0.8052380952380952,
+              "mrr_query_bootstrap_95_interval": [
+                0.7193571428571428,
+                0.8844722222222221
+              ],
+              "ndcg_at_k": 0.8266685770654479,
+              "queries": 75
+            },
+            "PubMedQA": {
+              "cutoff": 10,
+              "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+              "known_link_recall_at_1": 0.99,
+              "known_link_recall_at_k": 1.0,
+              "mrr_at_k": 0.9933333333333333,
+              "mrr_query_bootstrap_95_interval": [
+                0.98,
+                1.0
+              ],
+              "ndcg_at_k": 0.995,
+              "queries": 100
+            }
+          },
+          "cutoff": 10,
+          "interpretation": "Recovery of recorded source-paper links; unjudged alternatives are not proven scientific negatives.",
+          "known_link_recall_at_1": 0.8914285714285715,
+          "known_link_recall_at_k": 0.9542857142857143,
+          "mrr_at_k": 0.9127210884353741,
+          "mrr_query_bootstrap_95_interval": [
+            0.8716241496598639,
+            0.9504812925170066
+          ],
+          "ndcg_at_k": 0.9228579615994777,
+          "queries": 175,
+          "timings": {
+            "mean_query_ranking_seconds": 0.002414218857219177,
+            "query_ranking_seconds": 0.4224883000133559
+          }
+        }
+      },
+      "ordered_candidate_ids_sha256": "83e480176e3015384c149de7c55c0e0dd1ae3f3bbcc078e1b53bcae33c656320",
+      "paired": {
+        "bm25_pretrained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 4,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.08894708994708996,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.17084034391534395,
+                -0.0198468253968254
+              ],
+              "unchanged_queries": 58,
+              "worsened_queries": 13
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.0,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.0
+              ],
+              "unchanged_queries": 100,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 4,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.038120181405895695,
+          "ndcg_at_10_delta": -0.031793287874163245,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.07427743764172337,
+            -0.005791326530612251
+          ],
+          "recall_at_10_delta": -0.011428571428571455,
+          "recall_at_1_delta": -0.04571428571428571,
+          "unchanged_queries": 158,
+          "worsened_queries": 13
+        },
+        "bm25_pretrained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 22,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.13434920634920636,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.07911005291005292,
+                0.19501375661375658
+              ],
+              "unchanged_queries": 53,
+              "worsened_queries": 0
+            },
+            "PubMedQA": {
+              "improved_queries": 2,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.01,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.025
+              ],
+              "unchanged_queries": 98,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 24,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.06329251700680272,
+          "ndcg_at_10_delta": 0.06288270034291887,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.0377140589569161,
+            0.09175918367346937
+          ],
+          "recall_at_10_delta": 0.06285714285714283,
+          "recall_at_1_delta": 0.07428571428571429,
+          "unchanged_queries": 151,
+          "worsened_queries": 0
+        },
+        "bm25_trained_rrf_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 4,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.05788888888888889,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.1258388888888889,
+                0.007361111111111083
+              ],
+              "unchanged_queries": 60,
+              "worsened_queries": 11
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.0,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.0
+              ],
+              "unchanged_queries": 100,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 4,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.02480952380952381,
+          "ndcg_at_10_delta": -0.021349005739056515,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.05505357142857143,
+            0.003592857142857122
+          ],
+          "recall_at_10_delta": -0.011428571428571455,
+          "recall_at_1_delta": -0.034285714285714364,
+          "unchanged_queries": 160,
+          "worsened_queries": 11
+        },
+        "bm25_trained_rrf_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 21,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.1654074074074074,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.09962222222222224,
+                0.2447462962962963
+              ],
+              "unchanged_queries": 53,
+              "worsened_queries": 1
+            },
+            "PubMedQA": {
+              "improved_queries": 2,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.01,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.025
+              ],
+              "unchanged_queries": 98,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 23,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.0766031746031746,
+          "ndcg_at_10_delta": 0.0733269824780256,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.047362698412698405,
+            0.10910158730158728
+          ],
+          "recall_at_10_delta": 0.06285714285714283,
+          "recall_at_1_delta": 0.08571428571428563,
+          "unchanged_queries": 151,
+          "worsened_queries": 1
+        },
+        "bm25_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 23,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.22329629629629633,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.1353824074074074,
+                0.32685185185185184
+              ],
+              "unchanged_queries": 50,
+              "worsened_queries": 2
+            },
+            "PubMedQA": {
+              "improved_queries": 2,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.01,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                0.0,
+                0.025
+              ],
+              "unchanged_queries": 98,
+              "worsened_queries": 0
+            }
+          },
+          "improved_queries": 25,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.1014126984126984,
+          "ndcg_at_10_delta": 0.09467598821708212,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.058951984126984124,
+            0.14670039682539684
+          ],
+          "recall_at_10_delta": 0.07428571428571429,
+          "recall_at_1_delta": 0.12,
+          "unchanged_queries": 148,
+          "worsened_queries": 2
+        },
+        "pretrained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 2,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.22329629629629633,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.32685185185185184,
+                -0.13538240740740742
+              ],
+              "unchanged_queries": 50,
+              "worsened_queries": 23
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.01,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.025,
+                0.0
+              ],
+              "unchanged_queries": 98,
+              "worsened_queries": 2
+            }
+          },
+          "improved_queries": 2,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.1014126984126984,
+          "ndcg_at_10_delta": -0.09467598821708212,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.14670039682539684,
+            -0.058951984126984124
+          ],
+          "recall_at_10_delta": -0.07428571428571429,
+          "recall_at_1_delta": -0.12,
+          "unchanged_queries": 148,
+          "worsened_queries": 25
+        },
+        "trained_vs_bm25": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 4,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.13687301587301587,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                -0.2315575396825397,
+                -0.05555515873015872
+              ],
+              "unchanged_queries": 54,
+              "worsened_queries": 17
+            },
+            "PubMedQA": {
+              "improved_queries": 0,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": -0.006666666666666667,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.02,
+                0.0
+              ],
+              "unchanged_queries": 99,
+              "worsened_queries": 1
+            }
+          },
+          "improved_queries": 4,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": -0.06246938775510204,
+          "ndcg_at_10_delta": -0.05693733663574041,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            -0.10399404761904762,
+            -0.023755952380952388
+          ],
+          "recall_at_10_delta": -0.040000000000000036,
+          "recall_at_1_delta": -0.07428571428571429,
+          "unchanged_queries": 153,
+          "worsened_queries": 18
+        },
+        "trained_vs_pretrained": {
+          "by_source": {
+            "Evidence Inference 2.0": {
+              "improved_queries": 15,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.08642328042328043,
+              "queries": 75,
+              "query_bootstrap_95_interval": [
+                0.02731031746031746,
+                0.1520791005291005
+              ],
+              "unchanged_queries": 57,
+              "worsened_queries": 3
+            },
+            "PubMedQA": {
+              "improved_queries": 1,
+              "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+              "mean_reciprocal_rank_delta": 0.003333333333333333,
+              "queries": 100,
+              "query_bootstrap_95_interval": [
+                -0.0033333333333333335,
+                0.015
+              ],
+              "unchanged_queries": 98,
+              "worsened_queries": 1
+            }
+          },
+          "improved_queries": 16,
+          "interpretation": "Paired development comparison, not untouched-test or expert-validity evidence.",
+          "mean_reciprocal_rank_delta": 0.03894331065759637,
+          "ndcg_at_10_delta": 0.03773865158134171,
+          "queries": 175,
+          "query_bootstrap_95_interval": [
+            0.012601700680272108,
+            0.06563469387755103
+          ],
+          "recall_at_10_delta": 0.03428571428571425,
+          "recall_at_1_delta": 0.04571428571428571,
+          "unchanged_queries": 155,
+          "worsened_queries": 4
+        }
+      },
+      "query_sha256": "27990a9e59a16b5f829f48fd65f6dfa177c5bded215d59a64465ff36aa9a7f1d",
+      "view": "full"
+    }
+  },
+  "encoding_timings": {
+    "abstract_only/pretrained": {
+      "document_first_fit_seconds": 101.10132980009075,
+      "document_first_origin": "fresh_model_encoding",
+      "document_warm_verified_fit_seconds": 1.2916560999583453,
+      "model_initialization_seconds": 0.2080512000247836,
+      "query_first_fit_seconds": 0.04059979994781315,
+      "query_first_origin": "verified_cache_replay",
+      "query_warm_verified_fit_seconds": 0.005957599962130189
+    },
+    "abstract_only/trained": {
+      "document_first_fit_seconds": 102.33053169993218,
+      "document_first_origin": "fresh_model_encoding",
+      "document_warm_verified_fit_seconds": 1.4117446000454947,
+      "model_initialization_seconds": 0.2154097999446094,
+      "query_first_fit_seconds": 0.02947220008354634,
+      "query_first_origin": "verified_cache_replay",
+      "query_warm_verified_fit_seconds": 0.008376299985684454
+    },
+    "full/pretrained": {
+      "document_first_fit_seconds": 111.49511629994959,
+      "document_first_origin": "fresh_model_encoding",
+      "document_warm_verified_fit_seconds": 1.4311919999308884,
+      "model_initialization_seconds": 12.743590499972925,
+      "query_first_fit_seconds": 0.19679199997335672,
+      "query_first_origin": "fresh_model_encoding",
+      "query_warm_verified_fit_seconds": 0.017782700015231967
+    },
+    "full/trained": {
+      "document_first_fit_seconds": 109.76798090001103,
+      "document_first_origin": "fresh_model_encoding",
+      "document_warm_verified_fit_seconds": 1.3663776000030339,
+      "model_initialization_seconds": 0.22205900005064905,
+      "query_first_fit_seconds": 0.18732139992062002,
+      "query_first_origin": "fresh_model_encoding",
+      "query_warm_verified_fit_seconds": 0.015041199978441
+    }
+  },
+  "source_receipts": {
+    "run_sha256": "a3f40511a9799fba3bba061c44f526e699472efd15c1472dd318bd364d69de70",
+    "independent_audit_sha256": "d282792e52467464cba1ac3bedfd007d686d1894767d178cf3a9afe8906548fd"
+  },
+  "independent_audit_status": "PASS_FOR_AVAILABLE_ARTIFACTS",
+  "interpretation": "Same frozen development source-paper links, no additional training. BM25 leads every measured condition; trained dense improves aggregate retrieval over its pretrained parent but not every source stratum. No dataset-feasibility or expert-accuracy claim.",
+  "independent_audit_provisional": false,
+  "limitations": [
+    "Results remain provisional until RUN.json is PASS and all four conditions are audited.",
+    "Development questions were used for original model selection; this is not an untouched test.",
+    "Exact title overlap and unjudged distractors limit generalization claims."
+  ]
+}

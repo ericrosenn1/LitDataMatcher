@@ -1,0 +1,27 @@
+{
+  "review_id": "E02-RELIABILITY-ROUND1",
+  "reviewer": "Codex evaluation worker; independent review of lead-authored modules",
+  "command": "PYTHONPATH=<lead> python -m pytest <evaluation>/tests/test_v2_reliability_challenges.py -q --tb=short",
+  "cwd": "lead worktree",
+  "exit_code": 1,
+  "tests": 9,
+  "passed": 5,
+  "failed": 4,
+  "status": "FAIL_REPAIR_REQUIRED",
+  "failures": [
+    "Catalog permits indirect dependency cycles",
+    "Changed derivation parents with equal output payload do not invalidate descendants",
+    "Relative output paths resolve against caller cwd instead of job cwd",
+    "An active job interrupted by manual pause never resumes after explicit RUNNING mode restoration"
+  ],
+  "passed_checks": [
+    "Missing-parent failure transaction preserves good record",
+    "Invalidated claims disappear from lexical search",
+    "Second lease writer is refused",
+    "Stale output cannot turn a no-op into success",
+    "Native exit7 is FAILED"
+  ],
+  "boundaries": "Only task-owned temporary catalogs, controller databases and child Python processes were used. No lead source or unrelated process was changed.",
+  "scientific_repair_retest": {"tests": 28, "passed": 28, "exit_code": 0},
+  "external_module_self_validation": {"tests": 10, "passed": 10, "exit_code": 0, "independent_approval": false}
+}

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
 import math
+from collections.abc import Iterable
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
 
 from .schemas import MatchCandidate, QuestionCandidate
 from .storage import read_jsonl, write_jsonl
@@ -67,11 +67,14 @@ def evaluate_question_extraction(
     """
 
     predictions = list(predicted)
-    gold_questions = [str(row.get("question", "")).strip() for row in gold_rows if row.get("question")]
+    gold_questions = [
+        str(row.get("question", "")).strip() for row in gold_rows if row.get("question")
+    ]
     matched_gold: set[int] = set()
     tp = 0
     fp = 0
     for prediction in predictions:
+        # Greedy matching prevents one gold question from crediting multiple predictions.
         best_idx = -1
         best_score = 0.0
         for idx, gold in enumerate(gold_questions):
@@ -106,6 +109,7 @@ def evaluate_ranking(
     relevance: dict[str, float] = {}
     for row in relevance_rows:
         label = float(row.get("relevance", row.get("label", 0)) or 0)
+        # Accept either persisted match IDs or stable question-dataset tuple labels.
         if row.get("match_id"):
             relevance[str(row["match_id"])] = label
         elif row.get("question_id") and row.get("dataset_id"):
@@ -123,6 +127,7 @@ def evaluate_ranking(
         ]
         label = next((relevance[key] for key in keys if key in relevance), None)
         if label is None:
+            # Unjudged matches count as zero gain but are not counted as judged.
             gains.append(0.0)
             continue
         judged += 1
@@ -130,6 +135,7 @@ def evaluate_ranking(
         if label > 0:
             relevant_count += 1
             if reciprocal_rank == 0.0:
+                # MRR rewards how early the first relevant match appears.
                 reciprocal_rank = 1.0 / rank
 
     precision_at_k = relevant_count / k if k else 0.0
@@ -153,6 +159,7 @@ def _ndcg(gains: list[float], ideal_gains: list[float], k: int) -> float:
     """Normalized discounted cumulative gain."""
 
     ideal = _dcg(ideal_gains, k)
+    # Without relevant gold labels, ranking quality is undefined and reported as zero.
     return _dcg(gains, k) / ideal if ideal else 0.0
 
 

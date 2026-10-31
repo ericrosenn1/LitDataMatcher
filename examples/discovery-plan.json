@@ -1,0 +1,11 @@
+{
+  "schema_version": "discovery-plan-1.0",
+  "queries": [
+    {"id": "breast_cancer", "query": "breast cancer", "dataset_sources": ["geo", "clinicaltrials", "datacite"], "literature_sources": ["pubmed"], "limit": 10},
+    {"id": "cardiovascular", "query": "cardiovascular disease", "dataset_sources": ["geo", "clinicaltrials", "datacite"], "literature_sources": ["pubmed"], "limit": 10},
+    {"id": "diabetes", "query": "diabetes", "dataset_sources": ["geo", "clinicaltrials", "datacite"], "literature_sources": ["pubmed"], "limit": 10},
+    {"id": "inflammation", "query": "inflammatory bowel disease", "dataset_sources": ["geo", "clinicaltrials", "datacite"], "literature_sources": ["pubmed"], "limit": 10},
+    {"id": "respiratory", "query": "respiratory infection", "dataset_sources": ["geo", "clinicaltrials", "datacite"], "literature_sources": ["pubmed"], "limit": 10},
+    {"id": "pregnancy", "query": "pregnancy", "dataset_sources": ["geo", "clinicaltrials", "datacite"], "literature_sources": ["pubmed"], "limit": 10}
+  ]
+}

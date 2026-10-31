@@ -1,13 +1,21 @@
-"""Small cached HTTP client for optional live adapters."""
+"""Small cached HTTP client for optional live adapters.
+
+Cached responses improve reproducibility for local workflows; they do not prove
+that a live API is currently reachable or unchanged.
+"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from hashlib import sha1
 import json
-from pathlib import Path
+import mimetypes
+import os
 import time
-from urllib.parse import urlencode
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from hashlib import sha1, sha256
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
 
@@ -20,18 +28,27 @@ class CachedHttpClient:
     timeout: float = 20.0
     min_interval_seconds: float = 0.2
     user_agent: str = "LitDataMatcher/0.1 research pipeline"
+    offline: bool = False
+    _last_request: float = field(default=0.0, init=False, repr=False)
+    last_response_metadata: dict[str, str] = field(default_factory=dict, init=False)
 
     def __post_init__(self) -> None:
         self.cache_dir = Path(self.cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self._last_request = 0.0
 
-    def _cache_path(self, url: str, params: dict | None) -> Path:
+    def _cache_path(self, url: str, params: dict | None, suffix: str = ".json") -> Path:
         """Return a stable cache path for a request."""
 
         query = urlencode(sorted((params or {}).items()), doseq=True)
-        key = sha1(f"{url}?{query}".encode("utf-8")).hexdigest()
-        return self.cache_dir / f"{key}.json"
+        key = sha1(f"{url}?{query}".encode()).hexdigest()
+        return self.cache_dir / f"{key}{suffix}"
+
+    def _wait_for_rate_limit(self) -> None:
+        """Pause just enough to respect the configured request interval."""
+
+        wait = max(0.0, self.min_interval_seconds - (time.time() - self._last_request))
+        if wait:
+            time.sleep(wait)
 
     def get_json(
         self,
@@ -39,21 +56,27 @@ class CachedHttpClient:
         params: dict | None = None,
         *,
         use_cache: bool = True,
+        refresh: bool = False,
         retries: int = 2,
     ) -> dict:
-        """Fetch JSON with retry and cache support."""
+        """Fetch JSON with replayable cache support and explicit successful refresh."""
 
-        path = self._cache_path(url, params)
-        if use_cache and path.exists():
-            return json.loads(path.read_text(encoding="utf-8"))
+        self.last_response_metadata = {}
+        path = self._cache_path(url, params, suffix=".json")
+        if use_cache and not refresh and path.exists():
+            # Cached/mock payloads are reproducible fixtures, not live validation.
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.last_response_metadata = self._cache_response_metadata(path, "cache_hit")
+            return data
+        if self.offline:
+            operation = "offline refresh unavailable" if refresh else "offline cache missing"
+            raise FileNotFoundError(f"{operation}: {url}")
 
-        wait = max(0.0, self.min_interval_seconds - (time.time() - self._last_request))
-        if wait:
-            time.sleep(wait)
-
+        replaced_sha256 = _file_sha256(path) if refresh and path.exists() else ""
         last_error: Exception | None = None
         for attempt in range(retries + 1):
             try:
+                self._wait_for_rate_limit()
                 response = requests.get(
                     url,
                     params=params,
@@ -64,10 +87,259 @@ class CachedHttpClient:
                 response.raise_for_status()
                 data = response.json()
                 if use_cache:
-                    path.write_text(json.dumps(data, sort_keys=True), encoding="utf-8")
+                    self._write_cache_response(
+                        path,
+                        json.dumps(data, sort_keys=True),
+                        "live_refreshed" if replaced_sha256 else "live_cached",
+                        replaced_sha256=replaced_sha256,
+                        request_scope={"url": url, "params": params or {}, "method": "GET"},
+                    )
                 return data
             except (requests.RequestException, ValueError) as exc:
                 last_error = exc
                 if attempt < retries:
                     time.sleep(0.5 * (attempt + 1))
         raise RuntimeError(f"HTTP JSON request failed for {url}: {last_error}")
+
+    def get_text(
+        self,
+        url: str,
+        params: dict | None = None,
+        *,
+        use_cache: bool = True,
+        retries: int = 2,
+    ) -> str:
+        """Fetch text/XML with retry and cache support."""
+
+        self.last_response_metadata = {}
+        path = self._cache_path(url, params, suffix=".txt")
+        if use_cache and path.exists():
+            # Text cache covers XML and TEI intermediates as well as plain text responses.
+            text = path.read_text(encoding="utf-8")
+            self.last_response_metadata = self._cache_response_metadata(path, "cache_hit")
+            return text
+        if self.offline:
+            raise FileNotFoundError(f"offline cache missing: {url}")
+
+        last_error: Exception | None = None
+        for attempt in range(retries + 1):
+            try:
+                self._wait_for_rate_limit()
+                response = requests.get(
+                    url,
+                    params=params,
+                    timeout=self.timeout,
+                    headers={"User-Agent": self.user_agent},
+                )
+                self._last_request = time.time()
+                response.raise_for_status()
+                text = response.text
+                if use_cache:
+                    self._write_cache_response(
+                        path,
+                        text,
+                        "live_cached",
+                        request_scope={"url": url, "params": params or {}, "method": "GET"},
+                    )
+                return text
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt < retries:
+                    time.sleep(0.5 * (attempt + 1))
+        raise RuntimeError(f"HTTP text request failed for {url}: {last_error}")
+
+    def _cache_response_metadata(
+        self, path: Path, cache_status: str, *, replaced_sha256: str = ""
+    ) -> dict[str, str]:
+        """Build cache identity and refresh lineage before publishing provenance."""
+
+        timestamp = (
+            datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+            .isoformat(timespec="seconds")
+            .replace("+00:00", "Z")
+        )
+        metadata = {
+            "cache_path": str(path),
+            "cache_status": cache_status,
+            "cache_content_sha256": _file_sha256(path),
+            "retrieval_time_utc": timestamp,
+            "retrieval_time_basis": "legacy_cache_mtime_unverified",
+        }
+        envelope_path = _acquisition_path(path, metadata["cache_content_sha256"])
+        if envelope_path.exists():
+            envelope = _read_acquisition_envelope(envelope_path, metadata["cache_content_sha256"])
+            metadata.update(envelope)
+            metadata["cache_path"] = str(path)
+            metadata["cache_status"] = cache_status
+            metadata["acquisition_envelope_path"] = str(envelope_path)
+        if replaced_sha256:
+            metadata["replaced_cache_content_sha256"] = replaced_sha256
+        return metadata
+
+    def _write_cache_response(
+        self,
+        path: Path,
+        text: str,
+        cache_status: str,
+        *,
+        replaced_sha256: str = "",
+        request_scope: dict | None = None,
+    ) -> None:
+        """Promote a complete response and its metadata without truncating prior cache."""
+
+        with NamedTemporaryFile(
+            dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+        ) as handle:
+            temporary_path = Path(handle.name)
+        envelope_path = None
+        try:
+            temporary_path.write_text(text, encoding="utf-8")
+            metadata = self._cache_response_metadata(
+                temporary_path, cache_status, replaced_sha256=replaced_sha256
+            )
+            metadata["cache_path"] = str(path)
+            metadata["schema_version"] = "cache-acquisition-v1"
+            metadata["retrieval_time_basis"] = "recorded_content_acquisition"
+            if request_scope:
+                metadata["request_scope"] = json.dumps(
+                    _redacted_scope(request_scope), sort_keys=True
+                )
+            envelope_path = _acquisition_path(path, metadata["cache_content_sha256"])
+            envelope_path.parent.mkdir(parents=True, exist_ok=True)
+            _create_acquisition_envelope(envelope_path, metadata)
+            # An identical response retains its first recorded acquisition time.
+            envelope = _read_acquisition_envelope(envelope_path, metadata["cache_content_sha256"])
+            metadata.update(envelope)
+            metadata["cache_status"] = cache_status
+            metadata["acquisition_envelope_path"] = str(envelope_path)
+            temporary_path.replace(path)
+            self.last_response_metadata = metadata
+        finally:
+            # Complete immutable acquisition receipts survive a failed cache promotion.
+            # Another writer may already reference them; they are not a successful cache hit.
+            temporary_path.unlink(missing_ok=True)
+
+    def post_file_text(
+        self,
+        url: str,
+        file_path: str | Path,
+        *,
+        field_name: str = "input",
+        data: dict | None = None,
+        use_cache: bool = True,
+        retries: int = 0,
+    ) -> str:
+        """POST a local file and cache the returned text by file digest and form data."""
+
+        self.last_response_metadata = {}
+        file_path = Path(file_path)
+        payload_data = {key: str(value) for key, value in (data or {}).items()}
+        digest = _file_sha256(file_path)
+        cache_params = {"file_sha256": digest, "file_name": file_path.name, **payload_data}
+        path = self._cache_path(url, cache_params, suffix=".txt")
+        if use_cache and path.exists():
+            text = path.read_text(encoding="utf-8")
+            self.last_response_metadata = self._cache_response_metadata(path, "cache_hit")
+            return text
+        if self.offline:
+            raise FileNotFoundError(f"offline cache missing: {url}")
+
+        last_error: Exception | None = None
+        mime_type = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
+        for attempt in range(retries + 1):
+            try:
+                self._wait_for_rate_limit()
+                with file_path.open("rb") as handle:
+                    response = requests.post(
+                        url,
+                        files={field_name: (file_path.name, handle, mime_type)},
+                        data=payload_data,
+                        timeout=self.timeout,
+                        headers={"User-Agent": self.user_agent},
+                    )
+                self._last_request = time.time()
+                response.raise_for_status()
+                text = response.text
+                if use_cache:
+                    self._write_cache_response(
+                        path,
+                        text,
+                        "live_cached",
+                        request_scope={"url": url, "params": cache_params, "method": "POST"},
+                    )
+                return text
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt < retries:
+                    time.sleep(0.5 * (attempt + 1))
+        raise RuntimeError(f"HTTP file POST failed for {url}: {last_error}")
+
+
+def _file_sha256(path: Path) -> str:
+    """Return a stable digest for cache keys involving local files."""
+
+    digest = sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _acquisition_path(path: Path, digest: str) -> Path:
+    """Immutable acquisition receipt tied to request key and response content."""
+    return path.parent / ".provenance" / f"{path.name}.{digest}.json"
+
+
+def _redacted_scope(scope: dict) -> dict:
+    """Keep scientific query provenance without copying credential parameters."""
+    sensitive = {"api_key", "apikey", "token", "access_token", "authorization", "key"}
+    parsed = urlsplit(str(scope.get("url", "")))
+    query = [
+        (key, "REDACTED" if key.lower() in sensitive else value)
+        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+    ]
+    safe_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), ""))
+    return {
+        **scope,
+        "url": safe_url,
+        "params": {
+            key: "REDACTED" if str(key).lower() in sensitive else value
+            for key, value in scope.get("params", {}).items()
+        },
+    }
+
+
+def _read_acquisition_envelope(path: Path, digest: str) -> dict:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(value, dict)
+        or value.get("schema_version") != "cache-acquisition-v1"
+        or value.get("cache_content_sha256") != digest
+    ):
+        raise ValueError("Cache acquisition envelope does not match its content")
+    try:
+        acquired = datetime.fromisoformat(
+            value.get("retrieval_time_utc", "").replace("Z", "+00:00")
+        )
+    except (TypeError, ValueError, AttributeError) as exc:
+        raise ValueError("Cache acquisition timestamp is invalid") from exc
+    if acquired.tzinfo is None:
+        raise ValueError("Cache acquisition timestamp requires a timezone")
+    return value
+
+
+def _create_acquisition_envelope(path: Path, metadata: dict) -> bool:
+    """Atomically add an immutable receipt without replacing an existing receipt."""
+    with NamedTemporaryFile(
+        dir=path.parent, prefix=".acquisition-", suffix=".tmp", delete=False
+    ) as handle:
+        temporary = Path(handle.name)
+    try:
+        temporary.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
+        try:
+            os.link(temporary, path)
+        except FileExistsError:
+            return False
+        return True
+    finally:
+        temporary.unlink(missing_ok=True)

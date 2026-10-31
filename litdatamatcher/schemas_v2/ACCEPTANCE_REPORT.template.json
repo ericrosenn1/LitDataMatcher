@@ -1,0 +1,162 @@
+{
+  "schema_version": "2.0",
+  "build_id": null,
+  "run_id": null,
+  "generated_at": null,
+  "product_status": "NOT_READY",
+  "automation_status": "NOT_CONFIGURED",
+  "calibration_status": "PENDING_EXPERT_LABELS",
+  "evidence_fingerprint": {
+    "source_commit": null,
+    "source_digest": null,
+    "model_config_digest": null,
+    "input_manifest_digest": null,
+    "evaluation_protocol": null
+  },
+  "coverage": {
+    "unique_literature_records": 0,
+    "parsed_full_texts": 0,
+    "unique_accession_studies": 0,
+    "sample_profiled_studies": 0,
+    "inspected_processed_studies": 0,
+    "external_structured_resources": 0,
+    "distinct_pilot_contexts": 0,
+    "case_dossiers": 0
+  },
+  "gates": {
+    "G01": {
+      "name": "Installation and user inputs",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G02": {
+      "name": "Real literature",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G03": {
+      "name": "Real dataset catalog",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G04": {
+      "name": "Capabilities and data files",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G05": {
+      "name": "Real semantic runtime",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G06": {
+      "name": "Evidence and normalization",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G07": {
+      "name": "Questions and dated gaps",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G08": {
+      "name": "Experimental matching",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G09": {
+      "name": "Evidence compiler",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G10": {
+      "name": "Evaluation and ranking",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G11": {
+      "name": "Incremental and offline",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G12": {
+      "name": "Failure recovery",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G13": {
+      "name": "Resource and concurrency",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G14": {
+      "name": "Scientific and engineering review",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G15": {
+      "name": "User-facing outputs and security",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    },
+    "G16": {
+      "name": "Delivery and readiness",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "reason": "Template only; not executed."
+    }
+  },
+  "operations": {
+    "O01": {
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    "O02": {
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    "O03": {
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    "O04": {
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    "O05": {
+      "status": "NOT_RUN",
+      "evidence": []
+    }
+  },
+  "refinement": {
+    "minimum_worker_passes_observed": 0,
+    "integrated_rounds": 0,
+    "consecutive_no_material_gain_rounds": 0,
+    "untouched_holdout_pass": false,
+    "independent_reviews_pass": false
+  },
+  "open_issues": [],
+  "optional_backlog": [],
+  "stop_reason": null,
+  "validator": {
+    "implementation_version": null,
+    "command": null,
+    "executed": false
+  },
+  "calibration_evidence": []
+}

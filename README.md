@@ -1,352 +1,206 @@
 # LitDataMatcher
 
-[![CI](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/ci.yml?query=branch%3Amain)
-[![Package build](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/package.yml?query=branch%3Amain)
-[![Documentation](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/docs.yml/badge.svg?branch=main)](https://ericrosenn1.github.io/LitDataMatcher/)
-[![CodeQL](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/codeql.yml?query=branch%3Amain)
-[![Pre-commit](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/ericrosenn1/LitDataMatcher/actions/workflows/pre-commit.yml?query=branch%3Amain)
+**A local research engine for connecting biomedical questions to public data.**
 
-<br>
+LitDataMatcher turns literature and explicit research questions into typed data
+requirements, source-linked evidence, and ranked dataset candidates. Unknowns,
+failed retrievals, conflicting evidence, and underdetermined questions remain
+visible throughout the workflow.
 
-[![Python](https://img.shields.io/badge/Python-%E2%89%A53.10-3776AB?logo=python&logoColor=white)](https://github.com/ericrosenn1/LitDataMatcher/blob/main/pyproject.toml)
-[![License](https://img.shields.io/github/license/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/blob/main/LICENSE)
-[![Citation](https://img.shields.io/badge/citation-CITATION.cff-5A2D81)](https://github.com/ericrosenn1/LitDataMatcher/blob/main/CITATION.cff)
+[Research workflow](docs/research_workflow.md) Â· [Methods](docs/campaign_20261031/retrieval_protocol.md) Â· [Recovery](docs/campaign_20261031/workflow_recovery.md) Â· [Scientific limits](docs/limitations.md) Â· [MIT license](LICENSE)
 
-<br>
+## Research capabilities
 
-[![Last commit](https://img.shields.io/github/last-commit/ericrosenn1/LitDataMatcher/main)](https://github.com/ericrosenn1/LitDataMatcher/commits/main)
-[![Contributors](https://img.shields.io/github/contributors/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/graphs/contributors)
-[![Issues](https://img.shields.io/github/issues/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/issues)
-[![Pull requests](https://img.shields.io/github/issues-pr/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher/pulls)
-[![Stars](https://img.shields.io/github/stars/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
-[![Forks](https://img.shields.io/github/forks/ericrosenn1/LitDataMatcher?style=social)](https://github.com/ericrosenn1/LitDataMatcher)
-[![Repository size](https://img.shields.io/github/repo-size/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
-[![Top language](https://img.shields.io/github/languages/top/ericrosenn1/LitDataMatcher)](https://github.com/ericrosenn1/LitDataMatcher)
+- **Source-grounded local inference:** exact source spans, bounded repair, and independent checks for relation direction, negation, and unsupported context.
+- **Typed question compilation:** entities, outcomes, comparisons, population and design requirements, with explicit abstention when information is missing.
+- **Configurable source discovery:** bounded PubMed, GEO, ClinicalTrials.gov, DataCite and other adapters, immutable responses, and query-level coverage receipts.
+- **Inspectable matching:** observed and unknown capabilities, study-dependence tracking, requirement-by-requirement assessments, and portable dossiers.
+- **Reproducible retrieval experiments:** BM25, pretrained dense retrieval, rank fusion, local fine-tuning, paired development comparisons, and verified vector caches.
+- **Recoverable execution:** leased workspaces, strict artifact validation, checkpointed stages, explicit retries, and preserved failure records.
 
-LitDataMatcher is a reproducible research-automation pipeline for turning
-scientific literature into ranked, reviewable question-data opportunities.
-
-The motivating problem is simple: papers often describe unresolved questions,
-limitations, future directions, and under-tested hypotheses, while public
-repositories contain datasets that may already be able to address some of those
-questions. LitDataMatcher connects those two worlds by extracting open research
-questions from text, normalizing their data requirements, discovering relevant
-public datasets, and ranking the most plausible question-dataset pairs for
-expert review.
-
-The current implementation is a functional research-software foundation. It is
-offline and reproducible by default, produces auditable JSONL/SQLite artifacts,
-and is organized into explicit scientific nodes that can be independently
-tested, benchmarked, replaced, or extended.
-
-## What It Does Today
-
-LitDataMatcher currently supports:
-
-- Literature-driven open-question extraction from JSONL records containing
-  titles, abstracts, full text, and DOI/source metadata.
-- Future-direction and limitation-derived question generation.
-- Lightweight meta-analysis style clustering and evidence synthesis across
-  related questions.
-- Ontology-backed variable harmonization for biomedical concepts such as
-  antibiotic exposure, microbiome composition, transcriptomics, metabolomics,
-  disease activity, treatment, outcomes, and timepoints.
-- Dataset discovery through a curated offline biomedical catalog.
-- Dataset metadata normalization into stable `DatasetRecord` objects.
-- Governance and reuse-risk scoring for access, license, and human-subject
-  concerns.
-- Pair-level feasibility assessment, including variable coverage, population
-  fit, sample adequacy, assay fit, longitudinal fit, caveats, and recommended
-  statistical design.
-- Explainable ranking of question-dataset pairs.
-- Expert review exports as CSV and JSONL.
-- Evaluation utilities for question-extraction and ranking benchmarks.
-- Manuscript-style Markdown reports for run summaries.
-- A legacy streaming orchestrator for live topic-level demos.
-
-## Scientific Workflow
-
-The package pipeline follows this conceptual flow:
-
-```text
-literature records
-  -> open-question identification
-  -> meta-analysis style clustering
-  -> dataset discovery and classification
-  -> governance and feasibility assessment
-  -> question-to-data ranking
-  -> JSONL, SQLite, expert review sheets, and publication report
+```mermaid
+flowchart LR
+    A[Paper or question] --> B[Source-grounded extraction]
+    B --> C[Typed requirements]
+    D[Public source adapters] --> E[Versioned catalog]
+    E --> F[Capability assessment]
+    C --> F
+    F --> G[Evidence and dependence checks]
+    G --> H[Ranked candidates or abstention]
+    H --> I[Research dossier and expert review]
 ```
 
-Each node writes inspectable outputs. This is intentional: the system is meant
-to support scientific audit, error analysis, and expert-in-the-loop validation,
-not just produce opaque scores.
+## Start locally
 
-## Repository Status
-
-The repository has two execution paths:
-
-- `litdatamatcher` package: the recommended reproducible pipeline for research
-  and publication-oriented analyses.
-- Top-level worker scripts: streaming subprocess entrypoints used by
-  `orchestrator.py` for topic-level demonstrations and resource-management
-  experiments.
-
-The package path should be used for serious analyses. The orchestrator path is
-kept for live demos and future distributed-worker development.
-
-## Installation
-
-Python 3.10 or newer is required.
+Python 3.10 or newer is required. The core package runs without a GPU or model downloads.
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+python -m pip install -e ".[dev,corpus]"
+litdatamatcher demo --out runs/demo
 ```
 
-Optional NLP/model dependencies can be installed with:
+The deterministic demo uses illustrative data. Inspect a research question without loading a model:
 
 ```bash
-python -m pip install -e ".[dev,nlp,ml]"
+litdatamatcher-v2 compile --question "Does treatment reduce IL6 in human cells?"
 ```
 
-The deterministic core pipeline does not require GPU access, external APIs, or
-network access.
-
-## Quickstart
-
-Run the built-in demo:
+Acquire a bounded biomedical workspace:
 
 ```bash
-litdatamatcher demo --out run/demo
+litdatamatcher-discover --plan examples/discovery-plan.json --out runs/biomedical --workers 2
 ```
 
-Equivalent module invocation:
+Edit the [example query plan](examples/discovery-plan.json) for the intended study.
+Use `--offline --resume` to verify completed source checkpoints, or add
+`--retry-failed` to retry failed nodes while retaining their previous receipts.
+
+## Local model workflow
 
 ```bash
-python -m litdatamatcher.cli demo --out run/demo
+python -m pip install -e ".[runtime,structured]"
 ```
 
-Run on a JSONL literature corpus:
+Prepare models explicitly with [runtime_download_models.py](scripts/v2/runtime_download_models.py)
+and an immutable revision, or provide existing directories with verified
+`MODEL_MANIFEST.json` files. The research configuration uses Qwen2.5-7B-Instruct
+and all-MiniLM-L6-v2. Model weights are not bundled in Git.
+
+Qualify the chosen runtime on a known positive development document. The JSON
+input supplies `document_id`, `title`, and `text`; this is an execution and
+source-checking smoke test, not a scientific accuracy benchmark.
+The campaign's selection rule requires two positive development documents:
+repeat qualification with the second document and a separate output directory,
+and proceed only when both pass. The example analysis references the first
+receipt for the same qualified backend.
 
 ```bash
-litdatamatcher run --input test_input.jsonl --out run/full --top-n 100
+python scripts/v2/runtime_qualify.py --model-dir /path/to/extractor --embedding-dir /path/to/encoder --document /path/to/positive-source.json --output runs/qualification/QUALIFICATION.json --device cuda --decoding-mode source_literal --max-new-tokens 384 --require-claims
+litdatamatcher-v2 analyze --root runs/biomedical --out runs/analysis-01 --model /path/to/extractor --embeddings /path/to/encoder --limit 3 --chunks 2 --device cuda --decoding-mode source_literal --max-new-tokens 384 --runtime-qualification runs/qualification/QUALIFICATION.json
 ```
 
-Each input row should include some combination of:
+Use `--device cpu` where suitable. Repeat the same command with `--resume`
+after interruption. `--vector-cache /path/to/cache` reuses verified dataset
+vectors. Source, model, configuration, or implementation changes require a new run.
 
-```json
-{"title": "...", "abstract": "...", "text": "...", "doi": "..."}
-```
+See the [local model guide](docs/campaign_20261031/model_source_schema.md) for
+structured decoding and offline qualification, and the
+[research workflow](docs/research_workflow.md) for output contracts.
 
-## Outputs
-
-A full run writes:
-
-- `questions.jsonl`: extracted and normalized open research questions.
-- `datasets.jsonl`: normalized candidate dataset records.
-- `syntheses.jsonl`: question-cluster evidence summaries.
-- `matches.jsonl`: ranked question-dataset opportunities with component scores.
-- `summary.md`: concise human-readable ranking summary.
-- `publication_report.md`: manuscript-style methods/results summary.
-- `review_sheet.csv`: expert review sheet for relevance annotation.
-- `review_sheet.jsonl`: programmatic review export.
-- `litdatamatcher.sqlite`: queryable run database.
-- `metrics.jsonl`: run-level counts and accounting.
-
-The most important artifact for scientific review is usually `matches.jsonl` or
-`review_sheet.csv`. Each match includes the question, dataset, component scores,
-rationale, missing variables, feasibility assessment, governance assessment, and
-recommended study design.
-
-## Evaluation And Review
-
-Evaluate a completed run against gold question labels:
+For many papers, the [batch command](docs/campaign_20261031/native_batch.md)
+reuses one model session while keeping separate case journals and outputs:
 
 ```bash
-litdatamatcher evaluate --run-dir run/full --gold-questions gold_questions.jsonl
+litdatamatcher-v2 batch --root runs/biomedical --inputs cases.jsonl --out runs/batch-01 --model /path/to/extractor --embeddings /path/to/encoder --device cuda --decoding-mode source_literal --max-new-tokens 384 --runtime-qualification runs/qualification/QUALIFICATION.json
 ```
 
-Evaluate both extraction and ranking:
+Each case supplies a source document and optional explicit question. The
+[model card](docs/model_card.md) describes training data, selection rules,
+qualified configurations, and limits on interpretation.
+The [literal decoder](docs/campaign_20261031/model_source_literal.md) preserves
+exact source text through escaped JSON. The earlier profiles remain available
+for reproducibility.
 
-```bash
-litdatamatcher evaluate ^
-  --run-dir run/full ^
-  --gold-questions gold_questions.jsonl ^
-  --gold-ranking gold_ranking.jsonl ^
-  --out run/full/evaluation.jsonl
-```
+## Measured development evidence
 
-Export a review sheet:
+Training uses **1,333 source-linked queries**. The same **175 paper-disjoint
+development queries** were evaluated against 1,508, 50,000, and 100,000 candidate
+papers. Official test partitions and reserved evaluation data are excluded.
+The larger pools add qualified annual-baseline distractors without retraining.
 
-```bash
-litdatamatcher review-export --run-dir run/full --out run/full/review.csv
-```
+**MRR@10 with 100,000 candidate papers:**
 
-Summarize completed review labels:
+| Method | Title + abstract | Abstract only |
+| --- | ---: | ---: |
+| BM25 | **0.9722** | **0.9354** |
+| BM25 + trained dense fusion | 0.9359 | 0.9038 |
+| BM25 + pretrained dense fusion | 0.9279 | 0.8910 |
+| Fine-tuned MiniLM | 0.9079 | 0.8326 |
+| Pretrained MiniLM | 0.8551 | 0.7903 |
 
-```bash
-litdatamatcher review-summary --labels run/full/review.csv
-```
+![Audited large-pool retrieval results](docs/assets/retrieval-scale.svg)
 
-Generate a manuscript-style report:
+Fine-tuning improves its pretrained parent by **0.0528 MRR** with title and
+abstract (paired query-bootstrap 95% interval: 0.0217â€“0.0841), and by **0.0423**
+with abstracts alone (0.0077â€“0.0780). **BM25 leads every measured condition.**
+The aggregate gain is source-dependent: PubMedQA performance decreases in both
+abstract-only pools. Many original queries echo source titles, so these results
+measure known source-link recovery, not general question answering or dataset
+suitability.
 
-```bash
-litdatamatcher report --run-dir run/full --out run/full/publication_report.md
-```
+Verified warm loading of 100,000-document vectors took **1.29â€“1.43 seconds** in
+the recorded local runs, versus **101â€“111 seconds** for fresh encoding. Model
+initialization is recorded separately. These are hardware-dependent cache
+measurements, not a claim that fresh model inference runs at cache speed.
 
-## Streaming Orchestrator Demo
+See the [complete scale results](benchmarks/campaign_20261031/retrieval_scale.json),
+[initial development experiment](benchmarks/campaign_20261031/retrieval_development.json),
+[fixed training protocol](docs/campaign_20261031/retrieval_protocol.md), and
+[scale evaluation procedure](docs/campaign_20261031/retrieval_scale.md).
+An independent audit checked all 3,500 query/method ranking lists, 20 condition
+metrics, and all four vector encodings.
 
-The legacy subprocess demo remains available:
+Other evidence includes a frozen 30-case development pack, real processed-table
+inspections, source-adapter replay, and an annual PubMed baseline integrity audit.
+The [case and data notes](docs/campaign_20261031/research_cases.md) distinguish
+measured values from missing evidence. The
+[extraction comparison](docs/campaign_20261031/extraction_results.md) retains all
+30 case outcomes, including abstentions and unresolved dataset suitability:
 
-```bash
-python orchestrator.py --out run/orchestrator_matches.jsonl
-```
+| Development endpoint | Original decoder | Literal decoder |
+| --- | ---: | ---: |
+| Returned source views | 43 / 45 | 45 / 45 |
+| Source-guard-accepted claims | 16 | 20 |
+| Cases requiring a technical retry | 2 | 0 |
 
-Provide custom topics with:
+All 30 literal-run cases passed the artifact and source-span audit and were
+reused unchanged on resume. These are software and source-fidelity results;
+accepted counts are not scientific accuracy, and all 140 dataset candidates
+still required inspection.
+The independently audited [revision ledger](docs/campaign_20261031/pubmed_revision_ledger.md)
+covers **1,621 PubMed shards**, preserving **45,477,637 citation upsert events**
+and **11,293 deletion events**. It records historical revisions without claiming
+a materialized current view. The final integrated suite passed **1,317 tests**
+with two platform-specific skips.
 
-```bash
-python orchestrator.py --topics-file topics.txt --out run/orchestrator_matches.jsonl
-```
+The active campaign's
+[specification](docs/research_campaign_20261031.md) and
+[structured state](project_state/campaign_20261031/TASK_STATE.json) track completed
+work and the separate public-release boundary.
 
-`topics.txt` may be plain text, one topic per line, or JSONL with a `topic`,
-`question`, or `title` field.
+## Outputs and review
 
-## Architecture
+Native runs produce a manifest, accepted claims and questions, evidence bundles,
+candidate assessments, no-fit or underdetermined outcomes, an expert review sheet,
+and a local HTML dossier. Rejected model attempts remain diagnostic artifacts.
+Blank expert-review fields are intentional. Scores are uncalibrated review
+priorities; scientific validity and dataset answerability require further evidence.
 
-The main package modules are:
+The optional [web workspace](docs/web-app.md) provides a visual review surface.
+The Python engine, CLI, and research artifacts are the primary application.
 
-- `litdatamatcher.schemas`: validated dataclasses and stable IDs.
-- `litdatamatcher.text`: deterministic text normalization, sentence splitting,
-  sectioning, variable inference, and lexical similarity.
-- `litdatamatcher.literature`: open-question extraction and significance
-  scoring.
-- `litdatamatcher.meta_analysis`: question clustering and evidence synthesis.
-- `litdatamatcher.datasets`: dataset adapters, metadata normalization, and
-  classification.
-- `litdatamatcher.ontology`: variable harmonization and concept normalization.
-- `litdatamatcher.governance`: access, license, privacy, and reuse-risk scoring.
-- `litdatamatcher.feasibility`: pair-level design feasibility and caveat scoring.
-- `litdatamatcher.ranking`: explainable question-to-dataset scoring.
-- `litdatamatcher.storage`: JSONL and SQLite persistence.
-- `litdatamatcher.evaluation`: extraction and ranking benchmark metrics.
-- `litdatamatcher.review`: expert review exports and label summaries.
-- `litdatamatcher.reporting`: publication-oriented run reports.
-- `litdatamatcher.adapters`: optional live-source adapter scaffolds.
-- `litdatamatcher.pipeline`: end-to-end orchestration.
-- `litdatamatcher.cli`: command-line interface.
+## Repository map
 
-Additional documentation:
+| Location | Role |
+| --- | --- |
+| `litdatamatcher/` | Engine, contracts, adapters, models, retrieval, orchestration |
+| `scripts/campaign_20261031/` | Reproducible experiments and data qualification |
+| `tests/` | Unit, integration, source-fidelity, and fault-injection checks |
+| `benchmarks/` | Small versioned protocols and validation summaries |
+| `docs/` | Methods, usage, limitations, and historical evidence |
+| `examples/` | Executable configurations |
+| `web/` | Optional browser workspace |
+| `archive/`, `workflows/legacy_streaming/` | Preserved historical implementations |
 
-- [Documentation site](https://ericrosenn1.github.io/LitDataMatcher/)
-- `docs/architecture.md`
-- `docs/node_contracts.md`
-- `docs/reproducibility.md`
-- `docs/model_robustness_plan.md`
-- `docs/feature_roadmap.md`
+Large corpora, environments, model weights, and transient outputs stay outside
+Git. Run `python -m pytest` to test the project. Install the build frontend with
+`python -m pip install build`, then run `python -m build` to create the package.
+CI separately checks core contracts, local-model contracts, package installation,
+documentation, and the web workspace.
 
-## Testing
-
-After installing development dependencies:
-
-```bash
-python -m pytest
-python -m compileall litdatamatcher data_worker.py lit_gpu_worker.py matcher.py orchestrator.py
-python -m litdatamatcher.cli demo --out run/demo
-python -m litdatamatcher.cli report --run-dir run/demo
-```
-
-The deterministic tests are designed to run without GPU access, network access,
-or external NLP models. Optional model-backed components should fail closed into
-deterministic lexical fallbacks where possible.
-
-## Reproducibility
-
-LitDataMatcher is designed for auditable runs:
-
-- Core identifiers are deterministic SHA-1 based stable IDs.
-- Node outputs are JSONL and are also persisted to SQLite.
-- Generated runtime files are ignored by `.gitignore`.
-- Line-ending behavior is pinned through `.gitattributes`.
-- Default dataset discovery is offline and deterministic.
-- Optional HTTP adapters use caching and retry scaffolds.
-- Scores are decomposed into interpretable components.
-
-For a publication run, archive:
-
-- Git commit SHA.
-- Python version and environment.
-- Input literature JSONL.
-- Optional dataset catalog JSONL.
-- Output directory.
-- `litdatamatcher.sqlite`.
-- `metrics.jsonl`.
-- Expert review labels, if available.
-
-## Extending Data Sources
-
-Add a new dataset adapter by implementing the `DataSourceAdapter` protocol:
-
-```python
-class MyAdapter:
-    name = "my_repository"
-
-    def search(self, query: str) -> list[DatasetRecord]:
-        ...
-```
-
-Adapters should preserve raw repository metadata in `DatasetRecord.metadata`
-when possible. Live API adapters should include retry, caching, rate-limit,
-schema-drift tests, source timestamps, and provenance before being used for
-production ranking.
-
-Optional scaffolds are already present for OpenAlex literature metadata and
-ClinicalTrials.gov study metadata. Priority future adapters include PubMed, GEO,
-SRA/ENA, MGnify, Qiita, Metabolomics Workbench, dbGaP, and domain-specific
-biomedical repositories.
-
-## Citation And License
-
-Citation metadata is provided in `CITATION.cff`. If this project contributes to
-academic work, cite the software repository and the exact commit or release used
-for the analysis.
-
-The project is distributed under the MIT License. See `LICENSE`.
-
-## Current Limitations
-
-LitDataMatcher is ready as a research-software foundation, not as a validated
-autonomous discovery engine. Important limitations remain:
-
-- Open-question extraction is currently deterministic and should be benchmarked
-  against expert annotations.
-- Ranking weights are interpretable heuristics, not yet calibrated from expert
-  relevance labels.
-- The default dataset catalog is curated and offline; production use requires
-  live source adapters and source-specific validation.
-- The meta-analysis node currently estimates recurrence and evidence strength;
-  it does not yet extract effect sizes or perform statistical meta-analysis.
-- Top-ranked pairs require manual review for study design, consent, license,
-  variable compatibility, confounding, missingness, and statistical power.
-
-## Path To Publication Readiness
-
-The next scientific milestones are:
-
-1. Build an expert-annotated benchmark corpus for open questions and
-   question-dataset relevance.
-2. Report extraction precision, recall, F1, calibration, and error taxonomy.
-3. Add live adapters for at least two major repositories.
-4. Calibrate ranking with expert labels and report precision@k, MRR, and nDCG.
-5. Produce case studies where ranked question-data opportunities are manually
-   validated by domain experts.
-6. Archive all inputs, outputs, environment metadata, and code at a stable
-   release commit.
-
-## Scientific Caveat
-
-LitDataMatcher ranks opportunities. It does not prove that a public dataset can
-answer a question. Its purpose is to accelerate expert review by making
-question-data connections explicit, traceable, and reproducible.
+For academic use, cite the exact commit or release used; see [CITATION.cff](CITATION.cff).
+Contributions should preserve provenance, negative findings, scientific assumptions,
+and compatibility of validated runs.

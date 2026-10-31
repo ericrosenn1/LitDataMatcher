@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "litdatamatcher"
-version = "0.1.0"
+version = "0.4.0"
 description = "A reproducible pipeline for extracting open scientific questions and ranking matching public datasets."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -24,10 +24,21 @@ dependencies = [
   "numpy>=1.24",
   "requests>=2.31",
   "rich>=13.7",
+  "psutil>=7.0",
+  "jsonschema>=4.23",
 ]
 
 [project.optional-dependencies]
+corpus = ["pyarrow>=19.0"]
+runtime = [
+  "torch>=2.4,<3",
+  "transformers>=4.57.6,<5",
+  "safetensors>=0.8,<1",
+]
+structured = ["lm-format-enforcer==0.11.3"]
+report = ["matplotlib>=3.8,<4"]
 nlp = [
+  "torch>=2.4",
   "sentence-transformers>=2.6",
   "transformers>=4.40",
   "spacy>=3.7",
@@ -44,13 +55,19 @@ dev = [
 
 [project.scripts]
 litdatamatcher = "litdatamatcher.cli:main"
+litdatamatcher-controller = "litdatamatcher.controller:main"
+litdatamatcher-v2 = "litdatamatcher.v2:main"
+litdatamatcher-discover = "litdatamatcher.discovery:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["litdatamatcher*"]
 
+[tool.setuptools.package-data]
+litdatamatcher = ["schemas_v2/*.json", "schemas_v2/*.lock", "question_compiler_rules_v1.json", "protocols/*.md"]
+
 [tool.pytest.ini_options]
-testpaths = ["tests", "test_lit_analyzer.py"]
+testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-q"
 

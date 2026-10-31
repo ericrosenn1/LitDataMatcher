@@ -1,0 +1,160 @@
+{
+  "schema_version": "research-engine-campaign-2.0",
+  "campaign": "biomedical-research-engine-20261031",
+  "status": "VALIDATED_LOCAL_RESEARCH_CANDIDATE",
+  "phase": "LOCAL_IMPLEMENTATION_COMPLETE_PUBLIC_RELEASE_SEPARATE",
+  "started_utc": "2026-10-31T11:48:16Z",
+  "soft_target_hours": 24,
+  "scope": "Biomedical research engine: source fidelity, model/retrieval experiments, recoverable multi-node execution, reproducible packaging and evidence.",
+  "specification": "docs/research_campaign_20261031.md",
+  "branch": "codex/research-engine-campaign-20261031",
+  "pull_request": "https://github.com/ericrosenn1/LitDataMatcher/pull/9",
+  "run_root": "C:\\Codex\\LitDataMatcher-v2\\data\\campaign_20261031",
+  "scientific_validity": "NOT_ESTABLISHED: no expert accuracy, calibrated suitability, or untouched-test claim",
+  "preservation": {
+    "original_corpora_and_models_unchanged": true,
+    "reserved_evaluation_data_accessed": false,
+    "supervisor_restarted": false,
+    "paid_services_used": false,
+    "original_incumbent_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
+    "original_incumbent_clean": true,
+    "prior_interface_commit": "07f74c86923612d456085ea25306c40fcbf42be6",
+    "prior_interface_observed_change": "sentences_fixed.csv; left untouched"
+  },
+  "regression": {
+    "status": "PASS",
+    "source_commit": "e966927",
+    "passed": 1317,
+    "skipped": 2,
+    "failures": 0,
+    "xml_seconds": 192.543,
+    "receipt": "local/campaign_20261031/integration-final.xml",
+    "skip_reasons": [
+      "POSIX socket.sendmsg unavailable on Windows",
+      "Windows symlink capability unavailable"
+    ],
+    "baseline_passed": 709,
+    "earlier_windows_path_failure_preserved": "local/campaign_20261031/integration-round-2.xml"
+  },
+  "style": {
+    "status": "PASS",
+    "maintained_python_files": 242,
+    "final_formatting_ast_identity_checked": 8,
+    "one_standard_library_import_order_repair": true,
+    "receipt": "final-integrated-validation-v1/STYLE_VALIDATION.json"
+  },
+  "corpus": {
+    "annual_baseline_shards": 1334,
+    "annual_baseline_upserts": 39994988,
+    "original_full_snapshot_status": "FAIL_PRESERVED",
+    "initial_duplicate_update_shards": 53,
+    "revision_ledger": "PASS",
+    "total_shards": 1621,
+    "upsert_events": 45477637,
+    "deletion_events": 11293,
+    "total_historical_events": 45488930,
+    "unique_current_pmids": null,
+    "current_view_materialized": false,
+    "builder_seconds": 6342.674238299951,
+    "independent_audit": "PASS",
+    "independent_audit_seconds": 105.20417789998464,
+    "final_namespace_repair": "Two real-shard Parquet files byte-identical; two verified partitions reused on resume",
+    "public_summary": "benchmarks/campaign_20261031/pubmed_revision_ledger.json"
+  },
+  "retrieval": {
+    "train_queries": 1333,
+    "development_queries": 175,
+    "initial_documents": 1508,
+    "largest_pool": 100000,
+    "ranking_lists_independently_checked": 3500,
+    "selected_dense_candidate": "epoch-02",
+    "mrr_100k_title_and_abstract": {
+      "bm25": 0.9722448979591837,
+      "pretrained": 0.8550702947845804,
+      "fine_tuned": 0.9078798185941043
+    },
+    "fine_tuned_minus_parent_100k_full": 0.05280952380952386,
+    "fine_tuned_minus_parent_100k_abstract": 0.042322,
+    "strongest_method_all_four_large_pool_conditions": "BM25",
+    "negative_finding": "PubMedQA abstract-only results decrease after fine-tuning",
+    "scope": "Known source-paper recovery on development queries; not dataset suitability",
+    "public_summary": "benchmarks/campaign_20261031/retrieval_scale.json"
+  },
+  "extraction": {
+    "model": "Qwen2.5-7B-Instruct",
+    "profile": "source_literal / 384 tokens",
+    "positive_smoke_documents_passed": 2,
+    "smaller_1_5b_candidate": "FAIL_BOTH_POSITIVE_LITERAL_DOCUMENTS_NOT_PROMOTED",
+    "source_index_candidate": "NOT_PROMOTED",
+    "baseline_claims": 16,
+    "literal_claims": 20,
+    "cases": 30,
+    "pass_cases": 11,
+    "terminal_partial_cases": 19,
+    "failed_cases": 0,
+    "retryable_cases": 0,
+    "views_returned": 45,
+    "candidate_rows": 140,
+    "scientifically_qualified_candidate_rows": 0,
+    "independent_artifact_and_source_span_audit": "PASS",
+    "resume": "30 verified skips; no new attempts; unchanged outputs",
+    "scope": "Post-repair development regression, not untouched evaluation",
+    "public_summary": "benchmarks/campaign_20261031/extraction_literal.json"
+  },
+  "source_discovery": {
+    "status": "PASS",
+    "jobs": 24,
+    "dataset_metadata_records": 170,
+    "literature_metadata_records": 56,
+    "offline_replay": "PASS",
+    "exhaustive_coverage_claim": false
+  },
+  "processed_inspections": {
+    "datasets": [
+      "UCI WDBC",
+      "UCI Cleveland Heart Disease"
+    ],
+    "rows": [
+      569,
+      303
+    ],
+    "missing_cells": [
+      0,
+      6
+    ],
+    "units_not_reported_remain_null": true,
+    "imputation_or_biological_analysis": false,
+    "failed_GEO_attempt_preserved": true
+  },
+  "workflow": {
+    "controller_admission_and_pause": "Repaired; Windows/POSIX fault injection verified",
+    "strict_json_and_stage_artifacts": "Validated",
+    "native_manifest_schema": "Validated including all 30 preserved baseline manifests",
+    "model_asset_policy": "Five existing model directories verified unchanged; loaded assets/references bound",
+    "dependency_identity": "Nine runtime packages bound to cache and qualification identities",
+    "multi_case_execution": "Shared serial model session; per-case journals, bounded retries and resumable stages"
+  },
+  "distribution": {
+    "version": "0.4.0 research preview",
+    "exact_revision_validation": "Recorded in the final handoff release-validation report and FINAL_ACCEPTANCE.json",
+    "source_archive_excludes": "Models, bulk corpus, environments, transient outputs",
+    "local_model_installation": "Explicit runtime and structured extras; pinned model revisions and matching qualification required"
+  },
+  "release_boundary": {
+    "default_branch_merged": false,
+    "deployed": false,
+    "published_to_package_index": false,
+    "owner_approval_required_for_public_release": true,
+    "github_dependency_review": "External prerequisite: enable repository Dependency graph; security workflow retained"
+  },
+  "known_limits": [
+    "No expert-validated extraction accuracy or dataset-suitability estimate.",
+    "All 140 dataset candidates still require scientific inspection.",
+    "Many PubMedQA development queries echo target titles.",
+    "Dense fine-tuning improves its parent but BM25 remains strongest.",
+    "Literal decoder transport and source guards do not establish biological truth.",
+    "Corpus event history is not a unique-current-PMID materialization.",
+    "Python network-denial hooks do not claim OS firewall coverage.",
+    "Hardware-dependent timings are observational, not controlled causal speedups."
+  ]
+}

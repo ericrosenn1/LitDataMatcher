@@ -1,0 +1,262 @@
+{
+  "artifact": "finalized_build_specification",
+  "spec_id": "LITDATAMATCHER_V2_CODEX_BUILD_20260907",
+  "spec_version": "2.0.0",
+  "status": "PACKAGE_QA_PASS",
+  "scope": "Instruction package, schema constraints, source preservation, integrity checker. Not application execution or scientific validation.",
+  "application_built": false,
+  "scheduler_created": false,
+  "repository_changed_by_package_creation": false,
+  "checks_passed": 62,
+  "checks": [
+    {
+      "check": "TASK_STATE schema validity",
+      "status": "PASS"
+    },
+    {
+      "check": "TASK_STATE default template validation",
+      "status": "PASS"
+    },
+    {
+      "check": "RUN_MANIFEST schema validity",
+      "status": "PASS"
+    },
+    {
+      "check": "RUN_MANIFEST default template validation",
+      "status": "PASS"
+    },
+    {
+      "check": "ACCEPTANCE_REPORT schema validity",
+      "status": "PASS"
+    },
+    {
+      "check": "ACCEPTANCE_REPORT default template validation",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject unexecuted template relabeled HARDENED_ALPHA_READY",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject fake expert calibration without evidence",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject enabled supervisor without executed O04 test",
+      "status": "PASS"
+    },
+    {
+      "check": "Synthetic complete readiness envelope accepted structurally",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G01 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G02 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G03 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G04 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G05 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G06 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G07 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G08 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G09 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G10 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G11 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G12 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G13 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G14 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G15 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject hardened claim with G16 NOT_RUN",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: unique_literature_records",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: parsed_full_texts",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: unique_accession_studies",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: sample_profiled_studies",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: inspected_processed_studies",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: external_structured_resources",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: distinct_pilot_contexts",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject coverage below hardened floor: case_dossiers",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject unresolved high-severity functional issue",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject missing refinement requirement: minimum_worker_passes_observed",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject missing refinement requirement: integrated_rounds",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject missing refinement requirement: consecutive_no_material_gain_rounds",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject duplicate workstream ID",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject manual pause labeled running",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject completion without hardened product",
+      "status": "PASS"
+    },
+    {
+      "check": "Reject unexecuted run template relabeled PASS",
+      "status": "PASS"
+    },
+    {
+      "check": "Exactly ten workstreams W01-W10",
+      "status": "PASS"
+    },
+    {
+      "check": "Exactly sixteen product gates G01-G16",
+      "status": "PASS"
+    },
+    {
+      "check": "Benchmark policy Codex-only",
+      "status": "PASS"
+    },
+    {
+      "check": "Automatic development commits/pushes, main protected",
+      "status": "PASS"
+    },
+    {
+      "check": "No added spending or Ultra",
+      "status": "PASS"
+    },
+    {
+      "check": "Not yet scheduled; actual repair required",
+      "status": "PASS"
+    },
+    {
+      "check": "No generated prose em dashes",
+      "status": "PASS"
+    },
+    {
+      "check": "All numbered companion files 00-16 present",
+      "status": "PASS"
+    },
+    {
+      "check": "No obsolete prohibition on commits",
+      "status": "PASS"
+    },
+    {
+      "check": "Source member exact bytes: evidence/AUXILIARY_AGENT_FINAL_DECISION.source.md",
+      "status": "PASS"
+    },
+    {
+      "check": "Source member exact bytes: evidence/BENCHMARK_HANDOFF.source.md",
+      "status": "PASS"
+    },
+    {
+      "check": "Source member exact bytes: evidence/MUSE_RESULTS.source.tsv",
+      "status": "PASS"
+    },
+    {
+      "check": "Source member exact bytes: evidence/OPENCODE_RESULTS.source.tsv",
+      "status": "PASS"
+    },
+    {
+      "check": "Integrity verifier compiles",
+      "status": "PASS"
+    },
+    {
+      "check": "Directory SHA/length/inventory verification",
+      "status": "PASS"
+    },
+    {
+      "check": "ZIP SHA/length/CRC/inventory verification",
+      "status": "PASS"
+    },
+    {
+      "check": "ZIP traversal rejection",
+      "status": "PASS"
+    },
+    {
+      "check": "Altered payload rejection",
+      "status": "PASS"
+    },
+    {
+      "check": "Duplicate ZIP entry rejection",
+      "status": "PASS"
+    },
+    {
+      "check": "Unexpected directory member rejection",
+      "status": "PASS"
+    }
+  ],
+  "test_data_note": "In-memory synthetic readiness envelopes were used only to test schema guards and were not included as application results."
+}

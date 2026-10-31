@@ -1,0 +1,45 @@
+{
+  "schema_version": "question-method-rules-1.0",
+  "question_types": {
+    "comparative": {
+      "analysis_plans": [{"plan_id": "comparative-contrast-v1", "description": "Estimate a contrast between explicitly defined groups without assuming its direction."}],
+      "requirements": [
+        {"rule_id": "comparative-joint-observation", "field": "joint_observation", "expected": true, "essential": true, "dependencies": ["outcome", "intervention"], "unresolved_parameters": ["estimand", "variance", "power"]},
+        {"rule_id": "comparative-outcome-ascertainment", "field": "outcome_ascertainment", "expected": true, "essential": true, "dependencies": ["outcome"]}
+      ]
+    },
+    "associational": {
+      "analysis_plans": [{"plan_id": "association-risk-v1", "description": "Estimate an exposure-outcome association or risk contrast; increased risk is not assumed as an observed result."}],
+      "requirements": [
+        {"rule_id": "association-joint-observation", "field": "joint_observation", "expected": true, "essential": true, "dependencies": ["outcome", "intervention"], "unresolved_parameters": ["confounding strategy", "estimand", "power"]},
+        {"rule_id": "association-temporal-order", "field": "temporal_order", "expected": "exposure_before_outcome", "essential": true, "dependencies": ["intervention", "outcome"]},
+        {"rule_id": "association-outcome-ascertainment", "field": "outcome_ascertainment", "expected": true, "essential": true, "dependencies": ["outcome"]}
+      ]
+    },
+    "longitudinal_change": {
+      "analysis_plans": [{"plan_id": "longitudinal-change-v1", "description": "Estimate within-unit change at two or more ordered measurements."}],
+      "requirements": [
+        {"rule_id": "longitudinal-repeated-units", "field": "repeated_measure_unit", "expected": true, "essential": true},
+        {"rule_id": "longitudinal-temporal-order", "field": "temporal_order", "expected": "ordered_measurements", "essential": true}
+      ]
+    },
+    "prediction": {
+      "analysis_plans": [{"plan_id": "prediction-validation-v1", "description": "Evaluate prediction with predictors preceding a target and a defensible validation partition."}],
+      "requirements": [
+        {"rule_id": "prediction-target", "field": "outcome_ascertainment", "expected": true, "essential": true},
+        {"rule_id": "prediction-timing", "field": "temporal_order", "expected": "predictors_before_target", "essential": true},
+        {"rule_id": "prediction-validation", "field": "validation_partition", "expected": true, "essential": true}
+      ]
+    },
+    "perturbational_mechanistic": {
+      "analysis_plans": [{"plan_id": "perturbation-effect-v1", "description": "Estimate an outcome after a measured perturbation with an appropriate comparison."}],
+      "requirements": [
+        {"rule_id": "perturbation-assignment", "field": "perturbation_assignment", "expected": true, "essential": true},
+        {"rule_id": "perturbation-outcome", "field": "outcome_ascertainment", "expected": true, "essential": true},
+        {"rule_id": "perturbation-joint-observation", "field": "joint_observation", "expected": true, "essential": true}
+      ]
+    },
+    "entity_discovery": {"analysis_plans": [{"plan_id": "entity-discovery-v1", "description": "Identify entities under an explicitly stated measurement and ranking criterion."}], "requirements": []},
+    "literature_only": {"analysis_plans": [{"plan_id": "literature-synthesis-v1", "description": "Retrieve and synthesize source evidence; this is not a dataset-analysis contract."}], "requirements": []}
+  }
+}

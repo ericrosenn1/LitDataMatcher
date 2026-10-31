@@ -8,8 +8,8 @@ why two records matched, and later swap in larger external ontologies.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +29,7 @@ class OntologyConcept:
 
 
 CONCEPTS: tuple[OntologyConcept, ...] = (
+    # Concept labels are used downstream as stable variable names.
     OntologyConcept(
         "LDM:AGE",
         "age",
@@ -61,7 +62,15 @@ CONCEPTS: tuple[OntologyConcept, ...] = (
         "LDM:MICROBIOME_COMPOSITION",
         "microbiome_composition",
         "omics",
-        ("microbiome", "microbiota", "16s", "16s rrna", "metagenomic", "metagenomics", "taxonomic profile"),
+        (
+            "microbiome",
+            "microbiota",
+            "16s",
+            "16s rrna",
+            "metagenomic",
+            "metagenomics",
+            "taxonomic profile",
+        ),
         "Microbial community composition or metagenomic profile.",
     ),
     OntologyConcept(
@@ -96,7 +105,16 @@ CONCEPTS: tuple[OntologyConcept, ...] = (
         "LDM:DISEASE_ACTIVITY",
         "disease_activity",
         "phenotype",
-        ("ibd", "crohn", "crohn's", "ulcerative colitis", "colitis", "inflammation", "remission", "relapse"),
+        (
+            "ibd",
+            "crohn",
+            "crohn's",
+            "ulcerative colitis",
+            "colitis",
+            "inflammation",
+            "remission",
+            "relapse",
+        ),
         "Disease status, activity, severity, remission, or relapse phenotype.",
     ),
     OntologyConcept(
@@ -117,10 +135,106 @@ CONCEPTS: tuple[OntologyConcept, ...] = (
 
 CANONICAL_BY_LABEL = {concept.label: concept for concept in CONCEPTS}
 TERM_TO_LABEL = {
+    # Synonym lookup keeps raw metadata comparable to canonical labels.
     term: concept.label
     for concept in CONCEPTS
     for term in concept.all_terms()
 }
+
+# Deliberately small local contracts.  These are fixtures/interfaces, not a
+# substitute for live ontology services or a claim of comprehensive coverage.
+ENTITY_CONTRACTS = {
+    "gene_protein": {
+        "tp53": ("HGNC:11998", "exact"),
+        "p53": ("HGNC:11998", "synonym"),
+        "il6": ("HGNC:6018", "exact"),
+        "cd3": (("CD3D", "CD3E"), "ambiguous"),
+    },
+    "disease_condition": {
+        "crohn disease": ("MONDO:0005011", "exact"),
+        "ibd": (("MONDO:0005011", "MONDO:0005101"), "ambiguous"),
+    },
+    "intervention_chemical": {
+        "lipopolysaccharide": ("CHEBI:16412", "exact"),
+        "lps": ("CHEBI:16412", "synonym"),
+    },
+    "tissue_cell_type": {
+        "macrophage": ("CL:0000235", "exact"),
+        "gut": (("UBERON:0001155", "UBERON:0002107"), "ambiguous"),
+    },
+    "organism": {
+        "homo sapiens": ("NCBITaxon:9606", "exact"),
+        "human": ("NCBITaxon:9606", "synonym"),
+        "homo sapiens (human)": ("NCBITaxon:9606", "synonym"),
+        "mus musculus": ("NCBITaxon:10090", "exact"),
+        "mouse": ("NCBITaxon:10090", "synonym"),
+        "mus musculus (mouse)": ("NCBITaxon:10090", "synonym"),
+        # Qualified against versioned UniProt taxonomy snapshots. Only these
+        # exact controlled spellings are aliases; arbitrary suffixes stay unknown.
+        "arabidopsis thaliana": ("NCBITaxon:3702", "exact"),
+        "drosophila melanogaster": ("NCBITaxon:7227", "exact"),
+        "drosophila melanogaster (fruit fly)": ("NCBITaxon:7227", "synonym"),
+        "rattus norvegicus": ("NCBITaxon:10116", "exact"),
+        "rattus norvegicus (rat)": ("NCBITaxon:10116", "synonym"),
+    },
+    "assay": {"rna-seq": ("EFO:0002772", "exact"), "rna sequencing": ("EFO:0002772", "synonym")},
+    "experimental_condition": {
+        "lps": ("CHEBI:16412", "synonym"),
+        "untreated": ("LDM:UNTREATED_CONTROL", "exact"),
+    },
+}
+DEPRECATED_ENTITY_IDS = {"HGNC:OLDTP53": "HGNC:11998"}
+
+
+def normalize_entity(
+    value: str, category: str, *, source_available: bool = True
+) -> dict[str, object]:
+    """Return an explicit local identifier mapping; ambiguity never picks a winner."""
+    if not source_available:
+        return {
+            "status": "SOURCE_UNAVAILABLE",
+            "mapping_type": "unresolved",
+            "source": "local_contract_v1",
+            "candidates": [],
+        }
+    raw = str(value or "").strip()
+    if raw in DEPRECATED_ENTITY_IDS:
+        return {
+            "status": "DEPRECATED",
+            "mapping_type": "unresolved",
+            "source": "local_contract_v1",
+            "candidates": [DEPRECATED_ENTITY_IDS[raw]],
+            "deprecated_id": raw,
+        }
+    entry = ENTITY_CONTRACTS.get(category, {}).get(raw.casefold())
+    if not entry:
+        canonical_ids = {
+            candidate
+            for value, _ in ENTITY_CONTRACTS.get(category, {}).values()
+            for candidate in (value if isinstance(value, tuple) else (value,))
+            if ":" in candidate
+        }
+        if raw in canonical_ids:
+            return {
+                "status": "RESOLVED",
+                "mapping_type": "exact",
+                "source": "local_contract_v1",
+                "candidates": [raw],
+            }
+        return {
+            "status": "UNRESOLVED",
+            "mapping_type": "unresolved",
+            "source": "local_contract_v1",
+            "candidates": [],
+        }
+    candidate, mapping_type = entry
+    candidates = list(candidate) if isinstance(candidate, tuple) else [candidate]
+    return {
+        "status": "AMBIGUOUS" if mapping_type == "ambiguous" else "RESOLVED",
+        "mapping_type": mapping_type,
+        "source": "local_contract_v1",
+        "candidates": candidates,
+    }
 
 
 def normalize_token(value: str) -> str:
@@ -144,6 +258,7 @@ def normalize_variable_name(value: str) -> str:
     if spaced in TERM_TO_LABEL:
         return TERM_TO_LABEL[spaced]
     for term, label in TERM_TO_LABEL.items():
+        # Substring matching catches noisy field names but should stay well tested.
         if term in raw or normalize_token(term) in normalized:
             return label
     return normalized
@@ -161,6 +276,7 @@ def infer_concepts_from_text(text: str) -> list[str]:
     lowered = str(text or "").lower()
     hits: list[str] = []
     for concept in CONCEPTS:
+        # Text inference is recall-oriented; later nodes handle feasibility and caveats.
         if any(term in lowered for term in concept.all_terms()):
             hits.append(concept.label)
     return hits
@@ -173,6 +289,7 @@ def explain_variable_match(required: list[str], available: set[str]) -> dict[str
     available_norm = {normalize_variable_name(item) for item in available}
     present = sorted(set(required_norm) & available_norm)
     missing = sorted(set(required_norm) - available_norm)
+    # Questions without explicit variables receive a neutral low-information score.
     coverage = len(present) / max(1, len(set(required_norm))) if required_norm else 0.45
     return {
         "coverage": round(coverage, 3),

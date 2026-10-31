@@ -1,0 +1,35 @@
+{
+  "source_archive": "LitDataMatcher_Auxiliary_Agent_Final_Benchmark_20260907_v2.zip",
+  "source_archive_sha256": "46b219bf458387b3d0841d2cf0af5cdf5e92efdb0dbcc514a88a1fa7737c9f30",
+  "interpretation": "Historical supplied benchmark evidence. Final build policy excludes both Muse and OpenCode; optional source wording does not grant routing authority.",
+  "members": [
+    {
+      "original_member": "docs/v2/AUXILIARY_AGENT_FINAL_DECISION.md",
+      "included_path": "evidence/AUXILIARY_AGENT_FINAL_DECISION.source.md",
+      "sha256": "bc80d65601e800f7fe4641faed13027dbb3f54639fbd5daa1d31c567dae884a9",
+      "size_bytes": 6203,
+      "modified": false
+    },
+    {
+      "original_member": "HANDOFF.md",
+      "included_path": "evidence/BENCHMARK_HANDOFF.source.md",
+      "sha256": "41e5fe2f162e5e20adc523d7eb2ba40a26a9209bf3b214f337eb256c94bea938",
+      "size_bytes": 1392,
+      "modified": false
+    },
+    {
+      "original_member": "benchmarks/muse_delegation/results.tsv",
+      "included_path": "evidence/MUSE_RESULTS.source.tsv",
+      "sha256": "324659535a92015e937e27435a17b45f716f1e0ee1a885573fd504e33f605074",
+      "size_bytes": 1959,
+      "modified": false
+    },
+    {
+      "original_member": "benchmarks/opencode_delegation/results.tsv",
+      "included_path": "evidence/OPENCODE_RESULTS.source.tsv",
+      "sha256": "321ace3bac559a9a8958eb54e006f11016f3d6c78c37cd1ce11db542f9a1fd4f",
+      "size_bytes": 2789,
+      "modified": false
+    }
+  ]
+}

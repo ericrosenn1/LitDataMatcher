@@ -1,0 +1,591 @@
+"""Independent runtime follow-up fixtures; no model loading or scientific execution."""
+
+import copy
+import importlib.util
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from litdatamatcher.scientific_v2 import compile_evidence
+from litdatamatcher.semantic_runtime import parse_model_json, validate_extraction
+from litdatamatcher.v2 import (
+    analyze,
+    evidence_from_source_view,
+    explicit_unresolved_questions,
+    read_rows,
+    rebase_runtime_item,
+    source_chunks,
+    write_rows,
+)
+
+
+@pytest.fixture(autouse=True)
+def deny_network_and_model_loading(monkeypatch):
+    def forbidden(*args, **kwargs):
+        pytest.fail("Runtime review attempted network transport or model loading")
+
+    for target in (
+        "requests.sessions.Session.request",
+        "socket.create_connection",
+        "socket.socket.connect",
+        "litdatamatcher.semantic_runtime.LocalSemanticRuntime._load",
+        "litdatamatcher.semantic_runtime.PretrainedSemanticIndex.__init__",
+    ):
+        monkeypatch.setattr(target, forbidden)
+
+
+def claim(quote, subject="We", predicate="observed", object_text="signal", status="interpretation"):
+    return {
+        "quote": quote,
+        "subject": subject,
+        "predicate": predicate,
+        "object": object_text,
+        "direction": "unknown",
+        "negated": False,
+        "status": status,
+        "context": None,
+        "comparator": None,
+    }
+
+
+@pytest.mark.parametrize(
+    "quote,subject,predicate,object_text",
+    [
+        (
+            "We reviewed 12 studies showing reduced mortality after treatment.",
+            "We",
+            "reviewed",
+            "12 studies",
+        ),
+        (
+            "This meta-analysis included 12 randomized trials of the treatment.",
+            "This meta-analysis",
+            "included",
+            "12 randomized trials",
+        ),
+    ],
+)
+def test_explicit_review_findings_cannot_be_promoted_to_current_experiments(
+    quote, subject, predicate, object_text
+):
+    result = validate_extraction(
+        {
+            "claims": [claim(quote, subject, predicate, object_text, "direct_experiment")],
+            "questions": [],
+        },
+        {"document_id": "fixture-review", "text": quote},
+    )
+    assert not result["claims"]
+    assert result["rejected"]
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"novelty_claim": "The first ever result in this field"},
+        {"expert_validated": True, "calibrated_probability": 0.99},
+    ],
+)
+def test_extra_scientific_claim_fields_cannot_bypass_source_guard(extra):
+    quote = "We observed a signal of 4 units."
+    candidate = {**claim(quote), **extra}
+    result = validate_extraction(
+        {"claims": [candidate], "questions": []}, {"document_id": "fixture-extra", "text": quote}
+    )
+    assert not result["claims"]
+    assert result["rejected"]
+
+
+@pytest.mark.parametrize(
+    "prefix,suffix",
+    [("", ""), ("```json\n", "\n```"), ("```\n", "\n```"), (" \n```json\n", "\n```\t ")],
+)
+def test_complete_transport_fence_preserves_json_content(prefix, suffix):
+    payload = {"claims": [], "questions": [{"quote": "Is the mechanism unknown?"}]}
+    assert parse_model_json(prefix + json.dumps(payload) + suffix) == payload
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '```json\n{"claims": [], "questions": []}',
+        '```json\n{"claims": [], "questions": []}\n```\ntrailing prose',
+        'prefix prose\n```json\n{"claims": [], "questions": []}\n```',
+        '```python\n{"claims": [], "questions": []}\n```',
+        '{"claims": [], "questions": []} {"claims": [], "questions": []}',
+        '```json\n{"claims": [], "questions": [],}\n```',
+    ],
+)
+def test_transport_handling_does_not_repair_non_json_content(raw):
+    with pytest.raises(ValueError):
+        parse_model_json(raw)
+
+
+def source_bound_run(tmp_path, monkeypatch, source_id, *, excluded=False, mode="claim"):
+    import litdatamatcher.semantic_runtime as runtime_module
+
+    executed = []
+
+    class Runtime:
+        model_manifest = {
+            "model_id": "runtime-followup-fixture",
+            "revision": "fixture",
+            "license": "fixture",
+        }
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def extract(self, view, *args, **kwargs):
+            executed.append(view)
+            if mode == "error":
+                raise RuntimeError("Injected inference failure")
+            candidates = [] if mode == "abstain" else [claim(view["text"])]
+            if mode == "reject":
+                candidates[0]["expert_validated"] = True
+            valid = validate_extraction({"claims": candidates, "questions": []}, view)
+            return {
+                **valid,
+                "inference_manifest": {
+                    "origin": "synthetic_test_stub",
+                    "fingerprint": {"prompt_sha256": "fixture"},
+                },
+            }
+
+    class Index:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fit(self, records):
+            self.records = records
+
+        def search(self, *args, **kwargs):
+            return [{"id": row["id"], "score": 0.5} for row in self.records]
+
+    monkeypatch.setattr(runtime_module, "LocalSemanticRuntime", Runtime)
+    monkeypatch.setattr(runtime_module, "PretrainedSemanticIndex", Index)
+    root, out = tmp_path / "root", tmp_path / "run"
+    document = {
+        "document_id": "fixture-source",
+        "title": "Synthetic source",
+        "text": "We observed a signal of 4 units.",
+        "source_locator": "fixture:source",
+        "split_context": "development",
+    }
+    if excluded:
+        document["version_relationships"] = {"is-retracted-by": [{"id": "fixture-notice"}]}
+    write_rows(root / "catalog/literature.jsonl", [document])
+    write_rows(
+        root / "catalog/studies.jsonl",
+        [
+            {
+                "dataset_id": "fixture-study",
+                "title": "Synthetic catalog",
+                "organisms": ["Homo sapiens"],
+                "source_provenance": {"source_url": "fixture:study"},
+            }
+        ],
+    )
+    write_rows(root / "catalog/processed_inspections.jsonl", [])
+    result = analyze(
+        root,
+        out,
+        tmp_path / "unused-model",
+        tmp_path / "unused-embedding",
+        question="Which catalogs are relevant?",
+        question_source_id=source_id,
+        requirements=[{"field": "species", "expected": "human"}],
+        limit=1,
+        chunks=1,
+    )
+    return result, out, executed
+
+
+def test_explicit_source_binding_links_context_without_claiming_direct_support(
+    tmp_path, monkeypatch
+):
+    result, out, executed = source_bound_run(tmp_path, monkeypatch, "fixture-source")
+    assert len(executed) == 1
+    bundle = read_rows(out / "evidence_bundles.jsonl")[0]
+    assert bundle["gap_status"] == "insufficient-coverage"
+    assert bundle["evidence_items"][0]["integration_mode"] == "CONTEXT_ONLY_OR_UNRESOLVED"
+    assert bundle["evidence_items"][0]["answers_question"] is False
+    assert (
+        bundle["novelty_claim"]
+        == "Limited to recorded searched coverage; no global novelty assertion"
+    )
+    dossier = read_rows(out / "scientific_dossiers.jsonl")[0]
+    assert dossier["question"]["source_document_id"] == "fixture-source"
+    assert dossier["review_status"] == "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW"
+    assert result["status"] == "PASS"
+
+
+def test_no_source_binding_does_not_create_unrelated_context(tmp_path, monkeypatch):
+    _, out, _ = source_bound_run(tmp_path, monkeypatch, None)
+    assert read_rows(out / "evidence_bundles.jsonl")[0]["evidence_items"] == []
+    assert read_rows(out / "scientific_dossiers.jsonl") == []
+
+
+@pytest.mark.parametrize("source_id,excluded", [("not-selected", False), ("fixture-source", True)])
+def test_question_source_binding_cannot_reintroduce_unselected_or_retracted_documents(
+    tmp_path, monkeypatch, source_id, excluded
+):
+    with pytest.raises(ValueError, match="selected active documents"):
+        source_bound_run(tmp_path, monkeypatch, source_id, excluded=excluded)
+
+
+@pytest.mark.parametrize("mode,expected_status", [("abstain", "PASS"), ("reject", "PARTIAL")])
+def test_observed_abstention_or_rejection_retains_unasserted_source_context(
+    tmp_path, monkeypatch, mode, expected_status
+):
+    result, out, _ = source_bound_run(tmp_path, monkeypatch, "fixture-source", mode=mode)
+    assert result["status"] == expected_status
+    assert read_rows(out / "claims.jsonl") == []
+    assert read_rows(out / "inferences.jsonl")[0]["origin"] == "synthetic_test_stub"
+    dossier = read_rows(out / "scientific_dossiers.jsonl")[0]
+    assert dossier["extraction_summary"]["status"] == "SOURCE_CONTEXT_ONLY"
+    assert dossier["extraction_summary"]["accepted_model_claims"] == 0
+    assert dossier["unresolvedness"]["gap_status"] == "insufficient-coverage"
+    for item in dossier["source_evidence"]:
+        assert item["evidence_origin"] == "deterministic_source_passage"
+        assert item["claim_status"] == "NOT_ASSERTED"
+        assert item["role"] == "background"
+        assert item["direction"] == "inconclusive"
+        assert item["answers_question"] is False
+        assert item["proposition_id"] is None
+        assert "claim" not in item
+        assert item["evidence_span"]["text"] == "We observed a signal of 4 units."
+    manifest = json.loads((out / "RUN_MANIFEST.json").read_text(encoding="utf-8"))
+    assert bool(manifest["failures"]) == (mode == "reject")
+
+
+def test_thrown_inference_failure_does_not_produce_source_context_dossier(tmp_path, monkeypatch):
+    result, out, _ = source_bound_run(tmp_path, monkeypatch, "fixture-source", mode="error")
+    assert result["status"] == "PARTIAL"
+    assert read_rows(out / "claims.jsonl") == []
+    assert read_rows(out / "inferences.jsonl") == []
+    assert read_rows(out / "scientific_dossiers.jsonl") == []
+
+
+def test_source_passage_retains_known_publication_date_for_temporal_guard():
+    document = {
+        "document_id": "fixture-future",
+        "text": "We observed a signal of 4 units.",
+        "publication_date": "2099-01-01",
+    }
+    item = evidence_from_source_view(document, source_chunks(document)[0])
+    item["related_proposition_id"] = "fixture-proposition"
+    with pytest.raises(ValueError, match="postdates"):
+        compile_evidence(
+            {"question_id": "fixture-q", "proposition_id": "fixture-proposition"},
+            [item],
+            "2026-09-13",
+            [],
+        )
+
+
+@pytest.mark.parametrize(
+    "analyze_status,failure_stages,expected_exit",
+    [
+        ("PASS", [], 0),
+        ("FAIL", ["artifact_validation"], 1),
+        ("PARTIAL", ["source_guard"], 0),
+        ("PARTIAL", ["inference"], 1),
+        ("PARTIAL", ["source_guard", "inference"], 1),
+        ("PARTIAL", ["runtime"], 1),
+        ("PARTIAL", ["artifact_validation"], 1),
+    ],
+)
+def test_case_controller_never_reports_pass_for_failed_analysis_outputs(
+    tmp_path, monkeypatch, analyze_status, failure_stages, expected_exit
+):
+    spec = importlib.util.spec_from_file_location(
+        "runtime_review_case_controller",
+        Path(__file__).parents[1] / "scripts/v2/run_final_cases.py",
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    captured_hooks = []
+    monkeypatch.setattr(module.sys, "addaudithook", captured_hooks.append)
+
+    class SocketProbe:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def connect(self, address):
+            captured_hooks[0]("socket.connect", address)
+
+    monkeypatch.setattr(module.socket, "socket", SocketProbe)
+    monkeypatch.setattr(
+        module.subprocess, "check_output", lambda *args, **kwargs: "fixture-source-commit"
+    )
+    root = tmp_path / "case-root"
+    root.mkdir()
+    document = root / "document.json"
+    document.write_text(json.dumps({"source_locator": "fixture:document"}), encoding="utf-8")
+    cases = [
+        {
+            "case_id": f"fixture-case-{i}",
+            "domain": "fixture",
+            "question": "Fixture question",
+            "requirements": [],
+            "document_id": "fixture-document",
+            "document": module.file_ref(document),
+        }
+        for i in range(6)
+    ]
+    (root / "PROTOCOL.json").write_text(json.dumps({"cases": cases, "chunks": 1}), encoding="utf-8")
+    write_rows(root / "catalog/studies.jsonl", [])
+    dossier = {
+        "question": {
+            "question_id": "fixture-q",
+            "question": "Fixture question",
+            "source_evidence_ids": ["fixture-e"],
+        },
+        "source_evidence": [{"evidence_id": "fixture-e", "source_locator": "fixture:document"}],
+        "contradictions": [],
+        "candidate_dataset": {"dataset_id": "fixture-study"},
+        "compatibility": {"status": "UNKNOWN"},
+        "unresolvedness": {
+            "novelty_claim": "Limited to recorded searched coverage; no global novelty assertion"
+        },
+        "ranking_rationale": ["Synthetic controller fixture"],
+        "review_status": "SOURCE_ASSISTED_PENDING_EXPERT_REVIEW",
+    }
+
+    def injected_analysis(case_root, run, *args, **kwargs):
+        write_rows(run / "scientific_dossiers.jsonl", [dossier])
+        failures = [
+            {"stage": stage, "description": "Synthetic controller failure probe"}
+            for stage in failure_stages
+        ]
+        for failure in failures:
+            if failure["stage"] == "source_guard":
+                failure["rejections"] = [
+                    {"index": 0, "kind": "claim", "reason": "Synthetic source guard rejection"}
+                ]
+        (run / "RUN_MANIFEST.json").write_text(
+            json.dumps({"execution_status": analyze_status, "failures": failures}), encoding="utf-8"
+        )
+        return {"status": analyze_status, "run": str(run)}
+
+    monkeypatch.setattr(module, "analyze", injected_analysis)
+    output = tmp_path / "case-output"
+    result = module.execute(
+        SimpleNamespace(
+            root=root,
+            out=output,
+            replay=False,
+            model=tmp_path / "unused-model",
+            embeddings=tmp_path / "unused-embedding",
+        )
+    )
+    assert result == expected_exit
+    receipt = json.loads((output / "CASE_EXECUTION.json").read_text(encoding="utf-8"))
+    assert (receipt["status"] == "PASS") == (expected_exit == 0)
+
+
+@pytest.mark.parametrize(
+    "layout,expected_source_questions",
+    [("same_span", 1), ("different_sources", 2), ("different_offsets", 2), ("user_origin", 1)],
+)
+def test_source_question_dedup_retains_origins_without_merging_other_identities(
+    tmp_path, monkeypatch, layout, expected_source_questions
+):
+    import litdatamatcher.semantic_runtime as runtime_module
+
+    statement = "Further research is needed to resolve dose effects."
+    source_documents = [
+        {
+            "document_id": "fixture-question-a",
+            "title": "Synthetic future work",
+            "text": statement,
+            "source_locator": "fixture:question-a",
+            "source_snapshot": {"sha256": "fixture-source-hash-a"},
+            "split_context": "development",
+        }
+    ]
+    if layout == "different_sources":
+        source_documents.append(
+            {
+                **source_documents[0],
+                "document_id": "fixture-question-b",
+                "source_locator": "fixture:question-b",
+                "source_snapshot": {"sha256": "fixture-source-hash-b"},
+            }
+        )
+    elif layout == "different_offsets":
+        source_documents[0]["text"] = statement + "\n" + statement
+        source_documents[0]["sections"] = [
+            {"start": 0, "end": len(statement), "section": "Results"},
+            {"start": len(statement) + 1, "end": 2 * len(statement) + 1, "section": "Discussion"},
+        ]
+
+    expected_members = {}
+    for document in source_documents:
+        for view in source_chunks(document, max_chunks=2):
+            from litdatamatcher.semantic_runtime import digest
+
+            view_id = digest(view)
+            local = validate_extraction(
+                {"claims": [], "questions": [{"quote": statement}]}, dict(view, document_id=view_id)
+            )["questions"][0]
+            model_question = rebase_runtime_item(local, document, view, view_id)
+            source_question = explicit_unresolved_questions(document, view)[0]
+            expected_members[
+                (document["document_id"], model_question["evidence_span"]["start"])
+            ] = {model_question["question_id"], source_question["question_id"]}
+
+    class Runtime:
+        model_manifest = {
+            "model_id": "question-identity-fixture",
+            "revision": "fixture",
+            "license": "fixture",
+        }
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def extract(self, view, *args, **kwargs):
+            valid = validate_extraction({"claims": [], "questions": [{"quote": statement}]}, view)
+            return {
+                **valid,
+                "inference_manifest": {
+                    "origin": "synthetic_test_stub",
+                    "fingerprint": {"prompt_sha256": "fixture-question-prompt"},
+                },
+            }
+
+    class Index:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def fit(self, records):
+            self.records = records
+
+        def search(self, *args, **kwargs):
+            return [{"id": row["id"], "score": 0.5} for row in self.records]
+
+    monkeypatch.setattr(runtime_module, "LocalSemanticRuntime", Runtime)
+    monkeypatch.setattr(runtime_module, "PretrainedSemanticIndex", Index)
+    root, out = tmp_path / "question-root", tmp_path / "question-run"
+    write_rows(root / "catalog/literature.jsonl", source_documents)
+    write_rows(
+        root / "catalog/studies.jsonl",
+        [
+            {
+                "dataset_id": "fixture-study",
+                "title": "Synthetic study",
+                "source_provenance": {"source_url": "fixture:study"},
+            }
+        ],
+    )
+    write_rows(root / "catalog/processed_inspections.jsonl", [])
+    analyze(
+        root,
+        out,
+        tmp_path / "unused-model",
+        tmp_path / "unused-embedding",
+        question=statement if layout == "user_origin" else None,
+        question_source_id=source_documents[0]["document_id"] if layout == "user_origin" else None,
+        limit=2,
+        chunks=2,
+    )
+    questions = read_rows(out / "questions.jsonl")
+    source_questions = [question for question in questions if question["origin"] != "user"]
+    assert len(source_questions) == expected_source_questions
+    assert sum(question["origin"] == "user" for question in questions) == (layout == "user_origin")
+    # A future-work sentence with no target relationship stays source-linked,
+    # but is explicitly underdetermined rather than being ranked against an
+    # unrelated synthetic catalog.
+    assert read_rows(out / "matches.jsonl") == []
+    outcomes = read_rows(out / "candidate_outcomes.jsonl")
+    assert len(outcomes) == len(questions)
+    assert {item["classification"] for item in outcomes} == {"NO_ASSESSABLE_CONTRACT"}
+    for question in source_questions:
+        key = (question["source_document_id"], question["evidence_span"]["start"])
+        assert set(question["extraction_origins"]) == {
+            "explicit_unresolved",
+            "explicit_unresolved_source",
+        }
+        assert set(question["original_question_ids"]) == expected_members[key]
+        records = question["source_question_records"]
+        assert {record["question_id"] for record in records} == expected_members[key]
+        model_record = next(
+            record for record in records if record["origin"] == "explicit_unresolved"
+        )
+        assert model_record["inference_fingerprint"]["prompt_sha256"] == "fixture-question-prompt"
+        assert model_record["source_provenance"]["source_snapshot"]["sha256"].startswith(
+            "fixture-source-hash-"
+        )
+        assert all(
+            record["source_document_id"] == question["source_document_id"]
+            and record["evidence_span"] == question["evidence_span"]
+            for record in records
+        )
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"requirements": [{"field": "paired", "expected": True}]},
+        {"conditions": {"dose": "high"}},
+        {"question": "Does a different dose have an effect?"},
+        {"evidence_span": {"start": 0, "end": 1, "text": "Further research is needed."}},
+    ],
+)
+def test_question_dedup_never_merges_different_scope_or_invalid_span(change):
+    from litdatamatcher.v2 import deduplicate_questions
+
+    text = "Further research is needed."
+    first = {
+        "question_id": "fixture-model-q",
+        "question": text,
+        "origin": "explicit_unresolved",
+        "source_document_id": "fixture-source",
+        "evidence_span": {"start": 0, "end": len(text), "text": text},
+        "requirements": [],
+        "conditions": {},
+    }
+    second = {
+        **copy.deepcopy(first),
+        "question_id": "fixture-source-q",
+        "origin": "explicit_unresolved_source",
+        **change,
+    }
+    original = copy.deepcopy([first, second])
+    assert deduplicate_questions([first, second]) == original
+    assert [first, second] == original
+
+
+def test_question_dedup_is_idempotent_and_preserves_original_records():
+    from litdatamatcher.v2 import deduplicate_questions
+
+    text = "Further research is needed."
+    first = {
+        "question_id": "fixture-model-q",
+        "question": text,
+        "origin": "explicit_unresolved",
+        "source_document_id": "fixture-source",
+        "evidence_span": {"start": 0, "end": len(text), "text": text},
+        "requirements": [],
+        "conditions": {},
+        "inference_fingerprint": {"prompt_sha256": "fixture-prompt"},
+    }
+    second = {
+        **copy.deepcopy(first),
+        "question_id": "fixture-source-q",
+        "origin": "explicit_unresolved_source",
+    }
+    original = copy.deepcopy([first, second])
+    merged = deduplicate_questions([first, second])
+    assert len(merged) == 1
+    assert merged[0]["question_id"] == first["question_id"]
+    assert merged[0]["source_question_records"] == original
+    assert deduplicate_questions(merged + [first, second]) == merged
+    assert [first, second] == original

@@ -1,0 +1,7 @@
+# Round 3 and round 4 refinement review
+
+The two post-integration development reports are byte-different because their elapsed times differ, but their normalized JSON payloads are identical after removing `elapsed_seconds`: normalized SHA256 `ea83e599124d0cc640c21b19d959b92d0edfca9a32ef144d7b89a39b2da3bf14`. Raw report hashes are round 3 `e444f321f6c983a36bac717bd2a69155012ef972063c0f54756929fa827a0257` and round 4 `a6f568f2e018cf3a7f81a841fa4561d1d1f7642dea4ee6e350b36f15045fe304`.
+
+All recorded known-denominator metrics are unchanged: primary compatibility-aware Recall@10 remains 20/20, invalid top remains 0/20, field correctness remains 100/100, and all lexical and MiniLM comparison values are identical. No newly fixed high-severity defect is recorded. The reports provide elapsed seconds (5.0519 versus 5.0014), not repeated median-latency measurements, so they cannot support the protocol's 10% median-latency material-gain pathway.
+
+Accordingly, the pair meets the numeric **no-material-gain** condition: no consequential defect, no >=2 percentage-point known-denominator metric change, and no demonstrated >=10% median-latency improvement. It does not satisfy the protocol's stopping/holdout-execution condition by itself. The protocol explicitly says that repeated identical passing tests are not a pass and requires substantive evaluations with new discriminating evidence, alongside the remaining linkage, calibration, live/replay, and product gates.

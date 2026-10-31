@@ -1,5 +1,10 @@
 # Installation and CLI
 
+The primary research path is the local `litdatamatcher-v2` engine. Follow the
+[research workflow](research_workflow.md) for source discovery, model inference,
+typed question compilation, and recoverable batch runs. The commands below
+also retain the deterministic reference pipeline for lightweight checks.
+
 LitDataMatcher requires Python 3.10 or newer. The deterministic core does not
 require a GPU, a private corpus, model weights, or live network access.
 
@@ -7,7 +12,7 @@ require a GPU, a private corpus, model weights, or live network access.
 python -m venv .venv
 .venv\Scripts\activate
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,corpus]"
 ```
 
 Run the built-in offline demo:
@@ -27,3 +32,22 @@ litdatamatcher run --input test_input.jsonl --out run/full --top-n 100
 Optional NLP and machine-learning extras are intentionally separate from the
 core install. Their use does not change the requirement for provenance,
 inspection, and expert review of ranked outputs.
+
+For the local Transformers runtime and source-constrained decoding:
+
+```bash
+python -m pip install -e ".[runtime,structured]"
+```
+
+Model preparation is explicit, and runtime inference uses only verified local
+files. Consult the [model guide](campaign_20261031/model_source_schema.md) for
+identity, hardware, offline, and qualification details. Install `.[report]` to
+recreate the research figures with Matplotlib.
+The current development-qualified
+[literal profile](campaign_20261031/model_source_literal.md) must use the same
+device, precision, and output-token budget in qualification and analysis.
+
+Source builds require setuptools 77.0.3 or newer, matching the declared SPDX
+license expression and license-file metadata. See the
+[setuptools license guide](https://setuptools.pypa.io/en/stable/userguide/license_migration.html).
+Build isolation installs the declared backend automatically.

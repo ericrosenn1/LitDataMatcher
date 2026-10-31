@@ -1,133 +1,126 @@
 # Additive PubMed revision ledger
 
-The original 2026 corpus and its failed full-snapshot receipt remain unchanged.
-`pubmed_revision_ledger.py` creates separate Parquet sidecars that recover citation
-version, revision-date, deletion, and event-order information from the raw XML.
-It does not silently replace the old normalization or declare the full corpus
-qualified after a small pilot.
+The complete ledger and its independent audit passed for the supplied 2026
+baseline/update snapshot. The ledger preserves **45,488,930 historical events**
+in separate Parquet sidecars. It does not overwrite the original corpus,
+retroactively change its snapshot's **FAIL** status, or materialize a global
+current-version view.
 
-## Identity and lifecycle rules
+The compact [public result record](../../benchmarks/campaign_20261031/pubmed_revision_ledger.json)
+contains exact counts, implementation identities, and source-receipt hashes.
 
-NLM describes a versioned citation by the combination of PMID and version, and
-notes that an individual version can be deleted. See
-[Versioning in PubMed](https://www.nlm.nih.gov/pubs/techbull/jf12/jf12_pm_versioning.html).
-NLM's archive instructions apply baseline files before updates and handle
-replacement and deletion events. See
-[local archive maintenance](https://www.nlm.nih.gov/dataguide/edirect/archive.html)
-and [DeleteCitation](https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/240101/el-DeleteCitation.html).
+## Measured full-run results
 
-Every upsert carries its original zero-based `legacy_row_index`; deletion events
-have no legacy row. The sidecar preserves the source `Version` string and its
-numeric interpretation, `DateRevised` fields, source filename, global shard order,
-and zero-based event index. Complete valid revision dates also have an ISO value;
-incomplete dates remain null with the original fields retained.
-
-The pure `resolve_pmid_events` function retains all input events and chooses the
-highest numeric active version, then the latest source event within that version.
-It does not sort versions lexically or use row order to prefer version 1 over 2.
-An explicit-version deletion removes that version. An unversioned deletion is a
-PMID-wide tombstone under the ingestion rule; no missing version is invented.
-After it, only new upserts may restore an active citation. Missing-version
-upserts and malformed deletion versions remain unresolved, with no asserted
-selected record. Revision dates are preserved, not guessed or substituted for
-the declared source-event ordering.
-
-## Verification and recovery
-
-- The parser compares the **entire ordered PMID sequence** from raw citation
-  records with the existing Parquet PMID column, including repeated identifiers.
-- Raw compressed MD5 must match the acquisition checksum; raw SHA-256 and current
-  normalized-file SHA-256 are retained. Original file changes during processing
-  fail validation.
-- Completed XML root children are cleared after their data are emitted. Parquet
-  writes and reads use 4,096-row batches; the full XML tree is not accumulated.
-- A verified Parquet file and its receipt are published together by an atomic
-  same-filesystem directory rename. Failed staging and corrupt prior derivatives
-  remain in task-owned `failed/` and `quarantine/` directories.
-- Resume rechecks raw and normalized hashes, implementation fingerprint, sidecar
-  hash/schema/counts, and row/event continuity. It skips XML parsing only for
-  already verified partitions. A process lease prevents two writers using the
-  same output directory.
-- Workers default to two and are limited to four. Interrupts cancel queued work
-  and wait only for active partitions; verified partitions remain resumable.
-- Any explicit shard filter or `--max-shards` produces `PARTIAL`, even if every
-  selected shard passes. A full request covers baseline and update shards from
-  the supplied snapshot. Every invocation retains an immutable run receipt.
-
-## Bounded real-source pilot
-
-Only `pubmed26n0001.xml.gz` and `pubmed26n1339.xml.gz` were parsed. The final pilot
-directory is
-`C:\Codex\LitDataMatcher-v2\data\campaign_20261031\revision-ledger-pilot-v2`.
-
-| Result | Observed |
+| Measure | Observed |
 | --- | ---: |
-| Full raw/Parquet sequences verified | 2 shards |
-| Citation upserts preserved | 60,000 |
-| Deletion events preserved | 13 |
-| Fresh two-worker execution | 19.51 seconds |
-| Verified resume, no XML reparse | 0.86 seconds |
-| Synthetic contract tests | 17 passed |
+| Verified shards | 1,621 / 1,621 |
+| Baseline / update shards | 1,334 / 287 |
+| Citation upsert events | 45,477,637 |
+| Deletion events | 11,293 |
+| Total events | 45,488,930 |
+| Failed shards / audit errors | 0 / 0 |
+| Unknown versions / unresolved revision dates | 0 / 0 |
+| Full builder elapsed | 6,342.674 seconds (105.71 minutes) |
+| Independent audit elapsed | 105.204 seconds |
 
-The known repeated PMID `34621506` occurs at legacy rows 6,278 and 6,282 with
-versions 2 and 1 respectively. Both were retained; the resolver selected version
-2 at row 6,278. The original Parquet remains intact. The prior full snapshot
-remains `FAIL`; this pilot's status is `PARTIAL` with no failed selected shards.
+All observed deletions were version-specific. The audit found zero PMID-wide
+or unresolved-version deletion events in this snapshot. These are measured
+properties of these files, not assumptions about future inputs. Counts describe
+**events**, not unique active citations.
 
-Fresh-run evidence: `RUN_RECEIPT_1793448004466102000.json`.
-Resume evidence: `RUN_RECEIPT_1793448012771005900.json`.
-Test evidence: `ledger_tests.xml`. Targeted Ruff checks also passed.
+The full build used two spawned process workers, with worker-pool startup
+included in its elapsed timer and no reused partitions. It ran alongside other
+local research work; this is a single-machine observation, not a throughput
+promise. The earlier two-shard extrapolation is superseded by this measured
+full-run duration.
 
-A naive row-count extrapolation from this two-shard mix is about four hours for
-45.5 million input rows at two workers. This is only an order-of-magnitude
-planning estimate: XML size, record complexity, storage load, and worker
-contention vary. No full-corpus parser was started by this workstream, and a
-larger worker count has not been benchmarked.
+The frozen full run used builder SHA-256
+`a02fe627a8dbe8526f8405874320aaa727f46d3cdc9822c2867c6d7a3fbcdf70`.
+Its manifest SHA-256 is
+`d2b17324ebe48fdd577df3687e75e1c84d18553d78c49114a74a97946ddfdc3f`;
+the matching immutable run receipt is `RUN_RECEIPT_1793454538150667800.json`.
+The original corpus-snapshot receipt remains unchanged and reports FAIL.
 
-## Commands
+## What is retained
 
-Run from the changed checkout using the existing environment with PyArrow.
-The output must be outside the source corpus. Repeating the same command resumes
-only verified matching partitions.
+Each upsert has its original zero-based `legacy_row_index`. Deletions have no
+legacy citation row. Every event retains PMID, raw `Version`, parsed numeric
+version, raw `DateRevised` fields, any valid ISO revision date, source shard,
+source class, global shard order, and zero-based event index. Incomplete dates
+or unknown versions remain explicit rather than being filled in.
 
-```powershell
-$env:PYTHONPATH = (Get-Location).Path
-& C:\Codex\LitDataMatcher-v2\env\Scripts\python.exe scripts/campaign_20261031/build_revision_ledger.py `
-  --corpus-root D:\LitDataMatcher-Corpora `
-  --snapshot C:\Codex\LitDataMatcher-v2\data\campaign_20261031\corpus-snapshot-v1\CORPUS_SNAPSHOT.json `
-  --out C:\Codex\LitDataMatcher-v2\data\campaign_20261031\revision-ledger-full `
-  --workers 2 --executor process
+NLM describes versioned citations using the PMID/version pair and permits
+individual versions to be deleted. See [Versioning in PubMed](https://www.nlm.nih.gov/pubs/techbull/jf12/jf12_pm_versioning.html).
+Its [archive-maintenance guide](https://www.nlm.nih.gov/dataguide/edirect/archive.html)
+processes baseline files before updates. The [DeleteCitation definition](https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/240101/el-DeleteCitation.html)
+also allows a deletion for a record not previously distributed.
+
+The separate `resolve_pmid_events` function retains history, then selects the
+highest active numeric version and the latest source event within that version.
+An explicit-version deletion removes that version. Under the project's ingestion
+policy, a genuinely unversioned deletion is a PMID-wide tombstone; malformed
+version strings remain unresolved. Only later observed upserts can restore a
+record after a tombstone. Missing-version upserts do not acquire an invented
+version. Revision dates do not replace source-event ordering.
+
+**No global current-view resolution was performed by this build or audit.** A
+consumer must group events by PMID and apply an explicit resolution policy,
+retaining the source/version lineage in the resulting derivative.
+
+## Verification and preservation
+
+The builder streamed the entire raw XML citation sequence and compared every
+upsert PMID with the original normalized Parquet order, including repeated
+identifiers. It checked acquisition MD5, retained raw and normalized SHA-256,
+and atomically published each sidecar with its receipt. Streaming root clearing
+and bounded Parquet batches avoid retaining the full XML tree in memory.
+
+The independent auditor uses its own validation code, not the builder's
+validator. It checked every sidecar and shard receipt, the final manifest and
+snapshot binding, exact Arrow schemas/counts, event order, legacy-row continuity,
+raw/parsed versions, revision dates, and deletion fields. It compared the current
+normalized PMID column in full and rechecked **6,484** raw/legacy/sidecar/receipt
+stat identities at completion. All 1,621 partitions share the single recorded
+builder implementation hash.
+
+A further review rechecked 1,631 control JSON files and aggregate arithmetic,
+with status PASS_WITH_LIMITATIONS. This additional review did not repeat the
+full Parquet scan or reparse raw XML.
+
+The independent audit does **not** reparse or rehash raw XML, or independently
+rehash non-PMID legacy columns. It verifies recorded acquisition bindings and
+current source size/timestamps. The original snapshot FAIL, all earlier pilot
+receipts, and the full-run artifacts remain preserved. Computational integrity
+is not biomedical truth, source completeness, or downstream dataset suitability.
+
+## Later path/format compatibility check
+
+After the full build, a Windows path-normalization repair and formatting change
+were checked in a **new two-shard pilot**. Its 60,000 upserts and 13 deletions were
+byte-identical to the corresponding full-run sidecars. Fresh execution took
+10.063 seconds; verified resume reused both partitions in 0.960 seconds. Its
+independent audit took 0.412 seconds and correctly reported PARTIAL coverage.
+
+That check has a different implementation fingerprint. It does not imply the
+whole ledger was rerun under the new code. Full and pilot identities, timing
+scopes, and the byte-equivalence receipt are separated in the public JSON.
+
+## Reproduction commands
+
+Use the matching checkout/environment with PyArrow; see
+[reproducibility](../reproducibility.md). Replace the uppercase path tokens with
+explicit local paths. Preserve validated outputs; use a new directory for a
+new implementation or experiment.
+
+```text
+python scripts/campaign_20261031/build_revision_ledger.py --corpus-root CORPUS_ROOT --snapshot CORPUS_SNAPSHOT.json --out NEW_LEDGER_DIRECTORY --workers 2 --executor process
+python scripts/campaign_20261031/audit_revision_ledger.py --corpus-root CORPUS_ROOT --snapshot CORPUS_SNAPSHOT.json --ledger LEDGER_DIRECTORY --report NEW_AUDIT.json
 ```
 
-Add `--max-shards 2 --shard pubmed26n0001.xml.gz --shard pubmed26n1339.xml.gz`
-and use a new pilot output path for the bounded check. Full sidecar construction
-does not itself perform a global current-version materialization; consumers can
-group sidecar events by PMID and apply the documented pure resolver. Accessions,
-version lineage, and deletion events must remain available in that derivative.
-
-## Optional spawned-process executor
-
-`--executor process` uses a top-level worker and an explicit `spawn` context,
-including on Windows. Arrow worker CPU/I/O pools are each bounded to one.
-The compatibility default remains `thread`; there is no silent executor fallback.
-
-The same two real shards were run once per mode with two workers, warm filesystem
-state, distinct output directories, and identical source/code checksums:
-
-| Mode | Elapsed including pool startup | Result |
-| --- | ---: | --- |
-| Thread | 17.77 s | 60,000 upserts, 13 deletions |
-| Spawned process | 11.34 s | 60,000 upserts, 13 deletions |
-| Process verified resume | 0.91 s | Both partitions reused |
-
-Process execution was 1.57 times as fast in this bounded comparison. Both Parquet
-files were byte-identical between modes, and all logical rows and source input
-hashes matched. Twenty tests passed, including actual process-mode publication,
-resume, and worker-failure reporting. Parent CLI/module import time is outside
-the recorded timer; process pool spawn and child initialization are included.
-
-The fastest **measured** setting is `--workers 2 --executor process`. Four workers
-and a full 1,621-shard workload have not been benchmarked; the two-shard result is
-not a full-scale guarantee. The complete comparison receipt is
-`C:\Codex\LitDataMatcher-v2\data\campaign_20261031\revision-ledger-process-v3\EXECUTOR_COMPARISON.json`;
-the source-preserving thread run is in sibling `revision-ledger-thread-v3`.
+Resume construction only with matching source and implementation identities.
+Verified partitions are reused; corrupt derivatives are quarantined with their
+history retained. The builder defaults to two workers, allows at most four, and
+does not silently switch executors. Any explicit shard filter or `--max-shards`
+is PARTIAL. Audit a pilot only with `--allow-partial`; leave that flag off for a
+full-ledger acceptance check. Reports must use new paths outside both protected
+input roots.

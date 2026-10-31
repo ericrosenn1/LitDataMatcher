@@ -1,0 +1,194 @@
+{
+  "schema_version": "public-pubmed-revision-ledger-evidence-v1",
+  "status": "PASS_ADDITIVE_EVENT_LEDGER",
+  "scope": "Complete baseline-and-updates event history for the supplied immutable snapshot; not a current PubMed view.",
+  "raw_source_text_included": false,
+  "original_snapshot": {
+    "status": "FAIL",
+    "preserved_unchanged": true,
+    "store_uuid": "1f5ee098-3e86-4b85-a8d8-49cc3bcdc906",
+    "file_sha256": "bf51b2cecab29c5ea6b3423e3b94fb2e5b12a6a628035244424e0f0769fc8581",
+    "snapshot_identity_sha256": "5f3a79cbf79995928bf4e0fe6cc962adf8f0d631ff9beed8008cb42ec796be81",
+    "normalized_rows": 45477637,
+    "receipt": {
+      "artifact": "corpus-snapshot-v1/CORPUS_SNAPSHOT.json",
+      "sha256": "bf51b2cecab29c5ea6b3423e3b94fb2e5b12a6a628035244424e0f0769fc8581",
+      "size_bytes": 942757
+    }
+  },
+  "full_build": {
+    "status": "PASS",
+    "ledger_version": "pubmed-revision-ledger-1.0",
+    "shards": {
+      "available": 1621,
+      "selected": 1621,
+      "verified": 1621,
+      "baseline": 1334,
+      "updates": 287
+    },
+    "upserts": 45477637,
+    "deletions": 11293,
+    "total_events": 45488930,
+    "failed_shards": 0,
+    "reused_shards": 0,
+    "workers": 2,
+    "executor": "process",
+    "process_start_method": "spawn",
+    "elapsed_seconds": 6342.674238299951,
+    "elapsed_minutes": 105.71123730499919,
+    "includes_worker_pool_startup": true,
+    "implementation_sha256": "a02fe627a8dbe8526f8405874320aaa727f46d3cdc9822c2867c6d7a3fbcdf70",
+    "source_commit_recorded": "2f10e918a8ef14a784a7e390f16e3edfd8bec214",
+    "manifest": {
+      "artifact": "revision-ledger-full-v1/LEDGER_MANIFEST.json",
+      "sha256": "d2b17324ebe48fdd577df3687e75e1c84d18553d78c49114a74a97946ddfdc3f",
+      "size_bytes": 1773701
+    },
+    "immutable_run_receipt": {
+      "artifact": "revision-ledger-full-v1/RUN_RECEIPT_1793454538150667800.json",
+      "sha256": "d2b17324ebe48fdd577df3687e75e1c84d18553d78c49114a74a97946ddfdc3f",
+      "size_bytes": 1773701
+    },
+    "preserved_source": {
+      "artifact": "final-integrated-validation-v1/full_ledger_builder_source.py",
+      "sha256": "a02fe627a8dbe8526f8405874320aaa727f46d3cdc9822c2867c6d7a3fbcdf70",
+      "size_bytes": 21185
+    },
+    "source_record": {
+      "artifact": "final-integrated-validation-v1/FULL_LEDGER_SOURCE.json",
+      "sha256": "b5837ff0869478e8b3b4976b8c2801c6dd192f0ecd076ff2ad4c755ce1994733",
+      "size_bytes": 323
+    }
+  },
+  "independent_audit": {
+    "status": "PASS",
+    "audit_version": "independent-revision-ledger-audit-1.0",
+    "method": "standalone_vectorized_parquet_no_builder_validator",
+    "scope": "full_snapshot",
+    "coverage": {
+      "available": 1621,
+      "selected": 1621,
+      "verified": 1621
+    },
+    "totals": {
+      "events": 45488930,
+      "upserts": 45477637,
+      "deletions": 11293,
+      "unknown_version": 0,
+      "unresolved_date_revised": 0,
+      "pmid_wide_deletions": 0,
+      "version_specific_deletions": 11293,
+      "unresolved_deletions": 0
+    },
+    "errors": 0,
+    "batch_size": 65536,
+    "stat_identities_rechecked": 6484,
+    "unfingerprinted_partitions": 0,
+    "implementation_variants": [
+      {
+        "sha256": "a02fe627a8dbe8526f8405874320aaa727f46d3cdc9822c2867c6d7a3fbcdf70",
+        "partitions": 1621
+      }
+    ],
+    "elapsed_seconds": 105.20417789998464,
+    "auditor_sha256": "0831d9776e4d3fb902cdb6d4d7973d517836ede3caff27e78c62a43da80f536a",
+    "completed_utc": "2026-10-31T13:50:46.937215+00:00",
+    "receipt": {
+      "artifact": "revision-ledger-independent-full-audit-v1/AUDIT.json",
+      "sha256": "39d54dfcbf8ab6e6f2df97199d0b48d7c63746b3a997b365a042a886f959ff43",
+      "size_bytes": 1369939
+    }
+  },
+  "postbuild_path_and_format_validation": {
+    "scope": "Two real shards under the later path/format implementation, not a rerun of the complete ledger.",
+    "status": "PARTIAL_PILOT_WITH_PASS_EQUIVALENCE",
+    "shards": 2,
+    "upserts": 60000,
+    "deletions": 13,
+    "fresh_seconds": 10.063268100027926,
+    "resume_seconds": 0.9598614999558777,
+    "verified_reused_shards": 2,
+    "independent_audit_seconds": 0.41227720002643764,
+    "byte_identical_sidecars": 2,
+    "implementation_variants": [
+      {
+        "sha256": "de92a7703a80bd8b46620a4b47a0774c6d236d5951de18a8d1bc3867042bb74e",
+        "partitions": 2
+      }
+    ],
+    "fresh_receipt": {
+      "artifact": "revision-ledger-final-pilot-v1/RUN_RECEIPT_1793454582860870200.json",
+      "sha256": "982cdc831ee0949f153673ca0c86da9b5d772e3769770a1d45bad3cea5bab5ac",
+      "size_bytes": 2957
+    },
+    "resume_receipt": {
+      "artifact": "revision-ledger-final-pilot-v1/RUN_RECEIPT_1793454595054268500.json",
+      "sha256": "9d43ec0ca880bde94f57defb332e24208bc05d80353d82657bb6c7692286f303",
+      "size_bytes": 2955
+    },
+    "independent_audit_receipt": {
+      "artifact": "final-integrated-validation-v1/PILOT_AUDIT.json",
+      "sha256": "2e3aeb2e2a22eaee64fedb14ab8dc3be69d0af1ee4710fe75e7156a1383c5daa",
+      "size_bytes": 5091
+    },
+    "equivalence_receipt": {
+      "artifact": "final-integrated-validation-v1/LEDGER_REPAIR_EQUIVALENCE.json",
+      "sha256": "ba79809e5546d88f9e138627d5525b19fb66dcf8ae53a2e3ffe3ac9e405c2c10",
+      "size_bytes": 1003
+    }
+  },
+  "event_contract": {
+    "retains_all_events": true,
+    "upserts_link_to_zero_based_legacy_rows": true,
+    "deletions_have_no_legacy_row": true,
+    "version_raw_retained": true,
+    "missing_or_invalid_versions_remain_unknown": true,
+    "complete_revision_dates_normalized_incomplete_dates_retained": true,
+    "current_view_materialized": false,
+    "resolver_rule": "Highest active numeric version, then latest source event within that version; applied only by an explicit downstream resolver.",
+    "deletion_policy": "Explicit-version deletion targets that version; genuinely missing-version deletion is a PMID-wide tombstone; malformed-version deletion remains unresolved."
+  },
+  "limitations": [
+    "Counts are historical events, not unique active citations or biomedical truth.",
+    "Original normalization and its FAIL receipt are not overwritten or retroactively promoted.",
+    "The independent auditor does not reparse or rehash raw XML; it verifies recorded acquisition bindings and current size/timestamps.",
+    "Current normalized PMID sequences are compared in full; non-PMID legacy values are not independently rehashed.",
+    "Single-machine elapsed times include a concurrent research workload and are not a throughput guarantee.",
+    "The later namespace/format implementation was checked on two shards only; full artifacts retain the frozen original implementation hash."
+  ],
+  "independent_review": {
+    "status": "PASS_WITH_LIMITATIONS",
+    "scope": "Control JSON/aggregate arithmetic and two bounded equivalence hashes; no full corpus or Parquet rescan",
+    "control_json_files_rechecked": 1631,
+    "current_view_materialized": false,
+    "by_source": {
+      "baseline": {
+        "shards": 1334,
+        "events": 39994988,
+        "upserts": 39994988,
+        "deletions": 0,
+        "unknown_version": 0,
+        "unresolved_date_revised": 0,
+        "pmid_wide_deletions": 0,
+        "version_specific_deletions": 0,
+        "unresolved_deletions": 0
+      },
+      "updates": {
+        "shards": 287,
+        "events": 5493942,
+        "upserts": 5482649,
+        "deletions": 11293,
+        "unknown_version": 0,
+        "unresolved_date_revised": 0,
+        "pmid_wide_deletions": 0,
+        "version_specific_deletions": 11293,
+        "unresolved_deletions": 0
+      }
+    },
+    "receipt": {
+      "artifact": "revision-ledger-independent-full-audit-v1/FINAL_REVIEW.json",
+      "sha256": "ef55546c78a9b92c8b3bed60f290348863ea4f70888f855c5eceac26e70eed53",
+      "size_bytes": 2712
+    }
+  }
+}

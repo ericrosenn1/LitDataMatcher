@@ -37,7 +37,11 @@ def canonical_digest(value: Any) -> str:
 
 
 def sha256_file(path: Path) -> str:
-    return hashlib.file_digest(path.open("rb"), "sha256").hexdigest()
+    checksum = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            checksum.update(block)
+    return checksum.hexdigest()
 
 
 def read_json(path: Path) -> dict[str, Any]:

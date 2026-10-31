@@ -13,6 +13,15 @@ assert SPEC and SPEC.loader
 SPEC.loader.exec_module(EVALUATOR)
 
 
+def test_file_hashing_does_not_require_python_311_api(tmp_path, monkeypatch):
+    """Compatibility only; no reserved data or evaluation criteria are changed."""
+    path = tmp_path / "synthetic-bytes.bin"
+    content = b"synthetic-byte-identity" * 1000
+    path.write_bytes(content)
+    monkeypatch.delattr(hashlib, "file_digest", raising=False)
+    assert EVALUATOR.sha256_file(path) == hashlib.sha256(content).hexdigest()
+
+
 def _write(path, value):
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 

@@ -30,7 +30,7 @@ jobs:
           python -m pip install -e ".[dev,corpus]" pytest-cov
       - name: Lint and compile
         run: |
-          python -m ruff check scripts/validate_package.py
+          python -m ruff check litdatamatcher scripts tests
           python -m compileall -q litdatamatcher scripts/validate_package.py
       - name: Run tests with coverage
         if: matrix.python-version == '3.13'

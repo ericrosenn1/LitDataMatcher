@@ -428,7 +428,7 @@ def render_report(run: Path) -> Path:
 def analyze(
     root: Path, out: Path, model_dir: Path, embedding_dir: Path, *, question=None,
     requirements=None, limit=3, chunks=2, fresh=False, device="cpu", document_path=None,
-    topic=None, reference_accessions=None, question_source_id=None, resume=False,
+    topic=None, reference_accessions=None, question_source_id=None, resume=False, vector_cache=None,
 ):
     """Run or resume fingerprint-checked extraction, compilation and matching stages."""
     from .workflow_checkpoint import CheckpointRun, analysis_fingerprint
@@ -438,7 +438,8 @@ def analyze(
     root, out, model_dir, embedding_dir = map(Path, (root, out, model_dir, embedding_dir))
     parameters = dict(question=question, requirements=requirements, limit=limit, chunks=chunks,
         fresh=fresh, device=device, document_path=str(Path(document_path).resolve()) if document_path else None,
-        topic=topic, reference_accessions=reference_accessions, question_source_id=question_source_id)
+        topic=topic, reference_accessions=reference_accessions, question_source_id=question_source_id,
+        vector_cache=str(Path(vector_cache).resolve()) if vector_cache else None)
     fingerprint = analysis_fingerprint(root, model_dir, embedding_dir, parameters)
     with CheckpointRun(out, fingerprint, resume) as workflow:
         previous = workflow.completed()
@@ -467,6 +468,7 @@ def _analyze_stages(
     topic=None,
     reference_accessions=None,
     question_source_id=None,
+    vector_cache=None,
     _workflow=None,
 ):
     from .semantic_runtime import LocalSemanticRuntime, PretrainedSemanticIndex, RuntimeConfig
@@ -567,7 +569,7 @@ def _analyze_stages(
                     try:
                         result = _workflow.cached(
                             "view:" + viewid,
-                            lambda: runtime.extract(runtime_view, root / "inference_cache", force_fresh=fresh),
+                            lambda view=runtime_view: runtime.extract(view, root / "inference_cache", force_fresh=fresh),
                         )
                     except (ValueError, RuntimeError, OSError) as exc:
                         failures.append(
@@ -691,7 +693,11 @@ def _analyze_stages(
                 matching[name] for name in ("matches", "candidate_outcomes", "bundles", "dossiers")
             )
         else:
-            index = PretrainedSemanticIndex(embedding_dir, device=device)
+            if vector_cache:
+                from .retrieval import CachedSemanticIndex
+                index = CachedSemanticIndex(embedding_dir, vector_cache, device=device)
+            else:
+                index = PretrainedSemanticIndex(embedding_dir, device=device)
             if datasets:
                 index.fit(
                     [
@@ -699,6 +705,8 @@ def _analyze_stages(
                         for d in datasets
                     ]
                 )
+                if vector_cache:
+                    atomic_json(out / "retrieval_cache.json", index.receipt)
             matches = []
             candidate_outcomes = []
             bundles = []
@@ -1040,6 +1048,7 @@ def main(argv=None):
     run.add_argument("--fresh", action="store_true")
     run.add_argument("--resume", action="store_true", help="Resume this run only when source, model and configuration fingerprints match")
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    run.add_argument("--vector-cache", help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores")
 
     compile_only = sub.add_parser(
         "compile",
@@ -1165,6 +1174,7 @@ def main(argv=None):
             topic=args.topic,
             reference_accessions=args.reference_accessions,
             question_source_id=args.question_source_id,
+            vector_cache=args.vector_cache,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return int(result.get("status") == "FAIL")

@@ -627,7 +627,18 @@ def audit_revision_ledger(
                     )
                 }
             )
+        implementations = collections.Counter(
+            row["implementation_sha256"] for row in report["partitions"]
+        )
+        report["implementation_variants"] = [
+            {"sha256": value, "partitions": count}
+            for value, count in sorted(implementations.items(), key=lambda item: item[0] or "")
+        ]
         if not report["errors"]:
+            require(
+                not full or len(implementations) == 1,
+                "Full ledger contains mixed implementation fingerprints",
+            )
             require(
                 totals["upserts"] == manifest["upserts"]
                 and totals["deletions"] == manifest["deletions"],

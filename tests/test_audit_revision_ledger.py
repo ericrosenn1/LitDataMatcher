@@ -247,6 +247,34 @@ def test_partial_is_explicit_and_default_does_not_accept_it(tmp_path):
     assert result["coverage"] == {"available": 2, "selected": 1, "verified": 1}
 
 
+def test_full_ledger_rejects_resealed_mixed_implementations(tmp_path):
+    paths = fixture(tmp_path)
+    receipt = paths[1] / "partitions/updates/pubmed26n0002/SHARD_RECEIPT.json"
+    value = json.loads(receipt.read_bytes())
+    value["implementation_sha256"] = "b" * 64
+    write(receipt, value)
+    reseal_manifest(paths[1], lambda m: m["shards"][1].update(implementation_sha256="b" * 64))
+    result = run(paths)
+    assert result["status"] == "FAIL"
+    assert "mixed implementation" in result["errors"][-1]["error"]
+    assert result["implementation_variants"] == [
+        {"sha256": "a" * 64, "partitions": 1},
+        {"sha256": "b" * 64, "partitions": 1},
+    ]
+
+
+def test_partial_legacy_implementation_remains_explicitly_unknown(tmp_path):
+    paths = fixture(tmp_path, partial=True)
+    receipt = paths[1] / "partitions/baseline/pubmed26n0001/SHARD_RECEIPT.json"
+    value = json.loads(receipt.read_bytes())
+    del value["implementation_sha256"]
+    write(receipt, value)
+    reseal_manifest(paths[1], lambda m: m["shards"][0].pop("implementation_sha256"))
+    result = run(paths, allow_partial=True)
+    assert result["status"] == "PARTIAL"
+    assert result["implementation_variants"] == [{"sha256": None, "partitions": 1}]
+
+
 @pytest.mark.parametrize("raw", ["", "0", "-1", "+1", "1.0"])
 def test_invalid_version_stays_unknown_and_cannot_become_wide_deletion(tmp_path, raw):
     def mutation(rows):

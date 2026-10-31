@@ -1,6 +1,7 @@
 """Selective provenance-DAG invalidation for local Phase 2 artifacts."""
 
 from __future__ import annotations
+
 from .data_plane import digest
 
 

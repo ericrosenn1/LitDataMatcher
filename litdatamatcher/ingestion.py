@@ -7,17 +7,16 @@ ranking, and source validation happen downstream.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
-from typing import Iterable
 
 from .literature_xml import XML_SUFFIXES, xml_to_literature_record
 from .provenance import local_file_provenance, parser_caveats, summarize_source_provenance
 from .schemas import JsonDict, stable_id
 from .storage import read_jsonl, write_jsonl
 from .text import normalize_text
-
 
 TEXT_SUFFIXES = {".txt", ".text", ".md", ".markdown"}
 PDF_SUFFIXES = {".pdf"}

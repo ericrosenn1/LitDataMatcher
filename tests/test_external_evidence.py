@@ -1,6 +1,5 @@
 """Replay and failure injection for bounded contextual reference import."""
 
-import hashlib
 import json
 import urllib.error
 

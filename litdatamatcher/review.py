@@ -8,13 +8,12 @@ from __future__ import annotations
 
 import csv
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .provenance import provenance_from_record, provenance_review_caveats
 from .schemas import MatchCandidate, QuestionDataMatchLabel, QuestionQualityScore
 from .storage import read_jsonl, write_jsonl
-
 
 REVIEW_FIELDNAMES = [
     "rank",

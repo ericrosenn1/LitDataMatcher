@@ -10,8 +10,9 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from litdatamatcher.data_plane import atomic_json, digest
-from litdatamatcher.scientific_v2 import compile_evidence
+# Local imports follow the standalone script path bootstrap.
+from litdatamatcher.data_plane import atomic_json, digest  # noqa: E402
+from litdatamatcher.scientific_v2 import compile_evidence  # noqa: E402
 
 
 def build_receipt() -> dict:

@@ -1,7 +1,6 @@
 """Independent failure injection for the lead's data plane and controller."""
 
 import json
-import os
 import subprocess
 import sys
 import threading
@@ -9,8 +8,8 @@ import time
 
 import pytest
 
+from litdatamatcher.controller import Controller, OwnershipConflict, integration_lease
 from litdatamatcher.data_plane import Catalog
-from litdatamatcher.controller import Controller, integration_lease, OwnershipConflict
 
 
 def test_dependency_cycle_rejected_without_invalidating_valid_parent(tmp_path):
@@ -76,10 +75,12 @@ def test_relative_outputs_resolve_against_registered_job_cwd(tmp_path):
 
 
 def test_second_writer_cannot_take_held_lease(tmp_path):
-    with integration_lease(tmp_path, "first"):
-        with pytest.raises(OwnershipConflict):
-            with integration_lease(tmp_path, "second"):
-                pytest.fail("duplicate writer")
+    with (
+        integration_lease(tmp_path, "first"),
+        pytest.raises(OwnershipConflict),
+        integration_lease(tmp_path, "second"),
+    ):
+        pytest.fail("duplicate writer")
 
 
 def test_stale_success_artifact_does_not_hide_noop(tmp_path):

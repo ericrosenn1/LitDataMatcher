@@ -1,4 +1,5 @@
 import hashlib
+
 import pytest
 
 from litdatamatcher.data_plane import Catalog, atomic_json

@@ -6,11 +6,10 @@ import csv
 import json
 import sqlite3
 from collections import Counter
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .schemas import JsonDict
-
 
 REQUIRED_ARTIFACTS: dict[str, str] = {
     "questions.jsonl": "Extracted question records.",
@@ -332,15 +331,18 @@ def _provenance_coverage(loaded: dict[str, object]) -> JsonDict:
                     f"{surface} has {counts['malformed_provenance']} malformed provenance value(s).",
                 )
             )
-        if surface in {"review_csv", "review_jsonl"} and counts["records"]:
-            if not counts.get("dataset_with_provenance"):
-                issues.append(
-                    _issue(
-                        "warning",
-                        "review_dataset_provenance_hidden",
-                        f"{surface} does not expose populated dataset-side provenance.",
-                    )
+        if (
+            surface in {"review_csv", "review_jsonl"}
+            and counts["records"]
+            and not counts.get("dataset_with_provenance")
+        ):
+            issues.append(
+                _issue(
+                    "warning",
+                    "review_dataset_provenance_hidden",
+                    f"{surface} does not expose populated dataset-side provenance.",
                 )
+            )
     if "source_provenance_summary.json" in loaded and isinstance(
         loaded.get("source_provenance_summary.json"), dict
     ):
@@ -429,24 +431,30 @@ def _review_readiness(run_path: Path, loaded: dict[str, object]) -> JsonDict:
     review_jsonl = loaded.get("review_sheet.jsonl", [])
     report_text = str(loaded.get("publication_report.md", "") or "")
     caveat_terms = _term_counts(report_text)
-    if isinstance(review_csv, list) and review_csv:
-        if not any(_record_caveats(row) for row in review_csv if isinstance(row, dict)):
-            issues.append(
-                _issue(
-                    "warning",
-                    "review_csv_no_caveats",
-                    "review_sheet.csv has rows but no source caveat values.",
-                )
+    if (
+        isinstance(review_csv, list)
+        and review_csv
+        and not any(_record_caveats(row) for row in review_csv if isinstance(row, dict))
+    ):
+        issues.append(
+            _issue(
+                "warning",
+                "review_csv_no_caveats",
+                "review_sheet.csv has rows but no source caveat values.",
             )
-    if isinstance(review_jsonl, list) and review_jsonl:
-        if not any(_record_caveats(row) for row in review_jsonl if isinstance(row, dict)):
-            issues.append(
-                _issue(
-                    "warning",
-                    "review_jsonl_no_caveats",
-                    "review_sheet.jsonl has rows but no source caveat values.",
-                )
+        )
+    if (
+        isinstance(review_jsonl, list)
+        and review_jsonl
+        and not any(_record_caveats(row) for row in review_jsonl if isinstance(row, dict))
+    ):
+        issues.append(
+            _issue(
+                "warning",
+                "review_jsonl_no_caveats",
+                "review_sheet.jsonl has rows but no source caveat values.",
             )
+        )
     if report_text and not any(caveat_terms.values()):
         issues.append(
             _issue(

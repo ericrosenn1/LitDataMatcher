@@ -1,8 +1,9 @@
 """Minimal Phase 2 receipt manifest audit."""
 
 from __future__ import annotations
-from pathlib import Path
+
 from hashlib import sha256
+from pathlib import Path
 
 
 def audit(manifest: dict, root: str) -> dict:

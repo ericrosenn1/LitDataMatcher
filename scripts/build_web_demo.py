@@ -19,7 +19,6 @@ from litdatamatcher.meta_analysis import run_meta_analysis_node, synthesis_index
 from litdatamatcher.pipeline import collect_candidate_datasets  # noqa: E402
 from litdatamatcher.ranking import rank_matches  # noqa: E402
 
-
 RECORDS = [
     {
         "title": "Microbiome recovery after antibiotic exposure",

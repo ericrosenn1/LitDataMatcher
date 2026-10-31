@@ -1,12 +1,8 @@
 import json
-import os
 import subprocess
 import sys
-import time
 
-import pytest
-
-from litdatamatcher.controller import Controller, OwnershipConflict, integration_lease
+from litdatamatcher.controller import Controller, integration_lease
 
 
 def register(c, tmp_path, name="one"):
@@ -54,7 +50,7 @@ def test_duplicate_process_writer_is_prevented(tmp_path):
 
 def test_abandoned_stage_resumes_without_duplicate(tmp_path):
     c = Controller(tmp_path / "controller")
-    out = register(c, tmp_path)
+    register(c, tmp_path)
     dead = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(30)"])
     import psutil
 

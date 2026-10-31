@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from collections import Counter
 import random
+from collections import Counter
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Iterable, Sequence
 
 from .schemas import JsonDict, QuestionDataMatchLabel, QuestionQualityScore
 from .storage import write_jsonl
-
 
 SPLIT_NAMES = ("train", "validation", "test")
 DEFAULT_SPLIT_FRACTIONS = (0.8, 0.1, 0.1)
@@ -115,7 +114,7 @@ def normalize_split_fractions(fractions: Sequence[float]) -> JsonDict:
     if total <= 0:
         raise ValueError("at least one split fraction must be greater than zero.")
     normalized = [value / total for value in values]
-    return {name: round(value, 6) for name, value in zip(SPLIT_NAMES, normalized)}
+    return {name: round(value, 6) for name, value in zip(SPLIT_NAMES, normalized, strict=False)}
 
 
 def _combined_label_rows(

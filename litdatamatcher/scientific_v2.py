@@ -113,9 +113,7 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
             status = "MISMATCH"
         elif contract_status:
             status = contract_status
-        elif cap.status == "unknown":
-            status = "UNKNOWN"
-        elif (
+        elif cap.status == "unknown" or (
             not cap.source_locator
             or cap.status == "derived"
             or cap.mapping_type not in {"exact", "synonym"}

@@ -242,6 +242,7 @@ def test_duplicate_without_provenance_does_not_shift_later_source_snapshot(monke
 @pytest.mark.parametrize("limit", [1, 5])
 def test_real_cli_offline_cache_reconciliation(tmp_path, monkeypatch, limit):
     import json
+
     from litdatamatcher.cli import main
     from litdatamatcher.http_cache import CachedHttpClient
 

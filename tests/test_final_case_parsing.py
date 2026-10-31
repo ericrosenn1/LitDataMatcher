@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
+from litdatamatcher.scientific_v2 import compile_evidence
 from litdatamatcher.semantic_runtime import _span, parse_model_json
 from litdatamatcher.v2 import evidence_from_source_view, source_chunks
-from litdatamatcher.scientific_v2 import compile_evidence
 
 
 def test_abstract_sections_preserve_offsets_and_prioritize_actual_results():

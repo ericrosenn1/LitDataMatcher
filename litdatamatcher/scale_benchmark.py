@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-import json
 import platform
 import shutil
 import time
@@ -12,7 +11,6 @@ from pathlib import Path
 
 from .data_plane import Catalog, atomic_json, atomic_write, digest
 from .scientific_v2 import compile_evidence, rank_candidates
-
 
 BENCHMARK_SCHEMA_VERSION = "v2_5_local_benchmark_v1"
 

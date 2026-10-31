@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable
+from collections.abc import Iterable
 
 from .feasibility import assess_pair_feasibility
 from .governance import assess_governance
@@ -18,7 +18,6 @@ from .schemas import (
     stable_id,
 )
 from .text import extract_domain_terms, lexical_similarity
-
 
 ScoreQuestionDatasetResult = tuple[MatchScore, list[str], list[str], JsonDict]
 PROXY_CAPABILITY_CATEGORIES = {"derived_or_proxy_capability"}

@@ -12,9 +12,10 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import litdatamatcher.http_cache as http_cache
-from litdatamatcher.data_plane import atomic_json
-from litdatamatcher.http_cache import CachedHttpClient
+# Local imports follow the standalone script path bootstrap.
+import litdatamatcher.http_cache as http_cache  # noqa: E402
+from litdatamatcher.data_plane import atomic_json  # noqa: E402
+from litdatamatcher.http_cache import CachedHttpClient  # noqa: E402
 
 
 def main() -> None:

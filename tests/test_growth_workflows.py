@@ -1,13 +1,13 @@
 import csv
 import json
 
-from litdatamatcher.cli import main
 from litdatamatcher.calibration import calibrate_ranking_threshold
+from litdatamatcher.cli import main
 from litdatamatcher.pipeline import run_demo
 from litdatamatcher.review_queue import write_daily_review_queue
 from litdatamatcher.schemas import QuestionDataMatchLabel
-from litdatamatcher.stress import synthetic_literature_records
 from litdatamatcher.storage import read_jsonl, write_jsonl
+from litdatamatcher.stress import synthetic_literature_records
 
 
 def test_daily_review_queue_writes_top_matches(tmp_path):

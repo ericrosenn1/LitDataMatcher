@@ -8,11 +8,11 @@ serialization transparent and publication-friendly.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field as dataclass_field
-from hashlib import sha1
 import math
+from dataclasses import asdict, dataclass
+from dataclasses import field as dataclass_field
+from hashlib import sha1
 from typing import Any
-
 
 JsonDict = dict[str, Any]
 
@@ -162,7 +162,7 @@ class SourceProvenance:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "SourceProvenance":
+    def from_dict(cls, data: JsonDict) -> SourceProvenance:
         """Deserialize source provenance from a dictionary."""
 
         return cls(**dict(data or {}))
@@ -197,7 +197,7 @@ class Evidence:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "Evidence":
+    def from_dict(cls, data: JsonDict) -> Evidence:
         """Deserialize an evidence record from a dictionary."""
 
         payload = dict(data)
@@ -249,7 +249,7 @@ class DatasetVariable:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "DatasetVariable":
+    def from_dict(cls, data: JsonDict) -> DatasetVariable:
         """Deserialize a variable from a dictionary."""
 
         return cls(**data)
@@ -325,7 +325,7 @@ class DatasetRecord:
         return data
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "DatasetRecord":
+    def from_dict(cls, data: JsonDict) -> DatasetRecord:
         """Deserialize a dataset record from a dictionary."""
 
         payload = dict(data)
@@ -388,7 +388,7 @@ class QuestionCandidate:
         chars = [ch.lower() if ch.isalnum() or ch.isspace() else " " for ch in self.question]
         return " ".join("".join(chars).split())
 
-    def merge(self, other: "QuestionCandidate") -> "QuestionCandidate":
+    def merge(self, other: QuestionCandidate) -> QuestionCandidate:
         """Merge another candidate that refers to the same underlying question."""
 
         # Keep the clearest/highest extraction-confidence phrasing while preserving provenance.
@@ -415,7 +415,7 @@ class QuestionCandidate:
         return data
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "QuestionCandidate":
+    def from_dict(cls, data: JsonDict) -> QuestionCandidate:
         """Deserialize a question candidate from a dictionary."""
 
         payload = dict(data)
@@ -475,7 +475,7 @@ class EvidenceSynthesis:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "EvidenceSynthesis":
+    def from_dict(cls, data: JsonDict) -> EvidenceSynthesis:
         """Deserialize a synthesis record from a dictionary."""
 
         return cls(**data)
@@ -519,7 +519,7 @@ class MatchScore:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "MatchScore":
+    def from_dict(cls, data: JsonDict) -> MatchScore:
         """Deserialize a score record from a dictionary."""
 
         return cls(**data)
@@ -564,7 +564,7 @@ class MatchCandidate:
         }
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "MatchCandidate":
+    def from_dict(cls, data: JsonDict) -> MatchCandidate:
         """Deserialize a match candidate from a dictionary."""
 
         return cls(
@@ -620,7 +620,7 @@ class QuestionQualityScore:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "QuestionQualityScore":
+    def from_dict(cls, data: JsonDict) -> QuestionQualityScore:
         """Deserialize a quality score from a dictionary."""
 
         return cls(**data)
@@ -665,7 +665,7 @@ class QuestionLabel:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "QuestionLabel":
+    def from_dict(cls, data: JsonDict) -> QuestionLabel:
         """Deserialize a question label from a dictionary."""
 
         return cls(**data)
@@ -725,7 +725,7 @@ class EvidenceSpanLabel:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "EvidenceSpanLabel":
+    def from_dict(cls, data: JsonDict) -> EvidenceSpanLabel:
         """Deserialize an evidence label from a dictionary."""
 
         return cls(**data)
@@ -790,7 +790,7 @@ class QuestionDataMatchLabel:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "QuestionDataMatchLabel":
+    def from_dict(cls, data: JsonDict) -> QuestionDataMatchLabel:
         """Deserialize a match label from a dictionary."""
 
         return cls(**data)
@@ -832,7 +832,7 @@ class DerivedVariableRule:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "DerivedVariableRule":
+    def from_dict(cls, data: JsonDict) -> DerivedVariableRule:
         """Deserialize a derived-variable rule from a dictionary."""
 
         return cls(**data)
@@ -881,7 +881,7 @@ class DatasetCapability:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "DatasetCapability":
+    def from_dict(cls, data: JsonDict) -> DatasetCapability:
         """Deserialize a dataset capability from a dictionary."""
 
         return cls(**data)
@@ -934,7 +934,7 @@ class DerivedCapabilityLabel:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "DerivedCapabilityLabel":
+    def from_dict(cls, data: JsonDict) -> DerivedCapabilityLabel:
         """Deserialize a derived-capability label from a dictionary."""
 
         return cls(**data)
@@ -985,7 +985,7 @@ class ExpertPaperAnnotation:
         return data
 
     @classmethod
-    def from_dict(cls, data: JsonDict) -> "ExpertPaperAnnotation":
+    def from_dict(cls, data: JsonDict) -> ExpertPaperAnnotation:
         """Deserialize a paper annotation from a dictionary."""
 
         payload = dict(data)

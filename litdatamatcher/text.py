@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections import Counter
 import math
 import re
-
+from collections import Counter
 
 # These cue lists are deterministic fallbacks; update tests when changing them.
 ABBREVIATIONS = {

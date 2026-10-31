@@ -6,7 +6,6 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
-
 DEFAULT_OUTPUT = Path.home() / "Downloads" / "LitDataMatcher_main_scripts.txt"
 
 

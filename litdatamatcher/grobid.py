@@ -11,7 +11,6 @@ from pathlib import Path
 from .http_cache import CachedHttpClient
 from .schemas import JsonDict
 
-
 DEFAULT_GROBID_URL = "http://localhost:8070"
 FULLTEXT_ENDPOINT = "/api/processFulltextDocument"
 

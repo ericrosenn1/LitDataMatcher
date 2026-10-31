@@ -14,7 +14,6 @@ from .provenance import local_file_provenance, parser_caveats
 from .schemas import JsonDict, stable_id
 from .text import normalize_text
 
-
 XML_SUFFIXES = {".xml", ".nxml", ".jats", ".tei"}
 
 

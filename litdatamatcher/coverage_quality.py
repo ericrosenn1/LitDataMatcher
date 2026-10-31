@@ -1,6 +1,7 @@
 """Observed-only Phase 2 catalog coverage summaries."""
 
 from __future__ import annotations
+
 from collections import Counter, defaultdict
 
 

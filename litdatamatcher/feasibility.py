@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
 import math
+from dataclasses import asdict, dataclass
 
 from .governance import assess_governance
 from .ontology import explain_variable_match

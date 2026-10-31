@@ -10,8 +10,9 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from litdatamatcher.adapters import _bounded_cursor_pages
-from litdatamatcher.data_plane import atomic_json, digest
+# Local imports follow the standalone script path bootstrap.
+from litdatamatcher.adapters import _bounded_cursor_pages  # noqa: E402
+from litdatamatcher.data_plane import atomic_json, digest  # noqa: E402
 
 
 class FixtureClient:

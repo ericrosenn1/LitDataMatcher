@@ -1,6 +1,7 @@
+import time
+
 from rich.live import Live
 from rich.table import Table
-import time
 
 table = Table(title="Counter")
 table.add_column("Number")

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import sys, csv, os
+import csv
+import sys
 from pathlib import Path
 
 repo_root = Path(__file__).resolve().parents[2]
@@ -14,14 +15,14 @@ def normalize(line: str):
 
 
 with (
-    open(inp, "r", encoding="utf-8") as f_in,
+    open(inp, encoding="utf-8") as f_in,
     open(out, "w", encoding="utf-8", newline="") as f_out,
 ):
     w = csv.writer(f_out, quoting=csv.QUOTE_MINIMAL)
     # write header
     w.writerow(["sentence", "label"])
     bad = 0
-    for n, raw in enumerate(f_in, start=1):
+    for _n, raw in enumerate(f_in, start=1):
         line = normalize(raw)
         if not line or line.strip().lower() == "sentence,label":
             continue

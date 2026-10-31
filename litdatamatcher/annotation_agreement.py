@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from itertools import combinations
-from typing import Iterable
 
 from .schemas import JsonDict, QuestionDataMatchLabel
-
 
 AGREEMENT_SCHEMA_VERSION = "annotation_agreement_v1"
 AGREEMENT_QA_LIMITATIONS = (

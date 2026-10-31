@@ -8,7 +8,6 @@ from .pipeline import run_pipeline
 from .schemas import JsonDict, stable_id
 from .storage import write_jsonl
 
-
 STRESS_TOPICS = (
     "antibiotic exposure and longitudinal microbiome recovery",
     "metabolomics predictors of inflammatory bowel disease remission",

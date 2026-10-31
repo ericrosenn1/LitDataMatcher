@@ -9,12 +9,12 @@ from typing import Any
 from .datasets import default_adapters, discover_datasets_for_question
 from .literature import analyze_literature_records
 from .meta_analysis import run_meta_analysis_node, synthesis_index
+from .provenance import check_provenance_transfer, module_boundary_map, summarize_source_provenance
 from .ranking import rank_matches
+from .reporting import write_methods_report
+from .review import export_review_csv, export_review_jsonl, match_review_records
 from .schemas import DatasetRecord, MatchCandidate, QuestionCandidate
 from .storage import PipelineStore, read_jsonl, write_jsonl
-from .review import export_review_csv, export_review_jsonl, match_review_records
-from .reporting import write_methods_report
-from .provenance import check_provenance_transfer, module_boundary_map, summarize_source_provenance
 
 
 def collect_candidate_datasets(

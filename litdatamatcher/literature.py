@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 import re
-from typing import Iterable
+from collections import defaultdict
+from collections.abc import Iterable
 
 from .schemas import Evidence, QuestionCandidate, stable_id
 from .text import (
@@ -17,7 +17,6 @@ from .text import (
     split_sections,
     split_sentences,
 )
-
 
 # Cue banks are intentionally transparent so false positives can be reviewed.
 FUTURE_CUES = (
@@ -292,9 +291,7 @@ def should_reject_question_candidate(
         return True
     if _looks_like_reference_title_question(sentence, question, signals):
         return True
-    if _has_no_meaningful_question_context(sentence, signals):
-        return True
-    return False
+    return _has_no_meaningful_question_context(sentence, signals)
 
 
 def _looks_like_reference_title_question(sentence: str, question: str, signals: list[str]) -> bool:
@@ -311,9 +308,7 @@ def _looks_like_reference_title_question(sentence: str, question: str, signals: 
         return True
     if re.match(r"^[A-Z][A-Za-z0-9 ,;/()'-]{12,120}\?$", text):
         return True
-    if text == question_text and len(text.split()) <= 14:
-        return True
-    return False
+    return text == question_text and len(text.split()) <= 14
 
 
 def _has_no_meaningful_question_context(sentence: str, signals: list[str]) -> bool:
@@ -324,9 +319,7 @@ def _has_no_meaningful_question_context(sentence: str, signals: list[str]) -> bo
     lowered = normalize_text(sentence).lower()
     if any(cue in lowered for cue in RQ_CUES):
         return False
-    if len(lowered.split()) < 6:
-        return True
-    return False
+    return len(lowered.split()) < 6
 
 
 def _inference_context(title: str, abstract: str, sentence: str) -> str:

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .annotation_agreement import build_agreement_artifacts
 from .annotation_manifest import build_annotation_manifest
@@ -18,7 +18,6 @@ from .review import (
 )
 from .schemas import JsonDict, QuestionDataMatchLabel, QuestionQualityScore
 from .storage import write_jsonl
-
 
 ANNOTATION_CORPUS_VERSION = 1
 

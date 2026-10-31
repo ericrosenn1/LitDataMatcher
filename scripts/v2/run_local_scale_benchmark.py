@@ -11,8 +11,12 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from litdatamatcher.data_plane import atomic_json
-from litdatamatcher.scale_benchmark import compare_benchmark_baseline, run_local_benchmark
+# Local imports follow the standalone script path bootstrap.
+from litdatamatcher.data_plane import atomic_json  # noqa: E402
+from litdatamatcher.scale_benchmark import (  # noqa: E402
+    compare_benchmark_baseline,
+    run_local_benchmark,
+)
 
 
 def main() -> None:

@@ -6,9 +6,9 @@ validation that extracted questions, live metadata, or ranked matches are true.
 
 from __future__ import annotations
 
+import sqlite3
 from collections import Counter
 from pathlib import Path
-import sqlite3
 
 from .ontology import concept_table
 from .provenance import summarize_source_provenance

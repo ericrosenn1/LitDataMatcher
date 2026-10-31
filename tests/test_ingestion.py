@@ -4,9 +4,9 @@ from litdatamatcher.cli import main
 from litdatamatcher.ingestion import (
     discover_literature_files,
     extract_body_text,
-    ingest_literature_sources,
     infer_abstract,
     infer_title,
+    ingest_literature_sources,
     load_literature_sources,
 )
 from litdatamatcher.pipeline import run_pipeline

@@ -9,7 +9,6 @@ from .ingestion import SUPPORTED_SUFFIXES, discover_literature_files, ingest_lit
 from .pipeline import run_pipeline
 from .schemas import JsonDict
 
-
 HELPER_FILE_PREFIXES = (
     "input_inventory",
     "smoke_test_instruction",

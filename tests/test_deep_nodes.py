@@ -8,8 +8,8 @@ from litdatamatcher.meta_analysis import run_meta_analysis_node, synthesis_index
 from litdatamatcher.ontology import (
     explain_variable_match,
     infer_concepts_from_text,
-    normalize_variable_name,
     normalize_entity,
+    normalize_variable_name,
 )
 from litdatamatcher.ranking import rank_matches
 from litdatamatcher.review import (

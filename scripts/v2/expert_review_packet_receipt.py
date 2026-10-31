@@ -10,8 +10,9 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from litdatamatcher.data_plane import atomic_json
-from litdatamatcher.expert_review import (
+# Local imports follow the standalone script path bootstrap.
+from litdatamatcher.data_plane import atomic_json  # noqa: E402
+from litdatamatcher.expert_review import (  # noqa: E402
     agreement_and_adjudication,
     build_blinded_review_packet,
     validate_review_labels,

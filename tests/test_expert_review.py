@@ -4,8 +4,8 @@ from litdatamatcher.expert_review import (
     REVIEW_STATUS,
     agreement_and_adjudication,
     build_blinded_review_packet,
-    validate_review_labels,
     finalize_adjudication,
+    validate_review_labels,
 )
 
 

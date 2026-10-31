@@ -1,11 +1,10 @@
 import gzip
-import json
 import subprocess
 import sys
 
+import numpy as np
 import pytest
 import requests
-import numpy as np
 
 from litdatamatcher.acquisition_v2 import (
     DeferredRetry,
@@ -91,10 +90,12 @@ def test_retry_after_long_and_http_date_honored_or_deferred(tmp_path):
 
 
 def test_stage_lease_prevents_duplicate_writers_and_releases(tmp_path):
-    with StageLease(tmp_path / "writer.lock"):
-        with pytest.raises(RuntimeError, match="already has a writer"):
-            with StageLease(tmp_path / "writer.lock"):
-                pytest.fail("second writer entered")
+    with (
+        StageLease(tmp_path / "writer.lock"),
+        pytest.raises(RuntimeError, match="already has a writer"),
+        StageLease(tmp_path / "writer.lock"),
+    ):
+        pytest.fail("second writer entered")
     with StageLease(tmp_path / "writer.lock"):
         pass
 
@@ -110,9 +111,8 @@ def test_killed_writer_os_lease_can_resume(tmp_path):
     )
     try:
         assert process.stdout.readline().strip() == "locked"
-        with pytest.raises(RuntimeError, match="already has a writer"):
-            with StageLease(path):
-                pytest.fail("accepted competing owner")
+        with pytest.raises(RuntimeError, match="already has a writer"), StageLease(path):
+            pytest.fail("accepted competing owner")
     finally:
         process.kill()
         process.communicate(timeout=5)

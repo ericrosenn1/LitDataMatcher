@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from .annotation_agreement import AGREEMENT_QA_LIMITATIONS
-
 
 JsonDict = dict[str, Any]
 
@@ -316,7 +316,7 @@ def _split_summary_section(splits: JsonDict) -> list[str]:
         return [*lines, "- Split generation: not requested", ""]
     lines.extend(
         [
-            f"- Split generation: enabled",
+            "- Split generation: enabled",
             f"- Strategy: {splits.get('split_strategy', '')}",
             f"- Seed: {splits.get('split_seed', '')}",
         ]

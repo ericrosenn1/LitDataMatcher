@@ -3,7 +3,8 @@
 Complete snapshots can receive an independent bounded acceptance check with
 `python -m litdatamatcher.literature_validation --corpus-root CORPUS --ledger-manifest LEDGER_MANIFEST.json --database pubmed-current.sqlite3 --out NEW_VALIDATION_DIRECTORY`.
 The validator replays hashed event sidecars into a separate NumPy projection,
-compares every current PMID/version, checks evenly spaced winning source events,
+compares every current PMID/version, checks evenly spaced winning source events
+and 32 sampled normalized title/abstract rows with their retained source hashes,
 and performs full SQLite plus external-content FTS integrity checks. Its default
 bound is 50 million events and an estimated 6 GiB memory ceiling; no source files
 are changed. This oracle explicitly requires positive known versions, including

@@ -56,6 +56,53 @@ def _sampled_events(corpus, manifest_path, manifest, selected):
     return result
 
 
+def _check_source_text_samples(index, corpus, manifest_path, manifest, samples):
+    """Check up to 32 evenly spaced samples against hashed normalized source rows."""
+    positions = np.linspace(0, len(samples) - 1, min(32, len(samples)), dtype=int)
+    by_shard = {}
+    for position in positions:
+        record = index.get(samples[position]["document_id"])
+        event = record["source_provenance"]["event"]
+        by_shard.setdefault(event["shard_order"], {})[event["legacy_row_index"]] = record
+    checked = []
+    for order, wanted in by_shard.items():
+        shard = manifest["shards"][order]
+        path, _ = _paths(corpus, manifest_path.parent, shard)
+        if file_digest(path) != shard["legacy"]["sha256"]:
+            raise ValueError("Sampled normalized source checksum changed")
+        parquet = pq.ParquetFile(path)
+        offset = 0
+        for group in range(parquet.num_row_groups):
+            count = parquet.metadata.row_group(group).num_rows
+            needed = [position for position in wanted if offset <= position < offset + count]
+            if needed:
+                table = parquet.read_row_group(group, columns=["pmid", "title", "abstract"])
+                for position in needed:
+                    native = table.slice(position - offset, 1).to_pylist()[0]
+                    record = wanted[position]
+                    if (
+                        any(
+                            record[field] != native[field]
+                            for field in ("pmid", "title", "abstract")
+                        )
+                        or record["text"] != native["abstract"]
+                    ):
+                        raise ValueError("Sampled materialized text differs from normalized source")
+                    checked.append(
+                        {
+                            "document_id": record["document_id"],
+                            "legacy_relative_path": shard["legacy_relative_path"],
+                            "legacy_row_index": position,
+                            "legacy_sha256": shard["legacy"]["sha256"],
+                        }
+                    )
+                del table
+            offset += count
+    if len(checked) != len(positions):
+        raise ValueError("Sampled normalized source row was not found")
+    return checked
+
+
 def _select_current(events):
     """Resolve the final event per version, then choose the highest live version."""
     if not len(events):
@@ -300,6 +347,11 @@ def validate_current_snapshot(
                 )
             del expected
             atomic_json(out / "WINNING_EVENT_SAMPLES.json", samples)
+            progress("CHECKING_NORMALIZED_TEXT_SAMPLES")
+            text_samples = _check_source_text_samples(
+                index, corpus, manifest_path, manifest, samples
+            )
+            atomic_json(out / "NORMALIZED_TEXT_SAMPLES.json", text_samples)
             progress("SQLITE_AND_FTS_INTEGRITY", compared_records=compared)
             integrity = index.validate()
             if file_digest(Path(__file__)) != _IMPLEMENTATION_SHA256:
@@ -316,6 +368,7 @@ def validate_current_snapshot(
                 "actual_projection_sha256": actual_digest.hexdigest(),
                 "expected_projection_sha256": expected_digest.hexdigest(),
                 "source_event_samples": len(samples),
+                "normalized_text_samples": len(text_samples),
                 "integrity": integrity,
                 "estimated_peak_memory_bytes": estimated_bytes,
                 "elapsed_seconds": time.perf_counter() - started,

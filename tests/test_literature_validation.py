@@ -117,3 +117,16 @@ def test_validator_checks_complete_sampled_event_and_hash_provenance(tmp_path, f
             index.conn.execute("UPDATE versions SET provenance_json=?", (json.dumps(value),))
     with pytest.raises(ValueError, match="Winning source"):
         validate_current_snapshot(corpus, manifest, db, tmp_path / "validation")
+
+
+def test_validator_detects_text_corruption_with_consistent_fts_and_provenance(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)]])
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db) as index:
+        with index.conn:
+            index.conn.execute("DELETE FROM current_records")
+            index.conn.execute("UPDATE versions SET abstract='Fabricated source text'")
+            index.conn.execute("INSERT INTO current_records SELECT pmid,id FROM versions")
+        assert index.validate()["fts_content"] == "PASS"
+    with pytest.raises(ValueError, match="text differs from normalized source"):
+        validate_current_snapshot(corpus, manifest, db, tmp_path / "validation")

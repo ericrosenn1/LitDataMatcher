@@ -60,6 +60,11 @@ Documents carry stable `PMID:` identifiers, source URLs, source-shard checksums,
 event/version identity, and exact legacy row offsets. Passage results preserve
 their exact character offsets in the title or abstract and content-bound IDs.
 The returned `text` is the abstract when present, otherwise the title.
+Explicit retraction, correction, and expression-of-concern publication types
+are mapped to the existing literature-integrity contract. A current citation
+must not be confused with eligible evidence. Lifecycle coverage is limited to
+the retained publication types: the legacy normalized corpus does not preserve
+all comment/correction links, and no claim of complete lifecycle review is made.
 
 `semantic_search(query, model_dir, cache_root, limit=20, candidate_limit=200)`
 uses the existing fingerprinted `CachedSemanticIndex` to rerank a bounded lexical

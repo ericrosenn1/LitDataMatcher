@@ -18,6 +18,7 @@ from pathlib import Path
 from .controller import integration_lease
 from .corpus_snapshot import PUBMED_FIELDS, file_digest
 from .data_plane import atomic_json, digest
+from .literature_integrity import consolidate_literature_rows
 from .pubmed_revision_ledger import LEDGER_VERSION, _inside, _is_inside, _resolved_path
 
 INDEX_VERSION = "pubmed-current-index-1.0"
@@ -254,6 +255,35 @@ class LiteratureIndex:
             source_provenance=json.loads(row["provenance_json"]),
         )
         record["url"] = record["source_locator"]
+        record["source_provenance"]["source_type"] = "pubmed"
+        # Mirror the owning PubMed adapter's explicit publication-type policy.
+        # A current citation is not necessarily unretracted scientific evidence.
+        relations = {}
+        try:
+            publication_types = json.loads(record.get("publication_types_json") or "[]")
+            if not isinstance(publication_types, list) or any(
+                not isinstance(value, str) for value in publication_types
+            ):
+                raise ValueError("Invalid publication-type metadata")
+        except (ValueError, TypeError):
+            publication_types = []
+            relations["lifecycle_review"] = {
+                "reason": "Malformed retained publication-type metadata"
+            }
+        for value in publication_types:
+            kind = re.sub(r"[^a-z]", "", value.casefold())
+            if kind in {"retractedpublication", "retractionofpublication"}:
+                relations.setdefault("retracted_publication_type", []).append(value)
+            elif kind in {"publishederrata", "publishederratum", "correctedandrepublishedarticle"}:
+                relations.setdefault("correction_publication_type", []).append(value)
+            elif kind == "expressionofconcern":
+                relations.setdefault("lifecycle_review", []).append(value)
+        record["version_relationships"] = relations
+        record["publication_types"] = publication_types
+        record["lifecycle_coverage"] = (
+            "Retained publication types only; this normalized snapshot does not include comment/correction links."
+        )
+        record = consolidate_literature_rows([record])[0]
         record["input_sha256"] = digest(
             {
                 key: record[key]

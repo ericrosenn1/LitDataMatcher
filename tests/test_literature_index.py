@@ -312,3 +312,33 @@ def test_fast_status_handles_older_builders_without_stale_counts(tmp_path):
         index.conn.commit()
         assert index.status(include_counts=False)["current_records"] is None
         assert index.status()["current_records"] == 1
+
+
+@pytest.mark.parametrize(
+    "publication_type, expected",
+    [
+        ("Retracted Publication", "RETRACTED"),
+        ("Published Erratum", "CORRECTED_REQUIRES_VERSION_REVIEW"),
+        ("Expression of Concern", "FLAGGED_REQUIRES_SOURCE_REVIEW"),
+        ("Journal Article", "ACTIVE_METADATA_ONLY"),
+    ],
+)
+def test_current_records_preserve_explicit_lifecycle_notices(tmp_path, publication_type, expected):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)]])
+    payload = json.loads(manifest.read_text())
+    normal = corpus / payload["shards"][0]["legacy_relative_path"]
+    records = pq.read_table(normal).to_pylist()
+    records[0]["publication_types_json"] = json.dumps([publication_type])
+    pq.write_table(pa.Table.from_pylist(records), normal)
+    payload["shards"][0]["legacy"]["sha256"] = file_digest(normal)
+    atomic_json(manifest, payload)
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db, read_only=True) as index:
+        record = index.get(1)
+        assert record["metadata"]["literature_integrity"]["lifecycle_status"] == expected
+        assert record["publication_types"] == [publication_type]
+        if expected != "ACTIVE_METADATA_ONLY":
+            assert (
+                record["metadata"]["literature_integrity"]["evidence_eligibility"]
+                == "INELIGIBLE_REQUIRES_VERSION_REVIEW"
+            )

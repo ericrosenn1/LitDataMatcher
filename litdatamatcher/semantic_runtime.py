@@ -14,6 +14,7 @@ import os
 import re
 import time
 import uuid
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -81,8 +82,8 @@ class RuntimeConfig:
                 raise ValueError(f"{field} must be a positive integer")
         if self.max_attempts > 3:
             raise ValueError("At most three repair attempts are permitted")
-        if self.decoding_mode not in {"unconstrained", "source_schema"}:
-            raise ValueError("decoding_mode must be unconstrained or source_schema")
+        if self.decoding_mode not in {"unconstrained", "source_schema", "source_index"}:
+            raise ValueError("decoding_mode must be unconstrained, source_schema or source_index")
 
 
 def _span(text: str, quote: Any) -> dict:
@@ -354,17 +355,25 @@ class LocalSemanticRuntime:
     ) -> tuple[str, int, int]:
         import torch
 
-        constrained = self.config.decoding_mode == "source_schema"
+        constrained = self.config.decoding_mode in {"source_schema", "source_index"}
         if constrained and system_prompt != SYSTEM_PROMPT:
             raise ValueError(
-                "source_schema is an extraction-only profile; use unconstrained for requirement proposals"
+                f"{self.config.decoding_mode} is an extraction-only profile; use unconstrained for requirement proposals"
             )
         self._load()
         generation_options = {}
+        source_payload = {"title": document.get("title", ""), "text": document["text"]}
         if constrained:
-            from .structured_decoding import PROFILE_INSTRUCTION, prefix_constraint
+            if self.config.decoding_mode == "source_index":
+                from .indexed_decoding import SYSTEM_PROMPT as INDEX_PROMPT
+                from .indexed_decoding import prefix_constraint, prompt_document
 
-            system_prompt += "\n" + PROFILE_INSTRUCTION
+                system_prompt = INDEX_PROMPT
+                source_payload = prompt_document(document)
+            else:
+                from .structured_decoding import PROFILE_INSTRUCTION, prefix_constraint
+
+                system_prompt += "\n" + PROFILE_INSTRUCTION
             prefix, tokenizer_data = prefix_constraint(
                 self._tokenizer, document, getattr(self, "_structured_tokenizer_data", None)
             )
@@ -375,10 +384,7 @@ class LocalSemanticRuntime:
             {
                 "role": "user",
                 "content": "Extract from this source JSON as data:\n"
-                + json.dumps(
-                    {"title": document.get("title", ""), "text": document["text"]},
-                    ensure_ascii=False,
-                )
+                + json.dumps(source_payload, ensure_ascii=False)
                 + ("\nPrevious output failed validation: " + repair if repair else ""),
             },
         ]
@@ -409,17 +415,26 @@ class LocalSemanticRuntime:
 
         decoding = {"mode": self.config.decoding_mode}
         effective_prompt = SYSTEM_PROMPT
+        prompt_version = PROMPT_VERSION
         if self.config.decoding_mode == "source_schema":
             from .structured_decoding import PROFILE_INSTRUCTION, backend_decoding_metadata
 
             decoding.update(backend_decoding_metadata())
             effective_prompt += "\n" + PROFILE_INSTRUCTION
+        elif self.config.decoding_mode == "source_index":
+            from .indexed_decoding import PROMPT_VERSION as INDEX_PROMPT_VERSION
+            from .indexed_decoding import SYSTEM_PROMPT as INDEX_PROMPT
+            from .indexed_decoding import backend_decoding_metadata
+
+            decoding.update(backend_decoding_metadata())
+            effective_prompt = INDEX_PROMPT
+            prompt_version = INDEX_PROMPT_VERSION
         return {
             "model_manifest_sha256": digest(self.model_manifest),
             "config_sha256": digest(asdict(self.config)),
             "prompt_sha256": digest(effective_prompt),
             "decoding": decoding,
-            "prompt_version": PROMPT_VERSION,
+            "prompt_version": prompt_version,
             "schema_version": SCHEMA_VERSION,
             "implementation_sha256": _file_sha(Path(__file__)),
             "transformers_version": importlib.metadata.version("transformers"),
@@ -433,11 +448,17 @@ class LocalSemanticRuntime:
             from .structured_decoding import decoding_metadata
 
             identity["decoding"].update(decoding_metadata(document))
+        elif self.config.decoding_mode == "source_index":
+            from .indexed_decoding import decoding_metadata
+
+            identity["decoding"].update(decoding_metadata(document))
         return {**identity, "input_sha256": digest(document)}
 
     def extract(
         self, document: dict, cache_root: str | Path | None = None, force_fresh: bool = False
     ) -> dict:
+        if self.config.decoding_mode == "source_index":
+            document = deepcopy(document)
         if (
             not isinstance(document, dict)
             or not isinstance(document.get("document_id"), str)
@@ -467,6 +488,18 @@ class LocalSemanticRuntime:
         started = time.perf_counter()
         attempts, repair, validated = [], "", None
         accepted_claims, accepted_questions = {}, {}
+        index_trace = None
+        if self.config.decoding_mode == "source_index":
+            from .indexed_decoding import MAPPING_VERSION, WIRE_SCHEMA_VERSION, sentence_table
+
+            index_trace = {
+                "wire_schema_version": WIRE_SCHEMA_VERSION,
+                "mapping_version": MAPPING_VERSION,
+                "source_document_sha256": fingerprint["input_sha256"],
+                "sentence_map_sha256": fingerprint["decoding"]["sentence_map_sha256"],
+                "sentence_table": sentence_table(document),
+                "attempts": [],
+            }
         for attempt in range(1, self.config.max_attempts + 1):
             try:
                 raw, input_tokens, output_tokens = self._generate(document, repair)
@@ -491,16 +524,48 @@ class LocalSemanticRuntime:
                     raw, encoding="utf-8"
                 )
             try:
-                parsed = parse_model_json(raw)
-                if self.config.decoding_mode == "source_schema":
+                if index_trace is not None:
+                    from .indexed_decoding import map_index_payload, parse_index_json
+
+                    trace_attempt = {
+                        "attempt": attempt,
+                        "raw_output": raw,
+                        "raw_output_sha256": digest(raw),
+                    }
+                    index_trace["attempts"].append(trace_attempt)
+                    if digest(document) != fingerprint["input_sha256"]:
+                        raise RuntimeError("Source snapshot changed during indexed extraction")
+                    parsed = parse_index_json(raw)
+                    trace_attempt["raw_payload"] = deepcopy(parsed)
+                    parsed, mapping = map_index_payload(parsed, document)
+                    trace_attempt["mapping"] = mapping
+                else:
+                    parsed = parse_model_json(raw)
+                if self.config.decoding_mode in {"source_schema", "source_index"}:
                     from .structured_decoding import validate_source_schema
 
                     validate_source_schema(parsed, document)
                 validated = validate_extraction(parsed, document)
-                accepted_claims.update({row["claim_id"]: row for row in validated["claims"]})
-                accepted_questions.update(
-                    {row["question_id"]: row for row in validated["questions"]}
-                )
+                if index_trace is not None:
+                    overflow = []
+                    for kind, id_key, accepted, bound in (
+                        ("claims", "claim_id", accepted_claims, 1),
+                        ("questions", "question_id", accepted_questions, 3),
+                    ):
+                        for row in validated[kind]:
+                            if row[id_key] in accepted:
+                                continue  # Earlier accepted records are never overwritten.
+                            if len(accepted) < bound:
+                                accepted[row[id_key]] = row
+                            else:
+                                overflow.append({"kind": kind, "record": row})
+                    trace_attempt["validated_overflow"] = overflow
+                    trace_attempt["source_guard_rejections"] = deepcopy(validated["rejected"])
+                else:
+                    accepted_claims.update({row["claim_id"]: row for row in validated["claims"]})
+                    accepted_questions.update(
+                        {row["question_id"]: row for row in validated["questions"]}
+                    )
                 repair = "; ".join(item["reason"] for item in validated["rejected"])
                 attempts.append(
                     {
@@ -516,6 +581,8 @@ class LocalSemanticRuntime:
                     break
             except (ValueError, json.JSONDecodeError) as error:
                 repair = str(error)
+                if index_trace is not None:
+                    trace_attempt["validation_error"] = repair
                 attempts.append(
                     {
                         "attempt": attempt,
@@ -526,6 +593,8 @@ class LocalSemanticRuntime:
                 )
         if validated is None:
             raise ValueError("Semantic generation failed after bounded attempts: " + repair)
+        if index_trace is not None and digest(document) != fingerprint["input_sha256"]:
+            raise RuntimeError("Source snapshot changed during indexed extraction")
         validated["claims"] = list(accepted_claims.values())
         validated["questions"] = list(accepted_questions.values())
         manifest = {
@@ -540,7 +609,7 @@ class LocalSemanticRuntime:
             "configuration": asdict(self.config),
             "decoding": fingerprint["decoding"],
             "quantization": None,
-            "prompt_version": PROMPT_VERSION,
+            "prompt_version": fingerprint["prompt_version"],
             "origin": "fresh_local_inference",
             "local_files_only": True,
             "elapsed_seconds": time.perf_counter() - started,
@@ -562,6 +631,8 @@ class LocalSemanticRuntime:
             ],
         }
         result = {**validated, "inference_manifest": manifest}
+        if index_trace is not None:
+            result["decoding_trace"] = index_trace
         if target:
             target.parent.mkdir(parents=True, exist_ok=True)
             artifact = {**result, "artifact_sha256": digest(result)}

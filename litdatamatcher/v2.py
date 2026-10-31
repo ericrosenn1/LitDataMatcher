@@ -425,7 +425,7 @@ def qualified_runtime(qualification_path: Path, runtime) -> tuple[bool, str | No
         expected_backend["decoding"] = {
             key: value
             for key, value in expected_backend["decoding"].items()
-            if key not in {"schema_sha256", "complete_sentence_choices"}
+            if key not in {"schema_sha256", "complete_sentence_choices", "sentence_map_sha256"}
         }
         fresh = qualification["fresh"]
         configuration = qualification["configuration"]
@@ -1450,7 +1450,9 @@ def main(argv=None):
         "--vector-cache",
         help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores",
     )
-    run.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
+    run.add_argument(
+        "--decoding-mode", choices=["unconstrained", "source_schema", "source_index"], default=None
+    )
     run.add_argument("--max-new-tokens", type=int, default=None)
     run.add_argument(
         "--runtime-qualification",
@@ -1475,7 +1477,9 @@ def main(argv=None):
     batch.add_argument("--fresh", action="store_true")
     batch.add_argument("--resume", action="store_true")
     batch.add_argument("--stop-on-error", action="store_true")
-    batch.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
+    batch.add_argument(
+        "--decoding-mode", choices=["unconstrained", "source_schema", "source_index"], default=None
+    )
     batch.add_argument("--max-new-tokens", type=int, default=None)
     batch.add_argument(
         "--runtime-qualification",

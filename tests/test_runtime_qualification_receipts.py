@@ -105,14 +105,12 @@ def test_changed_runtime_identity_cannot_qualify(qualifier, monkeypatch):
     assert "identity differs" in json.loads(output.read_text())["failure"]["message"]
 
 
-def test_source_profile_cli_records_explicit_configuration(qualifier):
+@pytest.mark.parametrize("mode", ["source_schema", "source_index"])
+def test_source_profile_cli_records_explicit_configuration(qualifier, mode):
     args, output = qualifier
-    assert (
-        runtime_qualify.main([*args, "--decoding-mode", "source_schema", "--max-new-tokens", "384"])
-        == 1
-    )
+    assert runtime_qualify.main([*args, "--decoding-mode", mode, "--max-new-tokens", "384"]) == 1
     report = json.loads(output.read_text())
-    assert report["configuration"]["decoding_mode"] == "source_schema"
+    assert report["configuration"]["decoding_mode"] == mode
     assert report["configuration"]["max_new_tokens"] == 384
 
 

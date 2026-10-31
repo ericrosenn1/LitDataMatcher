@@ -26,7 +26,9 @@ def main(argv=None) -> int:
     parser.add_argument("--device", choices=["cuda", "cpu"], default="cpu")
     parser.add_argument("--question", help="Optional user question for fresh requirement proposals")
     parser.add_argument(
-        "--decoding-mode", choices=("unconstrained", "source_schema"), default="unconstrained"
+        "--decoding-mode",
+        choices=("unconstrained", "source_schema", "source_index"),
+        default="unconstrained",
     )
     parser.add_argument("--max-new-tokens", type=int, default=1024)
     parser.add_argument(
@@ -65,9 +67,9 @@ def main(argv=None) -> int:
     }
     stage = "input_and_configuration"
     try:
-        if args.question and args.decoding_mode == "source_schema":
+        if args.question and args.decoding_mode in {"source_schema", "source_index"}:
             raise ValueError(
-                "source_schema is extraction-only; omit --question or use an unconstrained runtime"
+                f"{args.decoding_mode} is extraction-only; omit --question or use an unconstrained runtime"
             )
         document = json.loads(args.document.read_text(encoding="utf-8-sig"))
         runtime = LocalSemanticRuntime(

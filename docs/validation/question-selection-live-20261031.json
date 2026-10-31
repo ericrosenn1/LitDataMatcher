@@ -1,0 +1,106 @@
+{
+  "status": "PASS",
+  "implementation_commit": "2669cfaf0dbe5a76d3c008b1af0587b7206946d1",
+  "api": {
+    "status": "PASS",
+    "source_job": "041f39b700814d92aff0a51867dea689",
+    "source_result_sha256": "bcbf49e6a06bf30162f39763a544d9eb57af2ae122ff30f7a57336d048b25fac",
+    "original_question": "rq_322307cc16134d272d375ce8",
+    "source_document": "PMID:42964294",
+    "unedited_job": "48970a2d5e4c41e893b6dd4b055cfec0",
+    "edited_job": "753c627720f945caac2c30816475cf94",
+    "questions_only_job": "6139495b4d2c4249a4447a29ce464162",
+    "source_fields_and_model_manifest_preserved": true,
+    "preview_context_matches_execution": true,
+    "edited_wording_is_explicit_user_modification": true,
+    "parent_output_unchanged": true,
+    "model_cache_hashes_and_mtimes_unchanged": true,
+    "model_inference_repeated": false,
+    "questions_only_dataset_outputs_empty": true,
+    "scientific_scope": "One preserved real question; source fidelity and abstention, not independently judged scientific utility or novelty."
+  },
+  "browser": {
+    "status": "PASS",
+    "actual_browser_questions_job": "07da50cbb36b46a68aae4ad6084a5ff2",
+    "actual_browser_dataset_job": "d9d7a6e7c0b240a4a06d45ed4ba35301",
+    "page_errors": [],
+    "desktop": {
+      "width": 1440,
+      "documentWidth": 1440
+    },
+    "mobile": {
+      "width": 390,
+      "documentWidth": 390
+    },
+    "model_inference_repeated": false,
+    "source_reference_preserved": true
+  },
+  "full_python_suite": {
+    "tests": 1493,
+    "passed": 1491,
+    "skipped": 2,
+    "failures": 0,
+    "errors": 0
+  },
+  "full_browser_suite": {
+    "passed": 43,
+    "skipped": 1,
+    "failed": 0
+  },
+  "web_library_tests": 27,
+  "fresh_installed_package": {
+    "status": "PASS",
+    "source_commit": "2669cfaf0dbe5a76d3c008b1af0587b7206946d1",
+    "installed_module": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\package-validation-v3\\clean-env\\Lib\\site-packages\\litdatamatcher\\__init__.py",
+    "python": "3.12.13 (main, Jul 23 2026, 14:44:57) [MSC v.1944 64 bit (AMD64)]",
+    "wheel_sha256": "1ea6449141bd2dc593e46d086d94d681700e7be3cc09a440a9fdbd2b1482174a",
+    "job_id": "bd737fe539f74cf88b63db1cb40f1fd0",
+    "job_status": "SUCCEEDED",
+    "processing_status": "COMPLETE",
+    "direct_fit": "UCI:17",
+    "method_contracts_match": true,
+    "base_profiles_unpromoted": true,
+    "statistical_adequacy": "UNKNOWN",
+    "actual_http_submission": true,
+    "built_frontend_served": true,
+    "entrypoints_help_pass": true,
+    "limitations": [
+      "Separate built frontend supplied with web_root.",
+      "Base dependencies only; model extras not installed or tested here."
+    ]
+  },
+  "independent_code_review": {
+    "revision": "df06a1e2caaf06c0ca56f59792e0ef900f5429c9",
+    "combined_tests_passed": 33,
+    "selection_tests_rerun_after_reader_fix": 10,
+    "remaining_implementation_blockers": 0
+  },
+  "evidence": [
+    {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-selection-v1\\API_SELECTION_RECEIPT.json",
+      "bytes": 913,
+      "sha256": "0cd98108b54764c822519cf695cd3e8d733b92fd7f1cc086004924d36867dd2e"
+    },
+    {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\application-selection-v1\\BROWSER_SELECTION_RECEIPT.json",
+      "bytes": 11971,
+      "sha256": "904bc105882900935a12210b2d52c95a0c475526652b5312dd849ba4a1b5f1c4"
+    },
+    {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\final-integrated-suite-after-selection.xml",
+      "bytes": 211572,
+      "sha256": "a364fd1c334f6f49134b7fd423e55e2a81ee464d0967ad964ec8c3dd5b3dbd3c"
+    },
+    {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\browser\\final-web-suite-after-selection.json",
+      "bytes": 54154,
+      "sha256": "7a8c704f8e1f019c6d7b28ee703a888779901bf497bb1d3eb27cbbd6d2d2c195"
+    },
+    {
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\package-validation-v3\\CLEAN_INSTALL_RECEIPT.json",
+      "bytes": 938,
+      "sha256": "34810f2637d4f4f58e1fd98009800b7ca6c9766380a1aac73a669f6d165a797e"
+    }
+  ],
+  "scientific_validation": "Pending independent reference judgments and approved final protocol; no novelty or adequacy inference"
+}

@@ -11,6 +11,7 @@ nav:
   - Home: index.md
   - Research workflow: research_workflow.md
   - Integrated application: full_platform.md
+  - Source question selection: campaign_20261031/question_selection.md
   - Installation and CLI: installation.md
   - Models and evaluation:
       - Model card: model_card.md

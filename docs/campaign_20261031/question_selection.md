@@ -65,4 +65,27 @@ stop, queued execution pauses, and completed stages are retained.
 
 These checks establish software behavior, not scientific accuracy, novelty,
 statistical adequacy, or clinical utility. Live reuse of the preserved Qwen job
-is a separate integration acceptance step; no new model extraction is required.
+is recorded separately below; no new model extraction was required.
+
+## Executed integrated acceptance
+
+The live API reused the real saved Qwen question
+`rq_322307cc16134d272d375ce8` from job `041f39b700814d92aff0a51867dea689`.
+Its original ID, citation, exact passage and model manifest were preserved;
+preview and execution used the same source context. An edited-wording control
+retained derivation without presenting the new wording as a source quotation.
+The parent output hash and model-cache hashes and modification times remained
+unchanged. A questions-only job produced no dataset outputs.
+
+A separate actual browser walkthrough submitted **Find questions**, selected
+that literal passage, previewed requirements, then submitted **Find datasets**.
+The final result retained its verified source reference. Desktop and mobile
+checks found no page errors or horizontal overflow. Saved extraction was reused
+even with model mode selected; the underdetermined question retained zero fits.
+
+Integrated validation at `2669cfa`: 1,491 Python tests passed with two platform
+skips, 43 browser checks passed with one intentional skip, and 27 web-library
+tests passed. A freshly installed wheel also served the frontend and completed
+a real HTTP descriptive comparison with essential method evidence and UNKNOWN
+statistical adequacy. The source-bound receipt is
+[question-selection-live-20261031.json](../validation/question-selection-live-20261031.json).

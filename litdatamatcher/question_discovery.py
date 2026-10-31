@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .data_plane import digest
+from .literature_integrity import consolidate_literature_rows
 from .question_compiler import compile_question
 from .semantic_runtime import validate_extraction
 from .structured_decoding import complete_source_sentences
@@ -120,6 +121,8 @@ def _document(raw: dict) -> dict:
     provenance = raw.get("source_provenance") or {}
     if not isinstance(provenance, dict):
         raise ValueError("source_provenance must be an object")
+    if raw.get("metadata") is not None and not isinstance(raw["metadata"], dict):
+        raise ValueError("metadata must be an object")
     locator = (
         raw.get("source_locator")
         or raw.get("url")
@@ -134,6 +137,90 @@ def _document(raw: dict) -> dict:
         "text": text,
         "source_locator": locator,
         "source_provenance": deepcopy(provenance),
+    }
+
+
+def _source_lifecycle(document: dict) -> dict:
+    """Apply the native lifecycle policy without erasing supplied exclusions.
+
+    Consolidation re-derives current relation-based status. Sources may also
+    carry an earlier explicit integrity decision without the original relation
+    payload, so its restrictive status remains visible and cannot be cleared
+    merely by recomputing from absent relationships.
+    """
+    integrity = consolidate_literature_rows([document])[0]["metadata"]["literature_integrity"]
+    supplied = []
+    sources, seen = [("document", document)], set()
+    for prefix, source in sources:
+        if id(source) in seen:
+            continue
+        seen.add(id(source))
+        metadata = source.get("metadata") or {}
+        if not isinstance(metadata, dict):
+            raise ValueError(f"{prefix}.metadata must be an object")
+        for suffix, value in (
+            ("", source),
+            (".metadata", metadata),
+            (".literature_integrity", source.get("literature_integrity")),
+            (".metadata.literature_integrity", metadata.get("literature_integrity")),
+        ):
+            if value is None:
+                continue
+            location = prefix + suffix
+            if not isinstance(value, dict):
+                raise ValueError(f"{location} must be an object")
+            snapshot = {
+                key: deepcopy(value[key])
+                for key in (
+                    "lifecycle_status",
+                    "evidence_eligibility",
+                    "version_relationships",
+                    "derivation_invalidation_key",
+                    "source_snapshots",
+                    "source_statuses",
+                )
+                if key in value
+            }
+            if snapshot:
+                supplied.append(
+                    {
+                        "location": location,
+                        "source_id": source.get("source_id")
+                        or source.get("document_id")
+                        or source.get("id"),
+                        **snapshot,
+                    }
+                )
+        members = metadata.get("merged_source_records", [])
+        if not isinstance(members, list) or not all(isinstance(member, dict) for member in members):
+            raise ValueError("merged_source_records must be an array of source objects")
+        sources.extend(
+            (f"{prefix}.metadata.merged_source_records[{i}]", member)
+            for i, member in enumerate(members)
+        )
+        if len(sources) > 1000:
+            raise ValueError("At most 1000 merged source records may enter one lifecycle check")
+    reasons = []
+    for observed in [{"location": "current_source_relations", **integrity}, *supplied]:
+        lifecycle = observed.get("lifecycle_status")
+        eligibility = observed.get("evidence_eligibility")
+        if lifecycle and lifecycle != "ACTIVE_METADATA_ONLY":
+            reasons.append(
+                {"location": observed["location"], "field": "lifecycle_status", "value": lifecycle}
+            )
+        if eligibility == "INELIGIBLE_REQUIRES_VERSION_REVIEW":
+            reasons.append(
+                {
+                    "location": observed["location"],
+                    "field": "evidence_eligibility",
+                    "value": eligibility,
+                }
+            )
+    return {
+        "literature_integrity": integrity,
+        "source_lifecycle_metadata": supplied,
+        "exclusion_reasons": reasons,
+        "excluded": bool(reasons),
     }
 
 
@@ -290,7 +377,9 @@ def compile_research_question(
     }
 
 
-def _record(document: dict, span: dict, method: str, manifest: dict | None = None) -> dict:
+def _record(
+    document: dict, span: dict, method: str, manifest: dict | None = None, *, lifecycle: dict
+) -> dict:
     text = span["text"]
     category = _category(text)
     if category is None:
@@ -310,6 +399,10 @@ def _record(document: dict, span: dict, method: str, manifest: dict | None = Non
         "source_locator": locator,
         "source_text_sha256": source_hash,
         "source_provenance": document["source_provenance"],
+        "literature_integrity": deepcopy(lifecycle["literature_integrity"]),
+        "source_lifecycle_metadata": deepcopy(lifecycle["source_lifecycle_metadata"]),
+        "lifecycle_status": lifecycle["literature_integrity"]["lifecycle_status"],
+        "evidence_eligibility": lifecycle["literature_integrity"]["evidence_eligibility"],
         "evidence_span": {**span, "source_locator": document["source_locator"]},
         "citation": {
             key: document.get(key) for key in ("title", "doi", "pmid", "pmcid", "url", "year")
@@ -415,6 +508,22 @@ def discover_questions(
     for document in prepared:
         identifier = document["document_id"]
         try:
+            lifecycle = _source_lifecycle(document)
+            if lifecycle["excluded"]:
+                statuses.append(
+                    {
+                        "document_id": identifier,
+                        "status": "EXCLUDED_SOURCE_LIFECYCLE",
+                        "reason": "Source lifecycle or version eligibility requires review",
+                        "source_locator": document["source_locator"],
+                        "source_text_sha256": _text_sha(document["text"]),
+                        "source_provenance": deepcopy(document["source_provenance"]),
+                        **lifecycle,
+                        "candidate_count": 0,
+                        "retained_count": 0,
+                    }
+                )
+                continue
             spans = _sentences(document)
             manifest = None
             rejected = []
@@ -441,7 +550,9 @@ def discover_questions(
                     if _category(row["text"]) is not None
                 ]
                 rejected = [*result.get("rejected", []), *guarded["rejected"]]
-            records = [_record(document, span, method, manifest) for span in selected]
+            records = [
+                _record(document, span, method, manifest, lifecycle=lifecycle) for span in selected
+            ]
             records = list({row["question_id"]: row for row in records}.values())
             remaining = max_questions - len(questions)
             questions.extend(records[:remaining])
@@ -454,6 +565,7 @@ def discover_questions(
                     "retained_count": min(remaining, len(records)),
                     "rejected": rejected,
                     "inference_manifest": manifest,
+                    **lifecycle,
                 }
             )
         except (ValueError, TypeError, KeyError, RuntimeError, OSError) as exc:
@@ -468,6 +580,7 @@ def discover_questions(
             )
     candidate_count = sum(status.get("candidate_count", 0) for status in statuses)
     failures = sum(status["status"] == "EXTRACTION_FAILURE" for status in statuses)
+    excluded = sum(status["status"] == "EXCLUDED_SOURCE_LIFECYCLE" for status in statuses)
     return {
         "schema_version": VERSION,
         "extraction_method": method,
@@ -476,8 +589,9 @@ def discover_questions(
         "document_statuses": statuses,
         "coverage": {
             "requested_documents": len(documents),
-            "processed_documents": len(statuses) - failures,
+            "processed_documents": len(statuses) - failures - excluded,
             "failed_documents": failures,
+            "excluded_documents": excluded,
             "candidate_questions": candidate_count,
             "retained_questions": len(questions),
             "truncated": candidate_count > len(questions),
@@ -506,10 +620,20 @@ def check_addressed_evidence(
         else question_record.get("text") or question_record.get("question")
     )
     terms = _terms(normalize_question(question))
-    candidates, failures, checked = [], [], []
+    candidates, failures, checked, excluded = [], [], [], []
     for raw in documents:
         doc = _document(raw)
         try:
+            lifecycle = _source_lifecycle(doc)
+            if lifecycle["excluded"]:
+                excluded.append(
+                    {
+                        "document_id": doc["document_id"],
+                        "source_locator": doc["source_locator"],
+                        **lifecycle,
+                    }
+                )
+                continue
             spans = _sentences(doc)
         except ValueError as exc:
             failures.append({"document_id": doc["document_id"], "error": str(exc)})
@@ -527,6 +651,9 @@ def check_addressed_evidence(
                     "source_locator": f"{doc['source_locator']}#chars={span['start']}:{span['end']}",
                     "evidence_span": span,
                     "source_text_sha256": _text_sha(doc["text"]),
+                    "literature_integrity": deepcopy(lifecycle["literature_integrity"]),
+                    "source_lifecycle_metadata": deepcopy(lifecycle["source_lifecycle_metadata"]),
+                    "source_provenance": deepcopy(doc["source_provenance"]),
                     "matched_terms": sorted(overlap),
                     "lexical_coverage": len(overlap) / len(terms),
                     "interpretation": "Related result passage; exact-question coverage requires scientific review.",
@@ -549,6 +676,7 @@ def check_addressed_evidence(
         "candidate_count": len(candidates),
         "searched_document_ids": checked,
         "failures": failures,
+        "excluded_documents": excluded,
         "search_complete": not failures,
         "global_novelty_established": False,
         "question_answered": None,

@@ -26,6 +26,16 @@ model failure never silently changes to heuristic extraction. The existing
 source guard revalidates model quotations, while repeated ambiguous sentence
 strings are omitted by the established source selector.
 
+Before extraction or addressing checks, the existing literature-integrity
+consolidator derives lifecycle/version eligibility. Retraction, correction,
+version-review and explicit ineligibility decisions exclude the source before
+model invocation. Supplied lifecycle snapshots, including merged-source member
+snapshots, remain preserved; missing relation payloads cannot erase a prior
+explicit exclusion. Excluded sources have `EXCLUDED_SOURCE_LIFECYCLE` document
+status and a separate coverage count. Retained questions carry current integrity,
+source provenance and supplied lifecycle snapshots, without promoting
+`REQUIRES_SOURCE_REVIEW` into established evidence eligibility.
+
 Source-stated unresolved passages, limitations, and interrogative research
 questions have different categories. A question mark does not establish that
 a question is unanswered. Limitations are not rewritten into invented

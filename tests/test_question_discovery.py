@@ -242,3 +242,134 @@ def test_addressing_check_records_failed_coverage():
     )
     assert result["status"] == "INCOMPLETE_SEARCH"
     assert result["search_complete"] is False
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"version_relationships": {"is-retracted-by": [{"id": "pmid:notice"}]}},
+        {
+            "metadata": {
+                "version_relationships": {"crossref": {"is-correction-of": [{"id": "doi:prior"}]}}
+            }
+        },
+        {"lifecycle_status": "RETRACTED"},
+        {
+            "metadata": {
+                "literature_integrity": {
+                    "lifecycle_status": "RETRACTED",
+                    "evidence_eligibility": "INELIGIBLE_REQUIRES_VERSION_REVIEW",
+                }
+            }
+        },
+        {
+            "literature_integrity": {
+                "lifecycle_status": "ACTIVE_METADATA_ONLY",
+                "evidence_eligibility": "INELIGIBLE_REQUIRES_VERSION_REVIEW",
+            }
+        },
+        {"metadata": {"alternate_source_ids": ["crossref:alternate"]}},
+    ],
+)
+def test_source_lifecycle_excludes_questions_before_model_or_rule_extraction(changes):
+    class ForbiddenModel:
+        def extract(self, *_args, **_kwargs):
+            raise AssertionError("An excluded source must never enter model inference")
+
+    document = {**doc("Further studies should examine glucose uptake in humans."), **changes}
+    for runtime in (None, ForbiddenModel()):
+        result = discover_questions([document], runtime=runtime)
+        assert result["questions"] == []
+        assert result["clusters"] == []
+        assert result["document_statuses"][0]["status"] == "EXCLUDED_SOURCE_LIFECYCLE"
+        assert result["document_statuses"][0]["exclusion_reasons"]
+        assert result["coverage"]["processed_documents"] == 0
+        assert result["coverage"]["excluded_documents"] == 1
+        assert result["coverage"]["failed_documents"] == 0
+
+
+def test_retained_questions_preserve_current_and_supplied_source_lifecycle():
+    from copy import deepcopy
+
+    document = {
+        **doc("Further studies should examine glucose uptake in humans."),
+        "source_id": "pmid:test",
+        "source_provenance": {
+            "source_type": "pubmed",
+            "retrieval_time_utc": "2026-10-31T12:00:00Z",
+        },
+        "metadata": {
+            "literature_integrity": {
+                "lifecycle_status": "ACTIVE_METADATA_ONLY",
+                "evidence_eligibility": "REQUIRES_SOURCE_REVIEW",
+                "derivation_invalidation_key": "prior-snapshot",
+            }
+        },
+    }
+    before = deepcopy(document)
+    question = discover_questions([document])["questions"][0]
+    assert question["lifecycle_status"] == "ACTIVE_METADATA_ONLY"
+    assert question["evidence_eligibility"] == "REQUIRES_SOURCE_REVIEW"
+    assert question["literature_integrity"]["source_snapshots"][0]["source_type"] == "pubmed"
+    assert (
+        question["source_lifecycle_metadata"][0]["derivation_invalidation_key"] == "prior-snapshot"
+    )
+    assert question["source_provenance"] == document["source_provenance"]
+    assert document == before
+
+
+def test_retracted_result_is_not_returned_as_addressing_evidence():
+    document = {
+        **doc("Insulin increased glucose uptake in humans."),
+        "version_relationships": {"is-retracted-by": [{"id": "notice"}]},
+    }
+    result = check_addressed_evidence("Does insulin increase glucose uptake in humans?", [document])
+    assert result["candidates"] == []
+    assert result["searched_document_ids"] == []
+    assert (
+        result["excluded_documents"][0]["literature_integrity"]["lifecycle_status"] == "RETRACTED"
+    )
+    assert result["question_answered"] is None
+
+
+def test_retracted_and_active_mixed_sources_keep_only_active_question():
+    text = "Further studies should examine glucose uptake in humans."
+    result = discover_questions(
+        [doc(text, "active"), {**doc(text, "retracted"), "lifecycle_status": "RETRACTED"}]
+    )
+    assert [question["source_document_id"] for question in result["questions"]] == ["active"]
+    assert result["coverage"]["processed_documents"] == 1
+    assert result["coverage"]["excluded_documents"] == 1
+
+
+def test_merged_source_member_explicit_lifecycle_snapshot_is_retained():
+    text = "Further studies should examine glucose uptake in humans."
+    document = {
+        **doc(text, "primary"),
+        "source_id": "pubmed:123",
+        "metadata": {
+            "merged_source_records": [
+                {
+                    "source_id": "europepmc:MED:123",
+                    "text": text,
+                    "metadata": {
+                        "literature_integrity": {
+                            "lifecycle_status": "RETRACTED",
+                            "evidence_eligibility": "INELIGIBLE_REQUIRES_VERSION_REVIEW",
+                        }
+                    },
+                }
+            ]
+        },
+    }
+    result = discover_questions([document])
+    assert result["questions"] == []
+    status = result["document_statuses"][0]
+    assert any(
+        row.get("source_id") == "europepmc:MED:123" and row.get("lifecycle_status") == "RETRACTED"
+        for row in status["source_lifecycle_metadata"]
+    )
+    assert any(
+        row["value"] == "RETRACTED" and "merged_source_records[0]" in row["location"]
+        for row in status["exclusion_reasons"]
+    )

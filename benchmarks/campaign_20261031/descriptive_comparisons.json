@@ -1,0 +1,142 @@
+{
+  "archive": {
+    "archive": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\LitDataMatcher-descriptive-development.zip",
+    "members": 8,
+    "payload_hashes_verified": true,
+    "sha256": "35ff1b580cee6adecc82b55a7ccabeee1d58ea4c30e6dd370216d82fff8111f2",
+    "status": "PASS",
+    "validation": {
+      "comparison_cases": 12,
+      "controls": 8,
+      "controls_correct": 8,
+      "distinct_processed_datasets": 2,
+      "no_global_method_capabilities": true,
+      "original_cases_qualified": 0,
+      "original_cases_replayed_unchanged": 12,
+      "original_report_hash_unchanged": true,
+      "qualified_full_compiled_contracts": 12
+    }
+  },
+  "limitations": [
+    "Twelve full-contract feasibility matches reuse two public datasets; they are dependent development examples.",
+    "New descriptive questions supplement, rather than reinterpret, the original association cases.",
+    "No claim of novel unanswered opportunities, clinical effectiveness, independent validation, power or participant independence.",
+    "Ascertainment means recorded source-defined measurements, not an adjudicated clinical endpoint.",
+    "Source definition mappings are explicit and auditable; expert scientific judgments remain separate.",
+    "Original temporal-order assumptions remain unresolved; no timing capability is inferred."
+  ],
+  "original_report": {
+    "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\dataset-qualification-v2\\QUALIFICATION_DEMONSTRATION.json",
+    "sha256": "68a1583d4a334ea895e413072dfa8d48838b523a5578fb655846024f86b79a1a"
+  },
+  "outputs": [
+    {
+      "bytes": 283581,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\COMPARISON_DEVELOPMENT.json",
+      "sha256": "6439f20d97a2fbad310e5270052bfe991b02dcfc25a874f2d07f068acfefe314"
+    },
+    {
+      "bytes": 17091,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\demonstrate_tabular_comparisons.py",
+      "sha256": "d4b61fe937650e704ae16131a5d0d86f1e0a8d469bcd83af048860914e6715b8"
+    },
+    {
+      "bytes": 1309,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\HANDOFF.md",
+      "sha256": "a604ef9e267aa9bfb2099117647a665ea287f47dafd84c640d8e6fb63e8ddaa1"
+    },
+    {
+      "bytes": 91947,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\inspected_datasets.jsonl",
+      "sha256": "665e619cf3bd6412fb1b0ac624ebb9f1260345df87c78e30b6df9c126de5fd4a"
+    },
+    {
+      "bytes": 32251,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\LitDataMatcher-descriptive-development.zip",
+      "sha256": "35ff1b580cee6adecc82b55a7ccabeee1d58ea4c30e6dd370216d82fff8111f2"
+    },
+    {
+      "bytes": 673,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\MANIFEST.tsv",
+      "sha256": "c8759412dc7c838ee0d896615f914809d21a635ae97ec71466e316734080fb97"
+    },
+    {
+      "bytes": 565,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\PACKAGE_VERIFICATION.json",
+      "sha256": "025b84fd0c7e7a24f1d53979004398fcc11419bae9644e33b2306ddd7166bc6f"
+    },
+    {
+      "bytes": 7989,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\requests.jsonl",
+      "sha256": "2c430bda62d29dae5147ae5cc7d15b4ff141c69f084492c716fa8c43cd3cd437"
+    },
+    {
+      "bytes": 13483,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\tabular_contracts.py",
+      "sha256": "143bd142b8d4b17e20c7f3f8c7b4b9fd340c44ba90988a43d07253fe152d6e91"
+    },
+    {
+      "bytes": 2879,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\task_state.json",
+      "sha256": "0c8ec18bdab01f895c694395ee6b040534075c8fe75c5052ca6e64ec9fe330af"
+    }
+  ],
+  "platform_api_execution": "pending_parent_integration",
+  "schema_version": "descriptive-comparison-development-receipt-1.0",
+  "source_receipts": [
+    {
+      "bytes": 125031,
+      "content_type": null,
+      "final_url": "https://archive.ics.uci.edu/static/public/17/data.csv",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\campaign_20261031\\processed-inspection-v1\\uci-tabular\\uci_17.csv",
+      "retrieved_utc": "2026-10-31T12:02:53.074015+00:00",
+      "sha256": "3487b754ff02c93cdc8a18afafe223961d9cfbfdb932e57483e52581042767d7",
+      "url": "https://archive.ics.uci.edu/static/public/17/data.csv"
+    },
+    {
+      "bytes": 7371,
+      "content_type": "text/plain;charset=UTF-8",
+      "final_url": "https://archive.ics.uci.edu/api/dataset?id=17",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\campaign_20261031\\processed-inspection-v1\\uci-tabular\\uci_17_metadata.json",
+      "retrieved_utc": "2026-10-31T12:02:52.625131+00:00",
+      "sha256": "c129484733a4d262158c583e69afba393e0e5909b9e7dad228c438a7b62830f9",
+      "url": "https://archive.ics.uci.edu/api/dataset?id=17"
+    },
+    {
+      "bytes": 11334,
+      "content_type": null,
+      "final_url": "https://archive.ics.uci.edu/static/public/45/data.csv",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\campaign_20261031\\processed-inspection-v1\\uci-tabular\\uci_45.csv",
+      "retrieved_utc": "2026-10-31T12:02:54.241499+00:00",
+      "sha256": "868cd646a53ffbc55611192bae7496911a163937c185710f6b8aa11549b88df1",
+      "url": "https://archive.ics.uci.edu/static/public/45/data.csv"
+    },
+    {
+      "bytes": 9622,
+      "content_type": "text/plain;charset=UTF-8",
+      "final_url": "https://archive.ics.uci.edu/api/dataset?id=45",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\campaign_20261031\\processed-inspection-v1\\uci-tabular\\uci_45_metadata.json",
+      "retrieved_utc": "2026-10-31T12:02:53.931163+00:00",
+      "sha256": "88cbc5a8918cb2f0103134233989b71efc52178dc3f2c197c32711e300c3d14b",
+      "url": "https://archive.ics.uci.edu/api/dataset?id=45"
+    }
+  ],
+  "status": "PASS_WITH_LIMITATIONS",
+  "tests": {
+    "count": 46,
+    "junit_path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3-tests.xml",
+    "passed": 46,
+    "sha256": "f2b806208990cc0d033613a2f6e8d2423f9693b53ad1c4b66c26ee05ead77843"
+  },
+  "validation": {
+    "comparison_cases": 12,
+    "controls": 8,
+    "controls_correct": 8,
+    "distinct_processed_datasets": 2,
+    "no_global_method_capabilities": true,
+    "original_cases_qualified": 0,
+    "original_cases_replayed_unchanged": 12,
+    "original_report_hash_unchanged": true,
+    "qualified_full_compiled_contracts": 12
+  }
+}

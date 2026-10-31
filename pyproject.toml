@@ -64,7 +64,7 @@ where = ["."]
 include = ["litdatamatcher*"]
 
 [tool.setuptools.package-data]
-litdatamatcher = ["schemas_v2/*.json", "schemas_v2/*.lock", "question_compiler_rules_v1.json"]
+litdatamatcher = ["schemas_v2/*.json", "schemas_v2/*.lock", "question_compiler_rules_v1.json", "protocols/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

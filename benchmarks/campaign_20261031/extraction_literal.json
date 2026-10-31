@@ -1,0 +1,347 @@
+{
+  "schema_version": "extraction-literal-evidence-v1",
+  "status": "COMPLETED_PARTIAL_BATCH",
+  "evidence_as_of_utc": "2026-10-31T13:15:54.037541+00:00",
+  "raw_source_text_included": false,
+  "scientific_accuracy": "NOT_MEASURED",
+  "automatic_promotion": false,
+  "inputs": {
+    "cases": 30,
+    "pipeline_input_sha256": "9b259ae42cd8b1eb8c71890d6674d53e46bb2fc3cad29d6225a69a69cd186024",
+    "shared_inputs_digest": "615a1a5e98542522fab75965db99774ee64a47a0a3cf65d717e50386a7ba8253",
+    "shared_models_digest": "62eda7576715433672b9e7f217909821fc4d91395bb4d09a1924ef4216a4780d",
+    "matches_baseline_inputs_and_models": true
+  },
+  "candidate": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "decoding_mode": "source_literal",
+    "configuration": {
+      "cpu_threads": 4,
+      "decoding_mode": "source_literal",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "max_attempts": 2,
+      "max_input_tokens": 4096,
+      "max_new_tokens": 384,
+      "seed": 1729
+    },
+    "backend_identity": {
+      "config_sha256": "0631e4b7ae7c1454973cdec44865e0bc15e698d925bdadd00b0c21a5d2d3f841",
+      "decoding": {
+        "final_cardinality": {
+          "claims": 1,
+          "questions": 3,
+          "selection": "first_guard_accepted"
+        },
+        "grammar_version": "fixed-source-json-literals-1.0",
+        "implementation_sha256": "85008eca01a655c14ad57be998752e94ff24818c50a74b0c3585447a2b6727b4",
+        "instruction_sha256": "a7374203ca7006e03d860608fc639247400dfdbc7572a756a4e78065214d539c",
+        "library": "lm-format-enforcer",
+        "library_version": "0.11.3",
+        "mode": "source_literal",
+        "parser_configuration": {
+          "array_limits": "source_schema",
+          "force_json_field_order": true,
+          "max_consecutive_whitespaces": 2,
+          "quote_encoding": "json.dumps:ensure_ascii=True|False"
+        },
+        "profile": "source-literal-decoding-1.0",
+        "source_schema_implementation_sha256": "cd4b507efa75bbe34d73f7c2f23550e90cef6ef2c247afbac31e9f0c5d67913a"
+      },
+      "dependency_identity_version": "runtime-dependencies-1",
+      "dependency_versions": {
+        "interegular": "0.3.3",
+        "jsonschema": "4.26.0",
+        "lm-format-enforcer": "0.11.3",
+        "numpy": "2.5.3",
+        "pydantic": "2.14.2",
+        "safetensors": "0.8.0",
+        "tokenizers": "0.22.2",
+        "torch": "2.11.0+cu128",
+        "transformers": "4.57.6"
+      },
+      "implementation_sha256": "f5ad14a672f2a60b20c429a327adf1dfeb81f219ba2e42aba866ecf3e9e3e57f",
+      "model_manifest_sha256": "b4c0259eb28bb9ec3a42287728f890b38463d062d365f5dcb1db25c6b837d6c6",
+      "prompt_sha256": "f8e840d7b6304b7991fc95d4efa221460e2c63748fc502c5aeddf8c66d477365",
+      "prompt_version": "source-extractive-v2.4",
+      "schema_version": "semantic-extraction-v2.2",
+      "torch_version": "2.11.0+cu128",
+      "transformers_version": "4.57.6"
+    },
+    "batch_fingerprint": "381010554612a184d1c6e92710bdbba5cbfdefafa2fa2c78e66bc1cbf0f4425b",
+    "fresh_state_sha256": "268a34b22ddd69a086e9420b43a6376a4c1cb794ef295952e557df9e5723ebe0",
+    "execution_counts": {
+      "failed": 0,
+      "partial": 19,
+      "passed": 11,
+      "retryable": 0,
+      "verified_skips": 0
+    },
+    "published_claims": 20,
+    "published_question_origins": {
+      "user": 30,
+      "explicit_unresolved_source": 2,
+      "explicit_unresolved": 3
+    },
+    "question_accounting": {
+      "caller": 30,
+      "model_extracted": 3,
+      "deterministic_source_extracted": 2,
+      "total": 35
+    },
+    "dataset_candidates": {
+      "rows": 140,
+      "requires_inspection": 140,
+      "scientifically_qualified": 0
+    },
+    "summary": {
+      "cases": 30,
+      "retryable_cases": 0,
+      "model_claims": 20,
+      "model_questions": 3,
+      "cases_with_model_claims": 18,
+      "cases_with_model_questions": 3,
+      "no_accepted_model_records_cases": 9,
+      "fully_observed_empty_model_cases": 9,
+      "technical_failures": 0,
+      "guard_failure_events": 24,
+      "views": 45,
+      "returned_views": 45,
+      "missing_view_timings": 0
+    }
+  },
+  "comparison": {
+    "baseline_record": "extraction_baseline.json",
+    "baseline_batch_state_sha256": "fef64d3a048b89ccd5d8c8be8331c40920fe8df38a5aa8a9f80d6e623366ba38",
+    "baseline_summary": {
+      "cases": 30,
+      "retryable_cases": 2,
+      "model_claims": 16,
+      "model_questions": 3,
+      "cases_with_model_claims": 14,
+      "cases_with_model_questions": 3,
+      "no_accepted_model_records_cases": 13,
+      "fully_observed_empty_model_cases": 11,
+      "technical_failures": 2,
+      "guard_failure_events": 26,
+      "views": 45,
+      "returned_views": 43,
+      "missing_view_timings": 2
+    },
+    "paired_view_timing_seconds": {
+      "pairs": 43,
+      "common_views": 45,
+      "baseline_missing_on_common_views": 2,
+      "candidate_missing_on_common_views": 0,
+      "pairs_with_different_origins": 0,
+      "median_baseline_seconds": 22.544864000054076,
+      "median_candidate_seconds": 9.619193699909374,
+      "median_delta_seconds": -11.849086600006558
+    },
+    "configuration_differences": [
+      "source_schema to source_literal decoder and final per-view cardinality handling",
+      "Implementation and qualification receipt identities changed",
+      "Dependency identity became more complete; shared versions recorded as torch 2.11.0+cu128, transformers 4.57.6, LM-format-enforcer 0.11.3",
+      "Different vector-cache directories; model/input digests match"
+    ],
+    "interpretation": "Observed paired timings and counts are development results. Hardware/concurrency were not experimentally controlled; no isolated speedup, causal, or accuracy claim.",
+    "accepted_record_preservation": {
+      "claim_loss_cases": 0,
+      "question_loss_cases": 0,
+      "same_span_claim_content_changed_cases": 0,
+      "source_strata": {
+        "Evidence Inference 2.0": {
+          "baseline": {
+            "cases": 15,
+            "model_claims": 5,
+            "model_questions": 2
+          },
+          "candidate": {
+            "cases": 15,
+            "model_claims": 7,
+            "model_questions": 2
+          }
+        },
+        "PubMedQA": {
+          "baseline": {
+            "cases": 15,
+            "model_claims": 11,
+            "model_questions": 1
+          },
+          "candidate": {
+            "cases": 15,
+            "model_claims": 13,
+            "model_questions": 1
+          }
+        }
+      }
+    }
+  },
+  "qualification": {
+    "status": "PASS_BOTH_DECLARED_POSITIVE_DEVELOPMENT_DOCUMENTS",
+    "trials": [
+      {
+        "document": 1,
+        "status": "PASS",
+        "accepted_claims": 1,
+        "source_questions": 0,
+        "receipt": {
+          "artifact": "qualified-literal-gpu-7b-doc1/QUALIFICATION.json",
+          "sha256": "48ed969035aa897b926f8e11b5ce26cc293b1a7fa738a81a574e670c05e683b8",
+          "size_bytes": 18434
+        }
+      },
+      {
+        "document": 2,
+        "status": "PASS",
+        "accepted_claims": 1,
+        "source_questions": 1,
+        "receipt": {
+          "artifact": "qualified-literal-gpu-7b-doc2/QUALIFICATION.json",
+          "sha256": "eea76df4140a2db2418a293f5277d356bb162d2cb60c14a9cae6e4183722fdbe",
+          "size_bytes": 19431
+        }
+      }
+    ],
+    "scope": "Fresh local inference plus verified replay, not scientific validation"
+  },
+  "audits": {
+    "root_artifact_span_question_audit": {
+      "status": "PASS_ARTIFACT_AND_SPAN_AUDIT",
+      "cases": 30,
+      "artifacts": 480,
+      "receipt": {
+        "artifact": "native-batch-literal-audit-v1/AUDIT.json",
+        "sha256": "4e463d50ad8a3e06720cf6967c0bd74f539f80f9095ca81208f9d9adb18dbdeb",
+        "size_bytes": 23582
+      }
+    },
+    "root_replay_audit": {
+      "status": "PASS_ARTIFACT_AND_SPAN_AUDIT",
+      "cases": 30,
+      "artifacts": 480,
+      "receipt": {
+        "artifact": "native-batch-literal-audit-v1/REPLAY_AUDIT.json",
+        "sha256": "80b02e4688fcc46100c1534595f17d1d9faac4f9388f9fa31a0da1b1a0aa8012",
+        "size_bytes": 23582
+      }
+    },
+    "independent_final_batch_audit": {
+      "status": "PASS_WITH_LIMITATIONS",
+      "comparison_receipts_verified": 571,
+      "baseline_artifacts_verified": 480,
+      "candidate_artifacts_verified": 480,
+      "timing_pairs": 43,
+      "replay_verified_skips": 30,
+      "receipt": {
+        "artifact": "extraction-comparison-independent-v1/AUDIT.json",
+        "sha256": "c9d22767f96cbeac9de5f073b92264f7a70836367c7bb564ab1a35a6114d9411",
+        "size_bytes": 148436
+      }
+    }
+  },
+  "resume": {
+    "status": "PASS",
+    "cases_reused": 30,
+    "new_attempts": 0,
+    "case_output_and_attempt_receipts_unchanged": true,
+    "fresh_state_sha256": "268a34b22ddd69a086e9420b43a6376a4c1cb794ef295952e557df9e5723ebe0",
+    "replay_state_sha256": "3927d90970e6fb862732b6e51f7800e3d8d037c2fc24205894bfc0e0bb6601d6",
+    "receipt": {
+      "artifact": "native-batch-literal-audit-v1/RESUME_VALIDATION.json",
+      "sha256": "74d28b736295b2e16c857945c80194e8c75f3302fa9be8541abc5ab88c397229",
+      "size_bytes": 2483
+    }
+  },
+  "timing_and_network": {
+    "batch_started_utc": "2026-10-31T13:05:34.488277+00:00",
+    "batch_finished_utc": "2026-10-31T13:13:46.222354+00:00",
+    "wrapper_elapsed_seconds": 503.18700000003446,
+    "replay_wrapper_elapsed_seconds": 25.48499999998603,
+    "control": "Python process audit hook",
+    "probe_blocked": true,
+    "subsequent_blocked_events": 0,
+    "os_firewall_claim": false,
+    "limitation": "Does not claim OS firewall control over arbitrary native libraries."
+  },
+  "receipts": {
+    "comparison": {
+      "artifact": "extraction-baseline-vs-literal-v1/COMPARISON.json",
+      "sha256": "1191b44c0ff561087ac39fc6dd2cf246b3bdf8b152b0813e1c8cade5bd641a14",
+      "size_bytes": 485863
+    },
+    "preserved_fresh_state": {
+      "artifact": "native-batch-literal-fresh-state-v1/BATCH_STATE.json",
+      "sha256": "268a34b22ddd69a086e9420b43a6376a4c1cb794ef295952e557df9e5723ebe0",
+      "size_bytes": 227170
+    },
+    "preserved_fresh_state_manifest": {
+      "artifact": "native-batch-literal-fresh-state-v1/MANIFEST.json",
+      "sha256": "34a202064de01547c13bda109a457edef47850be6824190c74476464c6c2641e",
+      "size_bytes": 795
+    },
+    "preserved_fresh_result": {
+      "artifact": "native-batch-literal-fresh-state-v1/BATCH_RESULT.json",
+      "sha256": "1162e70e4b34e52dab9b07141542d91c4a504c3497d3ff3aa553dddf1cd9d3e1",
+      "size_bytes": 211
+    },
+    "preserved_fresh_network": {
+      "artifact": "native-batch-literal-fresh-state-v1/native-batch-literal-v1-network.json",
+      "sha256": "2829a9aef9ae16b247134d935d024841ea62d260dd66fa625c0b17e49ea1314e",
+      "size_bytes": 1696
+    }
+  },
+  "model_size_comparison": {
+    "status": "SMALLER_MODEL_NOT_PROMOTED",
+    "profile": "source_literal",
+    "candidate": "Qwen/Qwen2.5-1.5B-Instruct",
+    "configuration": {
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "max_input_tokens": 4096,
+      "max_new_tokens": 384,
+      "max_attempts": 2,
+      "seed": 1729,
+      "cpu_threads": 4,
+      "decoding_mode": "source_literal"
+    },
+    "qualification_pair": "FAIL_BOTH_DOCUMENTS",
+    "full_batch_run": false,
+    "trials": [
+      {
+        "document": 1,
+        "status": "FAIL",
+        "accepted_claims": 0,
+        "source_questions": 0,
+        "fresh_seconds": 15.173574600019492,
+        "receipt": {
+          "artifact": "qualified-literal-gpu-1_5b-doc1/QUALIFICATION.json",
+          "sha256": "02c8ecb68444ae5115d21239c4b283008e1711d093102da554a51ee3611ce8eb",
+          "size_bytes": 13160
+        }
+      },
+      {
+        "document": 2,
+        "status": "FAIL",
+        "accepted_claims": 0,
+        "source_questions": 0,
+        "fresh_seconds": 13.515872500021942,
+        "receipt": {
+          "artifact": "qualified-literal-gpu-1_5b-doc2/QUALIFICATION.json",
+          "sha256": "dca799d2a701585d78f32a99fc9caed28bf32b957fdd107de10476f686533cfb",
+          "size_bytes": 13160
+        }
+      }
+    ],
+    "interpretation": "Zero accepted records on both positive development documents; the qualification rule precludes a smaller-model batch or promotion. No cross-model speed claim."
+  },
+  "limitations": [
+    "The 30 cases are development/regression inputs, not untouched final evaluation.",
+    "Accepted records and workflow PASS statuses are not expert accuracy labels.",
+    "Two baseline source-view timings are unobserved, not zero; pairing covers 43 common returned views.",
+    "The 13 baseline cases with no accepted model records include two with incomplete observation; only 11 are fully observed empty cases.",
+    "All 140 candidates still require inspection and none is scientifically qualified.",
+    "Independent audit passed with limitations; all counts remain uncalibrated development evidence. Smaller model failed qualification and was not run on the full pack."
+  ]
+}

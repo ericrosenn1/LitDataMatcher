@@ -1,4 +1,4 @@
-# Extraction baseline: measured results and limits
+# Extraction results: baseline and literal follow-up
 
 The original Qwen2.5-7B `source_schema` run completed **30 development cases:
 9 PASS, 21 PARTIAL, no FAILED cases, and 2 retryable cases**. These are workflow
@@ -74,9 +74,59 @@ its extracted question does not satisfy the required-claim rule. Thus both
 source-index model configurations remain **unpromoted**. CPU and GPU timings
 are not a controlled model-speed comparison.
 
-**Source-literal follow-up: PENDING.** This baseline record asserts no result
-from that separate qualification. Its synthetic transport checks are described
-in the [profile documentation](model_source_literal.md).
+## Completed source-literal follow-up
+
+The 7B literal profile passed both positive development qualification documents,
+then completed the same 30-case pack. The [literal evidence record](../../benchmarks/campaign_20261031/extraction_literal.json)
+preserves its fresh-run state, comparison, audit, and resume hashes separately
+from the unchanged baseline JSON.
+
+| Observed endpoint | Original source-schema | Source-literal |
+|---|---:|---:|
+| PASS / PARTIAL cases | 9 / 21 | 11 / 19 |
+| Retryable cases | 2 | 0 |
+| Accepted model claims | 16 | 20 |
+| Cases with model claims | 14 | 18 |
+| Model-extracted questions | 3 | 3 |
+| Cases with no accepted model records | 13* | 9 |
+| Fully observed empty-model cases | 11 | 9 |
+| Returned / attempted source views | 43 / 45 | 45 / 45 |
+| Technical inference failures | 2 | 0 |
+| Scientifically qualified dataset candidates | 0 | 0 |
+
+\*Two baseline cases had incomplete observation because of technical failures;
+they are not confirmed empty findings. Both runs contain 35 published questions:
+30 caller questions, three model-extracted questions, and two deterministic
+source-extracted questions. All 140 literal-run candidate rows still require
+inspection. More accepted claims do not establish improved scientific accuracy.
+
+The root artifact, source-span, and question-linkage audit passed for all
+**480 artifacts across 30 cases**. Verified resume reused all **30 cases**, created
+**zero new attempts**, and preserved case outputs and attempt receipts. The
+replay audit passed. Independent review passed with limitations after checking
+571 comparison-input receipts, 480 artifacts per run, and 43 timing pairs.
+It found no lost accepted claim/question spans or changed same-span claim
+content. These are computational-integrity checks, not expert scientific review.
+
+The four additional claims were split across the two source strata: Evidence
+Inference 2.0 increased from 5 to 7, and PubMedQA from 11 to 13. Model-extracted
+question counts remained 2 and 1, respectively.
+
+Across **43 paired returned views**, median recorded inference time was
+22.544864 seconds for the baseline and 9.619194 seconds for the literal run.
+Two baseline timings are missing, not zero. Inputs and model snapshots match,
+but decoding/configuration, implementation, qualification, and dependency
+identities differ; hardware and concurrent workload were not controlled as an
+isolated experiment. This is an observational timing comparison, not a causal
+speedup or accuracy claim.
+
+The 1.5B literal candidate failed both positive qualification documents, with
+zero accepted claims or questions (15.17 and 13.52 seconds). The unchanged rule
+therefore precluded a full 30-case run or smaller-model promotion. These timings
+do not establish cross-model equivalence or a usable speed advantage. The
+earlier failed source-index trials above also remain retained and unpromoted.
+See the [literal profile guide](model_source_literal.md) for the transport
+mechanism and limitations.
 
 ## Timing and reproducibility
 

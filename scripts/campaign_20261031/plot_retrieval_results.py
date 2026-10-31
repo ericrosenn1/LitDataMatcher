@@ -21,8 +21,12 @@ def render(source: Path, out: Path):
     import matplotlib.pyplot as plt
 
     report = json.loads(source.read_text(encoding="utf-8"))
-    names = [("bm25", "BM25"), ("hybrid", "BM25 + pretrained fusion"),
-             ("trained_epoch_02", "Fine-tuned MiniLM"), ("pretrained", "Pretrained MiniLM")]
+    names = [
+        ("bm25", "BM25"),
+        ("hybrid", "BM25 + pretrained fusion"),
+        ("trained_epoch_02", "Fine-tuned MiniLM"),
+        ("pretrained", "Pretrained MiniLM"),
+    ]
     values, intervals = [], []
     for key, _ in names:
         metric = report["methods"][key]
@@ -32,17 +36,30 @@ def render(source: Path, out: Path):
             raise ValueError("Plot requires finite MRR values in [0, 1]")
         values.append(value)
         intervals.append(interval)
-    plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none",
-                         "svg.hashsalt": "litdatamatcher-development-1"})
+    plt.rcParams.update(
+        {
+            "font.family": "DejaVu Sans",
+            "svg.fonttype": "none",
+            "svg.hashsalt": "litdatamatcher-development-1",
+        }
+    )
     fig, ax = plt.subplots(figsize=(9, 4.6), layout="constrained")
     fig.set_facecolor("#fbfcfe")
     ax.set_facecolor("#fbfcfe")
     colors = ["#20334e", "#5b708d", "#127f7b", "#a7b4c5"]
     ax.barh(range(4), values, height=0.56, color=colors)
-    ax.errorbar(values, range(4),
-                xerr=[[value - interval[0] for value, interval in zip(values, intervals, strict=True)],
-                      [interval[1] - value for value, interval in zip(values, intervals, strict=True)]],
-                fmt="none", ecolor="#172536", capsize=4, linewidth=1.2)
+    ax.errorbar(
+        values,
+        range(4),
+        xerr=[
+            [value - interval[0] for value, interval in zip(values, intervals, strict=True)],
+            [interval[1] - value for value, interval in zip(values, intervals, strict=True)],
+        ],
+        fmt="none",
+        ecolor="#172536",
+        capsize=4,
+        linewidth=1.2,
+    )
     ax.set_yticks(range(4), [label for _, label in names], fontsize=11)
     ax.invert_yaxis()
     ax.set_xlim(0, 1.1)
@@ -56,12 +73,22 @@ def render(source: Path, out: Path):
     for spine in ax.spines.values():
         spine.set_visible(False)
     counts = report["counts"]
-    ax.set_title(f"Development retrieval comparison\n{counts['development']:,} queries · "
-                 f"{counts['documents']:,} candidate papers", loc="left", fontsize=16, pad=18,
-                 color="#20334e")
-    fig.text(0.02, -0.04, "Bars: observed means. Whiskers: 95% query-bootstrap intervals.\n"
-             "Source-link recovery is not dataset-feasibility accuracy; source-title overlap limits interpretation.",
-             fontsize=8.5, color="#516176")
+    ax.set_title(
+        f"Development retrieval comparison\n{counts['development']:,} queries · "
+        f"{counts['documents']:,} candidate papers",
+        loc="left",
+        fontsize=16,
+        pad=18,
+        color="#20334e",
+    )
+    fig.text(
+        0.02,
+        -0.04,
+        "Bars: observed means. Whiskers: 95% query-bootstrap intervals.\n"
+        "Source-link recovery is not dataset-feasibility accuracy; source-title overlap limits interpretation.",
+        fontsize=8.5,
+        color="#516176",
+    )
     out.mkdir(parents=True, exist_ok=True)
     outputs = []
     for suffix in ("png", "svg"):
@@ -77,9 +104,15 @@ def render(source: Path, out: Path):
             ET.fromstring(svg)
         outputs.append({"path": target.name, "sha256": sha(target), "bytes": target.stat().st_size})
     plt.close(fig)
-    receipt = {"source_sha256": sha(source), "script_sha256": sha(__file__),
-               "matplotlib_version": matplotlib.__version__, "outputs": outputs}
-    with (out / "retrieval-development.manifest.json").open("w", encoding="utf-8", newline="\n") as handle:
+    receipt = {
+        "source_sha256": sha(source),
+        "script_sha256": sha(__file__),
+        "matplotlib_version": matplotlib.__version__,
+        "outputs": outputs,
+    }
+    with (out / "retrieval-development.manifest.json").open(
+        "w", encoding="utf-8", newline="\n"
+    ) as handle:
         handle.write(json.dumps(receipt, indent=2) + "\n")
     return receipt
 

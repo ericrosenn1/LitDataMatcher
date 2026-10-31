@@ -35,14 +35,19 @@ def prepare(source: Path, out: Path):
     (out / "catalog").mkdir(parents=True)
     for relative, data in content.items():
         (out / relative).write_bytes(data)
-    receipt = {"schema_version": "case-workspace-1.0", "status": "PASS",
-               "parent_discovery_manifest": str(report_path.resolve()),
-               "parent_discovery_sha256": checksum(report_path),
-               "preparer_sha256": checksum(__file__),
-               "processed_measurements_inspected": 0,
-               "source_failures_retained": report["failed_source_jobs"],
-               "outputs": [{"path": name, "sha256": checksum(out / name), "bytes": len(data)}
-                           for name, data in content.items()]}
+    receipt = {
+        "schema_version": "case-workspace-1.0",
+        "status": "PASS",
+        "parent_discovery_manifest": str(report_path.resolve()),
+        "parent_discovery_sha256": checksum(report_path),
+        "preparer_sha256": checksum(__file__),
+        "processed_measurements_inspected": 0,
+        "source_failures_retained": report["failed_source_jobs"],
+        "outputs": [
+            {"path": name, "sha256": checksum(out / name), "bytes": len(data)}
+            for name, data in content.items()
+        ],
+    }
     (out / "WORKSPACE_MANIFEST.json").write_text(json.dumps(receipt, indent=2) + "\n")
     return receipt
 

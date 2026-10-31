@@ -1,0 +1,642 @@
+"""Resume-safe current PubMed materialization and source-bound local retrieval.
+
+The existing revision ledger remains the historical authority. This derivative
+keeps active versions and an FTS5 current view in SQLite; a complete shard and
+its checkpoint commit together. It never changes the acquired corpus or ledger.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sqlite3
+import time
+from pathlib import Path
+
+from .controller import integration_lease
+from .corpus_snapshot import PUBMED_FIELDS, file_digest
+from .data_plane import atomic_json, digest
+from .pubmed_revision_ledger import LEDGER_VERSION, _inside, _is_inside, _resolved_path
+
+INDEX_VERSION = "pubmed-current-index-1.0"
+SELECTION_RULE = "highest_numeric_version_then_latest_event_within_version"
+
+_DDL = """
+CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS shards(
+  shard_order INTEGER PRIMARY KEY, identity TEXT NOT NULL, receipt TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS versions(
+  id INTEGER PRIMARY KEY, pmid TEXT NOT NULL, version_key TEXT NOT NULL,
+  version INTEGER, title TEXT NOT NULL, abstract TEXT NOT NULL,
+  metadata_json TEXT NOT NULL, provenance_json TEXT NOT NULL,
+  UNIQUE(pmid, version_key));
+CREATE INDEX IF NOT EXISTS version_selection ON versions(pmid, version DESC);
+CREATE TABLE IF NOT EXISTS unresolved_deletions(
+  pmid TEXT NOT NULL, position TEXT NOT NULL, PRIMARY KEY(pmid, position));
+CREATE TABLE IF NOT EXISTS current_records(
+  pmid TEXT UNIQUE NOT NULL, version_id INTEGER NOT NULL REFERENCES versions(id));
+CREATE VIEW IF NOT EXISTS search_content AS
+  SELECT c.rowid AS rowid, v.title, v.abstract
+  FROM current_records c JOIN versions v ON v.id=c.version_id;
+CREATE VIRTUAL TABLE IF NOT EXISTS literature_fts USING fts5(
+  title, abstract, content='search_content', content_rowid='rowid', tokenize='unicode61');
+CREATE TRIGGER IF NOT EXISTS current_delete BEFORE DELETE ON current_records BEGIN
+  INSERT INTO literature_fts(literature_fts, rowid, title, abstract)
+  SELECT 'delete', old.rowid, v.title, v.abstract FROM versions v WHERE v.id=old.version_id;
+END;
+CREATE TRIGGER IF NOT EXISTS current_insert AFTER INSERT ON current_records BEGIN
+  INSERT INTO literature_fts(rowid, title, abstract)
+  SELECT new.rowid, v.title, v.abstract FROM versions v WHERE v.id=new.version_id;
+END;
+"""
+
+
+def _json(value):
+    return json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    )
+
+
+def _positive_integer(value, name, maximum=None):
+    if type(value) is not int or value < 1 or (maximum is not None and value > maximum):
+        raise ValueError(
+            f"{name} must be a positive integer" + (f" <= {maximum}" if maximum else "")
+        )
+
+
+def _shard_identity(shard):
+    return digest(
+        {
+            key: shard[key]
+            for key in (
+                "source",
+                "source_shard",
+                "shard_order",
+                "events",
+                "upserts",
+                "deletions",
+                "sidecar_sha256",
+                "legacy",
+                "legacy_relative_path",
+                "pmid_sequence_sha256",
+            )
+        }
+    )
+
+
+def _manifest(path):
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if value.get("ledger_version") != LEDGER_VERSION or value.get("status") not in {
+        "PASS",
+        "PARTIAL",
+    }:
+        raise ValueError("A successful versioned revision-ledger manifest is required")
+    shards = value.get("shards", [])
+    if not shards:
+        raise ValueError("Ledger manifest has no verified shards")
+    orders, identities = set(), set()
+    for row in shards:
+        order = row.get("shard_order")
+        identity = (row.get("source"), row.get("source_shard"))
+        if (
+            type(order) is not int
+            or order < 0
+            or order in orders
+            or identity in identities
+            or row.get("status") != "PASS"
+            or row.get("sequence_verified") is not True
+        ):
+            raise ValueError("Ledger shards must have unique ordered, verified identities")
+        if row["source"] not in {"baseline", "updates"} or not re.fullmatch(
+            r"pubmed[0-9]{2}n[0-9]+\.xml\.gz", row["source_shard"]
+        ):
+            raise ValueError("Invalid PubMed source shard")
+        orders.add(order)
+        identities.add(identity)
+        _shard_identity(row)
+    value["shards"] = sorted(shards, key=lambda row: row["shard_order"])
+    if value["status"] == "PASS" and (
+        len(shards) != value.get("available_shards")
+        or sorted(orders) != list(range(len(shards)))
+    ):
+        raise ValueError("A complete ledger must cover every consecutive shard position")
+    return value
+
+
+class LiteratureIndex:
+    """A local current-literature index. Open a separate connection per thread."""
+
+    def __init__(self, path, *, read_only=False):
+        self.path = Path(path).resolve()
+        self.read_only = read_only
+        if read_only:
+            self.conn = sqlite3.connect(self.path.as_uri() + "?mode=ro", uri=True, timeout=30)
+        else:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.conn = sqlite3.connect(self.path, timeout=30)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA cache_size=-65536")
+        self.conn.execute("PRAGMA temp_store=FILE")
+        self.conn.execute("PRAGMA foreign_keys=ON")
+        if not read_only:
+            self.conn.execute("PRAGMA journal_mode=WAL")
+            self.conn.execute("PRAGMA synchronous=FULL")
+            self.conn.executescript(_DDL)
+            version = self._metadata("version")
+            if version is None:
+                self._set_metadata("version", INDEX_VERSION)
+                self.conn.commit()
+        if self._metadata("version") != INDEX_VERSION:
+            self.close()
+            raise ValueError("Unsupported literature index version")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
+
+    def close(self):
+        self.conn.close()
+
+    def _metadata(self, key, default=None):
+        row = self.conn.execute("SELECT value FROM metadata WHERE key=?", (key,)).fetchone()
+        return json.loads(row[0]) if row else default
+
+    def _set_metadata(self, key, value):
+        self.conn.execute("INSERT OR REPLACE INTO metadata VALUES (?,?)", (key, _json(value)))
+
+    def status(self):
+        """Return persisted scope and counts, without scanning the full FTS index."""
+        return {
+            "schema_version": INDEX_VERSION,
+            "selection_rule": SELECTION_RULE,
+            "status": self._metadata("status", "EMPTY"),
+            "applied_shards": self.conn.execute("SELECT count(*) FROM shards").fetchone()[0],
+            "available_shards": self._metadata("available_shards", 0),
+            "current_records": self.conn.execute("SELECT count(*) FROM current_records").fetchone()[
+                0
+            ],
+            "active_versions": self.conn.execute("SELECT count(*) FROM versions").fetchone()[0],
+            "unresolved_pmids": self.conn.execute(
+                "SELECT count(*) FROM (SELECT pmid FROM versions WHERE version IS NULL "
+                "UNION SELECT pmid FROM unresolved_deletions)"
+            ).fetchone()[0],
+            "historical_events_applied": self._metadata("events_applied", 0),
+            "corpus_store_uuid": self._metadata("corpus_store_uuid"),
+            "last_shard_order": self.conn.execute("SELECT max(shard_order) FROM shards").fetchone()[
+                0
+            ],
+            "scope_note": "Current only within the applied ledger scope; unknown citation versions are withheld.",
+        }
+
+    @staticmethod
+    def _record(row):
+        record = json.loads(row["metadata_json"])
+        record.update(
+            document_id=f"PMID:{row['pmid']}",
+            pmid=row["pmid"],
+            title=row["title"],
+            abstract=row["abstract"],
+            text=row["abstract"] or row["title"],
+            version=row["version"],
+            source="pubmed",
+            source_id=row["pmid"],
+            source_locator=f"https://pubmed.ncbi.nlm.nih.gov/{row['pmid']}/",
+            source_provenance=json.loads(row["provenance_json"]),
+        )
+        record["url"] = record["source_locator"]
+        record["input_sha256"] = digest(
+            {
+                key: record[key]
+                for key in ("pmid", "version", "title", "abstract", "source_provenance")
+            }
+        )
+        return record
+
+    def get(self, pmid):
+        pmid = str(pmid).removeprefix("PMID:")
+        row = self.conn.execute(
+            "SELECT v.* FROM current_records c JOIN versions v ON v.id=c.version_id WHERE c.pmid=?",
+            (pmid,),
+        ).fetchone()
+        return self._record(row) if row else None
+
+    def search(self, query, limit=20):
+        """Literal-token FTS search; user text is never interpreted as FTS syntax."""
+        _positive_integer(limit, "limit", 1000)
+        if not isinstance(query, str) or len(query) > 4000:
+            raise ValueError("Query must be text of at most 4000 characters")
+        terms = list(dict.fromkeys(re.findall(r"[^\W_]+", query, re.UNICODE)))[:64]
+        if not terms:
+            return []
+        expression = " OR ".join('"' + term.replace('"', '""') + '"' for term in terms)
+        rows = self.conn.execute(
+            "SELECT v.*, bm25(literature_fts, 2.0, 1.0) AS retrieval_score FROM literature_fts "
+            "JOIN current_records c ON c.rowid=literature_fts.rowid JOIN versions v ON v.id=c.version_id "
+            "WHERE literature_fts MATCH ? ORDER BY retrieval_score, c.pmid LIMIT ?",
+            (expression, limit),
+        ).fetchall()
+        return [
+            dict(
+                self._record(row),
+                score=-float(row["retrieval_score"]),
+                score_kind="fts5_bm25_not_probability",
+                retrieval_scope=self._metadata("status", "EMPTY"),
+            )
+            for row in rows
+        ]
+
+    def passages(self, pmid):
+        """Return exact source spans with stable content-addressed passage IDs."""
+        record = self.get(pmid)
+        if record is None:
+            return []
+        result = []
+        for field in ("title", "abstract"):
+            text = record[field]
+            for match in re.finditer(r"\S(?:.*?)(?:[.!?](?=\s|$)|$)", text, re.DOTALL):
+                start, end = match.span()
+                result.append(
+                    {
+                        "passage_id": f"{record['document_id']}:{field}:{start}-{end}:{digest(text)[:16]}",
+                        "document_id": record["document_id"],
+                        "pmid": record["pmid"],
+                        "version": record["version"],
+                        "field": field,
+                        "start": start,
+                        "end": end,
+                        "text": text[start:end],
+                        "source_locator": record["source_locator"] + f"#{field}:{start}-{end}",
+                        "source_provenance": record["source_provenance"],
+                        "input_sha256": record["input_sha256"],
+                    }
+                )
+        return result
+
+    def semantic_search(
+        self, query, model_dir, cache_root, *, limit=20, candidate_limit=200, device="cpu"
+    ):
+        """Rerank a bounded lexical shortlist with the existing fingerprinted model.
+
+        This is not exhaustive dense corpus search; that retrieval scope is
+        explicit in every returned row. No model is downloaded by this method.
+        """
+        from .retrieval import CachedSemanticIndex
+
+        _positive_integer(candidate_limit, "candidate_limit", 1000)
+        _positive_integer(limit, "limit", candidate_limit)
+        candidates = self.search(query, candidate_limit)
+        if not candidates:
+            return []
+        model = CachedSemanticIndex(model_dir, cache_root, device=device)
+        model.fit(
+            [
+                {"id": row["document_id"], "text": row["title"] + "\n" + row["abstract"]}
+                for row in candidates
+            ]
+        )
+        by_id = {row["document_id"]: row for row in candidates}
+        return [
+            dict(
+                by_id[hit["id"]],
+                semantic_score=hit["score"],
+                semantic_retrieval_scope="reranked_lexical_shortlist",
+                semantic_receipt=model.receipt,
+            )
+            for hit in model.search(query, k=limit)
+        ]
+
+    def iter_records(self, batch_size=1000):
+        """Stream current records for existing extraction/retrieval adapters."""
+        _positive_integer(batch_size, "batch_size", 10000)
+        cursor = self.conn.execute(
+            "SELECT v.* FROM current_records c JOIN versions v ON v.id=c.version_id ORDER BY c.pmid"
+        )
+        while rows := cursor.fetchmany(batch_size):
+            yield from (self._record(row) for row in rows)
+
+    def validate(self):
+        """Validate SQLite and exact external-content/FTS agreement."""
+        if self.conn.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+            raise ValueError("SQLite integrity check failed")
+        if not self.read_only:
+            self.conn.execute(
+                "INSERT INTO literature_fts(literature_fts,rank) VALUES('integrity-check',1)"
+            )
+            self.conn.commit()
+        return {"sqlite": "PASS", "fts_content": "NOT_RUN_READ_ONLY" if self.read_only else "PASS"}
+
+
+def _apply_batch(index, pairs, shard):
+    conn = index.conn
+    pmids = sorted({event["pmid"] for event, _ in pairs})
+    conn.execute("CREATE TEMP TABLE IF NOT EXISTS touched(pmid TEXT PRIMARY KEY)")
+    conn.execute("DELETE FROM touched")
+    conn.executemany("INSERT INTO touched VALUES(?)", ((pmid,) for pmid in pmids))
+    # Remove old FTS text before any version payload is modified or deleted.
+    conn.execute("DELETE FROM current_records WHERE pmid IN (SELECT pmid FROM touched)")
+    for event, record in pairs:
+        pmid, version = event["pmid"], event["version"]
+        if event["event_type"] == "upsert":
+            key = (
+                str(version)
+                if version is not None
+                else f"unknown:{event['shard_order']}:{event['event_index']}"
+            )
+            provenance = {
+                "adapter_name": "pubmed-current-index",
+                "adapter_version": INDEX_VERSION,
+                "source_locator": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
+                "source_shard": shard["source_shard"],
+                "source": shard["source"],
+                "legacy_relative_path": shard["legacy_relative_path"],
+                "legacy_sha256": shard["legacy"]["sha256"],
+                "sidecar_sha256": shard["sidecar_sha256"],
+                "event": event,
+                "selection_rule": SELECTION_RULE,
+            }
+            metadata = {
+                key: value
+                for key, value in record.items()
+                if key not in {"title", "abstract", "pmid"}
+            }
+            conn.execute(
+                "INSERT INTO versions(pmid,version_key,version,title,abstract,metadata_json,provenance_json) "
+                "VALUES(?,?,?,?,?,?,?) ON CONFLICT(pmid,version_key) DO UPDATE SET "
+                "title=excluded.title,abstract=excluded.abstract,metadata_json=excluded.metadata_json,provenance_json=excluded.provenance_json",
+                (
+                    pmid,
+                    key,
+                    version,
+                    record["title"] or "",
+                    record["abstract"] or "",
+                    _json(metadata),
+                    _json(provenance),
+                ),
+            )
+        elif version is None and event.get("version_raw") not in {None, ""}:
+            conn.execute(
+                "INSERT INTO unresolved_deletions VALUES(?,?)",
+                (pmid, f"{event['shard_order']}:{event['event_index']}"),
+            )
+        elif version is None:
+            conn.execute("DELETE FROM versions WHERE pmid=?", (pmid,))
+            conn.execute("DELETE FROM unresolved_deletions WHERE pmid=?", (pmid,))
+        else:
+            conn.execute("DELETE FROM versions WHERE pmid=? AND version=?", (pmid, version))
+    conn.execute(
+        "INSERT INTO current_records(pmid,version_id) SELECT v.pmid,v.id FROM versions v JOIN touched t ON t.pmid=v.pmid "
+        "WHERE v.version=(SELECT max(w.version) FROM versions w WHERE w.pmid=v.pmid) "
+        "AND NOT EXISTS(SELECT 1 FROM versions u WHERE u.pmid=v.pmid AND u.version IS NULL) "
+        "AND NOT EXISTS(SELECT 1 FROM unresolved_deletions d WHERE d.pmid=v.pmid)"
+    )
+
+
+def _paths(corpus_root, ledger_root, shard):
+    legacy = _inside(corpus_root, shard["legacy_relative_path"])
+    sidecar = _inside(
+        ledger_root,
+        f"partitions/{shard['source']}/{shard['source_shard'].removesuffix('.xml.gz')}/events.parquet",
+    )
+    return legacy, sidecar
+
+
+def _file_identity(path):
+    stat = path.stat()
+    return {"size_bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns}
+
+
+def _apply_shard(index, corpus_root, ledger_root, shard, batch_size):
+    import pyarrow.parquet as pq
+
+    legacy, sidecar = _paths(corpus_root, ledger_root, shard)
+    identities = [_file_identity(path) for path in (legacy, sidecar)]
+    for path, expected in ((legacy, shard["legacy"]["sha256"]), (sidecar, shard["sidecar_sha256"])):
+        if file_digest(path) != expected:
+            raise ValueError(f"Input checksum changed: {path}")
+    rows = pq.ParquetFile(legacy)
+    if PUBMED_FIELDS - set(rows.schema_arrow.names):
+        raise ValueError("Normalized corpus lacks required source fields")
+    records = (
+        record for batch in rows.iter_batches(batch_size=batch_size) for record in batch.to_pylist()
+    )
+    sentinel, sequence, pending = object(), hashlib.sha256(), []
+    upserts = deletions = events = 0
+    with index.conn:
+        for batch in pq.ParquetFile(sidecar).iter_batches(batch_size=batch_size):
+            for event in batch.to_pylist():
+                if (
+                    event.get("event_index") != events
+                    or event.get("shard_order") != shard["shard_order"]
+                    or event.get("source_shard") != shard["source_shard"]
+                    or event.get("source") != shard["source"]
+                    or not isinstance(event.get("pmid"), str)
+                    or not event["pmid"].isdigit()
+                ):
+                    raise ValueError("Event source, order, or PMID is invalid")
+                version = event.get("version")
+                if version is not None and (type(version) is not int or version < 1):
+                    raise ValueError("Invalid citation version")
+                record = None
+                if event["event_type"] == "upsert":
+                    record = next(records, sentinel)
+                    if (
+                        record is sentinel
+                        or record["pmid"] != event["pmid"]
+                        or record["source_shard"] != shard["source_shard"]
+                        or event["legacy_row_index"] != upserts
+                    ):
+                        raise ValueError("Ledger-to-corpus source row mapping changed")
+                    sequence.update((event["pmid"] + "\n").encode())
+                    upserts += 1
+                elif event["event_type"] == "delete" and event["legacy_row_index"] is None:
+                    deletions += 1
+                else:
+                    raise ValueError("Unknown or malformed citation event")
+                events += 1
+                pending.append((event, record))
+                if len(pending) >= batch_size:
+                    _apply_batch(index, pending, shard)
+                    pending.clear()
+        if pending:
+            _apply_batch(index, pending, shard)
+        if (
+            next(records, sentinel) is not sentinel
+            or events != shard["events"]
+            or upserts != shard["upserts"]
+            or deletions != shard["deletions"]
+            or sequence.hexdigest() != shard["pmid_sequence_sha256"]
+        ):
+            raise ValueError("Shard counts or PMID sequence changed")
+        if identities != [_file_identity(path) for path in (legacy, sidecar)]:
+            raise ValueError("Input files changed during materialization")
+        receipt = {
+            "source": shard["source"],
+            "source_shard": shard["source_shard"],
+            "shard_order": shard["shard_order"],
+            "events": events,
+            "input_stat_identities": identities,
+        }
+        index.conn.execute(
+            "INSERT INTO shards VALUES(?,?,?)",
+            (shard["shard_order"], _shard_identity(shard), _json(receipt)),
+        )
+        index._set_metadata("events_applied", index._metadata("events_applied", 0) + events)
+    return receipt
+
+
+def materialize_pubmed(
+    corpus_root,
+    ledger_manifest,
+    database,
+    *,
+    max_shards=2,
+    resume=True,
+    max_seconds=None,
+    batch_size=4096,
+    rehash_applied=False,
+):
+    """Apply at most ``max_shards`` NEW shards; ``None`` explicitly allows all.
+
+    Completed shards are reused after receipt, input-stat and SQLite checks.
+    Changed input stats trigger full checksum verification; ``rehash_applied``
+    also rehashes unchanged inputs. Appended ledger manifests are supported;
+    modifying, removing or inserting before any applied shard fails closed.
+    The time bound is checked between atomic shards, never midway through one.
+    """
+    if max_shards is not None:
+        _positive_integer(max_shards, "max_shards")
+    _positive_integer(batch_size, "batch_size", 65536)
+    if max_seconds is not None and (
+        not isinstance(max_seconds, (int, float)) or not 0 < max_seconds < float("inf")
+    ):
+        raise ValueError("max_seconds must be positive and finite")
+    corpus_root, ledger_manifest, database = map(
+        lambda p: _resolved_path(Path(p)), (corpus_root, ledger_manifest, database)
+    )
+    ledger_root = ledger_manifest.parent
+    if _is_inside(database, corpus_root) or _is_inside(database, ledger_root):
+        raise ValueError("The derivative database must be outside the protected corpus and ledger")
+    if database.exists() and not resume:
+        raise FileExistsError("An existing literature index requires resume=True")
+    marker = json.loads((corpus_root / "CORPUS_ROOT.json").read_text(encoding="utf-8"))
+    if not marker.get("store_uuid"):
+        raise ValueError("Missing corpus store identity")
+    manifest_hash = file_digest(ledger_manifest)
+    manifest = _manifest(ledger_manifest)
+    started, new_shards = time.perf_counter(), []
+    with (
+        integration_lease(
+            database.parent / (database.name + ".writer"), "pubmed-current-materialization"
+        ),
+        LiteratureIndex(database) as index,
+    ):
+        if index.conn.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+            raise ValueError("Existing database failed SQLite integrity verification")
+        previous_store = index._metadata("corpus_store_uuid")
+        if previous_store is not None and previous_store != marker["store_uuid"]:
+            raise ValueError("Cannot mix distinct source corpus stores")
+        applied = index.conn.execute("SELECT * FROM shards ORDER BY shard_order").fetchall()
+        if len(applied) > len(manifest["shards"]):
+            raise ValueError("New manifest removed already applied shards")
+        for old, shard in zip(applied, manifest["shards"], strict=False):
+            if old["shard_order"] != shard["shard_order"] or old["identity"] != _shard_identity(
+                shard
+            ):
+                raise ValueError("Applied ledger prefix changed; use a separate derivative index")
+            saved = json.loads(old["receipt"])["input_stat_identities"]
+            for path, identity, expected in zip(
+                _paths(corpus_root, ledger_root, shard),
+                saved,
+                (shard["legacy"]["sha256"], shard["sidecar_sha256"]),
+                strict=True,
+            ):
+                if (rehash_applied or identity != _file_identity(path)) and file_digest(
+                    path
+                ) != expected:
+                    raise ValueError("Previously applied source bytes changed")
+        with index.conn:
+            index._set_metadata("corpus_store_uuid", marker["store_uuid"])
+            index._set_metadata("available_shards", len(manifest["shards"]))
+            index._set_metadata("status", "PARTIAL")
+        pending = manifest["shards"][len(applied) :]
+        for shard in pending[:max_shards] if max_shards is not None else pending:
+            if max_seconds is not None and time.perf_counter() - started >= max_seconds:
+                break
+            new_shards.append(_apply_shard(index, corpus_root, ledger_root, shard, batch_size))
+        if file_digest(ledger_manifest) != manifest_hash:
+            raise ValueError(
+                "Ledger manifest changed during materialization; committed shards remain recoverable"
+            )
+        complete = (
+            len(applied) + len(new_shards) == len(manifest["shards"])
+            and manifest.get("status") == "PASS"
+            and len(manifest["shards"]) == manifest.get("available_shards")
+        )
+        with index.conn:
+            index._set_metadata("status", "COMPLETE" if complete else "PARTIAL")
+            index._set_metadata("ledger_manifest_sha256", manifest_hash)
+        report = dict(
+            index.status(),
+            newly_applied_shards=len(new_shards),
+            reused_shards=len(applied),
+            elapsed_seconds=time.perf_counter() - started,
+            database=str(database),
+            ledger_manifest_sha256=manifest_hash,
+            batch_size=batch_size,
+            verification="New inputs SHA256 verified; applied inputs stat-checked and rehashed when changed.",
+            historical_events_retain_source_ledger=True,
+            semantic_index="optional bounded lexical-shortlist reranking",
+        )
+        index.conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        atomic_json(database.with_suffix(database.suffix + ".receipt.json"), report)
+        return report
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    build = commands.add_parser("materialize")
+    build.add_argument("--corpus-root", required=True, type=Path)
+    build.add_argument("--ledger-manifest", required=True, type=Path)
+    build.add_argument("--database", required=True, type=Path)
+    build.add_argument("--max-shards", type=int, default=2)
+    build.add_argument("--all-shards", action="store_true")
+    build.add_argument("--max-seconds", type=float)
+    build.add_argument("--batch-size", type=int, default=4096)
+    build.add_argument("--rehash-applied", action="store_true")
+    for command in ("search", "status", "validate"):
+        sub = commands.add_parser(command)
+        sub.add_argument("--database", required=True, type=Path)
+        if command == "search":
+            sub.add_argument("query")
+            sub.add_argument("--limit", type=int, default=20)
+    args = parser.parse_args(argv)
+    if args.command == "materialize":
+        result = materialize_pubmed(
+            args.corpus_root,
+            args.ledger_manifest,
+            args.database,
+            max_shards=None if args.all_shards else args.max_shards,
+            max_seconds=args.max_seconds,
+            batch_size=args.batch_size,
+            rehash_applied=args.rehash_applied,
+        )
+    else:
+        with LiteratureIndex(args.database, read_only=args.command != "validate") as index:
+            result = (
+                index.search(args.query, args.limit)
+                if args.command == "search"
+                else index.validate()
+                if args.command == "validate"
+                else index.status()
+            )
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

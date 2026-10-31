@@ -63,6 +63,7 @@ def accepts(parser, value):
     ],
 )
 def test_exact_escaped_source_literal_is_accepted(tail):
+    pytest.importorskip("lmformatenforcer")
     source = document(tail)
     value = payload(source)
     assert accepts(literal.schema_parser(source), value)
@@ -113,6 +114,7 @@ def test_public_schema_and_original_prompt_identities_are_preserved(monkeypatch)
     ],
 )
 def test_literal_grammar_rejects_invalid_public_schema(mutation):
+    pytest.importorskip("lmformatenforcer")
     value = payload()
     claim = value["claims"][0]
     if mutation == "extra":
@@ -146,12 +148,14 @@ def test_literal_grammar_rejects_invalid_public_schema(mutation):
     "text", ["Incomplete source", "A repeated complete sentence. A repeated complete sentence."]
 )
 def test_no_complete_unique_sentence_requires_empty_arrays(text):
+    pytest.importorskip("lmformatenforcer")
     source = {"text": text}
     assert accepts(literal.schema_parser(source), {"claims": [], "questions": []})
     assert not accepts(literal.schema_parser(source), payload())
 
 
 def test_no_future_sentence_requires_empty_question_array():
+    pytest.importorskip("lmformatenforcer")
     source = {"text": 'Treatment reduced IL6 in "group A" cells.'}
     value = payload(source)
     assert accepts(literal.schema_parser(source), value)
@@ -160,6 +164,7 @@ def test_no_future_sentence_requires_empty_question_array():
 
 
 def test_field_order_duplicates_trailing_content_and_whitespace_are_strict():
+    pytest.importorskip("lmformatenforcer")
     source = document()
     assert not accepts(literal.schema_parser(source), '{"questions":[],"claims":[]}')
     assert not accepts(literal.schema_parser(source), '{"claims":[],"claims":[],"questions":[]}')
@@ -169,7 +174,9 @@ def test_field_order_duplicates_trailing_content_and_whitespace_are_strict():
 
 
 def test_string_shortcut_is_restricted_to_generic_roles_and_preserves_prefix_choices():
-    import torch
+    pytest.importorskip("lmformatenforcer")
+    torch = pytest.importorskip("torch")
+    pytest.importorskip("transformers")
 
     from tests.test_structured_decoding import _character_tokenizer
 
@@ -196,6 +203,7 @@ def test_string_shortcut_is_restricted_to_generic_roles_and_preserves_prefix_cho
 
 
 def test_wrong_direction_and_nonverbatim_roles_still_fail_unchanged_guard():
+    pytest.importorskip("lmformatenforcer")
     for change in ({"direction": "increase"}, {"object": "invented"}, {"negated": True}):
         value = payload()
         value["claims"][0].update(change)
@@ -204,6 +212,7 @@ def test_wrong_direction_and_nonverbatim_roles_still_fail_unchanged_guard():
 
 
 def test_original_quote_enum_failure_remains_in_old_profile():
+    pytest.importorskip("lmformatenforcer")
     assert not accepts(structured_decoding.schema_parser(document()), payload())
     assert accepts(literal.schema_parser(document()), payload())
 
@@ -228,6 +237,7 @@ def test_runtime_cache_keeps_exact_output_and_does_not_share_old_profile(monkeyp
 
 
 def test_literal_profile_remains_extraction_only():
+    pytest.importorskip("torch")
     runtime = LocalSemanticRuntime.__new__(LocalSemanticRuntime)
     runtime.config = RuntimeConfig(decoding_mode="source_literal")
     with pytest.raises(ValueError, match="extraction-only"):
@@ -311,7 +321,9 @@ def test_private_document_mutation_fails_closed_without_changing_caller(monkeypa
 
 
 def test_generation_uses_exact_original_system_and_profile_instruction(monkeypatch):
-    import torch
+    pytest.importorskip("lmformatenforcer")
+    torch = pytest.importorskip("torch")
+    pytest.importorskip("transformers")
 
     from tests.test_structured_decoding import _character_tokenizer
 
@@ -348,6 +360,7 @@ def test_generation_uses_exact_original_system_and_profile_instruction(monkeypat
 
 @pytest.mark.parametrize("control", ["\u0000", "\t", "\n", "\r", "\x1f"])
 def test_unescaped_controls_in_generic_roles_are_forbidden(control):
+    pytest.importorskip("lmformatenforcer")
     source = document("in" + control + "samples")
     value = json.dumps(payload(source), ensure_ascii=False)
     invalid = value.replace('"subject": "Treatment"', '"subject": "Treat' + control + 'ment"')
@@ -355,7 +368,9 @@ def test_unescaped_controls_in_generic_roles_are_forbidden(control):
 
 
 def test_tiny_real_cpu_generation_obeys_escaped_literal():
-    import torch
+    pytest.importorskip("lmformatenforcer")
+    torch = pytest.importorskip("torch")
+    pytest.importorskip("transformers")
     from transformers import GPT2Config, GPT2LMHeadModel, LogitsProcessor
 
     from tests.test_structured_decoding import _character_tokenizer

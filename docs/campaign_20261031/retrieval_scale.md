@@ -68,3 +68,45 @@ overlap in PubMedQA. Neither larger pools nor development improvements establish
 scientific suitability or unseen-question generalization. The abstract-only view
 specifically measures dependence on title availability; it does not replace the
 predeclared full-text endpoint or justify selecting the best-looking view.
+
+## Scheduled evaluation
+
+After the GPU is allocated, run the separate evaluator in the existing runtime
+environment. It uses local verified weights and never downloads or trains models.
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+& 'C:\Codex\LitDataMatcher-v2\runtime-env\Scripts\python.exe' scripts/campaign_20261031/evaluate_retrieval_scale.py --root 'C:\Codex\LitDataMatcher-v2\data\campaign_20261031\retrieval-scale-v1' --pretrained 'C:\Codex\LitDataMatcher-v2\data\models\all-MiniLM-L6-v2\1110a243fdf4706b3f48f1d95db1a4f5529b4d41' --trained 'C:\Codex\LitDataMatcher-v2\data\campaign_20261031\retrieval-training-v1\epoch-02' --out 'C:\Codex\LitDataMatcher-v2\data\campaign_20261031\retrieval-scale-evaluation-v1' --device cuda
+if ($LASTEXITCODE -ne 0) { throw 'Evaluation failed; inspect RUN.json and completed checkpoints' }
+```
+
+Use the identical command with `--resume` after an interruption. Changed code,
+inputs, runtime versions, device or model fingerprints require a distinct output
+directory. Completed encoding and method checkpoints are hash-verified, including
+their concrete record and model identities. An exclusive lease covers execution
+and failure receipts. Corrupt artifacts fail without silent replacement. Final
+input and model hashes are rechecked before publishing a successful run.
+
+The four conditions share the same 175 development queries. For each model and
+view, the evaluator encodes the 100,000 documents once and slices those immutable
+vectors for the 50,000 prefix. Query embeddings are cached independently, so the
+identical query vectors can also be reused across views. BM25 is fit independently
+at each pool size because its corpus statistics change. Its build time and query
+ranking time are recorded separately. Semantic receipts distinguish fresh
+encoding from verified cache replay, including an explicit warm-cache read.
+
+Every condition reports BM25, pretrained dense retrieval, trained dense retrieval,
+BM25 plus pretrained RRF, and BM25 plus trained RRF. Retrieval depth is 100, the
+metric cutoff is 10, and the RRF rank constant is 60. Compressed `rankings.jsonl.gz`
+files retain all top-100 IDs, scores and fusion components. Method metrics retain
+per-query ranks and source strata; `COMPARISON.json` and `RUN.json` contain compact
+aggregates and paired comparisons against BM25 and pretrained retrieval.
+`DIAGNOSTIC_CONTRASTS.json` records paired title-removal and pool-expansion effects.
+Model manifests and vector files are referenced by hashes rather than repeated in
+every result. These development comparisons have no promotion rule.
+
+The synthetic tests exercise prefix slicing, exact ranking ties, all five methods,
+query-byte changes, missing titles, input drift, corrupted vectors/rankings and
+interruption/resume without repeated successful encoding. Passing these tests is
+software evidence. The prepared real package has passed CPU-only input validation;
+the expanded retrieval results require the separately scheduled model run.

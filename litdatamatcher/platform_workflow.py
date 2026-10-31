@@ -38,6 +38,8 @@ def validate_request(raw: dict) -> dict:
         raise ValueError("Request must be an object")
     allowed = {
         "question",
+        "question_reference",
+        "workflow_mode",
         "query",
         "requirements",
         "documents",
@@ -52,21 +54,44 @@ def validate_request(raw: dict) -> dict:
     if set(raw) - allowed:
         raise ValueError("Unknown request fields: " + ", ".join(sorted(set(raw) - allowed)))
     value = dict(raw)
+    value.setdefault("workflow_mode", "full")
+    if value["workflow_mode"] not in {"full", "questions"}:
+        raise ValueError("Workflow mode must be full or questions")
     for field in ("question", "query"):
         value.setdefault(field, "")
         if not isinstance(value[field], str) or len(value[field]) > 4000:
             raise ValueError(f"{field} must contain at most 4000 characters")
         value[field] = value[field].strip()
-    if not (value["question"] or value["query"]):
+    reference = value.get("question_reference")
+    if reference is not None and (
+        not isinstance(reference, dict)
+        or set(reference) != {"job_id", "question_id"}
+        or not isinstance(reference.get("job_id"), str)
+        or not re.fullmatch(r"[a-f0-9]{32}", reference["job_id"])
+        or not isinstance(reference.get("question_id"), str)
+        or not re.fullmatch(r"rq_[a-f0-9]{24}", reference["question_id"])
+    ):
+        raise ValueError("Question reference requires a saved job ID and extracted question ID")
+    source_only = value["workflow_mode"] == "questions" and (
+        value.get("documents") or value.get("document_ids")
+    )
+    if not (value["question"] or value["query"] or reference or source_only):
         raise ValueError("Provide a scientific question or literature query")
     value.setdefault("requirements", [])
     if not isinstance(value["requirements"], list) or len(value["requirements"]) > 30:
         raise ValueError("At most 30 explicit requirements are supported")
     # Validate using the owning compiler; never accept a client-supplied assessment.
-    compile_question(value["question"] or value["query"], user_constraints=value["requirements"])
+    compile_question(
+        value["question"] or value["query"] or "Selected source",
+        user_constraints=value["requirements"],
+    )
     for key, registry, default in (
         ("literature_sources", LITERATURE_ADAPTERS, ["europepmc"]),
-        ("dataset_sources", DATASET_ADAPTERS, ["geo"]),
+        (
+            "dataset_sources",
+            DATASET_ADAPTERS,
+            [] if value["workflow_mode"] == "questions" else ["geo"],
+        ),
     ):
         value.setdefault(key, default)
         if (
@@ -76,7 +101,10 @@ def validate_request(raw: dict) -> dict:
             or len(set(value[key])) != len(value[key])
         ):
             raise ValueError(f"{key} must contain up to four unique supported sources")
-    for key, default, maximum in (("limit", 5, 20), ("inspection_limit", 3, 10)):
+    for key, default, maximum in (
+        ("limit", 5, 20),
+        ("inspection_limit", 0 if value["workflow_mode"] == "questions" else 3, 10),
+    ):
         value.setdefault(key, default)
         if (
             type(value[key]) is not int
@@ -84,6 +112,14 @@ def validate_request(raw: dict) -> dict:
             or (key == "limit" and not value[key])
         ):
             raise ValueError(f"{key} is out of range")
+    if value["workflow_mode"] == "questions" and (
+        value["dataset_sources"] or value["inspection_limit"] or reference
+    ):
+        raise ValueError(
+            "Question-only mode does not discover datasets, inspect them, or reuse a selected question"
+        )
+    if not (value["question"] or value["query"] or reference) and value["literature_sources"]:
+        raise ValueError("Public literature search requires a query")
     value.setdefault("extraction_mode", "rules")
     value.setdefault("ranking", "bm25")
     if value["extraction_mode"] not in {"rules", "model"} or value["ranking"] not in {
@@ -128,6 +164,70 @@ def validate_request(raw: dict) -> dict:
         )
     value["documents"] = cleaned
     return value
+
+
+def selected_source_question(request):
+    """Use only a server-resolved binding; edited wording is never a source quote."""
+    binding = request.get("source_question_binding")
+    if not binding:
+        return None
+    original = deepcopy(binding["question"])
+    reference = deepcopy(request["question_reference"])
+    if request["question"] == original["question"]:
+        return dict(
+            original, selection_reference=reference, selection_origin="REUSED_SOURCE_QUESTION"
+        )
+    return {
+        "question_id": "question:" + digest([reference, request["question"]])[:24],
+        "question": request["question"],
+        "origin": "USER_MODIFIED_SOURCE_QUESTION",
+        "provenance_category": "USER_MODIFIED",
+        "source_document_id": original["source_document_id"],
+        "source_locator": "user-modified-question",
+        "source_stated": False,
+        "model_inferred": False,
+        "novelty_status": "NOT_ASSESSED",
+        "selection_reference": reference,
+        "derived_from": original,
+    }
+
+
+def compile_selected_question(question, requirements, document=None):
+    """Bind context offsets to the source view without changing compiler rules."""
+    from .question_discovery import _document, _text_sha, compile_research_question
+
+    document = _document(document) if document else None
+    locator = question.get("source_locator") or "user-submitted-question"
+    compiled = compile_research_question(
+        question["question"],
+        user_constraints=requirements,
+        source_text=document["text"] if document else None,
+        source_locator=locator,
+    )
+    if document:
+        context = {
+            "source_document_id": document["document_id"],
+            "source_locator": document["source_locator"],
+            "source_text_sha256": _text_sha(document["text"]),
+        }
+        compiled["source_context"] = context
+
+        def bind_evidence(value):
+            if isinstance(value, dict):
+                if value.get("source_locator") == locator + "#context":
+                    start, end = value["start"], value["end"]
+                    if document["text"][start:end] != value["text"]:
+                        raise ValueError("Compiler context evidence differs from the pinned source")
+                    value.update(context)
+                    value["source_locator"] = f"{document['source_locator']}#chars={start}:{end}"
+                for child in value.values():
+                    bind_evidence(child)
+            elif isinstance(value, list):
+                for child in value:
+                    bind_evidence(child)
+
+        bind_evidence(compiled)
+    return compiled
 
 
 def _local_rows(root, filename, limit=10000):
@@ -223,6 +323,8 @@ def _acquire_local(request, config, work):
     documents = list(request["documents"])
     datasets, sources = [], []
     unresolved = set(request["document_ids"])
+    bound_document = request.get("source_question_binding", {}).get("document")
+    bound_id = bound_document.get("document_id") if bound_document else None
     if config.get("catalog_root"):
         root = config["catalog_root"]
         catalog_documents = _local_rows(root, "literature.jsonl")
@@ -232,21 +334,22 @@ def _acquire_local(request, config, work):
             if pmid.isdigit():
                 keys.update({"PMID:" + pmid, "pmid:" + pmid, "pubmed:" + pmid})
             selected = unresolved & keys
-            if selected:
+            if selected or (bound_id and bound_id in keys):
                 documents.append(document)
                 unresolved -= selected
         documents.extend(_select(catalog_documents, query, request["limit"], "document_id"))
-        datasets.extend(
-            _select(
-                _local_rows(root, "studies.jsonl"),
-                query + " " + " ".join(str(r["expected"]) for r in request["requirements"]),
-                request["limit"] * 4,
-                "dataset_id",
-                ranking=request["ranking"],
-                config=config,
-                work=work,
+        if request.get("workflow_mode") != "questions":
+            datasets.extend(
+                _select(
+                    _local_rows(root, "studies.jsonl"),
+                    query + " " + " ".join(str(r["expected"]) for r in request["requirements"]),
+                    request["limit"] * 4,
+                    "dataset_id",
+                    ranking=request["ranking"],
+                    config=config,
+                    work=work,
+                )
             )
-        )
         sources.append(
             {"source": "configured_local_catalog", "status": "SEARCHED", "scan_limit": 10000}
         )
@@ -255,13 +358,19 @@ def _acquire_local(request, config, work):
 
         with LiteratureIndex(config["literature_index"], read_only=True) as index:
             index.conn.execute("BEGIN")
+            if bound_id:
+                match = re.fullmatch(r"(?:pmid|pubmed):(\d+)", bound_id, re.I)
+                current = index.get(match.group(1)) if match else None
+                if current:
+                    documents.append(current)
             for identifier in list(unresolved):
                 match = re.fullmatch(r"(?:pmid|pubmed):(\d+)", identifier, re.I)
                 document = index.get(match.group(1)) if match else None
                 if document:
                     documents.append(document)
                     unresolved.remove(identifier)
-            documents.extend(index.search(query, limit=request["limit"]))
+            if query:
+                documents.extend(index.search(query, limit=request["limit"]))
             sources.append(
                 {
                     "source": "materialized_pubmed",
@@ -316,8 +425,31 @@ def _acquire(request, config, work, local):
     dataset_ids = {}
     for dataset in datasets:
         dataset_ids.setdefault(dataset["dataset_id"], dataset)
+    merged = _merge_documents(documents)
+    binding = request.get("source_question_binding")
+    if binding:
+        from .question_discovery import _source_lifecycle
+
+        original = binding["document"]
+        current = [d for d in merged if d["document_id"] == original["document_id"]]
+        if any(_source_lifecycle(d)["excluded"] for d in current):
+            raise ValueError(
+                "Selected source now requires lifecycle/version review; preserve prior job"
+            )
+        # Keep the verified source version that defines the selected literal span.
+        sources.append(
+            {
+                "source": "verified_prior_job_question",
+                "binding": binding,
+                "current_source_records": current,
+            }
+        )
+        merged = [
+            deepcopy(original),
+            *[d for d in merged if d["document_id"] != original["document_id"]],
+        ]
     return {
-        "documents": _merge_documents(documents)[: request["limit"] * 4],
+        "documents": merged[: request["limit"] * 4],
         "datasets": list(dataset_ids.values())[: request["limit"] * 4],
         "sources": sources,
     }
@@ -326,6 +458,21 @@ def _acquire(request, config, work, local):
 def _extract(request, config, acquired, work):
     from .question_discovery import discover_questions
 
+    if request.get("question_reference"):
+        if not request.get("source_question_binding"):
+            raise ValueError("Question reference has no server-verified binding")
+        return {
+            "questions": [deepcopy(request["source_question_binding"]["question"])],
+            "selected_question": selected_source_question(request),
+            "status": "SUCCESS",
+            "extraction_method": "verified_prior_job_question",
+            "coverage": {
+                "processed_documents": 0,
+                "reused_documents": 1,
+                "failed_documents": 0,
+                "retained_questions": 1,
+            },
+        }
     runtime = None
     if request["extraction_mode"] == "model":
         from .semantic_runtime import LocalSemanticRuntime, RuntimeConfig
@@ -350,7 +497,9 @@ def _extract(request, config, acquired, work):
         max_documents=80,
         max_questions=40,
     )
-    if request["question"]:
+    if request.get("workflow_mode") == "questions":
+        result["selected_question"] = None
+    elif request["question"]:
         result["selected_question"] = {
             "question_id": "question:" + digest(request["question"])[:24],
             "question": request["question"],
@@ -402,7 +551,7 @@ def _inspect(request, config, acquired, work, workflow=None):
 
 
 def _qualify(request, config, extracted, inspected, acquired, work):
-    from .question_discovery import check_addressed_evidence, compile_research_question
+    from .question_discovery import check_addressed_evidence
 
     question = extracted["selected_question"]
     if not question:
@@ -414,7 +563,7 @@ def _qualify(request, config, extracted, inspected, acquired, work):
             "reason": "No explicit unanswered question was extracted. Submit a question to continue.",
         }
     text = question.get("question") or question.get("question_text") or question.get("quote")
-    document = next(
+    document = request.get("source_question_binding", {}).get("document") or next(
         (
             doc
             for doc in acquired["documents"]
@@ -422,11 +571,8 @@ def _qualify(request, config, extracted, inspected, acquired, work):
         ),
         {},
     )
-    compiled = compile_research_question(
-        text,
-        source_text=document.get("text") or document.get("abstract"),
-        source_locator=question.get("source_locator") or "selected-question",
-        user_constraints=request["requirements"],
+    compiled = compile_selected_question(
+        dict(question, question=text), request["requirements"], document
     )
     requirements = compiled["matching_requirements"]
     datasets = inspected["datasets"]
@@ -532,6 +678,53 @@ def _report(result):
         "No global novelty, statistical adequacy, or expert validation is asserted.",
         "",
     ]
+    if question.get("selection_reference"):
+        lines.extend(
+            ["Selected from verified saved job: " + json.dumps(question["selection_reference"]), ""]
+        )
+    if question.get("derived_from"):
+        original = question["derived_from"]
+        lines.extend(
+            [
+                "The selected wording is a user modification, not a quoted source claim.",
+                "Original source question: " + original["question"],
+                "Original source locator: " + original["source_locator"],
+                "Original citation: "
+                + json.dumps(original.get("citation", {}), ensure_ascii=False),
+                "",
+            ]
+        )
+    if result.get("workflow_mode") == "questions":
+        lines.extend(
+            [
+                "## Source questions",
+                "",
+                "Dataset discovery, inspection, and qualification were not requested.",
+                "",
+            ]
+        )
+        for item in result["questions"]["questions"]:
+            lines.extend(
+                [
+                    item["question"],
+                    "Source: " + item["source_locator"],
+                    "Citation: " + json.dumps(item.get("citation", {}), ensure_ascii=False),
+                    "",
+                ]
+            )
+    addressed = result.get("addressed_evidence")
+    if addressed:
+        lines.extend(
+            [
+                "## Bounded addressing evidence",
+                "",
+                addressed["status"],
+                "Related result passages require review; this check establishes neither an answer nor global novelty.",
+                "",
+            ]
+        )
+        for item in addressed["candidates"]:
+            lines.extend([item["evidence_span"]["text"], "Source: " + item["source_locator"], ""])
     for row in result["candidates"]:
         lines.extend(
             [
@@ -603,9 +796,17 @@ def run_workflow(request, config, out: Path, *, progress_path=None):
     from .semantic_runtime import runtime_dependency_versions
 
     used_models = []
-    if request["extraction_mode"] == "model" and config.get("model_dir"):
+    if (
+        request["extraction_mode"] == "model"
+        and not request.get("source_question_binding")
+        and config.get("model_dir")
+    ):
         used_models.append(config["model_dir"])
-    if request["ranking"] != "bm25" and config.get("embedding_dir"):
+    if (
+        request.get("workflow_mode") != "questions"
+        and request["ranking"] != "bm25"
+        and config.get("embedding_dir")
+    ):
         used_models.append(config["embedding_dir"])
     identity = {
         "version": VERSION,
@@ -615,7 +816,11 @@ def run_workflow(request, config, out: Path, *, progress_path=None):
         "rules": file_identity(package / "question_compiler_rules_v1.json"),
         "catalog": [
             file_identity(Path(config["catalog_root"]) / "catalog" / f)
-            for f in ("literature.jsonl", "studies.jsonl")
+            for f in (
+                ("literature.jsonl",)
+                if request.get("workflow_mode") == "questions"
+                else ("literature.jsonl", "studies.jsonl")
+            )
         ]
         if config.get("catalog_root")
         else [],
@@ -659,14 +864,27 @@ def run_workflow(request, config, out: Path, *, progress_path=None):
         extracted = stage(
             "questions", lambda: _extract(request, config, acquired, out), ("discovery",)
         )
-        inspected = stage(
-            "inspection", lambda: _inspect(request, config, acquired, out, workflow), ("discovery",)
-        )
-        qualified = stage(
-            "qualification",
-            lambda: _qualify(request, config, extracted, inspected, acquired, out),
-            ("questions", "inspection"),
-        )
+        if request.get("workflow_mode") == "questions":
+            inspected = {"datasets": []}
+            qualified = {
+                "status": "QUESTIONS_DISCOVERED"
+                if extracted["questions"]
+                else "NO_SOURCE_QUESTION",
+                "question": None,
+                "compilation": None,
+                "candidates": [],
+            }
+        else:
+            inspected = stage(
+                "inspection",
+                lambda: _inspect(request, config, acquired, out, workflow),
+                ("discovery",),
+            )
+            qualified = stage(
+                "qualification",
+                lambda: _qualify(request, config, extracted, inspected, acquired, out),
+                ("questions", "inspection"),
+            )
         retryable_stages = [
             name
             for name, value in (
@@ -679,6 +897,7 @@ def run_workflow(request, config, out: Path, *, progress_path=None):
         workflow.state["retryable_stage_failures"] = retryable_stages
         result = dict(
             qualified,
+            workflow_mode=request.get("workflow_mode", "full"),
             processing_status="PARTIAL_RETRYABLE" if retryable_stages else "COMPLETE",
             retryable_stages=retryable_stages,
             schema_version=VERSION,

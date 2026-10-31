@@ -207,7 +207,7 @@ test("explicit requirements reach a queued job and source evidence remains inspe
     requests.find((row) => row.path === "/api/requirements")?.body
       ?.requirements,
   ).toEqual([{ field: "paired", expected: false, essential: false }]);
-  await page.getByRole("button", { name: "Launch research workflow" }).click();
+  await page.getByRole("button", { name: "Find datasets" }).click();
   await expect(page.locator(".scientific-job")).toContainText("inspection");
   await expect(
     page.getByRole("heading", {
@@ -283,7 +283,7 @@ test("saved jobs, local source selection and queue controls survive navigation",
   await page
     .getByLabel("Research question", { exact: true })
     .fill(result.question.question);
-  await page.getByRole("button", { name: "Launch research workflow" }).click();
+  await page.getByRole("button", { name: "Find datasets" }).click();
   await expect(
     page.getByRole("heading", {
       name: "Evidence and compatibility",
@@ -308,9 +308,7 @@ test("saved jobs, local source selection and queue controls survive navigation",
     }),
   ).toBeVisible();
   await expect(page.locator('a[href^="javascript:"]')).toHaveCount(0);
-  await page
-    .getByRole("button", { name: "Pause new jobs", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Pause jobs", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Resume jobs", exact: true }),
   ).toBeVisible();
@@ -351,7 +349,7 @@ test("an absent engine is a visible connection failure and cannot launch a job",
     .getByLabel("Research question", { exact: true })
     .fill(result.question.question);
   await expect(
-    page.getByRole("button", { name: "Launch research workflow" }),
+    page.getByRole("button", { name: "Find datasets" }),
   ).toBeDisabled();
   await expect(
     page.getByRole("heading", { name: "Evidence and compatibility" }),
@@ -403,9 +401,7 @@ test("live local catalog completes a browser research workflow and exports its d
         new URL(response.url()).pathname === "/api/jobs" &&
         response.request().method() === "POST",
     );
-    await page
-      .getByRole("button", { name: "Launch research workflow" })
-      .click();
+    await page.getByRole("button", { name: "Find datasets" }).click();
     const submission = await submitted;
     expect(submission.status()).toBe(202);
     job = await submission.json();

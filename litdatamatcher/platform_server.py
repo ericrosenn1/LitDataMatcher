@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import mimetypes
 import re
@@ -10,17 +11,32 @@ import sys
 import threading
 import time
 import uuid
+from copy import deepcopy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from .adapters import DATASET_ADAPTERS, LITERATURE_ADAPTERS
 from .controller import Controller, OwnershipConflict, integration_lease
-from .data_plane import atomic_json
-from .platform_workflow import validate_request
+from .data_plane import atomic_json, digest
+from .platform_workflow import compile_selected_question, selected_source_question, validate_request
 from .strict_artifacts import strict_json_loads
 
 JOB_ID = re.compile(r"^[a-f0-9]{32}$")
+
+
+def _read_verified_output(controller, row, path):
+    """Return the bytes checked against the successful receipt, without rereading."""
+    verified = controller._check_outputs(row, against_receipt=True)
+    content = path.read_bytes()
+    identity = {
+        "path": str(path),
+        "sha256": hashlib.sha256(content).hexdigest(),
+        "size_bytes": len(content),
+    }
+    if identity not in verified:
+        raise ValueError("Output receipt mismatch: saved output changed during read")
+    return content, identity
 
 
 class PlatformService:
@@ -106,12 +122,20 @@ class PlatformService:
             controller.close()
 
     def submit(self, raw):
-        request = validate_request(raw)
-        if request["extraction_mode"] == "model" and not self.health()["model_available"]:
+        request = self._bind_question(validate_request(raw))
+        if (
+            request["extraction_mode"] == "model"
+            and not request.get("source_question_binding")
+            and not self.health()["model_available"]
+        ):
             raise ValueError(
                 "Configure a verified local extraction model before selecting model mode"
             )
-        if request["ranking"] != "bm25" and not self.health()["semantic_available"]:
+        if (
+            request["workflow_mode"] != "questions"
+            and request["ranking"] != "bm25"
+            and not self.health()["semantic_available"]
+        ):
             raise ValueError(
                 "Configure a verified local embedding model before selecting semantic ranking"
             )
@@ -145,6 +169,96 @@ class PlatformService:
         finally:
             controller.close()
         return self.job(identifier)
+
+    def _bind_question(self, request):
+        """Resolve provenance from verified saved outputs, never client claims."""
+        reference = request.get("question_reference")
+        if not reference:
+            return request
+        from .question_discovery import _document, _source_lifecycle, _text_sha
+
+        prior = self.job(reference["job_id"])
+        if prior["status"] != "SUCCEEDED":
+            raise ValueError("Question selection requires a successful verified job")
+        result = prior["result"]
+        questions = [
+            q
+            for q in result.get("questions", {}).get("questions", [])
+            if q.get("question_id") == reference["question_id"]
+        ]
+        if len(questions) != 1:
+            raise ValueError("Question is not uniquely present in the referenced job")
+        question = questions[0]
+        documents = [
+            d
+            for d in result.get("documents", [])
+            if d.get("document_id") == question.get("source_document_id")
+        ]
+        if len(documents) != 1:
+            raise ValueError("Selected question lacks unique saved source context")
+        document = _document(documents[0])
+        span = question.get("evidence_span") or {}
+        start, end = span.get("start"), span.get("end")
+        if (
+            type(start) is not int
+            or type(end) is not int
+            or not 0 <= start < end <= len(document["text"])
+            or document["text"][start:end] != question.get("question")
+            or span.get("text") != question.get("question")
+            or question.get("source_provenance") != document["source_provenance"]
+            or question.get("source_text_sha256") != _text_sha(document["text"])
+            or span.get("source_locator") != document["source_locator"]
+            or question.get("source_locator") != f"{document['source_locator']}#chars={start}:{end}"
+            or question.get("citation")
+            != {key: document.get(key) for key in ("title", "doi", "pmid", "pmcid", "url", "year")}
+            or _source_lifecycle(document)["excluded"]
+        ):
+            raise ValueError("Selected question is not eligible verified literal source evidence")
+        expected_id = (
+            "rq_"
+            + digest(
+                [
+                    document["document_id"],
+                    _text_sha(document["text"]),
+                    {"text": span["text"], "start": start, "end": end},
+                ]
+            )[:24]
+        )
+        if question["question_id"] != expected_id:
+            raise ValueError("Selected question identity does not match its literal evidence")
+        bound = deepcopy(request)
+        bound["question"] = request["question"] or question["question"]
+        bound["source_question_binding"] = {
+            "question": deepcopy(question),
+            "document": deepcopy(documents[0]),
+            "reference": deepcopy(reference),
+            "result_id": result.get("result_id"),
+            "result_file": deepcopy(prior["verified_result_file"]),
+            "source_context_fingerprint": digest(documents[0]),
+        }
+        return bound
+
+    def preview(self, raw):
+        if not isinstance(raw, dict) or set(raw) - {
+            "question",
+            "requirements",
+            "question_reference",
+        }:
+            raise ValueError(
+                "Provide question, optional requirements, and optional saved question reference"
+            )
+        request = self._bind_question(
+            validate_request(dict(raw, literature_sources=[], dataset_sources=[]))
+        )
+        selected = selected_source_question(request)
+        compiled = compile_selected_question(
+            selected or {"question": request["question"]},
+            request["requirements"],
+            request["source_question_binding"]["document"] if selected else None,
+        )
+        if selected:
+            compiled["question_selection"] = selected
+        return compiled
 
     def _job_path(self, identifier):
         if not JOB_ID.fullmatch(identifier):
@@ -194,15 +308,28 @@ class PlatformService:
                 (path / "request.json").read_text(encoding="utf-8")
             )["request"]
             if row["status"] == "SUCCEEDED":
-                controller._check_outputs(row, against_receipt=True)
-                result["result"] = strict_json_loads(
-                    (path / "run/result.json").read_text(encoding="utf-8")
-                )
+                content, identity = _read_verified_output(controller, row, path / "run/result.json")
+                result["result"] = strict_json_loads(content.decode("utf-8"))
+                result["verified_result_file"] = identity
                 result["retryable"] = (
                     result["result"].get("processing_status") == "PARTIAL_RETRYABLE"
                     and row["attempts"] < 3
                 )
             return result
+        finally:
+            controller.close()
+
+    def export(self, identifier, filename):
+        if filename not in {"result.json", "dossier.md", "candidates.csv"}:
+            raise ValueError("Unknown export")
+        path = self._job_path(identifier) / "run" / filename
+        controller = Controller(self.queue)
+        try:
+            row = next((r for r in controller.jobs() if r["id"] == identifier), None)
+            if not row or row["status"] != "SUCCEEDED":
+                raise ValueError("Exports become available after successful validation")
+            content, _ = _read_verified_output(controller, row, path)
+            return content
         finally:
             controller.close()
 
@@ -222,10 +349,10 @@ class PlatformService:
                 row = next((r for r in controller.jobs() if r["id"] == identifier), None)
                 partial = False
                 if row and row["status"] == "SUCCEEDED":
-                    controller._check_outputs(row, against_receipt=True)
-                    saved = strict_json_loads(
-                        (self._job_path(identifier) / "run/result.json").read_text(encoding="utf-8")
+                    content, _ = _read_verified_output(
+                        controller, row, self._job_path(identifier) / "run/result.json"
                     )
+                    saved = strict_json_loads(content.decode("utf-8"))
                     partial = saved.get("processing_status") == "PARTIAL_RETRYABLE"
                 if not row or (row["status"] != "FAILED" and not partial) or row["attempts"] >= 3:
                     raise ValueError(
@@ -337,19 +464,7 @@ def make_server(service, *, host="127.0.0.1", port=8765):
                         202 if write else 200, service.submit(payload) if write else service.jobs()
                     )
                 elif path == "/api/requirements" and write:
-                    if not isinstance(payload, dict) or set(payload) - {"question", "requirements"}:
-                        raise ValueError("Provide question and optional requirements")
-                    from .question_discovery import compile_research_question
-
-                    checked = validate_request(
-                        dict(payload, literature_sources=[], dataset_sources=[])
-                    )
-                    self._respond(
-                        200,
-                        compile_research_question(
-                            checked["question"], user_constraints=checked["requirements"]
-                        ),
-                    )
+                    self._respond(200, service.preview(payload))
                 elif path in {"/api/pause", "/api/resume"} and write:
                     self._respond(
                         200, service.mode("PAUSED_BY_USER" if path.endswith("pause") else "RUNNING")
@@ -374,14 +489,10 @@ def make_server(service, *, host="127.0.0.1", port=8765):
                         and parts[4] in {"result.json", "dossier.md", "candidates.csv"}
                         and not write
                     ):
-                        job = service.job(identifier)
-                        if job["status"] != "SUCCEEDED":
-                            raise ValueError("Exports become available after successful validation")
-                        file = service._job_path(identifier) / "run" / parts[4]
                         self._respond(
                             200,
-                            file.read_bytes(),
-                            mimetypes.guess_type(file)[0] or "text/plain; charset=utf-8",
+                            service.export(identifier, parts[4]),
+                            mimetypes.guess_type(parts[4])[0] or "text/plain; charset=utf-8",
                         )
                     else:
                         raise FileNotFoundError("Unknown API route")

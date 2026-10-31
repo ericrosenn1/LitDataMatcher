@@ -23,6 +23,7 @@ import type {
   ResearchJob,
   ResearchRequest,
   ResearchResult,
+  SourceQuestionReference,
 } from "../lib/scientificApi";
 import "./ScientificWorkflow.css";
 
@@ -69,6 +70,9 @@ export function ScientificWorkflow() {
   const [health, setHealth] = useState<EngineHealth | null>(null);
   const [query, setQuery] = useState("");
   const [question, setQuestion] = useState("");
+  const [questionReference, setQuestionReference] =
+    useState<SourceQuestionReference | null>(null);
+  const [originalQuestion, setOriginalQuestion] = useState("");
   const [requirements, setRequirements] = useState<EditorRequirement[]>([]);
   const [compiled, setCompiled] = useState<CompiledQuestion | null>(null);
   const [documents, setDocuments] = useState<ResearchDocument[]>([]);
@@ -223,6 +227,9 @@ export function ScientificWorkflow() {
         await scientificRequest<CompiledQuestion>("requirements", {
           question,
           requirements: activeRequirements(),
+          ...(questionReference
+            ? { question_reference: questionReference }
+            : {}),
         }),
       );
     } catch (reason) {
@@ -232,8 +239,8 @@ export function ScientificWorkflow() {
     }
   }
 
-  async function launch() {
-    setBusy("launch");
+  async function launch(mode: "full" | "questions" = "full") {
+    setBusy(mode === "questions" ? "questions" : "launch");
     setError("");
     setNotice("");
     try {
@@ -250,30 +257,39 @@ export function ScientificWorkflow() {
         );
       }
       if (
-        (extraction === "model" && !health?.model_available) ||
-        (ranking !== "bm25" && !health?.semantic_available)
+        (extraction === "model" &&
+          !(mode === "full" && questionReference) &&
+          !health?.model_available) ||
+        (mode === "full" && ranking !== "bm25" && !health?.semantic_available)
       ) {
         throw new Error(
           "The selected model is unavailable. Choose an available extraction or retrieval option.",
         );
       }
       const body: ResearchRequest = {
-        query: query || question,
-        question,
-        requirements: activeRequirements(),
-        literature_sources: sources.literature,
-        dataset_sources: sources.datasets,
+        workflow_mode: mode,
+        query: query || (mode === "full" ? question : ""),
+        question: mode === "questions" ? "" : question,
+        requirements: mode === "questions" ? [] : activeRequirements(),
+        literature_sources:
+          mode === "questions" && !query.trim() ? [] : sources.literature,
+        dataset_sources: mode === "questions" ? [] : sources.datasets,
         limit,
-        inspection_limit: inspect,
+        inspection_limit: mode === "questions" ? 0 : inspect,
         extraction_mode: extraction,
         ranking,
+        ...(mode === "full" && questionReference
+          ? { question_reference: questionReference }
+          : {}),
         ...scientificSourcePayload(documents),
       };
       const value = await scientificRequest<ResearchJob>("jobs", body);
       setJob(value);
       setJobId(value.id);
       setNotice(
-        "Research job queued. Completed stages are retained by the local engine.",
+        mode === "questions"
+          ? "Literature extraction queued. Select a source question from the results before finding datasets."
+          : "Research job queued. Completed stages are retained by the local engine.",
       );
     } catch (reason) {
       setError(text(reason instanceof Error ? reason.message : reason));
@@ -331,7 +347,7 @@ export function ScientificWorkflow() {
         );
         setNotice(
           action === "pause"
-            ? "New job execution is paused; completed work is retained."
+            ? "Active and queued execution is paused; completed stages are retained."
             : "Job execution resumed.",
         );
       }
@@ -423,6 +439,20 @@ export function ScientificWorkflow() {
               <Search size={16} /> Search local corpus
             </button>
           </div>
+          <button
+            className="primary-button"
+            disabled={!health || !!busy || (!query.trim() && !documents.length)}
+            onClick={() => void launch("questions")}
+          >
+            {busy === "questions" && (
+              <LoaderCircle size={16} className="spin" />
+            )}
+            Find questions
+          </button>
+          <p>
+            Extract source questions from selected text and literature sources.
+            Dataset search starts after you choose a question.
+          </p>
           {literature.length > 0 && (
             <ul className="scientific-literature">
               {literature.map((paper, index) => (
@@ -456,6 +486,25 @@ export function ScientificWorkflow() {
             value={question}
             onChange={(event) => editQuestion(event.target.value)}
           />
+          {questionReference && (
+            <div className="scientific-coverage" role="status">
+              <p>
+                {question === originalQuestion
+                  ? "Selected source passage: citation and context will be reused from the verified saved job."
+                  : "User-modified question: the original source passage remains linked as derivation, not as this wording's evidence."}
+              </p>
+              <button
+                className="secondary-button"
+                onClick={() => {
+                  setQuestionReference(null);
+                  setOriginalQuestion("");
+                  setCompiled(null);
+                }}
+              >
+                Use as a new question
+              </button>
+            </div>
+          )}
           <details>
             <summary>Add source text</summary>
             <div className="scientific-source-fields">
@@ -753,7 +802,7 @@ export function ScientificWorkflow() {
         <div className="scientific-actions">
           <button
             className="primary-button"
-            disabled={!health || !!busy || (!question.trim() && !query.trim())}
+            disabled={!health || !!busy || !question.trim()}
             onClick={() => void launch()}
           >
             {busy === "launch" ? (
@@ -761,7 +810,7 @@ export function ScientificWorkflow() {
             ) : (
               <FlaskConical size={16} />
             )}{" "}
-            Launch research workflow <ChevronRight size={16} />
+            Find datasets <ChevronRight size={16} />
           </button>
           <span>
             Compatibility uses explicit requirements and observed evidence.
@@ -779,7 +828,7 @@ export function ScientificWorkflow() {
               disabled={!health || !!busy}
               onClick={() => void control(health?.paused ? "resume" : "pause")}
             >
-              {health?.paused ? "Resume jobs" : "Pause new jobs"}
+              {health?.paused ? "Resume jobs" : "Pause jobs"}
             </button>
           </div>
         </div>
@@ -830,12 +879,42 @@ export function ScientificWorkflow() {
         >
           <div className="scientific-panel-heading">
             <div>
-              <h2 id="scientific-results-title">Evidence and compatibility</h2>
+              <h2 id="scientific-results-title">
+                {result.workflow_mode === "questions"
+                  ? "Source questions"
+                  : "Evidence and compatibility"}
+              </h2>
               <p>
                 {typeof result.question === "string"
                   ? result.question
                   : result.question?.question}
               </p>
+              {typeof result.question === "object" &&
+                result.question?.selection_reference && (
+                  <p>
+                    {result.question.derived_from
+                      ? "User-modified wording; original source question retained as derivation."
+                      : "Source passage and context retained from a verified saved job."}
+                    {safeScientificUrl(
+                      result.question.derived_from?.source_locator ||
+                        result.question.source_locator,
+                    ) && (
+                      <>
+                        {" "}
+                        <a
+                          href={safeScientificUrl(
+                            result.question.derived_from?.source_locator ||
+                              result.question.source_locator,
+                          )}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View original source
+                        </a>
+                      </>
+                    )}
+                  </p>
+                )}
             </div>
             <div className="scientific-exports">
               {(["dossier.md", "result.json", "candidates.csv"] as const).map(
@@ -882,6 +961,12 @@ export function ScientificWorkflow() {
                   {result.questions.coverage.processed_documents}.
                 </p>
               )}
+              {!!result.questions?.coverage?.reused_documents && (
+                <p>
+                  Verified source contexts reused without extraction:{" "}
+                  {result.questions.coverage.reused_documents}.
+                </p>
+              )}
               {!!result.questions?.coverage?.metadata_only_documents && (
                 <p>
                   Metadata-only documents without source text to extract:{" "}
@@ -917,7 +1002,10 @@ export function ScientificWorkflow() {
             </details>
           )}
           {!!result.questions?.questions.length && (
-            <details className="scientific-extracted">
+            <details
+              className="scientific-extracted"
+              open={result.workflow_mode === "questions" ? true : undefined}
+            >
               <summary>
                 Source-linked questions ({result.questions.questions.length})
               </summary>
@@ -932,6 +1020,11 @@ export function ScientificWorkflow() {
                       className="secondary-button"
                       onClick={() => {
                         editQuestion(item.question);
+                        setQuestionReference({
+                          job_id: jobId!,
+                          question_id: item.question_id,
+                        });
+                        setOriginalQuestion(item.question);
                         setNotice(
                           "Source question selected. Review or refine its requirements before launching a new job.",
                         );
@@ -953,21 +1046,58 @@ export function ScientificWorkflow() {
               ))}
             </details>
           )}
-          <label className="scientific-filter">
-            Compatibility filter
-            <select
-              value={filter}
-              onChange={(event) => setFilter(event.target.value)}
-            >
-              <option value="ALL">All candidates</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {label(category)}
-                </option>
+          {result.addressed_evidence && (
+            <details>
+              <summary>Bounded addressing evidence</summary>
+              <p>{label(result.addressed_evidence.status)}</p>
+              <p>
+                Checked{" "}
+                {result.addressed_evidence.searched_document_ids?.length ?? 0}{" "}
+                supplied documents. Related result passages require review; this
+                check establishes neither an answer nor global novelty.
+              </p>
+              {result.addressed_evidence.candidates.map((item, index) => (
+                <article key={index}>
+                  <p>{item.evidence_span.text}</p>
+                  {safeScientificUrl(item.source_locator) ? (
+                    <a
+                      href={safeScientificUrl(item.source_locator)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View related evidence
+                    </a>
+                  ) : (
+                    <p>{item.source_locator || item.document_id}</p>
+                  )}
+                </article>
               ))}
-            </select>
-          </label>
-          {!candidates.length && (
+            </details>
+          )}
+          {result.workflow_mode !== "questions" && (
+            <label className="scientific-filter">
+              Compatibility filter
+              <select
+                value={filter}
+                onChange={(event) => setFilter(event.target.value)}
+              >
+                <option value="ALL">All candidates</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {label(category)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {!candidates.length && result.workflow_mode === "questions" && (
+            <p>
+              Select a source question above, review its requirements, then
+              choose Find datasets. No dataset discovery, inspection, or
+              qualification was requested.
+            </p>
+          )}
+          {!candidates.length && result.workflow_mode !== "questions" && (
             <p>
               No candidates in this view. Missing evidence, source failures, and
               lack of a compatible dataset are different outcomes; inspect the
@@ -992,7 +1122,10 @@ export function ScientificWorkflow() {
                 </div>
                 <p>{label(candidate.assessment.compatibility_status)}</p>
                 <p>
-                  Statistical adequacy: {label(candidate.assessment.statistical_adequacy || "UNKNOWN")}
+                  Statistical adequacy:{" "}
+                  {label(
+                    candidate.assessment.statistical_adequacy || "UNKNOWN",
+                  )}
                 </p>
                 {safeScientificUrl(candidate.dataset?.url) && (
                   <a

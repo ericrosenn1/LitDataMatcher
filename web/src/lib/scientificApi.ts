@@ -6,6 +6,7 @@ export interface Requirement {
 }
 
 export interface CompiledQuestion {
+  question_selection?: DiscoveredQuestion;
   compilation_status: string;
   question_purpose?: string;
   matching_requirements: Requirement[];
@@ -36,6 +37,15 @@ export interface DiscoveredQuestion {
   source_document_id?: string;
   source_locator?: string;
   unanswered_status?: string;
+  origin?: string;
+  provenance_category?: string;
+  selection_reference?: SourceQuestionReference;
+  derived_from?: DiscoveredQuestion;
+}
+
+export interface SourceQuestionReference {
+  job_id: string;
+  question_id: string;
 }
 
 export interface ScientificCandidate {
@@ -61,6 +71,16 @@ export interface ScientificCandidate {
 }
 
 export interface ResearchResult {
+  workflow_mode?: "full" | "questions";
+  addressed_evidence?: {
+    status: string;
+    searched_document_ids?: string[];
+    candidates: {
+      document_id?: string;
+      source_locator?: string;
+      evidence_span: { text: string };
+    }[];
+  };
   question?:
     | string
     | {
@@ -68,6 +88,10 @@ export interface ResearchResult {
         question_id?: string;
         source_locator?: string;
         novelty_status?: string;
+        origin?: string;
+        provenance_category?: string;
+        derived_from?: DiscoveredQuestion;
+        selection_reference?: SourceQuestionReference;
       };
   compilation?: CompiledQuestion;
   candidates: ScientificCandidate[];
@@ -75,6 +99,7 @@ export interface ResearchResult {
     questions: DiscoveredQuestion[];
     coverage?: {
       processed_documents?: number;
+      reused_documents?: number;
       failed_documents?: number;
       metadata_only_documents?: number;
       excluded_documents?: number;
@@ -110,6 +135,8 @@ export interface EngineHealth {
 }
 
 export interface ResearchRequest {
+  workflow_mode?: "full" | "questions";
+  question_reference?: SourceQuestionReference;
   query: string;
   question: string;
   requirements: Requirement[];

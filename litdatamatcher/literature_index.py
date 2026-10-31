@@ -254,7 +254,7 @@ class LiteratureIndex:
             pmid=row["pmid"],
             title=row["title"],
             abstract=row["abstract"],
-            text=row["abstract"] or row["title"],
+            text=row["abstract"],
             version=row["version"],
             source="pubmed",
             source_id=row["pmid"],

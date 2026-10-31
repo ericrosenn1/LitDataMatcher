@@ -64,7 +64,8 @@ snapshot, including while a writer commits new shards.
 Documents carry stable `PMID:` identifiers, source URLs, source-shard checksums,
 event/version identity, and exact legacy row offsets. Passage results preserve
 their exact character offsets in the title or abstract and content-bound IDs.
-The returned `text` is the abstract when present, otherwise the title.
+The returned `text` contains only the abstract. Title-only records remain
+searchable metadata and are not promoted to question-extraction text.
 Explicit retraction, correction, and expression-of-concern publication types
 are mapped to the existing literature-integrity contract. A current citation
 must not be confused with eligible evidence. Lifecycle coverage is limited to

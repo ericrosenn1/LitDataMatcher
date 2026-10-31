@@ -25,8 +25,8 @@ from unittest.mock import patch
 
 import psutil
 
-from . import __version__
 from .data_plane import Catalog, atomic_json, atomic_write, digest
+from .provenance import repository_identity as source_identity
 from .scientific_v2 import compile_evidence, rank_candidates
 from .v2 import normalize_dataset
 
@@ -76,36 +76,6 @@ ASSAYS.update({family: family for family in set(ASSAYS.values())})
 
 def file_sha256(path: str | Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def source_identity(repository: Path) -> dict:
-    """Report an available Git revision without inventing one for distributions."""
-    repository = repository.resolve()
-    identity = {"kind": "source_files_only", "commit": None, "package_version": __version__}
-    try:
-        git_root = Path(
-            subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"],
-                cwd=repository,
-                text=True,
-                stderr=subprocess.PIPE,
-            ).strip()
-        ).resolve()
-        if git_root != repository:
-            identity.update(git_error="repository_root_mismatch", git_root=str(git_root))
-            return identity
-        commit = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=repository, text=True, stderr=subprocess.PIPE
-        ).strip()
-    except OSError as error:
-        identity["git_error"] = type(error).__name__
-    except subprocess.CalledProcessError as error:
-        identity.update(git_error=type(error).__name__, git_returncode=error.returncode)
-    else:
-        if not re.fullmatch(r"[0-9a-f]{40}", commit):
-            raise ValueError("Git did not return an immutable commit SHA")
-        identity.update(kind="git_checkout", commit=commit)
-    return identity
 
 
 def verify_acquisition_input(path: str | Path, receipt_path: str | Path) -> dict:

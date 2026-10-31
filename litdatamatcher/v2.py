@@ -9,7 +9,6 @@ import html
 import json
 import platform
 import re
-import subprocess
 import sys
 from contextlib import nullcontext
 from pathlib import Path
@@ -17,10 +16,16 @@ from pathlib import Path
 from .data_plane import Catalog, atomic_json, atomic_write, digest
 from .literature_integrity import consolidate_literature_rows
 from .modality_contract import modality_contract
+from .provenance import repository_identity
 from .question_compiler import compile_question, matching_requirements
 from .schemas import stable_id
 from .scientific_v2 import compile_evidence, discover_cross_document_gaps, rank_candidates
 from .strict_artifacts import strict_json_loads, validate_artifact
+
+
+def _native_source_commit(source_root):
+    """Keep the closed manifest schema's existing non-checkout sentinel."""
+    return repository_identity(source_root)["commit"] or "installed-distribution"
 
 
 def read_rows(path):
@@ -1212,14 +1217,7 @@ def _analyze_stages(
             "case_dossiers": len(dossiers),
         }
         source_root = Path(__file__).parents[1]
-        try:
-            commit = subprocess.check_output(
-                ["git", "-C", str(source_root), "rev-parse", "HEAD"],
-                text=True,
-                stderr=subprocess.DEVNULL,
-            ).strip()
-        except (OSError, subprocess.CalledProcessError):
-            commit = "installed-distribution"
+        commit = _native_source_commit(source_root)
         qualification_path = (
             Path(runtime_qualification)
             if runtime_qualification

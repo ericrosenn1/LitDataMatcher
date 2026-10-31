@@ -8,6 +8,8 @@ question.
 from __future__ import annotations
 
 import json
+import re
+import subprocess
 from collections import Counter
 from collections.abc import Iterable
 from datetime import datetime, timezone
@@ -16,6 +18,39 @@ from pathlib import Path
 from .schemas import JsonDict, SourceProvenance
 
 PROVENANCE_SCHEMA_VERSION = "source_provenance_v1"
+
+
+def repository_identity(repository: Path) -> dict:
+    """Bind Git identity to this exact source root, including exported installs."""
+    from . import __version__
+
+    repository = Path(repository).resolve()
+    identity = {"kind": "source_files_only", "commit": None, "package_version": __version__}
+    try:
+        git_root = Path(
+            subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=repository,
+                text=True,
+                stderr=subprocess.PIPE,
+            ).strip()
+        ).resolve()
+        if git_root != repository:
+            identity.update(git_error="repository_root_mismatch", git_root=str(git_root))
+            return identity
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=repository, text=True, stderr=subprocess.PIPE
+        ).strip()
+    except OSError as error:
+        identity["git_error"] = type(error).__name__
+    except subprocess.CalledProcessError as error:
+        identity.update(git_error=type(error).__name__, git_returncode=error.returncode)
+    else:
+        if not re.fullmatch(r"[0-9a-f]{40}", commit):
+            raise ValueError("Git did not return an immutable commit SHA")
+        identity.update(kind="git_checkout", commit=commit)
+    return identity
+
 
 # Caveat codes are review vocabulary for parsers, not strict validation rules.
 PARSER_CAVEAT_RECORDS: dict[str, JsonDict] = {

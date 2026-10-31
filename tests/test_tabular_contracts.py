@@ -195,7 +195,17 @@ def test_timing_and_independence_remain_unknown_with_real_comparison_evidence(tm
 
 
 @pytest.mark.parametrize(
-    "failure", ["invented_text", "name_only", "id_column", "tampered_evidence"]
+    "failure",
+    [
+        "invented_text",
+        "name_only",
+        "wrong_variable",
+        "negative_index",
+        "noncanonical_index",
+        "id_column",
+        "tampered_evidence",
+        "unmapped_dataset_text",
+    ],
 )
 def test_source_definition_and_integrity_are_required(tmp_path, failure):
     dataset, requirements, path, metadata, spec = build(tmp_path)
@@ -211,6 +221,17 @@ def test_source_definition_and_integrity_are_required(tmp_path, failure):
             "json_pointer": "/variables/0/name",
             "text": "value",
         }
+    elif failure == "wrong_variable":
+        spec["definition_evidence"]["value"] = {
+            "json_pointer": "/variables/2/description",
+            "text": "Another measurement",
+        }
+    elif failure in {"negative_index", "noncanonical_index"}:
+        index = "-3" if failure == "negative_index" else "00"
+        spec["definition_evidence"]["value"]["json_pointer"] = f"/variables/{index}/description"
+    elif failure == "unmapped_dataset_text":
+        metadata["additional_info"] = {"summary": "Recorded assay concentration"}
+        spec["definition_evidence"]["value"]["json_pointer"] = "/additional_info/summary"
     else:
         metadata["variables"][0]["role"] = "ID"
     with pytest.raises(ValueError):

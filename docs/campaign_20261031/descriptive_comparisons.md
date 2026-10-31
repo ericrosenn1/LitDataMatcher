@@ -49,8 +49,8 @@ stage from this generator's direct compiler/assessor execution.
 Execution: 12/12 full-contract matches and 8/8 expected controls. Missing IL6 stays
 `NOT_QUALIFIED`; timing, independence and unscoped method claims remain
 `REQUIRES_INSPECTION`. Original association cases stay 0/12 qualified with unchanged
-report hash. Sixteen scoped evidence tests plus inspection/compiler tests pass
-(46 total). Row matches do not establish independence, power, confounder control
+report hash. Twenty scoped evidence tests plus inspection/compiler tests pass
+(50 total). Row matches do not establish independence, power, confounder control
 or novelty. No expert labels, model training, endpoint estimates or final evaluation
 were created; the earlier scientific review packet remains frozen.
 

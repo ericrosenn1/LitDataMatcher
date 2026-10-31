@@ -11,6 +11,7 @@ import csv
 import hashlib
 import json
 import math
+import re
 from collections import Counter
 from copy import deepcopy
 from urllib.parse import quote
@@ -35,6 +36,26 @@ def _definition(metadata, variable, evidence, metadata_url):
         raise ValueError("Source definition requires a JSON pointer and exact text")
     if pointer.split("/")[-1] not in {"description", "variable_info", "summary"}:
         raise ValueError("A column name alone is not an outcome definition")
+    tokens = pointer[1:].split("/")
+    if tokens[0] == "variables":
+        if (
+            len(tokens) != 3
+            or tokens[2] != "description"
+            or not re.fullmatch(r"0|[1-9]\d*", tokens[1])
+        ):
+            raise ValueError("Source variable definition requires a canonical column index")
+        try:
+            documented_variable = metadata["variables"][int(tokens[1])]["name"]
+        except (KeyError, IndexError, ValueError, TypeError) as exc:
+            raise ValueError("Source variable definition pointer is invalid") from exc
+        if documented_variable != variable:
+            raise ValueError("Source definition belongs to a different variable")
+    elif pointer not in {"/additional_info/variable_info", "/additional_info/summary"}:
+        raise ValueError(
+            "Source definition must identify a column or documented dataset-level mapping"
+        )
+    elif not isinstance(evidence.get("mapping_note"), str) or not evidence["mapping_note"].strip():
+        raise ValueError("Dataset-level definition requires an explicit variable mapping note")
     value = metadata
     try:
         for token in pointer[1:].split("/"):

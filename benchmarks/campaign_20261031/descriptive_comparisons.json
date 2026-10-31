@@ -1,9 +1,9 @@
 {
   "archive": {
-    "archive": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\LitDataMatcher-descriptive-development.zip",
+    "archive": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\LitDataMatcher-descriptive-development.zip",
     "members": 8,
     "payload_hashes_verified": true,
-    "sha256": "35ff1b580cee6adecc82b55a7ccabeee1d58ea4c30e6dd370216d82fff8111f2",
+    "sha256": "56cfcff308ee81904f30c58acb9edcf750d7d891c36643bc949a622991ecffd7",
     "status": "PASS",
     "validation": {
       "comparison_cases": 12,
@@ -31,53 +31,53 @@
   },
   "outputs": [
     {
-      "bytes": 283581,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\COMPARISON_DEVELOPMENT.json",
-      "sha256": "6439f20d97a2fbad310e5270052bfe991b02dcfc25a874f2d07f068acfefe314"
+      "bytes": 283627,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\COMPARISON_DEVELOPMENT.json",
+      "sha256": "0136af6a8fff7c6134cf21c93521dd59c0056333e60763c9b1f3933237bfa457"
     },
     {
-      "bytes": 17091,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\demonstrate_tabular_comparisons.py",
-      "sha256": "d4b61fe937650e704ae16131a5d0d86f1e0a8d469bcd83af048860914e6715b8"
+      "bytes": 17236,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\demonstrate_tabular_comparisons.py",
+      "sha256": "d1fa4069aa2e4a5e404ac8ed140513a818e6640171d55cf3b6f7993bea369a32"
     },
     {
       "bytes": 1309,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\HANDOFF.md",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\HANDOFF.md",
       "sha256": "a604ef9e267aa9bfb2099117647a665ea287f47dafd84c640d8e6fb63e8ddaa1"
     },
     {
-      "bytes": 91947,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\inspected_datasets.jsonl",
-      "sha256": "665e619cf3bd6412fb1b0ac624ebb9f1260345df87c78e30b6df9c126de5fd4a"
+      "bytes": 91993,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\inspected_datasets.jsonl",
+      "sha256": "13be1905a31272f252d6ac6d8286690262874faedf75b38e04899fcb0b575712"
     },
     {
-      "bytes": 32251,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\LitDataMatcher-descriptive-development.zip",
-      "sha256": "35ff1b580cee6adecc82b55a7ccabeee1d58ea4c30e6dd370216d82fff8111f2"
+      "bytes": 32606,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\LitDataMatcher-descriptive-development.zip",
+      "sha256": "56cfcff308ee81904f30c58acb9edcf750d7d891c36643bc949a622991ecffd7"
     },
     {
       "bytes": 673,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\MANIFEST.tsv",
-      "sha256": "c8759412dc7c838ee0d896615f914809d21a635ae97ec71466e316734080fb97"
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\MANIFEST.tsv",
+      "sha256": "94630dba57aff61c9e0a27ac32e16e3e3cabbbf666f859f62bc5ce7a86e25771"
     },
     {
       "bytes": 565,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\PACKAGE_VERIFICATION.json",
-      "sha256": "025b84fd0c7e7a24f1d53979004398fcc11419bae9644e33b2306ddd7166bc6f"
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\PACKAGE_VERIFICATION.json",
+      "sha256": "cb2253c30d62a92fd9220587dfcf941db6ec07626577b62a5cdcbcf20369eff5"
     },
     {
       "bytes": 7989,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\requests.jsonl",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\requests.jsonl",
       "sha256": "2c430bda62d29dae5147ae5cc7d15b4ff141c69f084492c716fa8c43cd3cd437"
     },
     {
-      "bytes": 13483,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\tabular_contracts.py",
-      "sha256": "143bd142b8d4b17e20c7f3f8c7b4b9fd340c44ba90988a43d07253fe152d6e91"
+      "bytes": 14594,
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\tabular_contracts.py",
+      "sha256": "16287805a646e680a54c4895ed5d3b3dd26b27a5925d1a0ee4f5e9843f65fa49"
     },
     {
       "bytes": 2879,
-      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3\\task_state.json",
+      "path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4\\task_state.json",
       "sha256": "0c8ec18bdab01f895c694395ee6b040534075c8fe75c5052ca6e64ec9fe330af"
     }
   ],
@@ -123,10 +123,10 @@
   ],
   "status": "PASS_WITH_LIMITATIONS",
   "tests": {
-    "count": 46,
-    "junit_path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v3-tests.xml",
-    "passed": 46,
-    "sha256": "f2b806208990cc0d033613a2f6e8d2423f9693b53ad1c4b66c26ee05ead77843"
+    "count": 50,
+    "junit_path": "C:\\Codex\\LitDataMatcher-v2\\data\\full_platform_20261031\\comparative-development-v4-tests.xml",
+    "passed": 50,
+    "sha256": "6c25cf7ea1a70d83ae028bf6a76c83b5d1dd4a332803c8d8ef126aa7b62b1b5e"
   },
   "validation": {
     "comparison_cases": 12,

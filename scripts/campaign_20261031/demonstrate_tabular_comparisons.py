@@ -44,7 +44,11 @@ def definition(metadata, variable):
             "mapping_note": f"Exact source dictionary column {variable}; documentation defines nucleus-feature families and diagnosis codes. Suffix 1 is retained literally without expanding an undocumented statistic or timing.",
         }
     if variable == "age":
-        return {"json_pointer": "/additional_info/variable_info", "text": "3 age: age in years"}
+        return {
+            "json_pointer": "/additional_info/variable_info",
+            "text": "3 age: age in years",
+            "mapping_note": "Source documentation explicitly names the exact age column and its unit years.",
+        }
     if variable == "num":
         return {
             "json_pointer": "/additional_info/summary",

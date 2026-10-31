@@ -70,3 +70,35 @@ scientific compiler. These are development execution observations, not expert
 correctness labels or evidence that 20 new opportunities were discovered.
 The output is retained under
 `C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\questions`.
+
+The final browser suite passed 41 checks across desktop and mobile, with one
+intentional duplicate mobile computation skipped. It reopened a preserved real
+job and downloaded its dossier; no new computational job was needed. Results now
+display processing completeness and extraction coverage independently of queue
+success, including metadata-only, lifecycle-excluded and failed documents.
+
+A bounded scale demonstration replayed 1,000 distinct PubMed breast-oncology
+records from the same committed partial corpus snapshot (563 applied shards).
+The source audit found an upstream index title fallback: 744 records had no
+abstract. That derived source-view issue was corrected explicitly, preserving
+every other native field and the original diagnostic run. The corrected run
+processed 256 available abstracts, recorded 744 metadata-only documents, and
+retained 18 literal passages from 17 records; 239 processed abstracts contained
+no configured question/limitation cue. There were no extraction failures or
+truncation. All 18 span, hash, citation, locator and provenance checks passed.
+
+Extraction plus grouping took 0.082 seconds in this single small-text run;
+sampled process RSS peaked at 48.17 MiB (5.92 MiB above its extraction baseline).
+These measurements do not establish large-corpus throughput, reviewed extraction
+accuracy, global novelty or scientific validity. Missing abstracts were not
+counted as extracted documents or negative findings. The first title-fallback
+run is retained as an explicitly superseded diagnostic and must not be cited as
+abstract-extraction evidence.
+
+The reproducible no-retrieval script is
+`scripts/validate_question_discovery_scale.py`; the corrected measured receipt
+is `docs/validation/question-discovery-scale-20261031.json`. The source snapshot,
+correction ledger, questions, validation, manifest and verified handoff archive
+are retained under
+`C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\question-scale-1000-v2`
+and its adjacent `.zip`. No model was loaded or expensive successful run repeated.

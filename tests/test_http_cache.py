@@ -184,7 +184,10 @@ def test_mocked_success_preserves_request_keys_and_clears_stale_metadata(cache_c
         client.offline = True
         assert invoke(client, method, upload) == expected
         assert len(calls) == 1
-        assert sorted(client.cache_dir.iterdir()) == [path]
+        assert sorted(client.cache_dir.iterdir()) == [client.cache_dir / ".provenance", path]
+        receipt = Path(client.last_response_metadata["acquisition_envelope_path"])
+        assert receipt.is_file()
+        assert json.loads(receipt.read_text())["cache_content_sha256"] == sha256(path.read_bytes()).hexdigest()
     else:
         assert client.last_response_metadata == {}
         assert list(client.cache_dir.iterdir()) == []
@@ -249,6 +252,8 @@ def test_failed_cache_promotion_preserves_prior_entry_and_leaves_no_partial_cach
         client.offline = True
         assert invoke(client, method, upload) == value
         assert len(calls) == 1
-        assert sorted(client.cache_dir.iterdir()) == [path]
+        assert [item for item in client.cache_dir.iterdir() if item.name != ".provenance"] == [path]
     else:
-        assert list(client.cache_dir.iterdir()) == []
+        assert [item for item in client.cache_dir.iterdir() if item.name != ".provenance"] == []
+    for receipt in (client.cache_dir / ".provenance").glob("*.json"):
+        assert json.loads(receipt.read_text())["schema_version"] == "cache-acquisition-v1"

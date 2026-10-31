@@ -3,12 +3,18 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Protocol
+from typing import Protocol
 
 from .provenance import curated_catalog_provenance
 from .schemas import DatasetRecord, DatasetVariable, QuestionCandidate, stable_id
-from .text import extract_domain_terms, infer_population, infer_required_variables, lexical_similarity
+from .text import (
+    extract_domain_terms,
+    infer_population,
+    infer_required_variables,
+    lexical_similarity,
+)
 
 
 class DataSourceAdapter(Protocol):
@@ -329,6 +335,7 @@ def classify_dataset_record(raw: dict) -> DatasetRecord:
     description = raw.get("description") or raw.get("summary") or raw.get("abstract") or ""
     source = raw.get("source") or raw.get("repository") or "unknown"
     variables = raw.get("variables")
+    inferred_variables = not variables
     if not variables:
         # Sparse external metadata still becomes usable by inferring a minimal variable list.
         variables = [
@@ -336,6 +343,14 @@ def classify_dataset_record(raw: dict) -> DatasetRecord:
             for variable in infer_required_variables(f"{title} {description}")
         ]
     dataset_id = raw.get("dataset_id") or raw.get("id") or stable_id("dataset", source, title)
+    metadata = dict(raw.get("metadata") or {})
+    metadata.setdefault("variable_evidence_policy", "source-evidence-v2")
+    if inferred_variables:
+        metadata["variable_inference"] = {
+            "status": "TEXT_INFERRED_NOT_OBSERVED",
+            "method": "deterministic_title_description_terms",
+            "fields": [variable["name"] for variable in variables],
+        }
     return DatasetRecord(
         dataset_id=dataset_id,
         title=title,
@@ -350,7 +365,7 @@ def classify_dataset_record(raw: dict) -> DatasetRecord:
         license=raw.get("license", "unknown"),
         access_type=raw.get("access_type", "unknown"),
         quality_score=raw.get("quality_score", 0.5),
-        metadata=raw.get("metadata", {}),
+        metadata=metadata,
     )
 
 

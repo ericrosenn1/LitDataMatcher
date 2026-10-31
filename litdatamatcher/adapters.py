@@ -17,6 +17,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Protocol
+from urllib.parse import parse_qs, urlsplit
 
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
@@ -61,7 +62,7 @@ class LiteratureSourceAdapter(Protocol):
         """Return literature records with title, abstract, doi, and source_id."""
 
 
-def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonDict, *, extract_items: Callable[[JsonDict], object], cursor_field: str, cursor_param: str, initial_cursor: str | None = None, max_pages: int = 4) -> JsonDict:
+def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonDict, *, extract_items: Callable[[JsonDict], object], cursor_field: str, cursor_param: str, initial_cursor: str | None = None, max_pages: int = 4, cursor_getter: Callable[[JsonDict], object] | None = None) -> JsonDict:
     """Read a bounded cursor sequence without claiming a partial universe is complete."""
     cursor = initial_cursor
     seen_cursors: set[str] = set()
@@ -77,11 +78,19 @@ def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonD
             return _pagination_result(items, pages, "ERROR", error=type(exc).__name__)
         if not isinstance(payload, dict) or any(payload.get(key) for key in ("error", "errors", "ERROR")):
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="payload_not_object")
-        page_items = extract_items(payload)
+        try:
+            page_items = extract_items(payload)
+        except (KeyError, TypeError, ValueError):
+            return _pagination_result(items, pages, "SCHEMA_DRIFT", error="invalid_page_envelope")
         if not isinstance(page_items, list) or not all(isinstance(item, dict) for item in page_items):
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="items_not_object_list")
         cache_lineage = _client_response_metadata(client)
-        next_cursor = payload.get(cursor_field)
+        try:
+            next_cursor = cursor_getter(payload) if cursor_getter else payload.get(cursor_field)
+        except (KeyError, TypeError, ValueError):
+            pages.append({"page_index": page_index, "request_scope": {"url": url, "params": params}, "returned_items": len(page_items), "cursor_in": cursor or "", "cursor_out": "INVALID", "cache_lineage": cache_lineage})
+            items.extend(page_items)
+            return _pagination_result(items, pages, "SCHEMA_DRIFT", error="invalid_next_cursor")
         next_cursor = str(next_cursor).strip() if next_cursor is not None else ""
         pages.append({"page_index": page_index, "request_scope": {"url": url, "params": params}, "returned_items": len(page_items), "cursor_in": cursor or "", "cursor_out": next_cursor, "cache_lineage": cache_lineage})
         items.extend(page_items)
@@ -123,6 +132,7 @@ class OpenAlexLiteratureAdapter:
             "https://api.openalex.org/works",
             params={"search": query, "per-page": min(max(1, limit), 200)},
         )
+        response_metadata = _client_response_metadata(self.client)
         rows: list[dict] = []
         for work in _response_list(_response_object(data).get("results")):
             abstract = _openalex_abstract(work.get("abstract_inverted_index") or {})
@@ -132,6 +142,8 @@ class OpenAlexLiteratureAdapter:
                 source_type="openalex",
                 source_url=source_url,
                 adapter_name=self.name,
+                adapter_version="openalex_works_source_fidelity_v2",
+                retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
                 acquisition_method="openalex_api",
                 content_scope="metadata_plus_reconstructed_abstract"
                 if abstract
@@ -141,7 +153,7 @@ class OpenAlexLiteratureAdapter:
                     "OpenAlex abstracts are reconstructed from an inverted index when available."
                 ],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("openalex")},
+                metadata={"source_profile": source_profile("openalex"), "cache_snapshot": response_metadata},
             ).to_dict()
             rows.append(
                 {
@@ -217,6 +229,7 @@ class PubMedLiteratureAdapter:
                 acquisition_method="ncbi_eutilities",
                 content_scope="abstract_plus_metadata" if abstract else "metadata_only",
                 raw_record_id=uid,
+                retrieval_time_utc=str((fetch_snapshot if abstract else summary_snapshot).get("retrieval_time_utc", "")),
                 limitations=[]
                 if abstract
                 else ["PubMed EFetch did not provide an abstract for this record."],
@@ -457,10 +470,12 @@ class GEODatasetAdapter:
 
     client: CachedHttpClient
     name: str = "geo"
+    last_search_status: JsonDict = field(default_factory=dict, init=False)
 
     def search(self, query: str) -> list[DatasetRecord]:
         """Search GEO DataSets and normalize study summaries as datasets."""
 
+        self.last_search_status = {}
         ids = _ncbi_search(self.client, "gds", query, limit=25)
         if not ids:
             return []
@@ -468,24 +483,34 @@ class GEODatasetAdapter:
             "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi",
             params={"db": "gds", "id": ",".join(ids), "retmode": "json"},
         )
-        results = data.get("result", {})
+        results = _response_object(_response_object(data).get("result"))
+        response_metadata = _client_response_metadata(self.client)
         records: list[DatasetRecord] = []
+        missing_ids: list[str] = []
         for uid in ids:
-            item = results.get(uid, {})
-            title = item.get("title", "") or item.get("accession", "") or "GEO dataset"
+            try:
+                item = _response_object(results.get(uid))
+                if not re.fullmatch(r"G(?:SE|DS|SM|PL)\d+", str(item.get("accession", ""))):
+                    raise ValueError("GEO ESummary omitted a valid requested accession")
+            except ValueError:
+                missing_ids.append(uid)
+                continue
+            title = item.get("title", "") or item["accession"]
             summary = item.get("summary", "")
-            accession = item.get("accession", "") or f"GEO:{uid}"
+            accession = str(item["accession"])
             source_url = f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={item.get('accession', uid)}"
             provenance = remote_source_provenance(
                 source_type="geo",
                 source_url=source_url,
                 adapter_name=self.name,
+                adapter_version="ncbi_geo_esummary_source_fidelity_v2",
+                retrieval_time_utc=str(response_metadata.get("retrieval_time_utc", "")),
                 acquisition_method="ncbi_eutilities",
                 content_scope="dataset_metadata",
                 raw_record_id=accession,
                 limitations=["GEO summaries may require follow-up file inspection for variable-level metadata."],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("geo")},
+                metadata={"source_profile": source_profile("geo"), "cache_snapshot": response_metadata},
             ).to_dict()
             records.append(
                 classify_dataset_record(
@@ -504,6 +529,7 @@ class GEODatasetAdapter:
                     }
                 )
             )
+        self.last_search_status = {"status": "SCHEMA_DRIFT" if missing_ids else "BOUNDED_RESULTS", "returned_items": len(records), "requested_ids": len(ids), "missing_ids": missing_ids, "candidate_universe_status": "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"}
         return records
 
 
@@ -886,10 +912,10 @@ def _clinical_variables(**fields: object) -> list[JsonDict]:
         ("intervention", "clinical", fields["interventions"]),
         ("study_arm", "study_design_feature", fields["arms"]),
         ("outcome", "clinical", [*fields["primary_outcomes"], *fields["secondary_outcomes"]]),
-        ("eligibility_criteria", "metadata", [fields["eligibility"]]),
+        ("eligibility_criteria", "metadata", fields["eligibility"].get("eligibilityCriteria", "")),
     ):
         variables.append({"name": name, "category": category, "observed_count": 0, "completeness": 0.8 if values else 0.0})
-    variables.append({"name": "study_type", "category": "study_design_feature", "observed_count": 0, "completeness": 1.0})
+    variables.append({"name": "study_type", "category": "study_design_feature", "observed_count": 0, "completeness": 1.0 if fields["study_type"] != "UNKNOWN" else 0.0})
     if any(item.get("time_frame") not in {"", "UNKNOWN"} for item in [*fields["primary_outcomes"], *fields["secondary_outcomes"]]):
         variables.append({"name": "timepoint", "category": "temporal_structure", "observed_count": 0, "completeness": 0.65})
     return variables
@@ -937,6 +963,94 @@ def _append_clinical_version(selected: DatasetRecord, discarded: DatasetRecord) 
         versions.append(version)
 
 
+def _datacite_cursor(payload: JsonDict) -> str | None:
+    """Read a cursor without following provider-supplied URLs to another host."""
+    links = _response_object(payload.get("links", {}))
+    next_url = links.get("next")
+    if not next_url:
+        return None
+    if not isinstance(next_url, str):
+        raise ValueError("DataCite next link must be a URL")
+    parsed = urlsplit(next_url)
+    if (parsed.scheme != "https" or parsed.netloc != "api.datacite.org"
+            or parsed.path.rstrip("/") != "/dois"):
+        raise ValueError("Unexpected DataCite pagination origin")
+    values = parse_qs(parsed.query).get("page[cursor]", [])
+    if len(values) != 1 or not values[0]:
+        raise ValueError("DataCite pagination omitted its cursor")
+    return values[0]
+
+
+@dataclass(slots=True)
+class DataCiteDatasetAdapter:
+    """DOI-addressable dataset metadata; never a claim of available measurements."""
+
+    client: CachedHttpClient
+    name: str = "datacite"
+    last_search_status: JsonDict = field(default_factory=dict, init=False)
+
+    def search(self, query: str) -> list[DatasetRecord]:
+        if not str(query).strip():
+            raise ValueError("DataCite requires a nonempty search query")
+        result = _bounded_cursor_pages(
+            self.client, "https://api.datacite.org/dois",
+            {"query": query, "resource-type-id": "dataset", "page[size]": 25},
+            extract_items=lambda payload: payload.get("data"), cursor_field="",
+            cursor_param="page[cursor]", initial_cursor="1", max_pages=4,
+            cursor_getter=_datacite_cursor,
+        )
+        self.last_search_status = result["pagination"]
+        records: dict[str, DatasetRecord] = {}
+        rejected = 0
+        for index, item in enumerate(result["items"]):
+            try:
+                attributes = _response_object(item.get("attributes"))
+                doi = _normalize_doi(attributes.get("doi") or item.get("id"))
+                if not re.fullmatch(r"10\.\d{4,9}/\S+", doi):
+                    raise ValueError("Invalid DataCite DOI")
+                if item.get("id") and _normalize_doi(item["id"]) != doi:
+                    raise ValueError("Conflicting DataCite DOI identifiers")
+                if _response_object(attributes.get("types")).get("resourceTypeGeneral") != "Dataset":
+                    raise ValueError("DataCite result is not a dataset")
+                titles = _response_list(attributes.get("titles"))
+                title = next((value["title"].strip() for value in titles if isinstance(value.get("title"), str) and value["title"].strip()), "")
+                if not title:
+                    raise ValueError("DataCite dataset title is missing")
+                descriptions = _response_list(attributes.get("descriptions", []))
+                description = " ".join(_strip_jats(value["description"]) for value in descriptions if isinstance(value.get("description"), str))
+                rights = _response_list(attributes.get("rightsList", []))
+            except (KeyError, TypeError, ValueError):
+                rejected += 1
+                continue
+            snapshot = _item_page_metadata(result, index, _client_response_metadata(self.client))
+            provenance = remote_source_provenance(
+                source_type="datacite", source_url=f"https://doi.org/{doi}",
+                adapter_name=self.name, adapter_version="datacite_rest_dataset_v1",
+                retrieval_time_utc=str(snapshot.get("retrieval_time_utc", "")),
+                acquisition_method="datacite_public_api", content_scope="dataset_metadata",
+                raw_record_id=doi,
+                limitations=["DOI metadata does not establish access to files, observed variables, or independent samples."],
+                metadata={"source_profile": source_profile("datacite"), "cache_snapshot": snapshot, "pagination": result["pagination"]},
+            ).to_dict()
+            record = classify_dataset_record({
+                "dataset_id": f"datacite:{doi}", "title": title, "source": "DataCite",
+                "description": description, "url": f"https://doi.org/{doi}",
+                "variables": [], "sample_size": 0,
+                "license": "; ".join(str(value.get("rights") or value.get("rightsUri") or value.get("rightsIdentifier") or "").strip() for value in rights) or "unknown",
+                "access_type": "public DOI metadata; dataset-file access unknown",
+                "metadata": {"source_provenance": provenance, "raw_record": item,
+                             "doi": doi, "related_identifiers": attributes.get("relatedIdentifiers", []),
+                             "publication_year": attributes.get("publicationYear"),
+                             "measurement_status": "NOT_REPORTED", "sample_count": None,
+                             "pagination": result["pagination"]},
+            })
+            records.setdefault(record.dataset_id, record)
+        if rejected:
+            self.last_search_status = {**self.last_search_status, "status": "SCHEMA_DRIFT", "rejected_records": rejected, "completed": False,
+                                       "candidate_universe_status": "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"}
+        return list(records.values())
+
+
 DATASET_ADAPTERS = {
     "clinicaltrials": ClinicalTrialsDatasetAdapter,
     "ena": ENASRADatasetAdapter,
@@ -944,6 +1058,7 @@ DATASET_ADAPTERS = {
     "mgnify": MGnifyDatasetAdapter,
     "pride": PRIDEDatasetAdapter,
     "metabolomicsworkbench": MetabolomicsWorkbenchDatasetAdapter,
+    "datacite": DataCiteDatasetAdapter,
 }
 
 LITERATURE_ADAPTERS = {

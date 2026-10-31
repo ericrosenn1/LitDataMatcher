@@ -269,6 +269,17 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "review_caveats": ["Inspect ENA study/sample relationships and file metadata before treating a record as analysis-ready."],
         "do_not_infer": ["donor identity", "biological-sample count from runs", "processed-data availability from raw-read metadata"],
     },
+    "datacite": {
+        "source_type": "datacite",
+        "category": "dataset_metadata",
+        "content_scope": "dataset DOI metadata",
+        "acquisition_method": "datacite_public_api",
+        "native_id_fields": ["doi", "related_identifiers"],
+        "strengths": ["persistent dataset identifiers", "source-declared rights and publication links"],
+        "limitations": ["metadata may omit measurements, sample units, and file access conditions"],
+        "review_caveats": ["Inspect the DOI landing page and source files before judging suitability or reuse rights."],
+        "do_not_infer": ["downloaded datasets", "measured variables", "independent sample counts", "permission to reuse underlying files"],
+    },
     "geo": {
         "source_type": "geo",
         "category": "dataset_metadata",
@@ -315,7 +326,7 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
     },
 }
 
-ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "europepmc", "crossref", "clinicaltrials", "ena", "geo", "mgnify")
+ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "europepmc", "crossref", "clinicaltrials", "ena", "geo", "mgnify", "datacite")
 
 # Module boundaries are developer-facing documentation, not runtime dispatch rules.
 MODULE_BOUNDARIES: dict[str, JsonDict] = {

@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from .ontology import normalize_token, normalize_variable_name
 from .provenance import source_profile
 from .schemas import DatasetCapability, DatasetRecord, DerivedVariableRule, JsonDict
-
 
 CAPABILITY_VOCABULARY: dict[str, JsonDict] = {
     "sample_size": {
@@ -112,6 +111,19 @@ DERIVED_OUTPUT_NAMES = {
     normalize_token(rule.output_variable) for rule in DEFAULT_DERIVED_RULES
 }
 
+CAPABILITY_EVIDENCE_POLICY = "source-evidence-v2"
+
+
+def _variable_evidence_status(variable) -> str:
+    """Separate source-reported metadata from absent or text-inferred fields."""
+    if variable.completeness <= 0 or variable.category == "absent":
+        return "ABSENT"
+    if variable.category in {"inferred", "derived", "proxy", "derived_or_proxy_capability"}:
+        return "INFERRED"
+    if variable.category == "unknown":
+        return "UNKNOWN"
+    return "OBSERVED_METADATA"
+
 
 def infer_dataset_capabilities(
     dataset: DatasetRecord,
@@ -124,21 +136,28 @@ def infer_dataset_capabilities(
     for variable in dataset.variables:
         normalized = normalize_variable_name(variable.name)
         vocabulary = CAPABILITY_VOCABULARY.get(normalized, {})
+        evidence_status = _variable_evidence_status(variable)
+        observed_metadata = evidence_status == "OBSERVED_METADATA"
         capabilities.append(
             DatasetCapability(
                 dataset_id=dataset.dataset_id,
                 variable_name=normalized,
-                capability_type="observed",
+                capability_type="observed" if observed_metadata else "unknown",
                 source_variable_names=[variable.name],
-                confidence=max(0.1, min(1.0, variable.completeness)),
-                evidence=f"Observed variable in dataset metadata: {variable.name}",
-                limitations=[] if variable.completeness >= 0.7 else ["variable completeness may be limited"],
+                confidence=variable.completeness if evidence_status != "ABSENT" else 0.0,
+                evidence=(f"Observed variable in dataset metadata: {variable.name}" if observed_metadata
+                          else f"{evidence_status.lower()} variable; source-level presence is not established: {variable.name}"),
+                limitations=(["Metadata presence does not establish measured, analysis-ready values."]
+                             if observed_metadata else ["Not an observed capability or a derivation prerequisite."])
+                            + ([] if variable.completeness >= 0.7 else ["variable completeness may be limited"]),
                 metadata={
                     "category": variable.category,
                     "capability_category": vocabulary.get("category", variable.category),
                     "capability_interpretation": vocabulary.get("interpretation", ""),
                     "observed_count": variable.observed_count,
                     "completeness": variable.completeness,
+                    "evidence_status": evidence_status,
+                    "evidence_policy": CAPABILITY_EVIDENCE_POLICY,
                     "source_profile": source_profile("capability_registry"),
                     "interpretation": "Observed capability from dataset metadata; not a completed downstream analysis.",
                 },
@@ -192,6 +211,8 @@ def _observed_variable_map(dataset: DatasetRecord) -> dict[str, str]:
 
     observed: dict[str, str] = {}
     for variable in dataset.variables:
+        if _variable_evidence_status(variable) != "OBSERVED_METADATA":
+            continue
         normalized = normalize_variable_name(variable.name)
         observed.setdefault(normalized, variable.name)
         for synonym in variable.synonyms:

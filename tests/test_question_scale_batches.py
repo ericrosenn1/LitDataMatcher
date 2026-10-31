@@ -154,3 +154,51 @@ def test_dependency_change_blocks_resume(tmp_path, runner, monkeypatch):
     monkeypatch.setattr(runner, "file_identity", changed)
     with pytest.raises(ValueError, match="fingerprint mismatch"):
         runner.run_batches(input_manifest, output, resume=True)
+
+
+def test_native_continuation_reuses_all_prior_payloads_above_ten_batches(
+    tmp_path, runner, monkeypatch
+):
+    source_manifest = manifest(tmp_path, runner, batches=11)
+    prior = tmp_path / "prior"
+    prior_summary = runner.run_batches(source_manifest, prior)
+    original_state = (prior / ".workflow/state.json").read_bytes()
+    prepared = tmp_path / "prepared"
+    prepared.mkdir()
+    entries, identifiers, _, proof = runner.import_prior_batches(prior, prepared)
+    continued_manifest = prepared / "INPUT_MANIFEST.json"
+    runner.atomic_json(
+        continued_manifest,
+        {
+            "documents": 22,
+            "batches": entries,
+            "prior_run_proof": proof,
+            "sampling_scope": "Synthetic test only",
+        },
+    )
+
+    def forbidden(_):
+        raise AssertionError("Native completed batches must not be recomputed")
+
+    monkeypatch.setattr(runner, "compute", forbidden)
+    result = runner.run_batches(continued_manifest, tmp_path / "continued")
+    assert len(identifiers) == result["documents"] == 22
+    assert result["prior_completed_batches_reused"] == 11
+    assert result["new_extraction_batches_total"] == 0
+    assert result["new_extraction_seconds_total"] == 0
+    assert result["retained_questions"] == prior_summary["retained_questions"]
+    assert (prior / ".workflow/state.json").read_bytes() == original_state
+    stage = runner.read(prior / ".workflow/state.json")["stages"]["extract-01"]
+    path = prior / ".workflow" / stage["file"]
+    path.write_text(path.read_text() + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="native checkpoint changed"):
+        runner.run_batches(continued_manifest, tmp_path / "corrupt-import")
+
+
+def test_coverage_question_count_must_match_retained_payload(tmp_path, runner):
+    source_manifest = manifest(tmp_path, runner, batches=1)
+    docs = runner.rows(runner.read(source_manifest)["batches"][0]["input"]["path"])
+    result = runner.compute(docs)["result"]
+    result["coverage"]["retained_questions"] += 1
+    with pytest.raises(ValueError, match="Retained-question count differs"):
+        runner.validate_result(docs, result)

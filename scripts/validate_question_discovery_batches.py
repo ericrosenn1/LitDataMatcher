@@ -178,6 +178,205 @@ def prepare(database, seed, output, count=10000):
     return manifest
 
 
+def import_prior_batches(prior_run, output):
+    """Read and verify a completed native run without modifying its artifacts."""
+    state = read(prior_run / ".workflow/state.json")
+    manifest = read(prior_run / "INPUT_MANIFEST.json")
+    if state["status"] != "COMPLETE" or state["completed"]["result"] != read(
+        prior_run / "SUMMARY.json"
+    ):
+        raise ValueError("Prior native run is not complete or its summary changed")
+    for item in state["completed"]["outputs"]:
+        if checksum(prior_run / item["file"]) != item["sha256"]:
+            raise ValueError("Prior completed output changed")
+    if state["inputs"]["implementation"] != implementation():
+        raise ValueError("Prior scientific implementation differs")
+    package = Path(sys.modules[discover_questions.__module__].__file__).parent
+    changed = [
+        Path(item["path"]).name
+        for item in state["inputs"]["dependencies"]
+        if checksum(package / Path(item["path"]).name) != item["sha256"]
+    ]
+    # These execution/application modules do not participate in rules extraction.
+    if set(changed) - {
+        "controller.py",
+        "platform_server.py",
+        "platform_workflow.py",
+        "recovery_contract.py",
+    }:
+        raise ValueError("Prior extraction dependency changed")
+    proof_path = output / "PRIOR_RUN_PROOF.json"
+    atomic_json(
+        proof_path,
+        {
+            "state": state,
+            "state_file": file_identity(prior_run / ".workflow/state.json"),
+            "prior_manifest": manifest,
+            "changed_execution_files": changed,
+            "scope": "Historical native checkpoint imports; current literal fidelity and lifecycle checks are repeated, extraction is not.",
+        },
+    )
+    batches, seen = [], set()
+    cutoff = 2**63 - 1
+    for batch in manifest["batches"]:
+        if file_identity(batch["input"]["path"]) != batch["input"]:
+            raise ValueError("Prior input changed")
+        docs = rows(batch["input"]["path"])
+        if (
+            len(docs) != batch["documents"]
+            or len({d["document_id"] for d in docs}) != len(docs)
+            or any(d["document_id"] in seen for d in docs)
+        ):
+            raise ValueError("Prior input accounting differs")
+        if batch.get("selection_protocol") and (
+            batch["selection_protocol"]["topic_regex"] != TOPIC
+            or batch["selection_protocol"]["excluded_wording_regex"] != EXCLUDED
+        ):
+            raise ValueError("Prior cohort sampling filters differ")
+        stage = state["stages"][f"extract-{batch['batch']:02d}"]
+        payload_path = prior_run / ".workflow" / stage["file"]
+        if checksum(payload_path) != stage["sha256"] or stage["parents"] != {
+            "inputs": state["stages"]["inputs"]["sha256"]
+        }:
+            raise ValueError("Prior checkpoint receipt differs")
+        validate_result(docs, read(payload_path)["result"])
+        target = output / f"batch-{batch['batch']:02d}.jsonl"
+        shutil.copyfile(batch["input"]["path"], target)
+        batches.append(
+            {
+                **batch,
+                "input": file_identity(target),
+                "prior_checkpoint": file_identity(payload_path),
+                "prior_run_proof": file_identity(proof_path),
+            }
+        )
+        seen.update(d["document_id"] for d in docs)
+        cutoff = min(cutoff, *(int(d["pmid"]) for d in docs))
+    if len(seen) != manifest["documents"]:
+        raise ValueError("Prior aggregate input accounting differs")
+    return batches, seen, cutoff, file_identity(proof_path)
+
+
+def prepare_continuation(database, prior_run, output, count=100000, max_seconds=300):
+    """Extend frozen native checkpoints using bounded ID and source snapshots."""
+    from litdatamatcher.literature_index import LiteratureIndex
+
+    if count % 1000 or not 1000 <= count <= 100000 or not 1 <= max_seconds <= 600:
+        raise ValueError("Continuation requires 1000..100000 records and 1..600 seconds")
+    started = time.perf_counter()
+    deadline = started + max_seconds
+    output.mkdir(parents=True, exist_ok=False)
+    batches, seen, cutoff, proof = import_prior_batches(prior_run, output)
+    if count <= len(seen) or any(batch["documents"] != 1000 for batch in batches):
+        raise ValueError("Continuation must add records beyond full prior 1000-record batches")
+    candidate_limit = min(150000, (count - len(seen)) * 2)
+    with LiteratureIndex(database, read_only=True) as index:
+        index.conn.set_progress_handler(lambda: int(time.perf_counter() >= deadline), 10000)
+        index.conn.execute("BEGIN")
+        candidate_snapshot = index.snapshot_identity()
+        candidates = [row[0] for row in index.conn.execute(SQL, (QUERY, cutoff, candidate_limit))]
+    candidates_path = output / "CANDIDATE_IDS.json"
+    atomic_json(
+        candidates_path,
+        {
+            "identifiers": candidates,
+            "snapshot": candidate_snapshot,
+            "sql": SQL,
+            "parameters": [QUERY, cutoff, candidate_limit],
+        },
+    )
+    cursor = 0
+    for number in range(len(batches) + 1, count // 1000 + 1):
+        if time.perf_counter() >= deadline:
+            raise TimeoutError("Preparation budget expired; completed input files retained")
+        selected, rejected = [], []
+        start = time.perf_counter()
+        cursor_start = cursor
+        with LiteratureIndex(database, read_only=True) as index:
+            index.conn.set_progress_handler(lambda: int(time.perf_counter() >= deadline), 10000)
+            index.conn.execute("BEGIN")
+            snapshot = index.snapshot_identity()
+            while len(selected) < 1000 and cursor < len(candidates):
+                identifier = candidates[cursor]
+                cursor += 1
+                doc = index.get(identifier)
+                text = (doc.get("title", "") + "\n" + (doc.get("abstract") or "")) if doc else ""
+                reason = (
+                    "no_current_nonempty_abstract"
+                    if not doc or not (doc.get("abstract") or "").strip()
+                    else "outside_explicit_topic"
+                    if not re.search(TOPIC, text, re.I)
+                    else "excluded_pathogen_wording"
+                    if re.search(EXCLUDED, text, re.I)
+                    else None
+                )
+                if reason:
+                    rejected.append({"pmid": identifier, "reason": reason})
+                else:
+                    if doc["document_id"] in seen or doc["text"] != doc["abstract"]:
+                        raise ValueError("Repeated ID or changed native abstract view")
+                    seen.add(doc["document_id"])
+                    selected.append(doc)
+        if len(selected) != 1000:
+            raise ValueError("Bounded candidate list exhausted before requested continuation")
+        path = output / f"batch-{number:02d}.jsonl"
+        path.write_text(
+            "".join(json.dumps(doc, ensure_ascii=False) + "\n" for doc in selected),
+            encoding="utf-8",
+        )
+        batches.append(
+            {
+                "batch": number,
+                "input": file_identity(path),
+                "documents": 1000,
+                "snapshot": snapshot,
+                "selection_protocol": {
+                    "candidate_ids": file_identity(candidates_path),
+                    "candidate_slice": [cursor_start, cursor],
+                    "candidate_identity_snapshot": candidate_snapshot,
+                    "topic_regex": TOPIC,
+                    "excluded_wording_regex": EXCLUDED,
+                    "considered": cursor - cursor_start,
+                    "rejections": rejected,
+                    "selection_seconds": time.perf_counter() - start,
+                },
+            }
+        )
+        atomic_json(
+            output / "PREPARATION_PROGRESS.json",
+            {
+                "completed_batches": number,
+                "documents": len(seen),
+                "candidate_cursor": cursor,
+                "elapsed_seconds": time.perf_counter() - started,
+            },
+        )
+        print(
+            json.dumps(
+                {
+                    "prepared_batch": number,
+                    "documents": len(selected),
+                    "snapshot_shards": snapshot["applied_shards"],
+                }
+            ),
+            flush=True,
+        )
+    manifest = {
+        "schema_version": "question-scale-batches-1.0",
+        "created_utc": now(),
+        "documents": count,
+        "batch_size": 1000,
+        "batches": batches,
+        "prior_run_proof": proof,
+        "candidate_ids": file_identity(candidates_path),
+        "preparation_seconds": time.perf_counter() - started,
+        "sampling_scope": "All previously completed inputs/results retained. Additional nonempty breast-oncology abstracts follow descending numeric PMID below the prior cohort cutoff. Candidate IDs are frozen from one committed partial snapshot; source views have per-batch committed snapshots. This mixed cohort is not representative or one corpus snapshot.",
+        "models_used": False,
+    }
+    atomic_json(output / "INPUT_MANIFEST.json", manifest)
+    return manifest
+
+
 def validate_result(documents, result):
     by_id = {row["document_id"]: row for row in documents}
     if len(by_id) != len(documents) or len(result["document_statuses"]) != len(documents):
@@ -220,6 +419,8 @@ def validate_result(documents, result):
         raise ValueError("Failures, truncation or unsupported novelty in scale output")
     if coverage["processed_documents"] != statuses["EMPTY"] + statuses["SUCCESS"]:
         raise ValueError("Processed-text accounting mismatch")
+    if coverage["retained_questions"] != len(result["questions"]):
+        raise ValueError("Retained-question count differs from literal records")
     for status in result["document_statuses"]:
         expected_exclusion = _source_lifecycle(by_id[status["document_id"]])["excluded"]
         if expected_exclusion != (status["status"] == "EXCLUDED_SOURCE_LIFECYCLE"):
@@ -280,8 +481,8 @@ def run_batches(manifest_path, output, *, resume=False, stop_after=None):
     identities = [file_identity(batch["input"]["path"]) for batch in inputs]
     if identities != [batch["input"] for batch in inputs]:
         raise ValueError("Frozen input changed; resume is not allowed")
-    if not 1 <= len(inputs) <= 10 or sum(batch["documents"] for batch in inputs) > 10000:
-        raise ValueError("At most ten batches and 10000 inputs are allowed")
+    if not 1 <= len(inputs) <= 100 or sum(batch["documents"] for batch in inputs) > 100000:
+        raise ValueError("At most one hundred batches and 100000 inputs are allowed")
     if (
         any(
             type(batch["documents"]) is not int or not 1 <= batch["documents"] <= 1000
@@ -328,7 +529,21 @@ def run_batches(manifest_path, output, *, resume=False, stop_after=None):
             if value is not None:
                 reused.append(number)
             else:
-                if batch.get("seed_result"):
+                if batch.get("prior_checkpoint"):
+                    for key in ("prior_checkpoint", "prior_run_proof"):
+                        if file_identity(batch[key]["path"]) != batch[key]:
+                            raise ValueError("Previously validated native checkpoint changed")
+                    prior = read(batch["prior_checkpoint"]["path"])
+                    value = {
+                        **prior,
+                        "origin": "PRIOR_VALIDATED_RUN_REUSED",
+                        "prior_origin": prior["origin"],
+                        "prior_checkpoint": batch["prior_checkpoint"],
+                        "prior_run_proof": batch["prior_run_proof"],
+                        "validation": validate_result(documents, prior["result"]),
+                    }
+                    imported.append(number)
+                elif batch.get("seed_result"):
                     for key in ("seed_result", "seed_receipt"):
                         if file_identity(batch[key]["path"]) != batch[key]:
                             raise ValueError("Previously validated seed changed")
@@ -437,7 +652,7 @@ def run_batches(manifest_path, output, *, resume=False, stop_after=None):
         atomic_json(
             output / "task_state.json",
             {
-                "task_name": "bounded_10000_abstract_checkpoint_scale",
+                "task_name": f"bounded_{manifest['documents']}_abstract_checkpoint_scale",
                 "task_status": "PASS_WITH_LIMITATIONS",
                 "inputs": [str(manifest_path)],
                 "outputs": ["SUMMARY.json", "RESUME_VALIDATION.json", ".workflow"],
@@ -496,6 +711,9 @@ def package(output):
     members["validate_question_discovery_batches.py"] = Path(__file__).resolve()
     for batch in manifest["batches"]:
         members[f"inputs/batch-{batch['batch']:02d}.jsonl"] = Path(batch["input"]["path"])
+    for name in ("prior_run_proof", "candidate_ids"):
+        if manifest.get(name):
+            members["inputs/" + Path(manifest[name]["path"]).name] = Path(manifest[name]["path"])
     text = "relative_path\tfile_size_bytes\tsha256\n"
     for name, path in sorted(members.items()):
         text += f"{name}\t{path.stat().st_size}\t{checksum(path)}\n"
@@ -521,7 +739,10 @@ def main():
     subcommands = parser.add_subparsers(dest="command", required=True)
     prepare_parser = subcommands.add_parser("prepare")
     prepare_parser.add_argument("--database", type=Path, required=True)
-    prepare_parser.add_argument("--seed", type=Path, required=True)
+    prior = prepare_parser.add_mutually_exclusive_group(required=True)
+    prior.add_argument("--seed", type=Path)
+    prior.add_argument("--prior-run", type=Path)
+    prepare_parser.add_argument("--max-seconds", type=int, default=300)
     prepare_parser.add_argument("--output", type=Path, required=True)
     prepare_parser.add_argument("--count", type=int, default=10000)
     run_parser = subcommands.add_parser("run")
@@ -531,7 +752,13 @@ def main():
     run_parser.add_argument("--stop-after", type=int)
     args = parser.parse_args()
     if args.command == "prepare":
-        result = prepare(args.database, args.seed, args.output, args.count)
+        result = (
+            prepare_continuation(
+                args.database, args.prior_run, args.output, args.count, args.max_seconds
+            )
+            if args.prior_run
+            else prepare(args.database, args.seed, args.output, args.count)
+        )
         print(
             json.dumps(
                 {

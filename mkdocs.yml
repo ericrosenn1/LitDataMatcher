@@ -10,8 +10,10 @@ theme:
 nav:
   - Home: index.md
   - Research workflow: research_workflow.md
+  - Model and evaluation card: model_card.md
   - Configurable source discovery: campaign_20261031/discovery.md
   - Local structured inference: campaign_20261031/model_source_schema.md
+  - Batch analysis: campaign_20261031/native_batch.md
   - Retrieval protocol: campaign_20261031/retrieval_protocol.md
   - Model training: campaign_20261031/retriever_training.md
   - Source-backed cases: campaign_20261031/research_cases.md

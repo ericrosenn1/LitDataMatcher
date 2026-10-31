@@ -2,7 +2,7 @@
   "schema_version": "research-engine-campaign-1.0",
   "campaign": "biomedical-research-engine-20261031",
   "status": "IN_PROGRESS",
-  "phase": "EXPANDED_RETRIEVAL_AND_SHARED_MODEL_WORKFLOW",
+  "phase": "FROZEN_REAL_DATA_EXECUTION_AND_INDEPENDENT_VALIDATION",
   "started_utc": "2026-10-31T11:48:16Z",
   "soft_target_hours": 24,
   "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
@@ -42,7 +42,7 @@
     "Controller can mark malformed JSONL successful; nonfinite JSON values are accepted",
     "Durable analysis checkpoints and bounded retry orchestration need completion"
   ],
-  "next_action": "Qualify source-constrained fresh inference; run frozen 30-case pack; compare retrieval in expanded candidate pool; integrate independent review and clean-install validation.",
+  "next_action": "Finish GPU scale evaluation, run source-backed case batch and replay, audit evidence, then integrate namespace fix and final release validation.",
   "integration_commits": {
     "sources": "30cfb84",
     "model_guard": "ecda49d",
@@ -61,23 +61,19 @@
     "scope": "annual baseline; official test and project evaluation_candidate excluded"
   },
   "native_model_qualification": {
-    "profile": "unconstrained v2.4",
-    "status": "FAIL_NO_ACCEPTED_RECORDS",
-    "elapsed_seconds": 167.6658445,
-    "interpretation": "Guard correctly rejected unsupported model output; constrained-decoding candidate planned",
-    "source_schema_attempt_1": {
-      "status": "FAIL",
-      "reason": "Pinned LMFE permits first item despite maxItems=0; independent validator rejected invented future question",
-      "receipt": "source-schema-positive-1/QUALIFICATION.json",
-      "repair": "Strict grammar intersection under test; no validator weakening"
-    }
+    "selected": "Qwen2.5-7B-Instruct",
+    "profile": "source_schema384 / grammar1.1",
+    "positive_documents_passed": 2,
+    "fresh_offline_and_cache_replay": "PASS",
+    "smaller_candidate": "1.5B fails positive document2 with zero accepted records",
+    "scope": "Previously seen development smoke inputs, no expert accuracy claim",
+    "receipt": "model-selection-v1/SELECTION.json"
   },
   "active_work": [
-    "Full PubMed revision/deletion ledger, 2 processes, additive outputs",
-    "Source-constrained local extraction candidate",
-    "Shared-model serial batch workflow with durable resume",
-    "Larger frozen-query candidate pool",
-    "Six-topic live biomedical discovery and replay"
+    "Full1621-shard revision/deletion ledger with original source hash preserved",
+    "Frozen50k/100k source-link retrieval evaluation, full and abstract-only views",
+    "30-case native batch pending GPU availability",
+    "Independent package and output-audit validation"
   ],
   "integration_round_1": {
     "status": "PASS",
@@ -150,5 +146,27 @@
     "existing_package_lint_findings": 134,
     "existing_total_lint_findings": 352,
     "next_action": "Apply reviewed formatting after active model/corpus source fingerprints freeze; no scientific changes"
-  }
+  },
+  "pull_request": "https://github.com/ericrosenn1/LitDataMatcher/pull/9",
+  "style_validation": {
+    "tests": 970,
+    "failures": 0,
+    "skips": 0,
+    "maintained_python_lint": "PASS",
+    "format_ast_identity_files": 206,
+    "receipt": "style/task_state.json"
+  },
+  "integration_round_2": {
+    "status": "ONE_WINDOWS_PATH_FAILURE_UNDER_REPAIR",
+    "tests": 1000,
+    "failures": 1,
+    "receipt": "local/campaign_20261031/integration-round-2.xml",
+    "cause": "Windows Path.resolve may return equivalent extended DOS prefix; isolated fix tested, deferred until fingerprinted jobs finish"
+  },
+  "pending_repairs": [
+    "Integrate proven Windows namespace containment fix after active fingerprinted jobs finish"
+  ],
+  "external_prerequisites": [
+    "GitHub dependency graph is disabled; existing dependency-review action retained"
+  ]
 }

@@ -81,6 +81,17 @@ See the [local model guide](docs/campaign_20261031/model_source_schema.md) for
 structured decoding and offline qualification, and the
 [research workflow](docs/research_workflow.md) for output contracts.
 
+For many papers, the [batch command](docs/campaign_20261031/native_batch.md)
+reuses one model session while keeping separate case journals and outputs:
+
+```bash
+litdatamatcher-v2 batch --root runs/biomedical --inputs cases.jsonl --out runs/batch-01 --model /path/to/extractor --embeddings /path/to/encoder --device cuda --decoding-mode source_schema --max-new-tokens 384 --runtime-qualification /path/to/qualification.json
+```
+
+Each case supplies a source document and optional explicit question. The
+[model card](docs/model_card.md) describes training data, selection rules,
+qualified configurations, and limits on interpretation.
+
 ## Measured development evidence
 
 The first frozen experiment uses **1,333 training queries, 175 development

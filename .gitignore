@@ -10,6 +10,7 @@ dist/
 build/
 out_lit/
 run/
+runs/
 local/
 outputs/
 artifacts/
@@ -27,6 +28,7 @@ rejected_sentences.txt
 data/legacy_training/*.csv
 data/legacy_fixtures/papers/*.pdf
 *.safetensors
+*.pt
 *.gguf
 *.bin
 .coverage

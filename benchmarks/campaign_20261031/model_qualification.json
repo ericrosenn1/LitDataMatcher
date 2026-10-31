@@ -1,0 +1,58 @@
+{
+  "schema_version": "extraction-development-selection-v1",
+  "status": "QUALIFIED_DEVELOPMENT_SMOKE",
+  "selected": "Qwen2.5-7B-Instruct",
+  "rule": "Both pre-existing positive smoke documents must pass fresh offline inference and verified replay with at least one accepted claim each.",
+  "trials": [
+    {
+      "model_size": "7b",
+      "development_document": 1,
+      "status": "PASS",
+      "accepted_claims": 1,
+      "accepted_questions": 0,
+      "inference_seconds": 39.968050300027244,
+      "cache_replay_origin": "cache_replay",
+      "failure": null,
+      "receipt_sha256": "1b24a4c6efedd1aaa5487e0056dffb532ccbbba5f6dd326d374e24e426d37c86"
+    },
+    {
+      "model_size": "7b",
+      "development_document": 2,
+      "status": "PASS",
+      "accepted_claims": 1,
+      "accepted_questions": 1,
+      "inference_seconds": 35.46535800001584,
+      "cache_replay_origin": "cache_replay",
+      "failure": null,
+      "receipt_sha256": "06e0a75dec37abc9ea876348fb1f77b7517fedecffa32815601cc75c1dff8c3d"
+    },
+    {
+      "model_size": "1_5b",
+      "development_document": 1,
+      "status": "PASS",
+      "accepted_claims": 1,
+      "accepted_questions": 0,
+      "inference_seconds": 31.417124899919145,
+      "cache_replay_origin": "cache_replay",
+      "failure": null,
+      "receipt_sha256": "234efd0218f048d44714e127ced34ca87753eac088882a08e57748d42d239e03"
+    },
+    {
+      "model_size": "1_5b",
+      "development_document": 2,
+      "status": "FAIL",
+      "accepted_claims": 0,
+      "accepted_questions": 0,
+      "inference_seconds": 41.410863299970515,
+      "cache_replay_origin": "cache_replay",
+      "failure": {
+        "stage": "cached_replay",
+        "error_type": "RuntimeError",
+        "message": "Fresh inference produced no accepted scientific records"
+      },
+      "receipt_sha256": "1ce9f24c6781ce6cff0e953fcdacb122554b030529637649c2eb565e8beeb9a5"
+    }
+  ],
+  "interpretation": "Runtime/source-guard qualification on development inputs, not expert scientific validation or general extraction accuracy.",
+  "smaller_model_decision": "Not recommended: one positive-source document produced no accepted scientific record. No relaxed verifier or prompt tuning on frozen30cases."
+}

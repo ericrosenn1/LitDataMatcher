@@ -12,6 +12,7 @@ FORBIDDEN_COMPONENTS = {".git", ".github", "data", "models", "test_one_paper", "
 REQUIRED_WHEEL_SUFFIXES = {
     "litdatamatcher/__init__.py",
     "litdatamatcher/cli.py",
+    "litdatamatcher/protocols/retrieval-training-v1.md",
     ".dist-info/METADATA",
     ".dist-info/WHEEL",
 }

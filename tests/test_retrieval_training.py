@@ -2,6 +2,7 @@
 
 import json
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
@@ -12,8 +13,44 @@ from litdatamatcher.retrieval_training import (
     file_sha,
     promotion_decision,
     run_training,
+    training_fingerprint,
     validate_benchmark,
 )
+
+
+def test_training_protocol_is_packaged_and_matches_source_when_available():
+    import litdatamatcher.retrieval_training as trainer
+
+    protocol = Path(trainer.__file__).with_name("protocols") / "retrieval-training-v1.md"
+    value = training_fingerprint({"manifest_sha256": "fixture"}, {}, FIXED_CONFIG, "cpu")
+    assert value["protocol_sha256"] == file_sha(protocol)
+    assert len(value["protocol_sha256"]) == 64
+    source = Path(trainer.__file__).parents[1] / "docs/campaign_20261031/retrieval_protocol.md"
+    if source.exists():
+        assert protocol.read_bytes() == source.read_bytes()
+
+
+def test_training_protocol_missing_fails_and_content_drift_changes_identity(tmp_path, monkeypatch):
+    import litdatamatcher.retrieval_training as trainer
+
+    for name in (
+        "retrieval_training.py",
+        "retrieval.py",
+        "retrieval_evaluation.py",
+        "semantic_runtime.py",
+        "strict_artifacts.py",
+    ):
+        (tmp_path / name).write_text("# synthetic module for fingerprint test\n", encoding="utf-8")
+    monkeypatch.setattr(trainer, "__file__", str(tmp_path / "retrieval_training.py"))
+    with pytest.raises(FileNotFoundError, match="Required packaged"):
+        training_fingerprint({"manifest_sha256": "fixture"}, {}, FIXED_CONFIG, "cpu")
+    protocol = tmp_path / "protocols/retrieval-training-v1.md"
+    protocol.parent.mkdir()
+    protocol.write_text("Synthetic protocol version 1.\n", encoding="utf-8")
+    first = training_fingerprint({"manifest_sha256": "fixture"}, {}, FIXED_CONFIG, "cpu")
+    protocol.write_text("Synthetic protocol version 2.\n", encoding="utf-8")
+    second = training_fingerprint({"manifest_sha256": "fixture"}, {}, FIXED_CONFIG, "cpu")
+    assert first["protocol_sha256"] != second["protocol_sha256"]
 
 
 def fixture_benchmark(root, train_count=16, development_count=4):

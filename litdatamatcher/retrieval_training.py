@@ -200,7 +200,11 @@ def training_fingerprint(benchmark, parent_manifest, config, device):
             versions[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
             versions[name] = None
-    protocol = Path(__file__).parents[1] / "docs/campaign_20261031/retrieval_protocol.md"
+    protocol = Path(__file__).with_name("protocols") / "retrieval-training-v1.md"
+    if not protocol.is_file():
+        raise FileNotFoundError(
+            f"Required packaged retrieval-training protocol missing: {protocol}"
+        )
     return {
         "benchmark_manifest_sha256": benchmark["manifest_sha256"],
         "parent_model": parent_manifest,
@@ -208,7 +212,7 @@ def training_fingerprint(benchmark, parent_manifest, config, device):
         "device": device,
         "runtime_versions": versions,
         "precision": "float32",
-        "protocol_sha256": file_sha(protocol) if protocol.exists() else None,
+        "protocol_sha256": file_sha(protocol),
         "implementation": {path.name: file_sha(path) for path in implementations},
     }
 

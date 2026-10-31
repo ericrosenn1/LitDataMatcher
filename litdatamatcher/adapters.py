@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Protocol
 from urllib.parse import parse_qs, urlsplit
 
+from .biostudies_adapter import ArrayExpressDatasetAdapter, BioStudiesDatasetAdapter
 from .datasets import classify_dataset_record
 from .http_cache import CachedHttpClient
 from .literature_integrity import consolidate_literature_rows
@@ -1391,6 +1392,8 @@ class DataCiteDatasetAdapter:
 
 
 DATASET_ADAPTERS = {
+    "arrayexpress": ArrayExpressDatasetAdapter,
+    "biostudies": BioStudiesDatasetAdapter,
     "clinicaltrials": ClinicalTrialsDatasetAdapter,
     "ena": ENASRADatasetAdapter,
     "geo": GEODatasetAdapter,

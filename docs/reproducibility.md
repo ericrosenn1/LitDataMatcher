@@ -80,8 +80,9 @@ python scripts/v2/runtime_qualify.py --model-dir MODEL_DIR --embedding-dir ENCOD
 Under the [extraction protocol](campaign_20261031/extraction_protocol.md), both
 positive documents must pass fresh inference and verified cache replay with at
 least one accepted claim each. The current 7B source-literal profile passed those
-two development checks; its 30-case follow-up is in progress. This is runtime
-qualification, not general scientific accuracy. Retained baseline and failed
+two development checks and completed the 30-case follow-up with no retryable
+technical failures. This is runtime qualification, not general scientific
+accuracy. Retained baseline and failed
 source-index results remain in the [extraction evidence](campaign_20261031/extraction_results.md).
 
 Use the identical backend settings and an explicit matching receipt for a batch:

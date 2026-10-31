@@ -72,6 +72,10 @@ and all-MiniLM-L6-v2. Model weights are not bundled in Git.
 Qualify the chosen runtime on a known positive development document. The JSON
 input supplies `document_id`, `title`, and `text`; this is an execution and
 source-checking smoke test, not a scientific accuracy benchmark.
+The campaign's selection rule requires two positive development documents:
+repeat qualification with the second document and a separate output directory,
+and proceed only when both pass. The example analysis references the first
+receipt for the same qualified backend.
 
 ```bash
 python scripts/v2/runtime_qualify.py --model-dir /path/to/extractor --embedding-dir /path/to/encoder --document /path/to/positive-source.json --output runs/qualification/QUALIFICATION.json --device cuda --decoding-mode source_literal --max-new-tokens 384 --require-claims
@@ -186,7 +190,8 @@ The Python engine, CLI, and research artifacts are the primary application.
 | `archive/`, `workflows/legacy_streaming/` | Preserved historical implementations |
 
 Large corpora, environments, model weights, and transient outputs stay outside
-Git. Run `python -m pytest` and `python -m build` to test and package the project.
+Git. Run `python -m pytest` to test the project. Install the build frontend with
+`python -m pip install build`, then run `python -m build` to create the package.
 CI separately checks core contracts, local-model contracts, package installation,
 documentation, and the web workspace.
 

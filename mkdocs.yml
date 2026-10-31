@@ -42,6 +42,7 @@ nav:
       - Scientific limitations: limitations.md
       - Reproducibility: reproducibility.md
       - Citation: citation.md
+      - Upstream references: campaign_20261031/references.md
   - Development:
       - Current status: development_status.md
       - Release infrastructure: RELEASE_INFRASTRUCTURE_CHECKLIST.md

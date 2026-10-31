@@ -45,8 +45,8 @@ separately in the [model card](../model_card.md). Links checked 31 October 2026.
   provide the constrained-decoding library used by the optional profiles.
   Format constraints remain separate from LitDataMatcher's source-validation guard.
 
-LitDataMatcher's own software is covered by the [MIT license](../../LICENSE).
+LitDataMatcher's own software is covered by the [MIT license](https://github.com/ericrosenn1/LitDataMatcher/blob/59a18634e51184a655aca7e18c512cf56cab64ec/LICENSE).
 That license does not relicense upstream model weights, datasets, or source
 papers. Consult the linked model cards, repositories, and NCBI terms for their
 respective conditions; metadata availability does not establish unrestricted
-reuse of source text. Cite this project separately using [CITATION.cff](../../CITATION.cff).
+reuse of source text. Cite this project separately using [CITATION.cff](https://github.com/ericrosenn1/LitDataMatcher/blob/59a18634e51184a655aca7e18c512cf56cab64ec/CITATION.cff).

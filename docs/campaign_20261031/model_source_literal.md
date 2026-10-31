@@ -1,7 +1,7 @@
-# Experimental source-literal decoding
+# Source-literal decoding
 
 `RuntimeConfig(decoding_mode="source_literal")` is an opt-in transport profile.
-The native `analyze`, `analyze-batch`, and `scripts/v2/runtime_qualify.py` commands
+The native `analyze`, `batch`, and `scripts/v2/runtime_qualify.py` commands
 accept `--decoding-mode source_literal`; `--max-new-tokens 384` is an explicit
 qualification setting, not a changed default. The optional dependency remains
 `lm-format-enforcer==0.11.3`. No model files are downloaded by this profile.
@@ -34,10 +34,12 @@ Duplicate JSON keys are rejected. Source schema, implementation, library and
 configuration hashes distinguish this profile from both earlier modes.
 
 The existing `source_schema`, `source_index`, and unconstrained modes remain
-available. The two failed/partial research profiles and their receipts remain
-historical evidence. This profile is **experimental and unpromoted** until fresh
-qualification succeeds; transport correctness does not establish better
-scientific extraction or solve the baseline's source-guard abstentions.
+available. Earlier failed and partial runs remain historical evidence. The
+7B literal configuration passed both positive development documents and the
+30-case run completed with no retryable technical failures. It is the current
+development-qualified transport; this does not establish scientific accuracy
+or eliminate source-guard abstentions. See the
+[measured outcomes and limits](extraction_results.md).
 
 ## Bounded evidence
 
@@ -59,11 +61,11 @@ Evidence directory:
   inference speed, throughput, or scientific-quality measurements. Early
   failures in the old profile are shorter and are not fair latency comparisons.
 
-`model_source_literal_probe.py --tokenizer <local-model-directory> --output
+`python scripts/campaign_20261031/model_source_literal_probe.py --tokenizer <local-model-directory> --output
 <new-receipt.json>` reproduces the synthetic tokenizer experiment without model
 weights. Small fixtures and 128 choices do not establish production peak memory
-or latency; union traversal and generic-string filtering remain bounded but
-should be measured on real qualification documents by the coordinating lead.
+or general latency guarantees. The extraction evidence report separately records
+real-model measurements.
 
 No biological prompt tuning or 30-case data was used to build this grammar.
 The previously inspected 30-case pack is development/regression evidence after

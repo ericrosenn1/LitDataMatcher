@@ -1,5 +1,8 @@
 # Model and evaluation card
 
+Upstream model, dataset, and software attribution is collected in the
+[primary references](campaign_20261031/references.md).
+
 LitDataMatcher supports research triage: source statements, typed questions,
 and candidate datasets for inspection. Its outputs do not establish scientific
 truth, causal identification, clinical utility, or access to participant data.
@@ -9,13 +12,13 @@ truth, causal identification, clinical utility, or access to participant data.
 | Component | Model or method | Role |
 | --- | --- | --- |
 | Local extraction | Qwen2.5-7B-Instruct, revision `a09a35458c702b33eeacc393d103063234e8bc28` | Source-bound claims and explicit future-work statements |
-| Smaller candidate | Qwen2.5-1.5B-Instruct, revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306` | Not recommended after a failed positive smoke case |
+| Smaller candidate | Qwen2.5-1.5B-Instruct, revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306` | Not recommended after failing both literal-profile positive smoke cases |
 | Pretrained encoder | all-MiniLM-L6-v2, revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41` | Candidate retrieval |
 | Experimental encoder | Two-epoch adaptation of pinned MiniLM | Original-paper link recovery, evaluated separately |
 | Lexical comparator | BM25, `k1=1.2`, `b=0.75` | Simple retrieval baseline |
 | Fusion | Reciprocal rank fusion, constant 60 | Combined lexical/semantic retrieval |
 
-The language models are not trained by this project. Manifests retain revision,
+The Qwen extractors are not trained by this project. Manifests retain revision,
 tokenizer, file hashes, and upstream license information. Runtime inference
 does not download weights or execute remote model code.
 The [model-file contract](campaign_20261031/model_asset_integrity.md) covers the
@@ -54,7 +57,8 @@ conditions. Complete results are recorded in
 `benchmarks/campaign_20261031/retrieval_scale.json`.
 
 Extraction qualification uses previously seen development documents. The
-smaller model failed one positive smoke case. Qualification requires fresh
+smaller model failed both literal-profile positive smoke cases and was not
+advanced to the 30-case comparison. Qualification requires fresh
 inference, source validation, and verified offline replay; it is not an
 expert-labelled accuracy estimate. See the
 [extraction protocol](campaign_20261031/extraction_protocol.md).

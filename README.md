@@ -7,7 +7,7 @@ requirements, source-linked evidence, and ranked dataset candidates. Unknowns,
 failed retrievals, conflicting evidence, and underdetermined questions remain
 visible throughout the workflow.
 
-[Research workflow](docs/research_workflow.md) · [Methods](docs/campaign_20261031/retrieval_protocol.md) · [Recovery](docs/campaign_20261031/workflow_recovery.md) · [Scientific limits](docs/limitations.md) · [MIT license](LICENSE)
+[Research workflow](docs/research_workflow.md) Â· [Methods](docs/campaign_20261031/retrieval_protocol.md) Â· [Recovery](docs/campaign_20261031/workflow_recovery.md) Â· [Scientific limits](docs/limitations.md) Â· [MIT license](LICENSE)
 
 ## Research capabilities
 
@@ -124,15 +124,15 @@ The larger pools add qualified annual-baseline distractors without retraining.
 ![Audited large-pool retrieval results](docs/assets/retrieval-scale.svg)
 
 Fine-tuning improves its pretrained parent by **0.0528 MRR** with title and
-abstract (paired query-bootstrap 95% interval: 0.0217–0.0841), and by **0.0423**
-with abstracts alone (0.0077–0.0780). **BM25 leads every measured condition.**
+abstract (paired query-bootstrap 95% interval: 0.0217â€“0.0841), and by **0.0423**
+with abstracts alone (0.0077â€“0.0780). **BM25 leads every measured condition.**
 The aggregate gain is source-dependent: PubMedQA performance decreases in both
 abstract-only pools. Many original queries echo source titles, so these results
 measure known source-link recovery, not general question answering or dataset
 suitability.
 
-Verified warm loading of 100,000-document vectors took **1.29–1.43 seconds** in
-the recorded local runs, versus **101–111 seconds** for fresh encoding. Model
+Verified warm loading of 100,000-document vectors took **1.29â€“1.43 seconds** in
+the recorded local runs, versus **101â€“111 seconds** for fresh encoding. Model
 initialization is recorded separately. These are hardware-dependent cache
 measurements, not a claim that fresh model inference runs at cache speed.
 
@@ -160,10 +160,16 @@ All 30 literal-run cases passed the artifact and source-span audit and were
 reused unchanged on resume. These are software and source-fidelity results;
 accepted counts are not scientific accuracy, and all 140 dataset candidates
 still required inspection.
+The independently audited [revision ledger](docs/campaign_20261031/pubmed_revision_ledger.md)
+covers **1,621 PubMed shards**, preserving **45,477,637 citation upsert events**
+and **11,293 deletion events**. It records historical revisions without claiming
+a materialized current view. The final integrated suite passed **1,317 tests**
+with two platform-specific skips.
+
 The active campaign's
 [specification](docs/research_campaign_20261031.md) and
 [structured state](project_state/campaign_20261031/TASK_STATE.json) track completed
-work and remaining validation.
+work and the separate public-release boundary.
 
 ## Outputs and review
 

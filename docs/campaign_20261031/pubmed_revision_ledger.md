@@ -6,7 +6,7 @@ in separate Parquet sidecars. It does not overwrite the original corpus,
 retroactively change its snapshot's **FAIL** status, or materialize a global
 current-version view.
 
-The compact [public result record](../../benchmarks/campaign_20261031/pubmed_revision_ledger.json)
+The compact [public result record](https://github.com/ericrosenn1/LitDataMatcher/blob/9e2d2916752a23d2b6510ccf8f2d1cd574e5c6ae/benchmarks/campaign_20261031/pubmed_revision_ledger.json)
 contains exact counts, implementation identities, and source-receipt hashes.
 
 ## Measured full-run results

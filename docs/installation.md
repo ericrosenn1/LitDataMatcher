@@ -46,3 +46,8 @@ recreate the research figures with Matplotlib.
 The current development-qualified
 [literal profile](campaign_20261031/model_source_literal.md) must use the same
 device, precision, and output-token budget in qualification and analysis.
+
+Source builds require setuptools 77.0.3 or newer, matching the declared SPDX
+license expression and license-file metadata. See the
+[setuptools license guide](https://setuptools.pypa.io/en/stable/userguide/license_migration.html).
+Build isolation installs the declared backend automatically.

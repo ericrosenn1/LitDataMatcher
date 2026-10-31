@@ -306,6 +306,40 @@ def test_source_failures_are_explicit_and_retryable(tmp_path):
     assert result["result"]["retryable_stages"] == ["discovery"]
     assert result["retryable"] is True
     assert service.retry(submitted["id"])["status"] == "QUEUED"
+    controller = Controller(service.queue)
+    try:
+        with controller.db:
+            controller.db.execute(
+                "UPDATE jobs SET status='SUCCEEDED',attempts=3 WHERE id=?", (submitted["id"],)
+            )
+    finally:
+        controller.close()
+    exhausted = service.job(submitted["id"])
+    assert exhausted["result"]["processing_status"] == "PARTIAL_RETRYABLE"
+    assert exhausted["retryable"] is False
+    with pytest.raises(ValueError, match="fewer than three attempts"):
+        service.retry(submitted["id"])
+
+
+@pytest.mark.parametrize("attempts,retryable", [(1, True), (2, True), (3, False)])
+def test_failed_job_retryability_matches_backend_attempt_bound(tmp_path, attempts, retryable):
+    service = PlatformService(tmp_path / "service")
+    submitted = service.submit(request())
+    controller = Controller(service.queue)
+    try:
+        with controller.db:
+            controller.db.execute(
+                "UPDATE jobs SET status='FAILED',attempts=? WHERE id=?", (attempts, submitted["id"])
+            )
+    finally:
+        controller.close()
+    assert service.job(submitted["id"])["retryable"] is retryable
+    assert service.jobs()["jobs"][0]["retryable"] is retryable
+    if retryable:
+        assert service.retry(submitted["id"])["status"] == "QUEUED"
+    else:
+        with pytest.raises(ValueError, match="fewer than three attempts"):
+            service.retry(submitted["id"])
 
 
 def test_missing_configured_catalog_is_not_empty_search(tmp_path):

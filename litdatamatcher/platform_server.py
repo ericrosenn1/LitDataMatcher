@@ -283,6 +283,8 @@ class PlatformService:
             key: row[key]
             for key in ("id", "status", "attempts", "started", "finished", "error", "exit_code")
         }
+        if row["status"] == "FAILED":
+            result["retryable"] = row["attempts"] < 3
         progress = self.root / "jobs" / row["id"] / "progress.json"
         result["progress"] = (
             strict_json_loads(progress.read_text(encoding="utf-8")) if progress.exists() else None

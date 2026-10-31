@@ -154,6 +154,8 @@ async function mockedEngine(page: Page) {
             };
     else if (path === "/api/jobs/saved-fixture")
       payload = { id: "saved-fixture", status: "COMPLETED", result };
+    else if (path === "/api/jobs/saved-fixture/retry")
+      payload = { id: "saved-fixture", status: "QUEUED" };
     else if (path === "/api/literature")
       payload = {
         documents: [
@@ -330,6 +332,58 @@ test("saved jobs, local source selection and queue controls survive navigation",
     })),
   ).toEqual([]);
 });
+
+for (const state of [
+  { status: "FAILED", retryable: true },
+  { status: "FAILED", retryable: false },
+  { status: "SUCCEEDED", retryable: true },
+  { status: "SUCCEEDED", retryable: false },
+]) {
+  test(`retry action respects ${state.status} retryable=${state.retryable}`, async ({
+    page,
+  }) => {
+    const requests = await mockedEngine(page);
+    await page.route("**/api/jobs/saved-fixture", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "saved-fixture",
+          ...state,
+          attempts: state.retryable ? 1 : 3,
+          ...(state.status === "SUCCEEDED"
+            ? { result }
+            : { error: "Recorded fixture failure" }),
+        }),
+      }),
+    );
+    await navigate(page);
+    await page.getByLabel("Saved research job").selectOption("saved-fixture");
+    await expect(page.locator(".scientific-job")).toContainText(
+      state.status.toLowerCase(),
+    );
+    const retry = page.getByRole("button", {
+      name: "Retry unfinished stages",
+      exact: true,
+    });
+    if (state.retryable) {
+      await expect(retry).toBeEnabled();
+      await retry.click();
+      await expect
+        .poll(() =>
+          requests.some((row) => row.path === "/api/jobs/saved-fixture/retry"),
+        )
+        .toBe(true);
+    } else {
+      await expect(retry).toHaveCount(0);
+      if (state.status === "SUCCEEDED")
+        await expect(
+          page.getByRole("status", { name: "Research coverage" }),
+        ).toContainText("this job cannot be retried");
+      expect(requests.some((row) => row.path.endsWith("/retry"))).toBe(false);
+    }
+  });
+}
 
 test("an absent engine is a visible connection failure and cannot launch a job", async ({
   page,

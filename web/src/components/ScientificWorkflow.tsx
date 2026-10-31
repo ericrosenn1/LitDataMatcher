@@ -859,7 +859,7 @@ export function ScientificWorkflow() {
               <LoaderCircle size={17} className="spin" />
             )}
             {!!job.error && <p>{text(job.error)}</p>}
-            {(job.retryable || job.status.toUpperCase() === "FAILED") && (
+            {job.retryable && (
               <button
                 className="secondary-button"
                 disabled={!!busy}
@@ -950,7 +950,9 @@ export function ScientificWorkflow() {
                   {result.processing_status === "COMPLETE"
                     ? "All requested processing stages completed."
                     : result.processing_status === "PARTIAL_RETRYABLE"
-                      ? "Some processing stages are incomplete and can be retried."
+                      ? job?.retryable
+                        ? "Some processing stages are incomplete and can be retried."
+                        : "Some processing stages are incomplete; this job cannot be retried."
                       : `Processing status: ${label(result.processing_status)}.`}
                 </p>
               )}

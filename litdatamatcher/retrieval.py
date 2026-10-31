@@ -158,6 +158,14 @@ class CachedSemanticIndex:
                     raise ValueError("Semantic vector cache integrity failure")
                 vectors = np.load(io.BytesIO(content), allow_pickle=False)
                 self._vectors_valid(vectors, len(records))
+                if (
+                    manifest.get("version") != CACHE_VERSION
+                    or manifest.get("record_count") != len(records)
+                    or manifest.get("dimensions") != vectors.shape[1]
+                    or manifest.get("records_sha256") != digest(records)
+                    or manifest.get("model") != self.index.manifest
+                ):
+                    raise ValueError("Semantic vector cache metadata integrity failure")
                 origin = "verified_cache_replay"
             else:
                 vectors = np.asarray(
@@ -190,7 +198,7 @@ class CachedSemanticIndex:
         return self
 
     def search(self, query: str, k: int = 10) -> list[dict]:
-        return self.index.search(query, k=k)
+        return self.search_many([query], k=k)[0]
 
     def search_many(self, queries: list[str], k: int = 10) -> list[list[dict]]:
         """Encode queries in batches while preserving deterministic tie handling."""
@@ -199,6 +207,9 @@ class CachedSemanticIndex:
         if type(k) is not int or k < 1:
             raise ValueError("k must be a positive integer")
         query_vectors = self.index.encode(queries)
+        self._vectors_valid(query_vectors, len(queries))
+        if query_vectors.shape[1] != self.index.vectors.shape[1]:
+            raise ValueError("Query/document vector dimensions differ")
         results = []
         for query in query_vectors:
             scores = self.index.vectors @ query
@@ -233,6 +244,10 @@ def reciprocal_rank_fusion(
         seen: set[str] = set()
         for rank, row in enumerate(ranking, 1):
             identity = row["id"]
+            if not isinstance(identity, str) or not identity:
+                raise ValueError("Candidate identity must be a nonempty string")
+            if row.get("score") is not None and not math.isfinite(row["score"]):
+                raise ValueError("Non-finite component ranking score")
             if identity in seen:
                 raise ValueError("Duplicate identity in a component ranking")
             seen.add(identity)

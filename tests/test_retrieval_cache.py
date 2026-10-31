@@ -123,3 +123,29 @@ def test_fusion_has_stable_ties_and_preserves_components():
 def test_fusion_rejects_duplicate_component_ids():
     with pytest.raises(ValueError, match="Duplicate"):
         retrieval.reciprocal_rank_fusion([[{"id": "a"}, {"id": "a"}]])
+
+
+def test_cache_rejects_changed_shape_metadata(encoder, tmp_path):
+    index = retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS)
+    path = tmp_path / index.fingerprint / "manifest.json"
+    metadata = json.loads(path.read_text())
+    metadata["record_count"] = 999
+    path.write_text(json.dumps(metadata))
+    with pytest.raises(ValueError, match="metadata integrity"):
+        retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS)
+
+
+def test_nonfinite_queries_are_rejected(encoder, monkeypatch, tmp_path):
+    index = retrieval.CachedSemanticIndex("fake", tmp_path).fit(RECORDS)
+    monkeypatch.setattr(
+        index.index, "encode", lambda texts: np.full((len(texts), 4), np.nan, dtype=np.float32)
+    )
+    with pytest.raises(ValueError, match="Non-finite"):
+        index.search_many(["query"])
+    with pytest.raises(ValueError, match="Non-finite"):
+        index.search("query")
+
+
+def test_fusion_rejects_nonfinite_original_scores():
+    with pytest.raises(ValueError, match="Non-finite"):
+        retrieval.reciprocal_rank_fusion([[{"id": "a", "score": float("nan")}]])

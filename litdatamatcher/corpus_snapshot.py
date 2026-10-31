@@ -76,6 +76,8 @@ def _qualify_shard(task: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("Unexpected field type; expected declared string schema")
         identifiers = parquet.read(columns=["pmid", "source_shard"]).to_pydict()
         present = [value for value in identifiers["pmid"] if value]
+        if len(present) != len(identifiers["pmid"]):
+            result["issues"].append("missing_pmid_rows")
         wrong_source = sum(value != task["name"] for value in identifiers["source_shard"])
         if wrong_source:
             result["issues"].append(f"wrong_source_shard_rows:{wrong_source}")

@@ -7,6 +7,8 @@ from collections import defaultdict
 
 import numpy as np
 
+from .data_plane import digest
+
 
 def evaluate_retrieval(
     queries: list[dict], rankings: list[list[dict]], *, k: int = 10, seed: int = 1729
@@ -36,6 +38,7 @@ def evaluate_retrieval(
             {
                 "query_id": query["id"],
                 "positive_doc_id": target,
+                "query_sha256": digest(query),
                 "rank": rank,
                 "reciprocal_rank": rr,
             }
@@ -65,6 +68,27 @@ def evaluate_retrieval(
 
 def paired_comparison(incumbent: dict, candidate: dict, *, seed: int = 1729) -> dict:
     """Compare the same queries; reject changed denominators."""
+    if incumbent.get("cutoff") != candidate.get("cutoff"):
+        raise ValueError("Paired comparison requires identical cutoffs")
+    for metrics in [incumbent, candidate]:
+        rows = metrics["query_results"]
+        if len({row["query_id"] for row in rows}) != len(rows):
+            raise ValueError("Duplicate query in paired metrics")
+        if any(
+            not math.isfinite(row["reciprocal_rank"]) or not 0 <= row["reciprocal_rank"] <= 1
+            for row in rows
+        ):
+            raise ValueError("Invalid reciprocal rank")
+    left_identity = {
+        row["query_id"]: (row["positive_doc_id"], row.get("query_sha256"))
+        for row in incumbent["query_results"]
+    }
+    right_identity = {
+        row["query_id"]: (row["positive_doc_id"], row.get("query_sha256"))
+        for row in candidate["query_results"]
+    }
+    if left_identity != right_identity:
+        raise ValueError("Paired comparison requires identical queries and targets")
     left = {row["query_id"]: row["reciprocal_rank"] for row in incumbent["query_results"]}
     right = {row["query_id"]: row["reciprocal_rank"] for row in candidate["query_results"]}
     if not left or set(left) != set(right):

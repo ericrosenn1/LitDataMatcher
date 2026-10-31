@@ -103,6 +103,24 @@ def test_empty_acquisition_cannot_pass(tmp_path):
     assert "no_qualifiable_shards" in receipt["issues"]
 
 
+def test_missing_nonfirst_identifier_cannot_pass(tmp_path):
+    root = corpus(tmp_path)
+    path = next(root.rglob("*.parquet"))
+    first = pq.read_table(path)
+    second = {field: None for field in PUBMED_FIELDS}
+    second.update(title="Missing identifier", source_shard="pubmed26n0001.xml.gz")
+    pq.write_table(
+        pa.concat_tables([first, pa.Table.from_pylist([second], schema=first.schema)]), path
+    )
+    state = root / "manifests/acquisition/pubmed_2026_normalization_state.json"
+    value = json.loads(state.read_text())
+    next(iter(value["shards"].values()))["records"] = 2
+    state.write_text(json.dumps(value))
+    result = qualify_corpus(root, tmp_path / "audit", include_updates=False)
+    assert result["status"] == "FAIL"
+    assert "missing_pmid_rows" in result["shards"][0]["issues"]
+
+
 def test_traversal_in_normalization_manifest_fails(tmp_path):
     root = corpus(tmp_path)
     path = root / "manifests/acquisition/pubmed_2026_normalization_state.json"

@@ -314,3 +314,64 @@ def test_listed_adapter_configuration_cannot_redirect_to_external_base(tmp_path)
     replace_manifest(tmp_path, manifest)
     with pytest.raises(ValueError, match="Adapter configuration"):
         runtime.verify_model(tmp_path)
+
+
+def rename_asset(root, manifest, original, replacement):
+    """Force actual on-disk case changes even on Windows."""
+    temporary = root / "case-rename.tmp"
+    (root / original).rename(temporary)
+    temporary.rename(root / replacement)
+    for row in manifest["files"]:
+        if row["path"] == original:
+            row.update(
+                path=replacement,
+                sha256=sha(root / replacement),
+                bytes=(root / replacement).stat().st_size,
+            )
+    replace_manifest(root, manifest)
+
+
+@pytest.mark.parametrize("name", ["ADAPTER_CONFIG.JSON", "Adapter_Config.Json"])
+def test_case_variant_adapter_configuration_is_rejected(tmp_path, name):
+    manifest = model(tmp_path)
+    path = tmp_path / name
+    write(path, {"base_model_name_or_path": "../outside"})
+    manifest["files"].append({"path": name, "sha256": sha(path)})
+    replace_manifest(tmp_path, manifest)
+    with pytest.raises(ValueError, match="Adapter configuration"):
+        runtime.verify_model(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "old,new,key,value",
+    [
+        ("config.json", "CONFIG.JSON", "configuration_files", ["../outside.json"]),
+        ("config.json", "Config.Json", "configuration_files", ["../outside.json"]),
+        ("tokenizer_config.json", "TOKENIZER_CONFIG.JSON", "tokenizer_file", "../outside.json"),
+        (
+            "tokenizer_config.json",
+            "Tokenizer_Config.Json",
+            "fast_tokenizer_files",
+            ["../outside.json"],
+        ),
+    ],
+)
+def test_case_variant_configuration_references_are_checked(tmp_path, old, new, key, value):
+    manifest = model(tmp_path)
+    write(tmp_path / old, {key: value})
+    if old == "tokenizer_config.json":
+        manifest["files"].append({"path": old})
+    rename_asset(tmp_path, manifest, old, new)
+    with pytest.raises(ValueError, match="asset path"):
+        runtime.verify_model(tmp_path)
+
+
+@pytest.mark.parametrize("name", ["MODEL.SAFETENSORS.INDEX.JSON", "Model.SafeTensors.Index.Json"])
+def test_case_variant_shard_index_references_are_checked(tmp_path, name):
+    manifest = model(tmp_path, sharded=True)
+    write(
+        tmp_path / "model.safetensors.index.json", {"weight_map": {"a": "../outside.safetensors"}}
+    )
+    rename_asset(tmp_path, manifest, "model.safetensors.index.json", name)
+    with pytest.raises(ValueError, match="asset path"):
+        runtime.verify_model(tmp_path)

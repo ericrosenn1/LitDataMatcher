@@ -92,7 +92,7 @@ _MODEL_METADATA = frozenset(
 
 def _model_metadata(name: str) -> bool:
     """Only known documentation and Hugging Face download bookkeeping are exempt."""
-    if name in _MODEL_METADATA:
+    if name.casefold() in {value.casefold() for value in _MODEL_METADATA}:
         return True
     path = PurePosixPath(name)
     return (
@@ -188,7 +188,7 @@ def verify_model(model_dir: str | Path) -> dict:
             raise ValueError("Invalid model file record")
         name = item.get("path")
         path = _model_asset_path(root, name)
-        if PurePosixPath(name).name == "adapter_config.json":
+        if PurePosixPath(name).name.casefold() == "adapter_config.json":
             raise ValueError(
                 "Adapter configuration requires an unsupported external base-model contract"
             )
@@ -206,7 +206,7 @@ def verify_model(model_dir: str | Path) -> dict:
             if key in item and (type(item[key]) is not int or item[key] != path.stat().st_size):
                 raise ValueError(f"Model asset size mismatch: {name}")
         listed[name] = path
-    if not any(name.endswith(".safetensors") for name in listed):
+    if not any(name.casefold().endswith(".safetensors") for name in listed):
         raise ValueError("Safetensors weights required")
     actual = set()
     for path in root.rglob("*"):
@@ -229,13 +229,13 @@ def verify_model(model_dir: str | Path) -> dict:
     if unknown:
         raise ValueError("Unlisted model asset: " + unknown[0])
     for name, path in listed.items():
-        if PurePosixPath(name).name not in {"config.json", "tokenizer_config.json"}:
+        if PurePosixPath(name).name.casefold() not in {"config.json", "tokenizer_config.json"}:
             continue
         configuration = strict_json_loads(path.read_text(encoding="utf-8"))
         if not isinstance(configuration, dict):
             raise ValueError("Model/tokenizer configuration must be an object")
         references = []
-        if PurePosixPath(name).name == "tokenizer_config.json":
+        if PurePosixPath(name).name.casefold() == "tokenizer_config.json":
             references.extend(
                 value
                 for key, value in configuration.items()
@@ -251,7 +251,7 @@ def verify_model(model_dir: str | Path) -> dict:
             if reference not in listed or listed[reference] != target:
                 raise ValueError("Configuration references an unlisted model asset")
     for name, path in listed.items():
-        if not name.endswith(".safetensors.index.json"):
+        if not name.casefold().endswith(".safetensors.index.json"):
             continue
         index = strict_json_loads(path.read_text(encoding="utf-8"))
         mapping = index.get("weight_map") if isinstance(index, dict) else None
@@ -261,7 +261,11 @@ def verify_model(model_dir: str | Path) -> dict:
             if not isinstance(tensor, str) or not tensor or not isinstance(shard, str):
                 raise ValueError("Invalid safetensors index entry")
             target = _model_asset_path(root, shard)
-            if shard not in listed or not shard.endswith(".safetensors") or listed[shard] != target:
+            if (
+                shard not in listed
+                or not shard.casefold().endswith(".safetensors")
+                or listed[shard] != target
+            ):
                 raise ValueError(f"Safetensors index references an unlisted shard: {shard}")
     return manifest
 

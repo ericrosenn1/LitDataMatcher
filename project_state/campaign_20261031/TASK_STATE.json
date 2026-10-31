@@ -2,7 +2,7 @@
   "schema_version": "research-engine-campaign-1.0",
   "campaign": "biomedical-research-engine-20261031",
   "status": "IN_PROGRESS",
-  "phase": "LITERAL_DECODER_QUALIFICATION_AND_CORPUS_COMPLETION",
+  "phase": "QUALIFIED_LITERAL_REAL_CASE_REGRESSION",
   "started_utc": "2026-10-31T11:48:16Z",
   "soft_target_hours": 24,
   "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
@@ -46,7 +46,7 @@
     "The original constrained decoder mishandles escaped source literals; index alternative failed the positive acceptance rule; literal repair remains under review",
     "CI exposed a pre-admission pause race in the controller; repair in progress"
   ],
-  "next_action": "Freeze current source, qualify source_literal with the two existing development documents, and run a new30-case development regression only after both pass. Finish full ledger before namespace repair; then final full validation and reproducible handoff.",
+  "next_action": "Finish and audit literal7Bbatch, perform exact-code offline resume, then qualify1.5Bliteral. Finishfullledger and integrate namespacefix onlyafteractivefingerprintedruns; finalvalidationanddelivery.",
   "integration_commits": {
     "sources": "30cfb84",
     "model_guard": "ecda49d",
@@ -66,19 +66,21 @@
   },
   "native_model_qualification": {
     "selected": "Qwen2.5-7B-Instruct",
-    "profile": "source_schema384 / grammar1.1",
+    "profile": "source_literal384 / grammar1.0",
     "positive_documents_passed": 2,
     "fresh_offline_and_cache_replay": "PASS",
     "smaller_candidate": "1.5B fails positive document2 with zero accepted records",
-    "scope": "Previously seen development smoke inputs, no expert accuracy claim",
-    "receipt": "model-selection-v1/SELECTION.json",
-    "source_index_followup": "NOT_PROMOTED:7B passes1/2 positive docs;1.5B CPU passes0/2; all failures preserved"
+    "scope": "Previously seen development smoke inputs; surface-language source guards, no expert accuracy claim",
+    "receipt": "qualified-literal-gpu-7b-doc1/QUALIFICATION.json",
+    "source_index_followup": "NOT_PROMOTED:7B passes1/2 positive docs;1.5B CPU passes0/2; all failures preserved",
+    "independent_audit": "qualification-literal-independent-v1/AUDIT.json"
   },
   "active_work": [
     "Full1621-shard revision ledger; implementation frozen",
-    "source_literal positive-document qualification pending",
-    "Final30-case regression contingent on qualification",
-    "Final cross-platform CI, package and evidence validation"
+    "Fresh30-case source_literal7B batch with public offline runner; wholepackage frozen",
+    "Potential1.5B literal qualification and same-profile comparison after GPU release",
+    "Corrected source-archive full test suite",
+    "Final namespace integration, tests, CI, docs and handoff"
   ],
   "integration_round_1": {
     "status": "PASS",
@@ -169,7 +171,8 @@
     "cause": "Windows Path.resolve may return equivalent extended DOS prefix; isolated fix tested, deferred until fingerprinted jobs finish"
   },
   "pending_repairs": [
-    "Integrate Windows namespace containment after full ledger completion"
+    "Integrate Windows namespace containment after all fingerprintedjobsfinish",
+    "Integrate fd94951 optional-dependency test fixture repair"
   ],
   "external_prerequisites": [
     "GitHub dependency graph is disabled; existing dependency-review action retained"

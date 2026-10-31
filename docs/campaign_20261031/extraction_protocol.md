@@ -76,3 +76,19 @@ the original batch motivated the change. Report baseline and repaired-profile
 outcomes separately, including fully rejected cases, retryable failures, and
 terminal abstentions. More accepted records or valid serialization alone do
 not establish better scientific interpretation.
+
+The subsequent `source_literal` candidate keeps the original source-schema
+prompt and schema, using an escape-safe literal grammar. Its 7B configuration
+passed both positive development documents before the new 30-case run began.
+After that batch releases the GPU, test the 1.5B model with the same literal
+profile, CUDA/bfloat16, seed, token budget, and two-document rule. Only if both
+positive documents pass may it proceed to the unchanged 30-case pack. Apply the
+original twofold-latency and rejected-case limits to the two literal-profile
+batches; CPU trials and different decoder profiles cannot supply that comparison.
+For this comparison, a fully rejected/empty case has no accepted model claim
+and no accepted model future-work question across its selected views. Caller
+questions and deterministic source-context extraction do not count as model
+coverage. Report valid empty generations and guard rejections separately.
+Use per-view fresh inference durations, including bounded repair time, and
+report missing durations rather than treating failed calls as zero seconds.
+Incomplete timing coverage cannot establish the speed criterion.

@@ -29,6 +29,9 @@ jobs:
         run: >-
           python -m pytest
           tests/test_structured_decoding.py
+          tests/test_indexed_decoding.py
+          tests/test_literal_decoding.py
+          tests/test_runtime_dependency_identity.py
           tests/test_runtime_qualification_receipts.py
           tests/test_retrieval_training.py
           tests/test_retrieval_cache.py

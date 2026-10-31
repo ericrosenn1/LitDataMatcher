@@ -61,6 +61,9 @@ has explicit window/count limits and can omit evidence outside selected
 passages. The independent verifier checks spans and several relation,
 direction, and negation invariants; it cannot validate every scientific
 interpretation. Accepted-record counts do not establish accuracy.
+Subject, predicate, and object preserve surface sentence structure; a subject
+can be a reporting word such as “Results.” These fields are not normalized
+biological entities or validated causal triples.
 
 No expert-labelled question–dataset suitability benchmark or calibrated
 probability model is claimed. Paper-link retrieval does not validate matching

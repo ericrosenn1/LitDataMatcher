@@ -19,6 +19,7 @@ nav:
   - Retrieval protocol: campaign_20261031/retrieval_protocol.md
   - Model training: campaign_20261031/retriever_training.md
   - Source-backed cases: campaign_20261031/research_cases.md
+  - Extraction evidence: campaign_20261031/extraction_results.md
   - Recovery: campaign_20261031/workflow_recovery.md
   - Worker process admission: campaign_20261031/workflow_controller_admission.md
   - Manifest contract: campaign_20261031/manifest_contract.md

@@ -6,7 +6,7 @@ statuses, not scientific correctness labels. The run retained **16
 source-guard-accepted claims** and established **no scientifically qualified
 dataset matches**.
 
-The machine-readable [baseline record](../../benchmarks/campaign_20261031/extraction_baseline.json)
+The machine-readable [baseline record](https://github.com/ericrosenn1/LitDataMatcher/blob/236e933af389ecbaff052ca4096376721a777a81/benchmarks/campaign_20261031/extraction_baseline.json)
 contains exact counts, configurations, identities, receipt hashes, and failed
 follow-up qualifications. The [protocol](extraction_protocol.md) defines the
 qualification rule and interpretation limits.

@@ -134,7 +134,10 @@ metrics, and all four vector encodings.
 Other evidence includes a frozen 30-case development pack, real processed-table
 inspections, source-adapter replay, and an annual PubMed baseline integrity audit.
 The [case and data notes](docs/campaign_20261031/research_cases.md) distinguish
-measured values from missing evidence. The active campaign's
+measured values from missing evidence. The
+[extraction baseline](docs/campaign_20261031/extraction_results.md) retains all
+30 case outcomes, including abstentions and unresolved dataset suitability.
+The active campaign's
 [specification](docs/research_campaign_20261031.md) and
 [structured state](project_state/campaign_20261031/TASK_STATE.json) track completed
 work and remaining validation.

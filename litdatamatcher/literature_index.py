@@ -446,6 +446,28 @@ class LiteratureIndex:
             self.conn.commit()
         return {"sqlite": "PASS", "fts_content": "NOT_RUN_READ_ONLY" if self.read_only else "PASS"}
 
+    def validate_admission(self):
+        """Check schema identity without rescanning all payload and FTS pages.
+
+        Atomic shard commits, pinned source-prefix receipts and SQLite recovery
+        protect continuation. Full integrity remains a separate acceptance step.
+        """
+        query = "SELECT name,type,sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%'"
+
+        def signature(conn):
+            return sorted(
+                (row[0], row[1], " ".join((row[2] or "").split())) for row in conn.execute(query)
+            )
+
+        expected = sqlite3.connect(":memory:")
+        try:
+            expected.executescript(_DDL)
+            if signature(self.conn) != signature(expected):
+                raise ValueError("Literature database schema differs from the admitted contract")
+        finally:
+            expected.close()
+        return {"schema": "PASS", "full_integrity_validation": "REQUIRED_SEPARATELY"}
+
 
 def _apply_batch(index, pairs, shard):
     conn = index.conn
@@ -672,8 +694,7 @@ def materialize_pubmed(
         ),
         LiteratureIndex(database) as index,
     ):
-        if index.conn.execute("PRAGMA quick_check").fetchone()[0] != "ok":
-            raise ValueError("Existing database failed SQLite integrity verification")
+        index.validate_admission()
         previous_store = index._metadata("corpus_store_uuid")
         if previous_store is not None and previous_store != marker["store_uuid"]:
             raise ValueError("Cannot mix distinct source corpus stores")
@@ -696,6 +717,10 @@ def materialize_pubmed(
                     path
                 ) != expected:
                     raise ValueError("Previously applied source bytes changed")
+        if index._metadata("events_applied", 0) != sum(
+            shard["events"] for shard in manifest["shards"][: len(applied)]
+        ):
+            raise ValueError("Committed event counter disagrees with the admitted shard prefix")
         with index.conn:
             index._set_metadata("corpus_store_uuid", marker["store_uuid"])
             index._set_metadata("available_shards", len(manifest["shards"]))
@@ -733,6 +758,7 @@ def materialize_pubmed(
             snapshot=index.snapshot_identity(),
             batch_size=batch_size,
             verification="New inputs SHA256 verified; applied inputs stat-checked and rehashed when changed.",
+            full_integrity_validation="REQUIRED_SEPARATELY",
             historical_events_retain_source_ledger=True,
             semantic_index="optional bounded lexical-shortlist reranking",
         )

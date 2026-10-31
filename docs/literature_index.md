@@ -19,6 +19,12 @@ ledger and normalized Parquet records into a SQLite database. The source corpus,
 revision ledger, frozen research outputs, and evaluation holdouts remain unchanged.
 
 Each applied shard and its recovery checkpoint commit in one SQLite transaction.
+Continuation admission checks the exact SQLite schema, committed event counter,
+and source-bound shard prefix without rescanning the complete payload. Full
+SQLite/FTS validation is required separately for final acceptance and is explicitly
+marked as pending in materialization receipts. Title metadata remains searchable,
+but records with missing abstracts have empty evidence text; titles are never
+silently substituted for abstract or full-paper evidence.
 An interrupted shard rolls back; a resumed invocation verifies the existing
 checkpoint prefix and continues at the next shard. Appended update manifests can
 extend an index. Changed or removed previously applied ledger entries are rejected.

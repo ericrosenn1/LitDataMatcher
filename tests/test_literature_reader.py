@@ -4,11 +4,11 @@ import json
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+from test_literature_index import event, fixture
 
 from litdatamatcher.corpus_snapshot import file_digest
 from litdatamatcher.data_plane import atomic_json
 from litdatamatcher.literature_index import LiteratureIndex, materialize_pubmed
-from test_literature_index import event, fixture
 
 
 def test_missing_abstract_keeps_title_searchable_without_evidence_substitution(tmp_path):

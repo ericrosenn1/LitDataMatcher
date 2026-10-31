@@ -117,7 +117,7 @@ def discover(plan: dict, out: Path, *, workers: int = 2, offline: bool = False,
         raise ValueError("Use 1..4 concurrent I/O workers")
     out = Path(out).resolve()
     implementation = {name: _hash(Path(__file__).with_name(name)) for name in
-                      ("discovery.py", "adapters.py", "http_cache.py", "provenance.py", "datasets.py")}
+                      ("discovery.py", "adapters.py", "omics_adapters.py", "http_cache.py", "provenance.py", "datasets.py")}
     identity = {"plan": plan, "implementation": implementation, "version": VERSION}
     fingerprint = digest(identity)
     with integration_lease(out, "query-discovery"):

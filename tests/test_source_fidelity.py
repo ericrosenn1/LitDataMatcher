@@ -31,6 +31,28 @@ class FakeClient:
         return next(self.payloads)
 
 
+def test_clinical_invalid_identifiers_cannot_be_reported_as_empty_success():
+    rows = search_dataset_sources("brain", ["clinicaltrials"], FakeClient([
+        {"studies": [{"protocolSection": {"identificationModule": {"nctId": "invalid"}}}]}
+    ]))
+    assert rows == []
+    status = rows.source_statuses[0]
+    assert status["status"] == "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE"
+    assert status["pagination"]["rejected_record_indices"] == [0]
+    assert not status["pagination"]["completed"]
+
+
+def test_clinical_rejects_bad_identity_but_preserves_valid_records():
+    adapter = ClinicalTrialsDatasetAdapter(FakeClient([{"studies": [
+        {"protocolSection": {"identificationModule": {"nctId": "bad"}}},
+        {"protocolSection": {"identificationModule": {"nctId": "NCT12345678", "briefTitle": "Valid"}}},
+    ]}]))
+    rows = adapter.search("brain")
+    assert len(rows) == 1
+    assert adapter.last_search_status["status"] == "SCHEMA_DRIFT"
+    assert rows[0].metadata["pagination"]["rejected_record_indices"] == [0]
+
+
 @pytest.mark.parametrize("summary", [{"error": "failure"}, {"result": {}}, {"result": {"123": "bad"}}])
 def test_geo_invalid_summary_never_creates_fallback_dataset(summary):
     result = search_dataset_sources(

@@ -446,12 +446,14 @@ class ClinicalTrialsDatasetAdapter:
         self.last_search_status = result["pagination"]
         response_metadata = _client_response_metadata(self.client)
         records_by_id: dict[str, DatasetRecord] = {}
+        rejected_indices: list[int] = []
         for item_index, study in enumerate(result["items"]):
             response_metadata = _item_page_metadata(result, item_index, response_metadata)
             if not isinstance(study, dict):
                 continue
             record = _clinicaltrials_record(study, response_metadata=response_metadata)
             if record is None:
+                rejected_indices.append(item_index)
                 continue
             record.metadata["pagination"] = result["pagination"]
             existing = records_by_id.get(record.dataset_id)
@@ -461,6 +463,14 @@ class ClinicalTrialsDatasetAdapter:
                 records_by_id[record.dataset_id] = record
             else:
                 _append_clinical_version(existing, record)
+        if rejected_indices:
+            self.last_search_status.update(
+                status="SCHEMA_DRIFT", completed=False,
+                candidate_universe_status="PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE",
+                rejected_record_indices=rejected_indices,
+                retained_valid_rows=len(records_by_id),
+                error="invalid_study_identity_or_protocol",
+            )
         return list(records_by_id.values())
 
 

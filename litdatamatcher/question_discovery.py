@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections import Counter
 from copy import deepcopy
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -113,12 +114,22 @@ def _document(raw: dict) -> dict:
     identifier = raw.get("document_id") or raw.get("id") or raw.get("source_id")
     if not isinstance(identifier, str) or not identifier.strip():
         raise ValueError("Each document needs a stable document_id, id, or source_id")
-    text = raw.get("text") or raw.get("abstract")
-    if not isinstance(text, str) or not text.strip():
-        raise ValueError("Each document needs nonempty text or abstract")
+    for key in ("text", "abstract"):
+        if raw.get(key) is not None and not isinstance(raw[key], str):
+            raise ValueError(f"Document {key} must be text or null")
+    text = next(
+        (
+            raw[key]
+            for key in ("text", "abstract")
+            if isinstance(raw.get(key), str) and raw[key].strip()
+        ),
+        "",
+    )
     if len(text) > 200_000:
         raise ValueError("Supply a bounded source view of at most 200,000 characters")
-    provenance = raw.get("source_provenance") or {}
+    provenance = raw.get("source_provenance")
+    if provenance is None:
+        provenance = {}
     if not isinstance(provenance, dict):
         raise ValueError("source_provenance must be an object")
     if raw.get("metadata") is not None and not isinstance(raw["metadata"], dict):
@@ -137,6 +148,59 @@ def _document(raw: dict) -> dict:
         "text": text,
         "source_locator": locator,
         "source_provenance": deepcopy(provenance),
+    }
+
+
+def _input_failure(raw, index, error) -> dict:
+    identifier = (
+        (raw.get("document_id") or raw.get("id") or raw.get("source_id"))
+        if isinstance(raw, dict)
+        else None
+    )
+    return {
+        "input_index": index,
+        "document_id": identifier if isinstance(identifier, str) else None,
+        "status": "EXTRACTION_FAILURE",
+        "error_type": type(error).__name__,
+        "error": str(error),
+        "retained_count": 0,
+    }
+
+
+def _prepare_documents(documents: list) -> tuple[list[tuple[int, dict]], list[dict]]:
+    prepared, failures = [], []
+    for index, raw in enumerate(documents):
+        try:
+            prepared.append((index, _document(raw)))
+        except (ValueError, TypeError, KeyError) as error:
+            failures.append(_input_failure(raw, index, error))
+    counts = Counter(document["document_id"] for _, document in prepared)
+    unique = []
+    for index, document in prepared:
+        if counts[document["document_id"]] > 1:
+            failures.append(
+                _input_failure(
+                    document,
+                    index,
+                    ValueError("Duplicate document ID; resolve source revisions before extraction"),
+                )
+            )
+        else:
+            unique.append((index, document))
+    return unique, failures
+
+
+def _metadata_only(document: dict, index: int, lifecycle: dict) -> dict:
+    return {
+        "input_index": index,
+        "document_id": document["document_id"],
+        "status": "METADATA_ONLY_NOT_EXTRACTED",
+        "source_locator": document["source_locator"],
+        "source_provenance": deepcopy(document["source_provenance"]),
+        "reason": "No source text or abstract was supplied; title metadata is not paper evidence",
+        "candidate_count": 0,
+        "retained_count": 0,
+        **lifecycle,
     }
 
 
@@ -497,15 +561,12 @@ def discover_questions(
     _bounded_int(max_questions, "max_questions", 1000)
     if not isinstance(documents, list) or len(documents) > max_documents:
         raise ValueError("documents must be a list within max_documents")
-    prepared = [_document(raw) for raw in documents]
-    ids = [doc["document_id"] for doc in prepared]
-    if len(ids) != len(set(ids)):
-        raise ValueError("Document IDs must be unique; resolve revisions before discovery")
+    prepared, statuses = _prepare_documents(documents)
     method = (
         "local_model_source_guard" if runtime is not None else "deterministic_source_sentences_v1"
     )
-    questions, statuses = [], []
-    for document in prepared:
+    questions = []
+    for index, document in prepared:
         identifier = document["document_id"]
         try:
             lifecycle = _source_lifecycle(document)
@@ -513,6 +574,7 @@ def discover_questions(
                 statuses.append(
                     {
                         "document_id": identifier,
+                        "input_index": index,
                         "status": "EXCLUDED_SOURCE_LIFECYCLE",
                         "reason": "Source lifecycle or version eligibility requires review",
                         "source_locator": document["source_locator"],
@@ -523,6 +585,9 @@ def discover_questions(
                         "retained_count": 0,
                     }
                 )
+                continue
+            if not document["text"]:
+                statuses.append(_metadata_only(document, index, lifecycle))
                 continue
             spans = _sentences(document)
             manifest = None
@@ -559,6 +624,7 @@ def discover_questions(
             statuses.append(
                 {
                     "document_id": identifier,
+                    "input_index": index,
                     "status": "SUCCESS" if records else "EMPTY",
                     "source_text_sha256": _text_sha(document["text"]),
                     "candidate_count": len(records),
@@ -568,19 +634,13 @@ def discover_questions(
                     **lifecycle,
                 }
             )
-        except (ValueError, TypeError, KeyError, RuntimeError, OSError) as exc:
-            statuses.append(
-                {
-                    "document_id": identifier,
-                    "status": "EXTRACTION_FAILURE",
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                    "retained_count": 0,
-                }
-            )
+        except (ValueError, TypeError, KeyError, AttributeError, RuntimeError, OSError) as exc:
+            statuses.append(_input_failure(document, index, exc))
+    statuses.sort(key=lambda item: item["input_index"])
     candidate_count = sum(status.get("candidate_count", 0) for status in statuses)
     failures = sum(status["status"] == "EXTRACTION_FAILURE" for status in statuses)
     excluded = sum(status["status"] == "EXCLUDED_SOURCE_LIFECYCLE" for status in statuses)
+    metadata_only = sum(status["status"] == "METADATA_ONLY_NOT_EXTRACTED" for status in statuses)
     return {
         "schema_version": VERSION,
         "extraction_method": method,
@@ -589,9 +649,10 @@ def discover_questions(
         "document_statuses": statuses,
         "coverage": {
             "requested_documents": len(documents),
-            "processed_documents": len(statuses) - failures - excluded,
+            "processed_documents": len(statuses) - failures - excluded - metadata_only,
             "failed_documents": failures,
             "excluded_documents": excluded,
+            "metadata_only_documents": metadata_only,
             "candidate_questions": candidate_count,
             "retained_questions": len(questions),
             "truncated": candidate_count > len(questions),
@@ -620,23 +681,27 @@ def check_addressed_evidence(
         else question_record.get("text") or question_record.get("question")
     )
     terms = _terms(normalize_question(question))
-    candidates, failures, checked, excluded = [], [], [], []
-    for raw in documents:
-        doc = _document(raw)
+    prepared, failures = _prepare_documents(documents)
+    candidates, checked, excluded, metadata_only = [], [], [], []
+    for index, doc in prepared:
         try:
             lifecycle = _source_lifecycle(doc)
             if lifecycle["excluded"]:
                 excluded.append(
                     {
                         "document_id": doc["document_id"],
+                        "input_index": index,
                         "source_locator": doc["source_locator"],
                         **lifecycle,
                     }
                 )
                 continue
+            if not doc["text"]:
+                metadata_only.append(_metadata_only(doc, index, lifecycle))
+                continue
             spans = _sentences(doc)
-        except ValueError as exc:
-            failures.append({"document_id": doc["document_id"], "error": str(exc)})
+        except (ValueError, TypeError, KeyError, AttributeError, RuntimeError, OSError) as exc:
+            failures.append(_input_failure(doc, index, exc))
             continue
         checked.append(doc["document_id"])
         for span in spans:
@@ -670,14 +735,15 @@ def check_addressed_evidence(
         "status": "POSSIBLY_ADDRESSED_NEEDS_REVIEW"
         if candidates
         else "INCOMPLETE_SEARCH"
-        if failures
+        if failures or metadata_only
         else "NO_ADDRESSING_EVIDENCE_IN_SEARCHED_DOCUMENTS",
         "candidates": candidates[:limit],
         "candidate_count": len(candidates),
         "searched_document_ids": checked,
         "failures": failures,
         "excluded_documents": excluded,
-        "search_complete": not failures,
+        "metadata_only_documents": metadata_only,
+        "search_complete": not (failures or metadata_only),
         "global_novelty_established": False,
         "question_answered": None,
         "method": "bounded_lexical_result_passages_v1",

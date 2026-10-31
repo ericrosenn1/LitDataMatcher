@@ -210,8 +210,9 @@ def test_nonfinite_requirements_and_duplicate_documents_fail_clearly():
         compile_research_question(
             "Test question", user_constraints=[{"field": "n", "expected": float("nan")}]
         )
-    with pytest.raises(ValueError):
-        discover_questions([doc("Test question?"), doc("Second question?")])
+    duplicate = discover_questions([doc("Test question?"), doc("Second question?")])
+    assert duplicate["coverage"]["failed_documents"] == 2
+    assert all(row["status"] == "EXTRACTION_FAILURE" for row in duplicate["document_statuses"])
     with pytest.raises(ValueError):
         discover_questions([], max_documents=True)
 
@@ -373,3 +374,95 @@ def test_merged_source_member_explicit_lifecycle_snapshot_is_retained():
         row["value"] == "RETRACTED" and "merged_source_records[0]" in row["location"]
         for row in status["exclusion_reasons"]
     )
+
+
+def test_metadata_only_and_malformed_rows_do_not_discard_valid_questions():
+    text = "Further studies should examine glucose uptake in humans."
+    inputs = [
+        doc(text, "valid"),
+        {
+            "document_id": "metadata-only",
+            "title": "Further studies should examine humans.",
+            "abstract": None,
+        },
+        {"document_id": "bad-text", "text": ["not source text"]},
+        None,
+        {"title": "Missing source identity", "text": text},
+    ]
+    result = discover_questions(inputs)
+    assert [row["source_document_id"] for row in result["questions"]] == ["valid"]
+    assert [row["status"] for row in result["document_statuses"]] == [
+        "SUCCESS",
+        "METADATA_ONLY_NOT_EXTRACTED",
+        "EXTRACTION_FAILURE",
+        "EXTRACTION_FAILURE",
+        "EXTRACTION_FAILURE",
+    ]
+    assert [row["input_index"] for row in result["document_statuses"]] == list(range(5))
+    assert result["coverage"]["processed_documents"] == 1
+    assert result["coverage"]["metadata_only_documents"] == 1
+    assert result["coverage"]["failed_documents"] == 3
+    assert result["status"] == "PARTIAL"
+
+
+def test_metadata_only_row_never_invokes_model_or_uses_title_as_evidence():
+    class ForbiddenModel:
+        def extract(self, *_args, **_kwargs):
+            raise AssertionError("Metadata-only text must not enter inference")
+
+    result = discover_questions(
+        [
+            {
+                "document_id": "title-only",
+                "title": "Future studies should examine glucose uptake.",
+                "text": "",
+                "abstract": "   ",
+            }
+        ],
+        runtime=ForbiddenModel(),
+    )
+    assert result["questions"] == []
+    assert result["document_statuses"][0]["status"] == "METADATA_ONLY_NOT_EXTRACTED"
+    assert "title metadata is not paper evidence" in result["document_statuses"][0]["reason"]
+    assert result["coverage"]["failed_documents"] == 0
+
+
+def test_addressing_isolates_missing_text_and_malformed_rows():
+    result = check_addressed_evidence(
+        "Does insulin increase glucose uptake in humans?",
+        [
+            doc("Insulin increased glucose uptake in humans.", "valid"),
+            {
+                "document_id": "metadata-only",
+                "title": "Insulin increased glucose uptake in humans.",
+            },
+            {"document_id": "bad-metadata", "text": "Insulin increased uptake.", "metadata": []},
+        ],
+    )
+    assert len(result["candidates"]) == 1
+    assert result["searched_document_ids"] == ["valid"]
+    assert result["metadata_only_documents"][0]["status"] == "METADATA_ONLY_NOT_EXTRACTED"
+    assert result["failures"][0]["status"] == "EXTRACTION_FAILURE"
+    assert result["search_complete"] is False
+    metadata_only = check_addressed_evidence(
+        "Does insulin increase glucose uptake?",
+        [{"document_id": "no-abstract", "title": "An article"}],
+    )
+    assert metadata_only["status"] == "INCOMPLETE_SEARCH"
+    assert metadata_only["failures"] == []
+
+
+def test_duplicate_ids_fail_individually_without_discarding_distinct_source():
+    text = "Further studies should examine glucose uptake in humans."
+    result = discover_questions(
+        [doc(text, "duplicate"), doc(text, "duplicate"), doc(text, "valid")]
+    )
+    assert [row["source_document_id"] for row in result["questions"]] == ["valid"]
+    assert result["coverage"]["failed_documents"] == 2
+
+
+def test_blank_text_uses_available_abstract_and_preserves_exact_source_span():
+    text = "Further studies should examine glucose uptake in humans."
+    result = discover_questions([{"document_id": "abstract", "text": "  ", "abstract": text}])
+    assert result["questions"][0]["evidence_span"]["text"] == text
+    assert result["coverage"]["metadata_only_documents"] == 0

@@ -55,6 +55,13 @@ source views use the existing 128-sentence source selector and 200,000-character
 input ceiling. Large articles need explicit upstream windows. Failed views,
 empty results and truncated result sets remain distinguishable.
 
+Metadata-only papers without source text or an abstract are recorded as
+`METADATA_ONLY_NOT_EXTRACTED`; titles are never substituted as paper evidence.
+Malformed records and unresolved duplicate identities have per-input failures,
+so valid peers continue. Addressing checks separately report missing-text
+coverage without turning it into a negative scientific finding or a transient
+model failure.
+
 Validation: 27 focused discovery/compiler tests passed. A fresh execution over
 the 30 existing development source documents retained 20 passages: 14 research
 questions, five source-stated unresolved passages and one limitation, without

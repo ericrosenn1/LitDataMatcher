@@ -21,13 +21,39 @@ import pyarrow.parquet as pq
 from .controller import integration_lease
 from .corpus_snapshot import file_digest
 from .data_plane import atomic_json
-from .literature_index import LiteratureIndex, _manifest, _paths
+from .literature_index import LiteratureIndex, _manifest, _paths, _shard_identity
 
 EVENT_DTYPE = np.dtype(
     [("pmid", "<u8"), ("version", "<i4"), ("shard", "<i4"), ("event", "<i4"), ("upsert", "?")]
 )
 PAIR_DTYPE = np.dtype([("pmid", "<u8"), ("version", "<i4")])
 VERSION = "independent-current-ledger-validation-1.0"
+_IMPLEMENTATION_SHA256 = file_digest(Path(__file__))
+
+
+def _sampled_events(corpus, manifest_path, manifest, selected):
+    """Fetch complete sampled source events, reading each needed row group once."""
+    by_shard = {}
+    for value in selected:
+        by_shard.setdefault(int(value["shard"]), set()).add(int(value["event"]))
+    result = {}
+    for order, positions in by_shard.items():
+        shard = manifest["shards"][order]
+        _, path = _paths(corpus, manifest_path.parent, shard)
+        if file_digest(path) != shard["sidecar_sha256"]:
+            raise ValueError("Sampled ledger bytes changed")
+        parquet = pq.ParquetFile(path)
+        offset = 0
+        for group in range(parquet.num_row_groups):
+            count = parquet.metadata.row_group(group).num_rows
+            needed = [position for position in positions if offset <= position < offset + count]
+            if needed:
+                table = parquet.read_row_group(group)
+                for position in needed:
+                    result[(order, position)] = table.slice(position - offset, 1).to_pylist()[0]
+                del table
+            offset += count
+    return result
 
 
 def _select_current(events):
@@ -167,6 +193,16 @@ def validate_current_snapshot(
             manifest["shards"]
         ):
             raise ValueError("Full validation requires a complete materialized snapshot")
+        checkpoints = [
+            tuple(row)
+            for row in index.conn.execute(
+                "SELECT shard_order,identity FROM shards ORDER BY shard_order"
+            )
+        ]
+        if checkpoints != [
+            (shard["shard_order"], _shard_identity(shard)) for shard in manifest["shards"]
+        ]:
+            raise ValueError("Committed checkpoint identity differs from the ledger manifest")
         marker = json.loads((corpus / "CORPUS_ROOT.json").read_text(encoding="utf-8"))
         if (
             index._metadata("ledger_manifest_sha256") != ledger_hash
@@ -232,15 +268,29 @@ def validate_current_snapshot(
             positions = np.linspace(
                 0, len(expected) - 1, min(sample_size, len(expected)), dtype=int
             )
+            progress("CHECKING_SOURCE_EVENT_SAMPLES", sample_size=len(positions))
+            source_events = _sampled_events(corpus, manifest_path, manifest, expected[positions])
             for position in positions:
                 value = expected[position]
                 record = index.get(str(int(value["pmid"])))
                 winning = record["source_provenance"]["event"]
-                if (winning["shard_order"], winning["event_index"]) != (
-                    int(value["shard"]),
-                    int(value["event"]),
-                ):
+                key = (int(value["shard"]), int(value["event"]))
+                if winning != source_events[key]:
                     raise ValueError("Winning source event mismatch")
+                shard = manifest["shards"][key[0]]
+                required = {
+                    "source": shard["source"],
+                    "source_shard": shard["source_shard"],
+                    "legacy_relative_path": shard["legacy_relative_path"],
+                    "legacy_sha256": shard["legacy"]["sha256"],
+                    "sidecar_sha256": shard["sidecar_sha256"],
+                    "source_locator": f"https://pubmed.ncbi.nlm.nih.gov/{int(value['pmid'])}/",
+                }
+                if any(
+                    record["source_provenance"].get(key) != wanted
+                    for key, wanted in required.items()
+                ):
+                    raise ValueError("Winning source provenance mismatch")
                 samples.append(
                     {
                         "document_id": record["document_id"],
@@ -252,6 +302,8 @@ def validate_current_snapshot(
             atomic_json(out / "WINNING_EVENT_SAMPLES.json", samples)
             progress("SQLITE_AND_FTS_INTEGRITY", compared_records=compared)
             integrity = index.validate()
+            if file_digest(Path(__file__)) != _IMPLEMENTATION_SHA256:
+                raise ValueError("Validator implementation changed during execution")
             if file_digest(manifest_path) != ledger_hash or index.snapshot_identity() != snapshot:
                 raise ValueError("Source or snapshot identity changed during validation")
             report = {
@@ -267,7 +319,7 @@ def validate_current_snapshot(
                 "integrity": integrity,
                 "estimated_peak_memory_bytes": estimated_bytes,
                 "elapsed_seconds": time.perf_counter() - started,
-                "implementation_sha256": file_digest(Path(__file__)),
+                "implementation_sha256": _IMPLEMENTATION_SHA256,
                 "versions": {"numpy": np.__version__, "pyarrow": pa.__version__},
                 "scope_note": "Computational current PMID/version and winning-event fidelity, plus SQLite/FTS agreement; not biomedical truth validation.",
             }

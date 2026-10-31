@@ -90,3 +90,30 @@ def test_independent_array_projection_matches_simple_dictionary_history():
             expected[pmid] = row
     actual = _select_current(np.array(rows, dtype=EVENT_DTYPE))
     assert actual.tolist() == [expected[pmid] for pmid in sorted(expected)]
+
+
+def test_validator_rejects_checkpoint_not_bound_to_manifest(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)]])
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db) as index, index.conn:
+        index.conn.execute("UPDATE shards SET identity=?", ("0" * 64,))
+    with pytest.raises(ValueError, match="checkpoint identity"):
+        validate_current_snapshot(corpus, manifest, db, tmp_path / "validation")
+
+
+@pytest.mark.parametrize(
+    "field", ["pmid", "version", "source_shard", "legacy_row_index", "legacy_sha256"]
+)
+def test_validator_checks_complete_sampled_event_and_hash_provenance(tmp_path, field):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)]])
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db) as index:
+        value = json.loads(index.conn.execute("SELECT provenance_json FROM versions").fetchone()[0])
+        if field == "legacy_sha256":
+            value[field] = "0" * 64
+        else:
+            value["event"][field] = "wrong"
+        with index.conn:
+            index.conn.execute("UPDATE versions SET provenance_json=?", (json.dumps(value),))
+    with pytest.raises(ValueError, match="Winning source"):
+        validate_current_snapshot(corpus, manifest, db, tmp_path / "validation")

@@ -42,6 +42,7 @@ def main():
     parser.add_argument("--documents", type=Path, required=True)
     parser.add_argument("--snapshot", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--selection-protocol", type=Path)
     args = parser.parse_args()
     original_bytes = args.documents.read_bytes()
     documents = [json.loads(line) for line in original_bytes.decode("utf-8").splitlines()]
@@ -66,6 +67,13 @@ def main():
         encoding="utf-8",
     )
     write_json(dest / "SNAPSHOT.json", snapshot)
+    selection_protocol = (
+        json.loads(args.selection_protocol.read_text(encoding="utf-8"))
+        if args.selection_protocol
+        else None
+    )
+    if selection_protocol is not None:
+        write_json(dest / "SELECTION_PROTOCOL.json", selection_protocol)
     write_json(
         dest / "SOURCE_VIEW_CORRECTION.json",
         {
@@ -156,6 +164,7 @@ def main():
             ),
         },
         "snapshot": snapshot,
+        "selection_protocol": selection_protocol,
         "coverage": result["coverage"],
         "document_status_counts": counts,
         "no_candidate_question_in_processed_source_text_documents": counts.get("EMPTY", 0),
@@ -201,12 +210,14 @@ def main():
             "items_failed": result["coverage"]["failed_documents"],
             "validation_status": "PASS",
             "audit_status": "PASS",
-            "repair_cycles": 1,
+            "repair_cycles": 1 if corrected_ids else 0,
             "repairs_performed": [
                 "Removed the historical index's title fallback from derived source text; original input and first run preserved as diagnostic."
-            ],
+            ]
+            if corrected_ids
+            else [],
             "unresolved_issues": [
-                "Missing native abstracts limit actual extraction count.",
+                "Missing native abstracts, when present, limit actual extraction count.",
                 "Rule-based cue accuracy is not measured; no expert labels or novelty claims.",
             ],
             "scientific_assumptions_changed": False,

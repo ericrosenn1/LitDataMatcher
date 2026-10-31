@@ -102,3 +102,23 @@ correction ledger, questions, validation, manifest and verified handoff archive
 are retained under
 `C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\question-scale-1000-v2`
 and its adjacent `.zip`. No model was loaded or expensive successful run repeated.
+
+A separate, explicitly sampled abstract-only demonstration selected 1,000
+nonempty native PubMed abstracts from a later committed partial snapshot (677
+applied shards). The recorded protocol uses fixed breast-oncology phrases,
+numeric PMID descending order and a bounded source-topic filter. It is a
+purposive engineering sample, not a representative scientific evaluation.
+Two records were excluded by the unchanged lifecycle policy; 998 abstracts were
+processed, of which 906 had no configured cue. The remaining 92 sources yielded
+102 literal passages: 74 source-stated unresolved passages, 26 limitations and
+two research questions. All 102 exact native-abstract fidelity checks passed;
+there were no extraction failures or truncation.
+
+The read-only selection took 6.82 seconds; extraction plus grouping took 0.508
+seconds. Sampled process RSS peaked at 55.09 MiB (7.59 MiB over its extraction
+baseline). This single bounded run does not establish general throughput or
+accuracy. Its complete sample protocol and receipt are in
+`docs/validation/question-discovery-abstract-scale-20261031.json`; inputs,
+outputs, validation and verified ZIP are under the separate
+`question-scale-1000-abstracts-v1` location beside the earlier corrected cohort.
+Both valid demonstrations and the superseded diagnostic remain preserved.

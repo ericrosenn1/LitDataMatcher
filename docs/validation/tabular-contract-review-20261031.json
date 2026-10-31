@@ -1,0 +1,25 @@
+{
+  "review_status": "PASS_AFTER_TARGETED_FIX",
+  "review_scope": "Independent read-only engineering review of tabular_contracts and platform_workflow question-scoped integration; not expert scientific labeling.",
+  "original_commits_reviewed": ["119f8d6", "4f8b897"],
+  "owner_fix_commit": "73c3d495d814373fd960de22e5098ad6368ed513",
+  "finding": {
+    "issue": "A source definition pointer to a different named dictionary column was accepted and could produce DIRECT_FIT.",
+    "reproduction": "Existing fixture outcome value was assigned /variables/2/description for column other, text Another measurement.",
+    "owner_fix": "Require exact variable identity and canonical index for column pointers; constrain narrative pointer families and require explicit mapping notes.",
+    "independent_revalidation": "The same reproduction now raises ValueError: Source definition belongs to a different variable."
+  },
+  "checks": {
+    "targeted_scope_and_workflow_tests_before_guard_fix": 17,
+    "targeted_scope_and_workflow_tests_passed": 17,
+    "actual_comparative_cases_independently_checked": 12,
+    "native_csv_group_counts_and_row_indices": "PASS",
+    "exact_definition_quotes_at_native_metadata_pointers": "PASS",
+    "exact_contract_column_group_type_and_hash_guards": "PASS_REVIEW",
+    "observed_conflicts_preserved_and_prior_capabilities_restored": "PASS_REVIEW",
+    "no_projected_method_capabilities_persisted_in_general_catalog": "PASS_REVIEW",
+    "timing_independence_and_statistical_adequacy_remain_unknown": "PASS_REVIEW"
+  },
+  "interpretation": "Twelve new descriptive development contracts reuse two source datasets. They do not establish twelve independent studies, source-stated unanswered opportunities, novelty, causal effects or statistical adequacy. Original twelve association contracts remain unchanged and unqualified.",
+  "remaining_actionable_findings": []
+}

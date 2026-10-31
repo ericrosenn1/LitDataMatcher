@@ -1,0 +1,17 @@
+{
+  "source_sha256": "52ac09839ab1dec8767d480ea7e734d1d464606dce074cbf0398568f35189cf9",
+  "script_sha256": "347133db884e4ebd6969d4f6bd5c91cf6d980785c2a16022743c69e36f72b6d6",
+  "matplotlib_version": "3.11.2",
+  "outputs": [
+    {
+      "path": "retrieval-scale.png",
+      "sha256": "5302bc32d90bbfa0b8f2b45c5801a2221f582ef058c8dd1dce128f47b0a9d21a",
+      "bytes": 113005
+    },
+    {
+      "path": "retrieval-scale.svg",
+      "sha256": "26caf695ca415f7a0377d043097e4eae03a1aaddce75462c77e350fe017e0d56",
+      "bytes": 17639
+    }
+  ]
+}

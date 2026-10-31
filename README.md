@@ -7,7 +7,7 @@ requirements, source-linked evidence, and ranked dataset candidates. Unknowns,
 failed retrievals, conflicting evidence, and underdetermined questions remain
 visible throughout the workflow.
 
-[Research workflow](docs/research_workflow.md) · [Methods](docs/campaign_20261031/retrieval_protocol.md) · [Recovery](docs/campaign_20261031/workflow_recovery.md) · [Scientific limits](docs/limitations.md) · [MIT license](LICENSE)
+[Research workflow](docs/research_workflow.md) Â· [Methods](docs/campaign_20261031/retrieval_protocol.md) Â· [Recovery](docs/campaign_20261031/workflow_recovery.md) Â· [Scientific limits](docs/limitations.md) Â· [MIT license](LICENSE)
 
 ## Research capabilities
 
@@ -94,29 +94,42 @@ qualified configurations, and limits on interpretation.
 
 ## Measured development evidence
 
-The first frozen experiment uses **1,333 training queries, 175 development
-queries, and 1,508 source papers**. Training and development paper identities
-and text are disjoint. Official test partitions and reserved evaluation data
-are excluded.
+Training uses **1,333 source-linked queries**. The same **175 paper-disjoint
+development queries** were evaluated against 1,508, 50,000, and 100,000 candidate
+papers. Official test partitions and reserved evaluation data are excluded.
+The larger pools add qualified annual-baseline distractors without retraining.
 
-| Method | Development MRR@10 |
-| --- | ---: |
-| BM25 | 0.9921 |
-| BM25 + pretrained dense fusion | 0.9700 |
-| Locally fine-tuned dense encoder | 0.9522 |
-| Pretrained dense encoder | 0.9302 |
+**MRR@10 with 100,000 candidate papers:**
 
-![Measured development retrieval results](docs/assets/retrieval-development.svg)
+| Method | Title + abstract | Abstract only |
+| --- | ---: | ---: |
+| BM25 | **0.9722** | **0.9354** |
+| BM25 + trained dense fusion | 0.9359 | 0.9038 |
+| BM25 + pretrained dense fusion | 0.9279 | 0.8910 |
+| Fine-tuned MiniLM | 0.9079 | 0.8326 |
+| Pretrained MiniLM | 0.8551 | 0.7903 |
 
-Fine-tuning improves its pretrained parent by **0.0220 MRR** (paired query-bootstrap
-95% interval: 0.0033–0.0432), while BM25 remains stronger. Many PubMedQA queries
-echo their source titles; larger candidate pools and an abstract-only diagnostic
-are being evaluated separately. These measure **known source-paper recovery**,
-not whether a dataset can answer a question.
+![Audited large-pool retrieval results](docs/assets/retrieval-scale.svg)
 
-See the [results and independent audit summary](benchmarks/campaign_20261031/retrieval_development.json),
-[fixed protocol](docs/campaign_20261031/retrieval_protocol.md), and
-[training procedure](docs/campaign_20261031/retriever_training.md).
+Fine-tuning improves its pretrained parent by **0.0528 MRR** with title and
+abstract (paired query-bootstrap 95% interval: 0.0217–0.0841), and by **0.0423**
+with abstracts alone (0.0077–0.0780). **BM25 leads every measured condition.**
+The aggregate gain is source-dependent: PubMedQA performance decreases in both
+abstract-only pools. Many original queries echo source titles, so these results
+measure known source-link recovery, not general question answering or dataset
+suitability.
+
+Verified warm loading of 100,000-document vectors took **1.29–1.43 seconds** in
+the recorded local runs, versus **101–111 seconds** for fresh encoding. Model
+initialization is recorded separately. These are hardware-dependent cache
+measurements, not a claim that fresh model inference runs at cache speed.
+
+See the [complete scale results](benchmarks/campaign_20261031/retrieval_scale.json),
+[initial development experiment](benchmarks/campaign_20261031/retrieval_development.json),
+[fixed training protocol](docs/campaign_20261031/retrieval_protocol.md), and
+[scale evaluation procedure](docs/campaign_20261031/retrieval_scale.md).
+An independent audit checked all 3,500 query/method ranking lists, 20 condition
+metrics, and all four vector encodings.
 
 Other evidence includes a frozen 30-case development pack, real processed-table
 inspections, source-adapter replay, and an annual PubMed baseline integrity audit.

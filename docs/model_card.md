@@ -43,7 +43,11 @@ The initial experiment selected epoch 2 over its pretrained parent, but BM25
 remained stronger overall. Many PubMedQA questions echo target titles. See the
 [retrieval protocol](campaign_20261031/retrieval_protocol.md) and the repository's
 `benchmarks/campaign_20261031/retrieval_development.json`. Larger-pool and
-title-removal comparisons are separate development diagnostics.
+title-removal comparisons are separate development diagnostics. Both completed
+large-pool comparisons retain BM25 as the strongest measured method. Fine-tuning
+improves aggregate dense retrieval but reduces PubMedQA MRR in abstract-only
+conditions. Complete results are recorded in
+`benchmarks/campaign_20261031/retrieval_scale.json`.
 
 Extraction qualification uses previously seen development documents. The
 smaller model failed one positive smoke case. Qualification requires fresh

@@ -64,7 +64,13 @@
     "profile": "unconstrained v2.4",
     "status": "FAIL_NO_ACCEPTED_RECORDS",
     "elapsed_seconds": 167.6658445,
-    "interpretation": "Guard correctly rejected unsupported model output; constrained-decoding candidate planned"
+    "interpretation": "Guard correctly rejected unsupported model output; constrained-decoding candidate planned",
+    "source_schema_attempt_1": {
+      "status": "FAIL",
+      "reason": "Pinned LMFE permits first item despite maxItems=0; independent validator rejected invented future question",
+      "receipt": "source-schema-positive-1/QUALIFICATION.json",
+      "repair": "Strict grammar intersection under test; no validator weakening"
+    }
   },
   "active_work": [
     "Full PubMed revision/deletion ledger, 2 processes, additive outputs",
@@ -120,5 +126,29 @@
     ],
     "biological_analysis_performed": false,
     "failed_GEO_attempt_retained": true
+  },
+  "source_discovery": {
+    "status": "PASS",
+    "source_jobs": 24,
+    "dataset_records": 170,
+    "literature_records": 56,
+    "offline_replay": "PASS",
+    "scope": "Six-topic bounded metadata queries; no completeness or scientific-feasibility claim",
+    "receipt": "biomedical-discovery-v1/DISCOVERY_MANIFEST.json"
+  },
+  "package_round_1": {
+    "status": "PASS",
+    "wheel": "litdatamatcher-0.4.0-py3-none-any.whl",
+    "fresh_environment": true,
+    "demo_documents": 1,
+    "demo_questions": 3,
+    "demo_matches": 15,
+    "notes": "Illustrative deterministic smoke; current package final rebuild pending"
+  },
+  "documentation_build_round_1": "PASS_STRICT",
+  "source_style_audit": {
+    "existing_package_lint_findings": 134,
+    "existing_total_lint_findings": 352,
+    "next_action": "Apply reviewed formatting after active model/corpus source fingerprints freeze; no scientific changes"
   }
 }

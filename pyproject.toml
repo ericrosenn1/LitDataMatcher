@@ -29,6 +29,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+corpus = ["pyarrow>=19.0"]
 nlp = [
   "torch>=2.4",
   "sentence-transformers>=2.6",

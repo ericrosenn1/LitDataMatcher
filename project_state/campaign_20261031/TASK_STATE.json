@@ -10,7 +10,13 @@
   "branch": "codex/research-engine-campaign-20261031",
   "scope": "Broad biomedical research; model quality/performance, source fidelity, multi-node recovery, source-backed benchmarking, reproducible delivery",
   "specification": "docs/research_campaign_20261031.md",
-  "baseline_validation": "RUNNING",
+  "baseline_validation": {
+    "status": "PASS",
+    "tests": 709,
+    "source_commit": "e592407",
+    "receipt": "local/campaign_20261031/baseline.xml",
+    "environment": "C:/Codex/LitDataMatcher-v2/env (read-only existing environment)"
+  },
   "source_corpus_integrity": "NOT_YET_QUALIFIED_FOR_THIS_CAMPAIGN",
   "source_corpus_root": "D:/LitDataMatcher-Corpora",
   "run_root": "C:/Codex/LitDataMatcher-v2/data/campaign_20261031",

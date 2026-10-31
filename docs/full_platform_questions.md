@@ -170,3 +170,27 @@ sample protocol, source inputs, per-batch results, manifest and verified 11.25 M
 archive are retained under
 `C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\question-scale-10000-v1`
 and its adjacent `.zip`. The previous milestones remain preserved.
+
+An additive global aggregation then ran the existing `cluster_questions` on
+all 935 retained passages, within its 1,000-passage API bound. It produced 931
+review groups, including three groups spanning batches and source documents
+(member counts two, two and three). All three multi-member groups are explicitly
+`NEAR_DUPLICATE_REVIEW`, with scientific equivalence unestablished and independent
+evidence counts null. The existing 0.9 engineering threshold was unchanged.
+Global grouping took 38.90 seconds and did not rerun extraction, retrieve
+sources or load a model.
+
+All 935 original question records, source identities, exact passages, citations
+and provenance remain preserved. Membership was independently reconciled with
+no missing or repeated question IDs. The original per-batch total remains 935
+groups in the frozen 10,000-input report; this separate global stage adds 931
+groups without replacing that report or its verified ZIP. Source checkpoint,
+input and archive hashes bind the added output to the original run.
+
+The additive script is `scripts/aggregate_question_scale_results.py`, with
+measured receipt `docs/validation/question-discovery-10000-global-20261031.json`.
+The source-linked question records, global groups, source fingerprint, manifest
+and verified archive are retained under the separate
+`question-scale-10000-global-v1` location. These are proposed textual groupings
+for review, not established duplicate scientific questions or independent
+unanswered opportunities.

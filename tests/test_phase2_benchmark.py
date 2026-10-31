@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 
 import pytest
@@ -16,6 +17,7 @@ from litdatamatcher.phase2_benchmark import (
     ranking_metrics,
     reference_label,
     run_benchmark,
+    source_identity,
     unique_records,
     verify_acquisition_input,
 )
@@ -213,3 +215,39 @@ def test_complete_receipt_refuses_missing_real_challenge_coverage(
     )
     with pytest.raises(ValueError, match="new empty versioned"):
         run_benchmark(literature, datasets, acquisition, output, protocol)
+
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="Nested repository test requires Git")
+def test_exported_source_does_not_claim_ancestor_repository_commit(tmp_path):
+    parent = tmp_path / "parent-repository"
+    parent.mkdir()
+    subprocess.run(["git", "init", str(parent)], check=True, capture_output=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(parent),
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "--allow-empty",
+            "-m",
+            "Synthetic parent repository",
+        ],
+        check=True,
+        capture_output=True,
+    )
+    commit = subprocess.check_output(
+        ["git", "-C", str(parent), "rev-parse", "HEAD"], text=True
+    ).strip()
+    assert source_identity(parent)["commit"] == commit
+    exported = parent / "unpacked-source"
+    exported.mkdir()
+    observed = source_identity(exported)
+    assert observed["kind"] == "source_files_only"
+    assert observed["commit"] is None
+    assert observed["git_error"] == "repository_root_mismatch"

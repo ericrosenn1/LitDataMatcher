@@ -80,8 +80,20 @@ def file_sha256(path: str | Path) -> str:
 
 def source_identity(repository: Path) -> dict:
     """Report an available Git revision without inventing one for distributions."""
+    repository = repository.resolve()
     identity = {"kind": "source_files_only", "commit": None, "package_version": __version__}
     try:
+        git_root = Path(
+            subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=repository,
+                text=True,
+                stderr=subprocess.PIPE,
+            ).strip()
+        ).resolve()
+        if git_root != repository:
+            identity.update(git_error="repository_root_mismatch", git_root=str(git_root))
+            return identity
         commit = subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=repository, text=True, stderr=subprocess.PIPE
         ).strip()

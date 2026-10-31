@@ -27,7 +27,7 @@ def main(argv=None) -> int:
     parser.add_argument("--question", help="Optional user question for fresh requirement proposals")
     parser.add_argument(
         "--decoding-mode",
-        choices=("unconstrained", "source_schema", "source_index"),
+        choices=("unconstrained", "source_schema", "source_index", "source_literal"),
         default="unconstrained",
     )
     parser.add_argument("--max-new-tokens", type=int, default=1024)
@@ -67,7 +67,11 @@ def main(argv=None) -> int:
     }
     stage = "input_and_configuration"
     try:
-        if args.question and args.decoding_mode in {"source_schema", "source_index"}:
+        if args.question and args.decoding_mode in {
+            "source_schema",
+            "source_index",
+            "source_literal",
+        }:
             raise ValueError(
                 f"{args.decoding_mode} is extraction-only; omit --question or use an unconstrained runtime"
             )

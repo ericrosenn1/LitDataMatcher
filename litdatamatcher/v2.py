@@ -1467,7 +1467,9 @@ def main(argv=None):
         help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores",
     )
     run.add_argument(
-        "--decoding-mode", choices=["unconstrained", "source_schema", "source_index"], default=None
+        "--decoding-mode",
+        choices=["unconstrained", "source_schema", "source_index", "source_literal"],
+        default=None,
     )
     run.add_argument("--max-new-tokens", type=int, default=None)
     run.add_argument(
@@ -1494,7 +1496,9 @@ def main(argv=None):
     batch.add_argument("--resume", action="store_true")
     batch.add_argument("--stop-on-error", action="store_true")
     batch.add_argument(
-        "--decoding-mode", choices=["unconstrained", "source_schema", "source_index"], default=None
+        "--decoding-mode",
+        choices=["unconstrained", "source_schema", "source_index", "source_literal"],
+        default=None,
     )
     batch.add_argument("--max-new-tokens", type=int, default=None)
     batch.add_argument(

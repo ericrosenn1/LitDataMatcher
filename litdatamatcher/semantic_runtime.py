@@ -107,8 +107,15 @@ class RuntimeConfig:
                 raise ValueError(f"{field} must be a positive integer")
         if self.max_attempts > 3:
             raise ValueError("At most three repair attempts are permitted")
-        if self.decoding_mode not in {"unconstrained", "source_schema", "source_index"}:
-            raise ValueError("decoding_mode must be unconstrained, source_schema or source_index")
+        if self.decoding_mode not in {
+            "unconstrained",
+            "source_schema",
+            "source_index",
+            "source_literal",
+        }:
+            raise ValueError(
+                "decoding_mode must be unconstrained, source_schema, source_index or source_literal"
+            )
 
 
 def _span(text: str, quote: Any) -> dict:
@@ -380,7 +387,11 @@ class LocalSemanticRuntime:
     ) -> tuple[str, int, int]:
         import torch
 
-        constrained = self.config.decoding_mode in {"source_schema", "source_index"}
+        constrained = self.config.decoding_mode in {
+            "source_schema",
+            "source_index",
+            "source_literal",
+        }
         if constrained and system_prompt != SYSTEM_PROMPT:
             raise ValueError(
                 f"{self.config.decoding_mode} is an extraction-only profile; use unconstrained for requirement proposals"
@@ -396,7 +407,12 @@ class LocalSemanticRuntime:
                 system_prompt = INDEX_PROMPT
                 source_payload = prompt_document(document)
             else:
-                from .structured_decoding import PROFILE_INSTRUCTION, prefix_constraint
+                from .structured_decoding import PROFILE_INSTRUCTION
+
+                if self.config.decoding_mode == "source_literal":
+                    from .literal_decoding import prefix_constraint
+                else:
+                    from .structured_decoding import prefix_constraint
 
                 system_prompt += "\n" + PROFILE_INSTRUCTION
             prefix, tokenizer_data = prefix_constraint(
@@ -445,6 +461,12 @@ class LocalSemanticRuntime:
 
             decoding.update(backend_decoding_metadata())
             effective_prompt += "\n" + PROFILE_INSTRUCTION
+        elif self.config.decoding_mode == "source_literal":
+            from .literal_decoding import backend_decoding_metadata
+            from .structured_decoding import PROFILE_INSTRUCTION
+
+            decoding.update(backend_decoding_metadata())
+            effective_prompt += "\n" + PROFILE_INSTRUCTION
         elif self.config.decoding_mode == "source_index":
             from .indexed_decoding import PROMPT_VERSION as INDEX_PROMPT_VERSION
             from .indexed_decoding import SYSTEM_PROMPT as INDEX_PROMPT
@@ -474,6 +496,10 @@ class LocalSemanticRuntime:
             from .structured_decoding import decoding_metadata
 
             identity["decoding"].update(decoding_metadata(document))
+        elif self.config.decoding_mode == "source_literal":
+            from .literal_decoding import decoding_metadata
+
+            identity["decoding"].update(decoding_metadata(document))
         elif self.config.decoding_mode == "source_index":
             from .indexed_decoding import decoding_metadata
 
@@ -483,7 +509,7 @@ class LocalSemanticRuntime:
     def extract(
         self, document: dict, cache_root: str | Path | None = None, force_fresh: bool = False
     ) -> dict:
-        if self.config.decoding_mode == "source_index":
+        if self.config.decoding_mode in {"source_index", "source_literal"}:
             document = deepcopy(document)
         if (
             not isinstance(document, dict)
@@ -526,6 +552,13 @@ class LocalSemanticRuntime:
                 "sentence_table": sentence_table(document),
                 "attempts": [],
             }
+        elif self.config.decoding_mode == "source_literal":
+            index_trace = {
+                "profile": fingerprint["decoding"]["profile"],
+                "source_document_sha256": fingerprint["input_sha256"],
+                "schema_sha256": fingerprint["decoding"]["schema_sha256"],
+                "attempts": [],
+            }
         for attempt in range(1, self.config.max_attempts + 1):
             try:
                 raw, input_tokens, output_tokens = self._generate(document, repair)
@@ -551,8 +584,6 @@ class LocalSemanticRuntime:
                 )
             try:
                 if index_trace is not None:
-                    from .indexed_decoding import map_index_payload, parse_index_json
-
                     trace_attempt = {
                         "attempt": attempt,
                         "raw_output": raw,
@@ -560,14 +591,22 @@ class LocalSemanticRuntime:
                     }
                     index_trace["attempts"].append(trace_attempt)
                     if digest(document) != fingerprint["input_sha256"]:
-                        raise RuntimeError("Source snapshot changed during indexed extraction")
-                    parsed = parse_index_json(raw)
+                        raise RuntimeError("Source snapshot changed during constrained extraction")
+                    if self.config.decoding_mode == "source_index":
+                        from .indexed_decoding import map_index_payload, parse_index_json
+
+                        parsed = parse_index_json(raw)
+                    else:
+                        from .literal_decoding import parse_literal_json
+
+                        parsed = parse_literal_json(raw)
                     trace_attempt["raw_payload"] = deepcopy(parsed)
-                    parsed, mapping = map_index_payload(parsed, document)
-                    trace_attempt["mapping"] = mapping
+                    if self.config.decoding_mode == "source_index":
+                        parsed, mapping = map_index_payload(parsed, document)
+                        trace_attempt["mapping"] = mapping
                 else:
                     parsed = parse_model_json(raw)
-                if self.config.decoding_mode in {"source_schema", "source_index"}:
+                if self.config.decoding_mode in {"source_schema", "source_index", "source_literal"}:
                     from .structured_decoding import validate_source_schema
 
                     validate_source_schema(parsed, document)
@@ -620,7 +659,7 @@ class LocalSemanticRuntime:
         if validated is None:
             raise ValueError("Semantic generation failed after bounded attempts: " + repair)
         if index_trace is not None and digest(document) != fingerprint["input_sha256"]:
-            raise RuntimeError("Source snapshot changed during indexed extraction")
+            raise RuntimeError("Source snapshot changed during constrained extraction")
         validated["claims"] = list(accepted_claims.values())
         validated["questions"] = list(accepted_questions.values())
         manifest = {

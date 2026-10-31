@@ -14,6 +14,7 @@ import {
   safeScientificUrl,
   scientificExportUrl,
   scientificRequest,
+  scientificSourcePayload,
 } from "../lib/scientificApi";
 import type {
   CompiledQuestion,
@@ -266,15 +267,7 @@ export function ScientificWorkflow() {
         inspection_limit: inspect,
         extraction_mode: extraction,
         ranking,
-        documents: documents.map((document) => ({
-          title: document.title || document.document_id || "Submitted source",
-          text: document.text || document.abstract || "",
-          ...(safeScientificUrl(document.url || document.source_locator)
-            ? {
-                url: safeScientificUrl(document.url || document.source_locator),
-              }
-            : {}),
-        })),
+        ...scientificSourcePayload(documents),
       };
       const value = await scientificRequest<ResearchJob>("jobs", body);
       setJob(value);

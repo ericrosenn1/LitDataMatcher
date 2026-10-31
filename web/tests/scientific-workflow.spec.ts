@@ -255,6 +255,32 @@ test("saved jobs, local source selection and queue controls survive navigation",
   await expect(page.locator(".scientific-attached")).toContainText(
     "Synthetic source for workflow testing",
   );
+  await page.getByText("Add source text", { exact: true }).click();
+  await page.getByLabel("Source title", { exact: true }).fill("Pasted source");
+  await page
+    .getByLabel("Abstract or source passage", { exact: true })
+    .fill("Further research is needed on glucose uptake.");
+  await page.getByRole("button", { name: "Add source", exact: true }).click();
+  await page
+    .getByLabel("Research question", { exact: true })
+    .fill(result.question.question);
+  await page.getByRole("button", { name: "Launch research workflow" }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Evidence and compatibility",
+      exact: true,
+    }),
+  ).toBeVisible();
+  const launched = requests.find(
+    (row) => row.path === "/api/jobs" && row.body,
+  )?.body;
+  expect(launched?.document_ids).toEqual(["fixture-paper"]);
+  expect(launched?.documents).toEqual([
+    {
+      title: "Pasted source",
+      text: "Further research is needed on glucose uptake.",
+    },
+  ]);
   await page.getByLabel("Saved research job").selectOption("saved-fixture");
   await expect(
     page.getByRole("heading", {

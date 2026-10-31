@@ -110,6 +110,29 @@ export interface ResearchRequest {
   extraction_mode: "rules" | "model";
   ranking: "bm25" | "dense" | "hybrid";
   documents?: ResearchDocument[];
+  document_ids?: string[];
+}
+
+export function scientificSourcePayload(sources: ResearchDocument[]) {
+  // Known identifiers are resolved by the server from its owning catalog/index.
+  // A selected source's citation and lifecycle are never reconstructed in-browser.
+  const document_ids = [
+    ...new Set(
+      sources.flatMap((source) =>
+        source.document_id ? [source.document_id] : [],
+      ),
+    ),
+  ];
+  const documents = sources
+    .filter((source) => !source.document_id)
+    .map((source) => ({
+      title: source.title || "Submitted source",
+      text: source.text || source.abstract || "",
+      ...(safeScientificUrl(source.url || source.source_locator)
+        ? { url: safeScientificUrl(source.url || source.source_locator) }
+        : {}),
+    }));
+  return { document_ids, documents };
 }
 
 export async function scientificRequest<T>(

@@ -2,6 +2,7 @@
 
 import json
 import threading
+from contextlib import contextmanager
 from copy import deepcopy
 
 import pytest
@@ -367,5 +368,90 @@ def test_cli_forwards_explicit_decoding_configuration(monkeypatch):
         return {"status": "PASS", "failed": 0, "retryable": 0}
     monkeypatch.setattr(batches, "run_batch", capture)
     assert v2.main(["batch", "--root", "root", "--out", "out", "--model", "model", "--embeddings", "embed",
-                    "--inputs", "cases.jsonl", "--decoding-mode", "source_schema", "--max-new-tokens", "384"]) == 0
+                    "--inputs", "cases.jsonl", "--decoding-mode", "source_schema", "--max-new-tokens", "384",
+                    "--runtime-qualification", "trial.json"]) == 0
     assert captured["runtime_config"] == {"decoding_mode": "source_schema", "max_new_tokens": 384}
+    assert captured["runtime_qualification"] == "trial.json"
+
+
+def test_explicit_qualification_is_hash_bound_and_historical_file_is_preserved(native, tmp_path):
+    root, inputs, counts = native
+    historical = root / "runtime-qualification/qualified_7b_pass1.json"
+    historical.parent.mkdir()
+    historical.write_text('{"historical": true}', encoding="utf-8")
+    chosen = tmp_path / "new-trial.json"
+    chosen.write_text('{"status": "FAIL"}', encoding="utf-8")
+    out = tmp_path / "batch"
+    run_batch(root, out, tmp_path / "model", tmp_path / "embeddings", inputs, runtime_qualification=chosen)
+    state = json.loads((out / "BATCH_STATE.json").read_text())
+    assert state["inputs"]["shared_analysis"]["qualification_override"]["path"] == str(chosen.resolve())
+    assert historical.read_text() == '{"historical": true}'
+    chosen.write_text('{"status": "different"}', encoding="utf-8")
+    with pytest.raises(ValueError, match="fingerprint mismatch"):
+        run_batch(root, out, tmp_path / "model", tmp_path / "embeddings", inputs, runtime_qualification=chosen, resume=True)
+
+
+def test_missing_explicit_qualification_is_rejected_before_case_output(native, tmp_path):
+    root, inputs, counts = native
+    out = tmp_path / "batch"
+    with pytest.raises(ValueError, match="existing file"):
+        run_batch(root, out, tmp_path / "model", tmp_path / "embeddings", inputs, runtime_qualification=tmp_path / "missing.json")
+    assert not out.exists()
+
+
+def test_new_batch_rechecks_output_after_acquiring_ownership(native, tmp_path, monkeypatch):
+    import litdatamatcher.analysis_batch as batches
+
+    root, inputs, counts = native
+    out = tmp_path / "batch"
+    original = batches.integration_lease
+    sentinel = '{"other_owner": "completed"}'
+    @contextmanager
+    def competing_owner(*args, **kwargs):
+        with original(*args, **kwargs):
+            (out / "BATCH_STATE.json").write_text(sentinel, encoding="utf-8")
+            yield
+    monkeypatch.setattr(batches, "integration_lease", competing_owner)
+    with pytest.raises(ValueError, match="another owner"):
+        run_batch(root, out, tmp_path / "model", tmp_path / "embeddings", inputs)
+    assert (out / "BATCH_STATE.json").read_text() == sentinel
+    assert counts["runtime"] == 0
+
+
+def test_resume_loads_authoritative_state_only_after_acquiring_ownership(native, tmp_path, monkeypatch):
+    import litdatamatcher.analysis_batch as batches
+
+    root, inputs, counts = native
+    out = tmp_path / "batch"
+    run_batch(root, out, tmp_path / "model", tmp_path / "embeddings", inputs)
+    original = batches.integration_lease
+    @contextmanager
+    def competing_owner(*args, **kwargs):
+        with original(*args, **kwargs):
+            path = out / "BATCH_STATE.json"
+            state = json.loads(path.read_text())
+            state["fingerprint"] = "other-owner-fingerprint"
+            path.write_text(json.dumps(state), encoding="utf-8")
+            yield
+    monkeypatch.setattr(batches, "integration_lease", competing_owner)
+    with pytest.raises(ValueError, match="fingerprint mismatch"):
+        run_batch(root, out, tmp_path / "model", tmp_path / "embeddings", inputs, resume=True)
+    assert json.loads((out / "BATCH_STATE.json").read_text())["fingerprint"] == "other-owner-fingerprint"
+
+
+def test_native_run_rechecks_output_after_acquiring_ownership(tmp_path, monkeypatch):
+    import litdatamatcher.workflow_checkpoint as workflows
+
+    out = tmp_path / "native-run"
+    original = workflows.integration_lease
+    sentinel = '{"other_owner": "completed"}'
+    @contextmanager
+    def competing_owner(*args, **kwargs):
+        with original(*args, **kwargs):
+            (out / "RUN_MANIFEST.json").write_text(sentinel, encoding="utf-8")
+            yield
+    monkeypatch.setattr(workflows, "integration_lease", competing_owner)
+    with pytest.raises(ValueError, match="another owner"), workflows.CheckpointRun(out, {}, False):
+        pass
+    assert (out / "RUN_MANIFEST.json").read_text() == sentinel
+    assert not (out / ".workflow/state.json").exists()

@@ -505,24 +505,28 @@ def analyze(
     root: Path, out: Path, model_dir: Path, embedding_dir: Path, *, question=None,
     requirements=None, limit=3, chunks=2, fresh=False, device="cpu", document_path=None,
     topic=None, reference_accessions=None, question_source_id=None, resume=False, vector_cache=None,
-    runtime_config=None, _session=None,
+    runtime_config=None, runtime_qualification=None, _session=None,
 ):
     """Run or resume fingerprint-checked extraction, compilation and matching stages."""
     from .analysis_session import runtime_configuration, runtime_environment
-    from .workflow_checkpoint import CheckpointRun, analysis_fingerprint
+    from .workflow_checkpoint import CheckpointRun, analysis_fingerprint, file_identity
 
     if limit < 1 or chunks < 1:
         raise ValueError("Positive limits required")
+    if runtime_qualification and not Path(runtime_qualification).is_file():
+        raise ValueError("Explicit runtime qualification must be an existing file")
     root, out, model_dir, embedding_dir = map(Path, (root, out, model_dir, embedding_dir))
     parameters = dict(question=question, requirements=requirements, limit=limit, chunks=chunks,
         fresh=fresh, device=device, document_path=str(Path(document_path).resolve()) if document_path else None,
         topic=topic, reference_accessions=reference_accessions, question_source_id=question_source_id,
         vector_cache=str(Path(vector_cache).resolve()) if vector_cache else None,
-        runtime_config=runtime_configuration(device, runtime_config))
+        runtime_config=runtime_configuration(device, runtime_config),
+        runtime_qualification=str(Path(runtime_qualification).resolve()) if runtime_qualification else None)
     owner = _session.claim(root, model_dir, embedding_dir, parameters) if _session else nullcontext()
     with owner:
         fingerprint = _session.fingerprint(parameters) if _session else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
         fingerprint["runtime_environment"] = runtime_environment()
+        fingerprint["qualification_override"] = file_identity(runtime_qualification) if runtime_qualification else None
         with CheckpointRun(out, fingerprint, resume) as workflow:
             previous = workflow.completed()
             if previous is not None:
@@ -530,6 +534,7 @@ def analyze(
             result = _analyze_stages(root, out, model_dir, embedding_dir, **parameters, _workflow=workflow, _session=_session)
             current = _session.fingerprint(parameters) if _session else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
             current["runtime_environment"] = runtime_environment()
+            current["qualification_override"] = file_identity(runtime_qualification) if runtime_qualification else None
             if current != fingerprint:
                 raise ValueError("Analysis input, model or implementation changed during execution; output is not accepted")
             workflow.finish(result)
@@ -554,6 +559,7 @@ def _analyze_stages(
     question_source_id=None,
     vector_cache=None,
     runtime_config=None,
+    runtime_qualification=None,
     _workflow=None,
     _session=None,
 ):
@@ -951,7 +957,7 @@ def _analyze_stages(
             ).strip()
         except (OSError, subprocess.CalledProcessError):
             commit = "installed-distribution"
-        qualification_path = root / "runtime-qualification/qualified_7b_pass1.json"
+        qualification_path = Path(runtime_qualification) if runtime_qualification else root / "runtime-qualification/qualified_7b_pass1.json"
         backend_qualified, qualification_digest = qualified_runtime(qualification_path, runtime)
         package_assets = Path(__file__).resolve().parent / "schemas_v2"
         lock_path = package_assets / "requirements-v2.lock"
@@ -1003,6 +1009,7 @@ def _analyze_stages(
                         "vector_cache": vector_cache,
                         "fresh": fresh,
                         "device": device,
+                        "runtime_qualification": runtime_qualification,
                     }
                 ),
             },
@@ -1164,6 +1171,7 @@ def main(argv=None):
     run.add_argument("--vector-cache", help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores")
     run.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
     run.add_argument("--max-new-tokens", type=int, default=None)
+    run.add_argument("--runtime-qualification", help="Explicit qualification receipt; preserve historical receipts")
 
     batch = sub.add_parser("batch", help="Analyze development cases serially with one shared model session")
     batch.add_argument("--root", required=True)
@@ -1181,6 +1189,7 @@ def main(argv=None):
     batch.add_argument("--stop-on-error", action="store_true")
     batch.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
     batch.add_argument("--max-new-tokens", type=int, default=None)
+    batch.add_argument("--runtime-qualification", help="Explicit qualification receipt; hashed into the batch identity")
 
     compile_only = sub.add_parser(
         "compile",
@@ -1269,7 +1278,7 @@ def main(argv=None):
                            resume=args.resume, stop_on_error=args.stop_on_error, device=args.device,
                            vector_cache=args.vector_cache, fresh=args.fresh, limit=args.limit, chunks=args.chunks,
                            requirements=strict_json_loads(Path(args.requirements).read_text(encoding="utf-8")) if args.requirements else None,
-                           runtime_config=runtime_options)
+                           runtime_config=runtime_options, runtime_qualification=args.runtime_qualification)
     elif args.command == "compile":
         constraints = (
             json.loads(Path(args.requirements).read_text(encoding="utf-8"))
@@ -1317,6 +1326,7 @@ def main(argv=None):
             question_source_id=args.question_source_id,
             vector_cache=args.vector_cache,
             runtime_config={key: value for key, value in {"decoding_mode": args.decoding_mode, "max_new_tokens": args.max_new_tokens}.items() if value is not None},
+            runtime_qualification=args.runtime_qualification,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return int(result.get("status") == "FAIL" or (args.command == "batch" and (result.get("failed", 0) or result.get("retryable", 0))))

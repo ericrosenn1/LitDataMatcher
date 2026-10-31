@@ -39,6 +39,10 @@ source's hash and dynamic sentence schema stay bound to the trial; a different
 analysis document does not need the same text or sentence schema. Old
 revision-only receipts remain historical evidence but do not qualify a changed
 backend.
+Use `--runtime-qualification PATH` to select a new immutable qualification
+receipt without replacing the historical default at
+`<root>/runtime-qualification/qualified_7b_pass1.json`. The selected file must
+exist and its bytes are bound into native and batch resume identities.
 
 ## Input contract
 

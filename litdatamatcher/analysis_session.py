@@ -63,13 +63,17 @@ class AnalysisSession:
     stat checks protect every case boundary. Per-case documents are hashed anew.
     """
 
-    def __init__(self, root, model_dir, embedding_dir, *, device="cpu", vector_cache=None, runtime_config=None):
+    def __init__(self, root, model_dir, embedding_dir, *, device="cpu", vector_cache=None, runtime_config=None, runtime_qualification=None):
         self.root, self.model_dir, self.embedding_dir = (Path(path).resolve() for path in (root, model_dir, embedding_dir))
         self.device = device
         self.vector_cache = str(Path(vector_cache).resolve()) if vector_cache else None
         self.runtime_config = runtime_configuration(device, runtime_config)
+        self.runtime_qualification = str(Path(runtime_qualification).resolve()) if runtime_qualification else None
+        if self.runtime_qualification and not Path(self.runtime_qualification).is_file():
+            raise ValueError("Explicit runtime qualification must be an existing file")
         self._base = analysis_fingerprint(self.root, self.model_dir, self.embedding_dir, {})
         self._base["runtime_environment"] = runtime_environment()
+        self._base["qualification_override"] = file_identity(self.runtime_qualification) if self.runtime_qualification else None
         self._stats = {path: _stat_identity(path) for path in _identity_paths(self._base)}
         self._owner = threading.get_ident()
         self._process = os.getpid()
@@ -81,7 +85,8 @@ class AnalysisSession:
 
     def _config_digest(self):
         return digest({"root": str(self.root), "model": str(self.model_dir), "embeddings": str(self.embedding_dir),
-                       "device": self.device, "vector_cache": self.vector_cache, "runtime_config": self.runtime_config})
+                       "device": self.device, "vector_cache": self.vector_cache, "runtime_config": self.runtime_config,
+                       "runtime_qualification": self.runtime_qualification})
 
     def validate_unchanged(self, *, full=False):
         if self._closed:
@@ -95,6 +100,7 @@ class AnalysisSession:
         if full:
             current = analysis_fingerprint(self.root, self.model_dir, self.embedding_dir, {})
             current["runtime_environment"] = runtime_environment()
+            current["qualification_override"] = file_identity(self.runtime_qualification) if self.runtime_qualification else None
             if current != self._base:
                 raise ValueError("Session content fingerprint changed")
 
@@ -107,7 +113,8 @@ class AnalysisSession:
             expected = tuple(str(path) for path in (self.root, self.model_dir, self.embedding_dir))
             if (actual != expected or parameters.get("device") != self.device
                     or parameters.get("vector_cache") != self.vector_cache
-                    or parameters.get("runtime_config") != self.runtime_config):
+                    or parameters.get("runtime_config") != self.runtime_config
+                    or parameters.get("runtime_qualification") != self.runtime_qualification):
                 raise ValueError("Analysis session configuration identity mismatch")
             self.validate_unchanged()
             yield self

@@ -109,7 +109,8 @@ def _case_receipt(out, run):
 
 
 def run_batch(root, out, model_dir, embedding_dir, inputs, *, resume=False, stop_on_error=False,
-              device="cpu", vector_cache=None, limit=1, chunks=2, fresh=False, requirements=None, runtime_config=None):
+              device="cpu", vector_cache=None, limit=1, chunks=2, fresh=False, requirements=None, runtime_config=None,
+              runtime_qualification=None):
     """Share a serial model session; independently journal every case and failure."""
     from .v2 import analyze
 
@@ -124,21 +125,26 @@ def run_batch(root, out, model_dir, embedding_dir, inputs, *, resume=False, stop
     cases = load_batch_inputs(inputs)
     if file_identity(inputs) != input_identity:
         raise ValueError("Batch input changed while it was being read")
-    session = AnalysisSession(root, model_dir, embedding_dir, device=device, vector_cache=vector_cache, runtime_config=runtime_config)
+    session = AnalysisSession(root, model_dir, embedding_dir, device=device, vector_cache=vector_cache,
+                              runtime_config=runtime_config, runtime_qualification=runtime_qualification)
     options = {"device": device, "vector_cache": session.vector_cache, "limit": limit, "chunks": chunks,
-               "fresh": fresh, "requirements": requirements, "runtime_config": session.runtime_config}
+               "fresh": fresh, "requirements": requirements, "runtime_config": session.runtime_config,
+               "runtime_qualification": session.runtime_qualification}
     identity = {"schema_version": "native-batch-v1", "input": input_identity, "options": options,
                 "shared_analysis": session.fingerprint({}), "case_inputs": {case["case_id"]: case["input_sha256"] for case in cases}}
     state_path = out / "BATCH_STATE.json"
-    if resume:
-        state = strict_json_loads(state_path.read_text(encoding="utf-8"))
-        if state.get("fingerprint") != digest(identity):
-            raise ValueError("Batch resume fingerprint mismatch: inputs, configuration, models or implementation changed")
-        if not isinstance(state.get("cases"), dict) or set(state["cases"]) - set(identity["case_inputs"]):
-            raise ValueError("Batch state contains invalid case identities")
-    else:
-        state = {"schema_version": "native-batch-v1", "fingerprint": digest(identity), "inputs": identity, "created_utc": utc_now(), "cases": {}}
     with integration_lease(out / ".batch_owner", "native-analysis-batch"):
+        # Preflight is advisory; only this locked read may authorize a write.
+        if resume:
+            state = strict_json_loads(state_path.read_text(encoding="utf-8"))
+            if state.get("fingerprint") != digest(identity):
+                raise ValueError("Batch resume fingerprint mismatch: inputs, configuration, models or implementation changed")
+            if not isinstance(state.get("cases"), dict) or set(state["cases"]) - set(identity["case_inputs"]):
+                raise ValueError("Batch state contains invalid case identities")
+        else:
+            if any(path.name != ".batch_owner" for path in out.iterdir()):
+                raise ValueError("Batch output was created by another owner; preserve it and use --resume")
+            state = {"schema_version": "native-batch-v1", "fingerprint": digest(identity), "inputs": identity, "created_utc": utc_now(), "cases": {}}
         state["status"] = "RUNNING"
         atomic_json(state_path, state)
         try:

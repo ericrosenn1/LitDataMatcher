@@ -145,6 +145,10 @@ class CheckpointRun:
         self.lease = integration_lease(self.directory, "native-analysis")
         self.lease.__enter__()
         try:
+            if not self.resume and (
+                self.path.exists() or any(path.name != ".workflow" for path in self.out.iterdir())
+            ):
+                raise ValueError("Run output was created by another owner; preserve it and use --resume")
             if self.resume:
                 if not self.path.is_file():
                     raise ValueError(

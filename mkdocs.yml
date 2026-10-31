@@ -20,6 +20,7 @@ nav:
       - Source-index experiment: campaign_20261031/model_source_index.md
       - Extraction protocol: campaign_20261031/extraction_protocol.md
       - Extraction evidence: campaign_20261031/extraction_results.md
+      - Same-source extraction comparison: campaign_20261031/extraction_mode_comparison.md
       - Retrieval protocol: campaign_20261031/retrieval_protocol.md
       - Retriever training: campaign_20261031/retriever_training.md
       - Large-pool retrieval: campaign_20261031/retrieval_scale.md

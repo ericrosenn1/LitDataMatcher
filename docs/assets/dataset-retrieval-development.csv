@@ -1,0 +1,5 @@
+method,label,mrr_at_5
+bm25,BM25,0.5
+dense,MiniLM dense,0.7708333333333334
+hybrid_rrf,BM25 + dense fusion,0.5416666666666666
+requirement_aware_dense,Availability-aware dense*,1.0

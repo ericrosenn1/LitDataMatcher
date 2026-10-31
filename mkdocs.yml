@@ -10,6 +10,7 @@ theme:
 nav:
   - Home: index.md
   - Research workflow: research_workflow.md
+  - Integrated application: full_platform.md
   - Installation and CLI: installation.md
   - Models and evaluation:
       - Model card: model_card.md
@@ -23,10 +24,14 @@ nav:
       - Retriever training: campaign_20261031/retriever_training.md
       - Large-pool retrieval: campaign_20261031/retrieval_scale.md
       - Source-backed cases: campaign_20261031/research_cases.md
+      - Dataset ranking: campaign_20261031/dataset_ranking.md
+      - Scientific review packet: campaign_20261031/scientific_review_packet.md
   - Data and provenance:
       - Source discovery: campaign_20261031/discovery.md
       - Corpus and data: corpus_and_data.md
       - Revision ledger: campaign_20261031/pubmed_revision_ledger.md
+      - Current literature index: literature_index.md
+      - Dataset inspection: campaign_20261031/dataset_inspection.md
       - Source fidelity: campaign_20261031/sources_fidelity.md
       - Source validation: campaign_20261031/sources_validation.md
       - Ingestion provenance: source_ingestion_and_provenance.md
@@ -38,6 +43,7 @@ nav:
       - Node contracts: node_contracts.md
       - Architecture: architecture.md
       - Question compiler: question_compiler.md
+      - Question discovery: full_platform_questions.md
   - Research practice:
       - Scientific limitations: limitations.md
       - Reproducibility: reproducibility.md

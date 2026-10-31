@@ -1,5 +1,7 @@
 # Dataset ranking development comparison
 
+![Measured dataset retrieval results](../assets/dataset-retrieval-development.png)
+
 This executed comparison uses 12 explicit variable-availability questions over
 two inspected UCI tables and 119 additional real repository metadata records.
 The resulting deduplicated pool has 121 accessions. These are development
@@ -47,3 +49,15 @@ resume preserved the comparison SHA-256
 Input, implementation and model identities, every ranking, candidate text and
 timing are retained under `dataset-ranking-v2`. A compact committed receipt is
 `benchmarks/campaign_20261031/dataset_ranking.json`.
+
+The figure and per-method CSV can be reproduced without rerunning retrieval:
+
+```powershell
+python scripts/campaign_20261031/plot_dataset_results.py --source benchmarks/campaign_20261031/dataset_ranking.json --out local/dataset-figures
+if ($LASTEXITCODE -ne 0) { throw 'Dataset figure validation failed' }
+```
+
+The `report` extra supplies Matplotlib. The renderer checks every reported MRR
+against its individual query values and writes PNG, SVG, PDF, CSV and a hashed
+figure manifest. Results are descriptive; queries sharing a dataset are not
+treated as independent scientific replicates.

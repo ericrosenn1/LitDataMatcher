@@ -4,9 +4,13 @@ import json
 import random
 
 import numpy as np
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 from test_literature_index import event, fixture
 
+from litdatamatcher.corpus_snapshot import file_digest
+from litdatamatcher.data_plane import atomic_json
 from litdatamatcher.literature_index import LiteratureIndex, materialize_pubmed
 from litdatamatcher.literature_validation import (
     EVENT_DTYPE,
@@ -130,3 +134,20 @@ def test_validator_detects_text_corruption_with_consistent_fts_and_provenance(tm
         assert index.validate()["fts_content"] == "PASS"
     with pytest.raises(ValueError, match="text differs from normalized source"):
         validate_current_snapshot(corpus, manifest, db, tmp_path / "validation")
+
+
+def test_native_null_abstract_remains_missing_evidence_in_validated_projection(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)]])
+    payload = json.loads(manifest.read_text())
+    path = corpus / payload["shards"][0]["legacy_relative_path"]
+    table = pq.read_table(path)
+    rows = table.to_pylist()
+    rows[0]["abstract"] = None
+    pq.write_table(pa.Table.from_pylist(rows, schema=table.schema), path)
+    payload["shards"][0]["legacy"]["sha256"] = file_digest(path)
+    atomic_json(manifest, payload)
+    materialize_pubmed(corpus, manifest, db)
+    result = validate_current_snapshot(corpus, manifest, db, tmp_path / "validation")
+    assert result["status"] == "PASS" and result["normalized_text_samples"] == 1
+    with LiteratureIndex(db, read_only=True) as index:
+        assert index.get(1)["abstract"] == index.get(1)["text"] == ""

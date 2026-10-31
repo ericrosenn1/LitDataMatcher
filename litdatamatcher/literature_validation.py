@@ -76,21 +76,27 @@ def _check_source_text_samples(index, corpus, manifest_path, manifest, samples):
             count = parquet.metadata.row_group(group).num_rows
             needed = [position for position in wanted if offset <= position < offset + count]
             if needed:
-                table = parquet.read_row_group(group, columns=["pmid", "title", "abstract"])
+                table = parquet.read_row_group(
+                    group, columns=["pmid", "source_shard", "title", "abstract"]
+                )
                 for position in needed:
                     native = table.slice(position - offset, 1).to_pylist()[0]
                     record = wanted[position]
                     if (
-                        any(
-                            record[field] != native[field]
-                            for field in ("pmid", "title", "abstract")
+                        record["pmid"] != native["pmid"]
+                        or native["source_shard"] != shard["source_shard"]
+                        or any(
+                            record[field] != (native[field] or "")
+                            for field in ("title", "abstract")
                         )
-                        or record["text"] != native["abstract"]
+                        or record["text"] != (native["abstract"] or "")
                     ):
                         raise ValueError("Sampled materialized text differs from normalized source")
                     checked.append(
                         {
                             "document_id": record["document_id"],
+                            "source": shard["source"],
+                            "source_shard": shard["source_shard"],
                             "legacy_relative_path": shard["legacy_relative_path"],
                             "legacy_row_index": position,
                             "legacy_sha256": shard["legacy"]["sha256"],
@@ -369,6 +375,18 @@ def validate_current_snapshot(
                 "expected_projection_sha256": expected_digest.hexdigest(),
                 "source_event_samples": len(samples),
                 "normalized_text_samples": len(text_samples),
+                "sampling_policy": {
+                    "winning_events": "Evenly spaced across current PMID SQLite BINARY order",
+                    "normalized_text": "Up to 32 evenly spaced members of winning-event sample; native null text normalized to empty",
+                    "winning_event_sources": {
+                        source: sum(row["source_provenance"]["source"] == source for row in samples)
+                        for source in ("baseline", "updates")
+                    },
+                    "normalized_text_sources": {
+                        source: sum(row["source"] == source for row in text_samples)
+                        for source in ("baseline", "updates")
+                    },
+                },
                 "integrity": integrity,
                 "estimated_peak_memory_bytes": estimated_bytes,
                 "elapsed_seconds": time.perf_counter() - started,

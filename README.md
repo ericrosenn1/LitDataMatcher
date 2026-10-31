@@ -95,6 +95,8 @@ are excluded.
 | Locally fine-tuned dense encoder | 0.9522 |
 | Pretrained dense encoder | 0.9302 |
 
+![Measured development retrieval results](docs/assets/retrieval-development.svg)
+
 Fine-tuning improves its pretrained parent by **0.0220 MRR** (paired query-bootstrap
 95% interval: 0.0033–0.0432), while BM25 remains stronger. Many PubMedQA queries
 echo their source titles; larger candidate pools and an abstract-only diagnostic

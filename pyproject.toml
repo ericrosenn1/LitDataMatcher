@@ -36,6 +36,7 @@ runtime = [
   "safetensors>=0.8,<1",
 ]
 structured = ["lm-format-enforcer==0.11.3"]
+report = ["matplotlib>=3.8,<4"]
 nlp = [
   "torch>=2.4",
   "sentence-transformers>=2.6",

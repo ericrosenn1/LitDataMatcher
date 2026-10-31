@@ -19,11 +19,12 @@ from .modality_contract import modality_contract
 from .question_compiler import compile_question, matching_requirements
 from .schemas import stable_id
 from .scientific_v2 import compile_evidence, discover_cross_document_gaps, rank_candidates
+from .strict_artifacts import strict_json_loads, validate_artifact
 
 
 def read_rows(path):
     return [
-        json.loads(line)
+        strict_json_loads(line)
         for line in Path(path).read_text(encoding="utf-8-sig").splitlines()
         if line.strip()
     ]
@@ -306,35 +307,11 @@ def qualified_runtime(qualification_path: Path, runtime) -> tuple[bool, str | No
 
 
 def validate_run_artifact(path: Path) -> str:
-    """Parse every persisted artifact type before recording validation PASS."""
+    """Strictly parse persisted artifacts, including finite numbers and row shapes."""
     try:
-        if path.suffix == ".jsonl":
-            for line in path.read_text(encoding="utf-8").splitlines():
-                if line.strip():
-                    value = json.loads(line)
-                    if not isinstance(value, dict):
-                        return "FAIL"
-        elif path.suffix == ".csv":
-            import csv
-
-            with path.open(encoding="utf-8", newline="") as handle:
-                rows = list(csv.reader(handle))
-            if not rows or len(rows[0]) < 2:
-                return "FAIL"
-        elif path.suffix == ".html":
-            content = path.read_text(encoding="utf-8")
-            if (
-                "<!doctype html>" not in content.casefold()
-                or "Content-Security-Policy" not in content
-            ):
-                return "FAIL"
-        elif path.suffix == ".json":
-            json.loads(path.read_text(encoding="utf-8"))
-        else:
-            return "NOT_RUN"
-    except (OSError, UnicodeError, json.JSONDecodeError):
+        return validate_artifact(path)
+    except (OSError, UnicodeError, ValueError):
         return "FAIL"
-    return "PASS"
 
 
 def evidence_publication_date(document):
@@ -449,6 +426,32 @@ def render_report(run: Path) -> Path:
 
 
 def analyze(
+    root: Path, out: Path, model_dir: Path, embedding_dir: Path, *, question=None,
+    requirements=None, limit=3, chunks=2, fresh=False, device="cpu", document_path=None,
+    topic=None, reference_accessions=None, question_source_id=None, resume=False,
+):
+    """Run or resume fingerprint-checked extraction, compilation and matching stages."""
+    from .workflow_checkpoint import CheckpointRun, analysis_fingerprint
+
+    if limit < 1 or chunks < 1:
+        raise ValueError("Positive limits required")
+    root, out, model_dir, embedding_dir = map(Path, (root, out, model_dir, embedding_dir))
+    parameters = dict(question=question, requirements=requirements, limit=limit, chunks=chunks,
+        fresh=fresh, device=device, document_path=str(Path(document_path).resolve()) if document_path else None,
+        topic=topic, reference_accessions=reference_accessions, question_source_id=question_source_id)
+    fingerprint = analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+    with CheckpointRun(out, fingerprint, resume) as workflow:
+        previous = workflow.completed()
+        if previous is not None:
+            return previous
+        result = _analyze_stages(root, out, model_dir, embedding_dir, **parameters, _workflow=workflow)
+        if analysis_fingerprint(root, model_dir, embedding_dir, parameters) != fingerprint:
+            raise ValueError("Analysis input, model or implementation changed during execution; output is not accepted")
+        workflow.finish(result)
+        return result
+
+
+def _analyze_stages(
     root: Path,
     out: Path,
     model_dir: Path,
@@ -464,13 +467,11 @@ def analyze(
     topic=None,
     reference_accessions=None,
     question_source_id=None,
+    _workflow=None,
 ):
     from .semantic_runtime import LocalSemanticRuntime, PretrainedSemanticIndex, RuntimeConfig
 
-    if out.exists():
-        raise ValueError("Run output already exists; use a new run ID or the resume command")
-    out.mkdir(parents=True)
-    started = dt.datetime.now(dt.timezone.utc).isoformat()
+    started = dt.datetime.fromtimestamp(_workflow.state["started_at"], dt.timezone.utc).isoformat()
     catalog_documents = read_rows(root / "catalog/literature.jsonl")
     documents = catalog_documents
     all_datasets = [normalize_dataset(r) for r in read_rows(root / "catalog/studies.jsonl")]
@@ -539,228 +540,253 @@ def analyze(
                 dataset,
                 search_text=dataset["title"] + " " + dataset.get("summary", ""),
             )
-        for document in selected:
-            catalog.upsert(
-                "document", document["document_id"], document, search_text=document.get("title", "")
+        extraction = _workflow.load("extraction")
+        if extraction and any(item.get("stage") == "inference" for item in extraction["failures"]):
+            extraction = None
+        if extraction is not None:
+            claims, questions, inferences, failures, views, evidence = (
+                extraction[name] for name in ("claims", "questions", "inferences", "failures", "views", "evidence")
             )
-            for view in source_chunks(document, max_chunks=chunks):
-                viewid = digest(view)
-                views.append(
-                    dict(
-                        view_id=viewid,
-                        document_id=document["document_id"],
-                        start=view["parent_start"],
-                        end=view["parent_end"],
-                        section=view["section"],
-                    )
+        else:
+            for document in selected:
+                catalog.upsert(
+                    "document", document["document_id"], document, search_text=document.get("title", "")
                 )
-                runtime_view = dict(view, document_id=viewid)
-                try:
-                    result = runtime.extract(
-                        runtime_view, root / "inference_cache", force_fresh=fresh
+                for view in source_chunks(document, max_chunks=chunks):
+                    viewid = digest(view)
+                    views.append(
+                        dict(
+                            view_id=viewid,
+                            document_id=document["document_id"],
+                            start=view["parent_start"],
+                            end=view["parent_end"],
+                            section=view["section"],
+                        )
                     )
-                except (ValueError, RuntimeError, OSError) as exc:
-                    failures.append(
+                    runtime_view = dict(view, document_id=viewid)
+                    try:
+                        result = _workflow.cached(
+                            "view:" + viewid,
+                            lambda: runtime.extract(runtime_view, root / "inference_cache", force_fresh=fresh),
+                        )
+                    except (ValueError, RuntimeError, OSError) as exc:
+                        failures.append(
+                            {
+                                "document_id": document["document_id"],
+                                "view_id": viewid,
+                                "stage": "inference",
+                                "description": str(exc),
+                            }
+                        )
+                        continue
+                    evidence.append(evidence_from_source_view(document, view))
+                    inferences.append(result["inference_manifest"])
+                    result["claims"] = [
+                        rebase_runtime_item(item, document, view, viewid) for item in result["claims"]
+                    ]
+                    result["questions"] = [
+                        rebase_runtime_item(item, document, view, viewid)
+                        for item in result["questions"]
+                    ]
+                    for item in result["claims"] + result["questions"]:
+                        item["inference_fingerprint"] = result["inference_manifest"]["fingerprint"]
+                    for claim in result["claims"]:
+                        catalog.upsert(
+                            "claim", claim["claim_id"], claim, [("document", document["document_id"])]
+                        )
+                        claims.append(claim)
+                        evidence.append(evidence_from_claim(claim, document))
+                    for q in result["questions"]:
+                        q.update(
+                            question=q["text"],
+                            proposition_id=stable_id("proposition", q["text"]),
+                            requirements=[],
+                            conditions={},
+                        )
+                        questions.append(q)
+                    questions.extend(explicit_unresolved_questions(document, view))
+                    if result["rejected"]:
+                        failures.append(
+                            {
+                                "document_id": document["document_id"],
+                                "view_id": viewid,
+                                "stage": "source_guard",
+                                "description": "Model records rejected by source guard",
+                                "rejections": result["rejected"],
+                            }
+                        )
+            questions.extend(discover_cross_document_gaps(evidence, started[:10]))
+            _workflow.save("extraction", {"claims": claims, "questions": questions,
+                "inferences": inferences, "failures": failures, "views": views, "evidence": evidence})
+        _workflow.state["retryable_stage_failures"] = any(item.get("stage") == "inference" for item in failures)
+        compilation_state = _workflow.load("compilation", ("extraction",))
+        if compilation_state is not None:
+            questions, compilations = compilation_state["questions"], compilation_state["compilations"]
+        else:
+            if question:
+                if question_source_id and question_source_id not in {item["document_id"] for item in selected}:
+                    raise ValueError("Question source must be one of the selected active documents")
+                questions.insert(
+                    0,
+                    {
+                        "question_id": stable_id("question", question),
+                        "question": question,
+                        "origin": "user",
+                        "proposition_id": stable_id("proposition", question),
+                        "requirements": requirements or [],
+                        "conditions": {},
+                        "gap_status": "unassessed",
+                        **({"source_document_id": question_source_id, "source_relation": "caller-declared source context; no direct-answer claim"} if question_source_id else {}),
+                    },
+                )
+            questions = deduplicate_questions(questions)
+            # Compile every native question before retrieval. The full compiler
+            # artifact remains inspectable; only its validated non-null assessor
+            # view reaches the existing experimental-contract matcher.
+            documents_by_id = {item["document_id"]: item for item in documents}
+            compilations = []
+            for q in questions:
+                source_document = documents_by_id.get(q.get("source_document_id"), {})
+                source_locator = str(
+                    q.get("source_locator") or q.get("source_document_id") or "user-question"
+                )
+                compilation = compile_question(
+                    q["question"],
+                    source_text=source_document.get("text"),
+                    source_locator=source_locator,
+                    user_constraints=(q.get("requirements") or []) if q.get("origin") == "user" else None,
+                )
+                q["requirements"] = matching_requirements(
+                    compilation,
+                    expert_override=bool(q.get("origin") == "user" and q.get("requirements")),
+                )
+                q["compilation_status"] = compilation["compilation_status"]
+                q["answer_specification"] = compilation["answer_specification"]
+                q["question_purpose"] = compilation["question_purpose"]
+                q["compilation_id"] = stable_id(
+                    "question_compilation", q["question_id"], compilation["ruleset_version"]
+                )
+                q["routing_terms"] = sorted(
+                    {
+                        str(role["expected"])
+                        for role in compilation["entity_roles"]
+                        if role.get("expected") is not None
+                    }
+                )
+                q["candidate_relevance_terms"] = sorted(
+                    {
+                        str(role["expected"])
+                        for role in compilation["entity_roles"]
+                        if role.get("expected") is not None
+                        and role.get("field") not in {"species", "time"}
+                    }
+                )
+                compilations.append(
+                    {"question_id": q["question_id"], "compilation_id": q["compilation_id"], **compilation}
+                )
+            _workflow.save("compilation", {"questions": questions, "compilations": compilations}, ("extraction",))
+        matching = _workflow.load("matching", ("compilation",))
+        if matching is not None:
+            matches, candidate_outcomes, bundles, dossiers = (
+                matching[name] for name in ("matches", "candidate_outcomes", "bundles", "dossiers")
+            )
+        else:
+            index = PretrainedSemanticIndex(embedding_dir, device=device)
+            if datasets:
+                index.fit(
+                    [
+                        {"id": d["dataset_id"], "text": d["title"] + " " + d.get("summary", "")}
+                        for d in datasets
+                    ]
+                )
+            matches = []
+            candidate_outcomes = []
+            bundles = []
+            dossiers = []
+            reference_records = []
+            if (root / "external_evidence/uniprot").exists():
+                from .external_evidence import import_resource
+
+                reference_records = import_resource(root, offline=True, **({"accessions": reference_accessions} if reference_accessions else {}))
+            for q in questions:
+                # Related retrieved claims remain context; exact proposition support requires a separate justified mapping.
+                qtext = q["question"]
+                query_tokens = set(re.findall(r"\w+", qtext.lower()))
+                contextual = []
+                for item in evidence:
+                    if (q.get("source_document_id") and q["source_document_id"] == item.get("source_document_id")) or len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
+                        contextual.append(dict(item, related_proposition_id=q["proposition_id"]))
+                if reference_records:
+                    from .external_evidence import query_resource
+
+                    entities = sorted({alias for record in reference_records for alias in record["aliases"] if re.search(r"(?<!\w)" + re.escape(alias) + r"(?!\w)", qtext, re.I)})
+                    contextual.extend(
+                        query_resource(reference_records, entities, proposition_id=q["proposition_id"])
+                    )
+                bundle = compile_evidence(q, contextual, started[:10], [])
+                bundles.append(bundle)
+                compiled_requirements = q["requirements"]
+                if not compiled_requirements:
+                    candidate_outcomes.append(
                         {
-                            "document_id": document["document_id"],
-                            "view_id": viewid,
-                            "stage": "inference",
-                            "description": str(exc),
+                            "question_id": q["question_id"],
+                            "classification": "NO_ASSESSABLE_CONTRACT",
+                            "reason": "Question compiler returned no assessable necessities; no best scientific match is claimed.",
+                            "compilation_status": q["compilation_status"],
                         }
                     )
                     continue
-                evidence.append(evidence_from_source_view(document, view))
-                inferences.append(result["inference_manifest"])
-                result["claims"] = [
-                    rebase_runtime_item(item, document, view, viewid) for item in result["claims"]
-                ]
-                result["questions"] = [
-                    rebase_runtime_item(item, document, view, viewid)
-                    for item in result["questions"]
-                ]
-                for item in result["claims"] + result["questions"]:
-                    item["inference_fingerprint"] = result["inference_manifest"]["fingerprint"]
-                for claim in result["claims"]:
-                    catalog.upsert(
-                        "claim", claim["claim_id"], claim, [("document", document["document_id"])]
-                    )
-                    claims.append(claim)
-                    evidence.append(evidence_from_claim(claim, document))
-                for q in result["questions"]:
-                    q.update(
-                        question=q["text"],
-                        proposition_id=stable_id("proposition", q["text"]),
-                        requirements=[],
-                        conditions={},
-                    )
-                    questions.append(q)
-                questions.extend(explicit_unresolved_questions(document, view))
-                if result["rejected"]:
-                    failures.append(
+                routing_query = " ".join([qtext, *q.get("routing_terms", [])])
+                semantic = (
+                    {r["id"]: r["score"] for r in index.search(routing_query, k=min(50, len(datasets)))}
+                    if datasets
+                    else {}
+                )
+                lexical = set(catalog.search("dataset", routing_query, 50))
+                initial_candidates = [d for d in datasets if d["dataset_id"] in lexical | set(semantic)]
+                candidates = requirement_aware_candidates(
+                    initial_candidates, q.get("candidate_relevance_terms", [])
+                )
+                if not candidates:
+                    candidate_outcomes.append(
                         {
-                            "document_id": document["document_id"],
-                            "view_id": viewid,
-                            "stage": "source_guard",
-                            "description": "Model records rejected by source guard",
-                            "rejections": result["rejected"],
+                            "question_id": q["question_id"],
+                            "classification": "NO_RELEVANT_CANDIDATE_FOUND",
+                            "reason": "No candidate in the declared local catalog mentioned a required non-generic intervention, outcome, tissue, or comparator. Unknown metadata was not treated as confirmed absence.",
+                            "compilation_status": q["compilation_status"],
+                            "search_scope": "local catalog snapshot",
                         }
                     )
-        questions.extend(discover_cross_document_gaps(evidence, started[:10]))
-        if question:
-            if question_source_id and question_source_id not in {item["document_id"] for item in selected}:
-                raise ValueError("Question source must be one of the selected active documents")
-            questions.insert(
-                0,
-                {
-                    "question_id": stable_id("question", question),
-                    "question": question,
-                    "origin": "user",
-                    "proposition_id": stable_id("proposition", question),
-                    "requirements": requirements or [],
-                    "conditions": {},
-                    "gap_status": "unassessed",
-                    **({"source_document_id": question_source_id, "source_relation": "caller-declared source context; no direct-answer claim"} if question_source_id else {}),
-                },
-            )
-        questions = deduplicate_questions(questions)
-        # Compile every native question before retrieval. The full compiler
-        # artifact remains inspectable; only its validated non-null assessor
-        # view reaches the existing experimental-contract matcher.
-        documents_by_id = {item["document_id"]: item for item in documents}
-        compilations = []
-        for q in questions:
-            source_document = documents_by_id.get(q.get("source_document_id"), {})
-            source_locator = str(
-                q.get("source_locator") or q.get("source_document_id") or "user-question"
-            )
-            compilation = compile_question(
-                q["question"],
-                source_text=source_document.get("text"),
-                source_locator=source_locator,
-                user_constraints=(q.get("requirements") or []) if q.get("origin") == "user" else None,
-            )
-            q["requirements"] = matching_requirements(
-                compilation,
-                expert_override=bool(q.get("origin") == "user" and q.get("requirements")),
-            )
-            q["compilation_status"] = compilation["compilation_status"]
-            q["answer_specification"] = compilation["answer_specification"]
-            q["question_purpose"] = compilation["question_purpose"]
-            q["compilation_id"] = stable_id(
-                "question_compilation", q["question_id"], compilation["ruleset_version"]
-            )
-            q["routing_terms"] = sorted(
-                {
-                    str(role["expected"])
-                    for role in compilation["entity_roles"]
-                    if role.get("expected") is not None
-                }
-            )
-            q["candidate_relevance_terms"] = sorted(
-                {
-                    str(role["expected"])
-                    for role in compilation["entity_roles"]
-                    if role.get("expected") is not None
-                    and role.get("field") not in {"species", "time"}
-                }
-            )
-            compilations.append(
-                {"question_id": q["question_id"], "compilation_id": q["compilation_id"], **compilation}
-            )
-        index = PretrainedSemanticIndex(embedding_dir, device=device)
-        if datasets:
-            index.fit(
-                [
-                    {"id": d["dataset_id"], "text": d["title"] + " " + d.get("summary", "")}
-                    for d in datasets
-                ]
-            )
-        matches = []
-        candidate_outcomes = []
-        bundles = []
-        dossiers = []
-        reference_records = []
-        if (root / "external_evidence/uniprot").exists():
-            from .external_evidence import import_resource
+                    continue
+                ranked = rank_candidates(compiled_requirements, candidates, semantic)
+                for m in ranked[:10]:
+                    m["candidate_classification"] = {
+                        "DIRECT_FIT": "POTENTIAL_DIRECT_ANALYSIS_FIT",
+                        "PARTIAL_FIT": "CONDITIONAL_OR_PARTIAL_FIT",
+                        "REQUIRES_INSPECTION": "INSPECTION_NEEDED",
+                        "NOT_QUALIFIED": "KNOWN_INCOMPATIBILITY",
+                    }[m["assessment"]["eligibility"]]
+                    m.update(
+                        question_id=q["question_id"],
+                        match_id=stable_id("match", q["question_id"], m["dataset_id"]),
+                        evidence_bundle_id=bundle["bundle_id"],
+                    )
+                    matches.append(m)
+                    if bundle["evidence_items"]:
+                        from .scientific_dossier import build_dossier
 
-            reference_records = import_resource(root, offline=True, **({"accessions": reference_accessions} if reference_accessions else {}))
-        for q in questions:
-            # Related retrieved claims remain context; exact proposition support requires a separate justified mapping.
-            qtext = q["question"]
-            query_tokens = set(re.findall(r"\w+", qtext.lower()))
-            contextual = []
-            for item in evidence:
-                if (q.get("source_document_id") and q["source_document_id"] == item.get("source_document_id")) or len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
-                    contextual.append(dict(item, related_proposition_id=q["proposition_id"]))
-            if reference_records:
-                from .external_evidence import query_resource
-
-                entities = sorted({alias for record in reference_records for alias in record["aliases"] if re.search(r"(?<!\w)" + re.escape(alias) + r"(?!\w)", qtext, re.I)})
-                contextual.extend(
-                    query_resource(reference_records, entities, proposition_id=q["proposition_id"])
-                )
-            bundle = compile_evidence(q, contextual, started[:10], [])
-            bundles.append(bundle)
-            compiled_requirements = q["requirements"]
-            if not compiled_requirements:
-                candidate_outcomes.append(
-                    {
-                        "question_id": q["question_id"],
-                        "classification": "NO_ASSESSABLE_CONTRACT",
-                        "reason": "Question compiler returned no assessable necessities; no best scientific match is claimed.",
-                        "compilation_status": q["compilation_status"],
-                    }
-                )
-                continue
-            routing_query = " ".join([qtext, *q.get("routing_terms", [])])
-            semantic = (
-                {r["id"]: r["score"] for r in index.search(routing_query, k=min(50, len(datasets)))}
-                if datasets
-                else {}
-            )
-            lexical = set(catalog.search("dataset", routing_query, 50))
-            initial_candidates = [d for d in datasets if d["dataset_id"] in lexical | set(semantic)]
-            candidates = requirement_aware_candidates(
-                initial_candidates, q.get("candidate_relevance_terms", [])
-            )
-            if not candidates:
-                candidate_outcomes.append(
-                    {
-                        "question_id": q["question_id"],
-                        "classification": "NO_RELEVANT_CANDIDATE_FOUND",
-                        "reason": "No candidate in the declared local catalog mentioned a required non-generic intervention, outcome, tissue, or comparator. Unknown metadata was not treated as confirmed absence.",
-                        "compilation_status": q["compilation_status"],
-                        "search_scope": "local catalog snapshot",
-                    }
-                )
-                continue
-            ranked = rank_candidates(compiled_requirements, candidates, semantic)
-            for m in ranked[:10]:
-                m["candidate_classification"] = {
-                    "DIRECT_FIT": "POTENTIAL_DIRECT_ANALYSIS_FIT",
-                    "PARTIAL_FIT": "CONDITIONAL_OR_PARTIAL_FIT",
-                    "REQUIRES_INSPECTION": "INSPECTION_NEEDED",
-                    "NOT_QUALIFIED": "KNOWN_INCOMPATIBILITY",
-                }[m["assessment"]["eligibility"]]
-                m.update(
-                    question_id=q["question_id"],
-                    match_id=stable_id("match", q["question_id"], m["dataset_id"]),
-                    evidence_bundle_id=bundle["bundle_id"],
-                )
-                matches.append(m)
-                if bundle["evidence_items"]:
-                    from .scientific_dossier import build_dossier
-
-                    linked_question = dict(q, source_evidence_ids=[item["evidence_id"] for item in bundle["evidence_items"]], source_relation="retrieved context; direct support only as classified in the bundle")
-                    candidate = next(item for item in candidates if item["dataset_id"] == m["dataset_id"])
-                    dossier = build_dossier(linked_question, bundle, m["assessment"], candidate, [
-                        "Eligibility is determined by essential observed requirements before ranking.",
-                        f"Uncalibrated heuristic components: {json.dumps(m['components'], sort_keys=True)}",
-                        "Retrieved context does not establish novelty, causal effects or statistical adequacy.",
-                    ])
-                    accepted_count = sum("claim" in item for item in bundle["evidence_items"])
-                    dossier["extraction_summary"] = {"accepted_model_claims": accepted_count, "source_context_items": sum(item.get("evidence_origin") == "deterministic_source_passage" for item in bundle["evidence_items"]), "status": "SOURCE_CONTEXT_ONLY" if not accepted_count else "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS", "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage."}
-                    dossiers.append(dossier)
+                        linked_question = dict(q, source_evidence_ids=[item["evidence_id"] for item in bundle["evidence_items"]], source_relation="retrieved context; direct support only as classified in the bundle")
+                        candidate = next(item for item in candidates if item["dataset_id"] == m["dataset_id"])
+                        dossier = build_dossier(linked_question, bundle, m["assessment"], candidate, [
+                            "Eligibility is determined by essential observed requirements before ranking.",
+                            f"Uncalibrated heuristic components: {json.dumps(m['components'], sort_keys=True)}",
+                            "Retrieved context does not establish novelty, causal effects or statistical adequacy.",
+                        ])
+                        accepted_count = sum("claim" in item for item in bundle["evidence_items"])
+                        dossier["extraction_summary"] = {"accepted_model_claims": accepted_count, "source_context_items": sum(item.get("evidence_origin") == "deterministic_source_passage" for item in bundle["evidence_items"]), "status": "SOURCE_CONTEXT_ONLY" if not accepted_count else "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS", "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage."}
+                        dossiers.append(dossier)
+            _workflow.save("matching", {"matches": matches, "candidate_outcomes": candidate_outcomes,
+                "bundles": bundles, "dossiers": dossiers}, ("compilation",))
         for name, rows in [
             ("claims", claims),
             ("questions", questions),
@@ -1012,6 +1038,7 @@ def main(argv=None):
     run.add_argument("--limit", type=int, default=3)
     run.add_argument("--chunks", type=int, default=2)
     run.add_argument("--fresh", action="store_true")
+    run.add_argument("--resume", action="store_true", help="Resume this run only when source, model and configuration fingerprints match")
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
 
     compile_only = sub.add_parser(
@@ -1132,6 +1159,7 @@ def main(argv=None):
             limit=args.limit,
             chunks=args.chunks,
             fresh=args.fresh,
+            resume=args.resume,
             device=args.device,
             document_path=Path(args.document) if args.document else None,
             topic=args.topic,

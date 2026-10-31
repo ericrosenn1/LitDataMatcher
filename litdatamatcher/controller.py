@@ -20,6 +20,8 @@ from pathlib import Path
 import psutil
 
 from .data_plane import atomic_json, digest
+from .recovery_contract import recover
+from .strict_artifacts import strict_json_loads, validate_artifact
 
 
 class OwnershipConflict(RuntimeError):
@@ -102,6 +104,16 @@ class Controller:
             owner_pid INTEGER,owner_created REAL,exit_code INTEGER,error TEXT,
             fingerprint TEXT,started REAL,finished REAL);
         """)
+        columns = {row[1] for row in self.db.execute("PRAGMA table_info(jobs)")}
+        for name, declaration in (
+            ("retry_codes", "TEXT NOT NULL DEFAULT '[]'"),
+            ("max_retries", "INTEGER NOT NULL DEFAULT 0"),
+            ("retry_backoff", "REAL NOT NULL DEFAULT 0"),
+            ("not_before", "REAL NOT NULL DEFAULT 0"),
+        ):
+            if name not in columns:
+                self.db.execute(f"ALTER TABLE jobs ADD COLUMN {name} {declaration}")
+        self.db.commit()
 
     def close(self):
         self.db.close()
@@ -116,23 +128,51 @@ class Controller:
             self.db.execute("UPDATE settings SET value=? WHERE key='mode'", (mode,))
 
     def register(
-        self, job_id: str, command: list[str], cwd: str | Path, outputs: list[str | Path]
+        self,
+        job_id: str,
+        command: list[str],
+        cwd: str | Path,
+        outputs: list[str | Path],
+        *,
+        retryable_exit_codes=(),
+        max_retries: int = 0,
+        retry_backoff: float = 0,
     ) -> None:
         if not command or any(not isinstance(x, str) or "\x00" in x for x in command):
             raise ValueError("Job needs a literal argument array")
+        if type(max_retries) is not int or not 0 <= max_retries <= 2:
+            raise ValueError("max_retries must be between zero and two")
+        if not isinstance(retry_backoff, (int, float)) or not 0 <= retry_backoff <= 300:
+            raise ValueError("retry_backoff must be between zero and 300 seconds")
+        retryable_exit_codes = list(retryable_exit_codes)
+        if any(type(code) is not int or code == 0 for code in retryable_exit_codes):
+            raise ValueError("Only explicit nonzero integer exit codes can be retried")
+        retry_codes = sorted(set(retryable_exit_codes))
         cwd = str(Path(cwd).resolve(strict=True))
         outputs = [
             str((Path(p) if Path(p).is_absolute() else Path(cwd) / p).resolve()) for p in outputs
         ]
         fp = digest([command, cwd, outputs])
+        if retry_codes or max_retries or retry_backoff:
+            fp = digest([command, cwd, outputs, retry_codes, max_retries, retry_backoff])
         with self.db:
             old = self.db.execute("SELECT fingerprint FROM jobs WHERE id=?", (job_id,)).fetchone()
             if old and old[0] != fp:
                 raise ValueError("Job ID collision with changed command/configuration")
             self.db.execute(
-                """INSERT OR IGNORE INTO jobs(id,command,cwd,outputs,status,fingerprint)
-              VALUES(?,?,?,?,?,?)""",
-                (job_id, json.dumps(command), cwd, json.dumps(outputs), "QUEUED", fp),
+                """INSERT OR IGNORE INTO jobs(id,command,cwd,outputs,status,fingerprint,retry_codes,max_retries,retry_backoff)
+              VALUES(?,?,?,?,?,?,?,?,?)""",
+                (
+                    job_id,
+                    json.dumps(command),
+                    cwd,
+                    json.dumps(outputs),
+                    "QUEUED",
+                    fp,
+                    json.dumps(retry_codes),
+                    max_retries,
+                    retry_backoff,
+                ),
             )
 
     def jobs(self) -> list[dict]:
@@ -145,14 +185,10 @@ class Controller:
         rows = []
         for value in json.loads(job["outputs"]):
             p = Path(value)
-            if not p.is_file() or p.stat().st_size == 0:
+            if not p.is_file() or (p.stat().st_size == 0 and p.suffix.lower() != ".jsonl"):
                 raise ValueError(f"Missing/empty output {p}")
             data = p.read_bytes()
-            if p.suffix == ".json":
-                json.loads(
-                    data,
-                    parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite JSON")),
-                )
+            validate_artifact(p)
             rows.append(
                 {
                     "path": str(p),
@@ -161,7 +197,7 @@ class Controller:
                 }
             )
         if against_receipt:
-            receipt = json.loads(self._receipt(job["id"]).read_text())
+            receipt = strict_json_loads(self._receipt(job["id"]).read_text())
             if receipt["outputs"] != rows or receipt["fingerprint"] != job["fingerprint"]:
                 raise ValueError("Output receipt mismatch")
         return rows
@@ -214,9 +250,20 @@ class Controller:
                 return {"status": self.mode(), "executed": False}
             repaired = self.repair()
             row = self.db.execute(
-                "SELECT * FROM jobs WHERE status='QUEUED' AND attempts<3 ORDER BY id LIMIT 1"
+                "SELECT * FROM jobs WHERE status='QUEUED' AND attempts<3 AND not_before<=? ORDER BY id LIMIT 1",
+                (time.time(),),
             ).fetchone()
             if row is None:
+                waiting = self.db.execute(
+                    "SELECT MIN(not_before) FROM jobs WHERE status='QUEUED' AND attempts<3"
+                ).fetchone()[0]
+                if waiting is not None:
+                    return {
+                        "status": "WAITING_RETRY",
+                        "executed": False,
+                        "next_eligible_at": waiting,
+                        "repairs": repaired,
+                    }
                 return {"status": "IDLE", "executed": False, "repairs": repaired}
             job = dict(row)
             # Prevent a stale result from being mistaken for success after a no-op command.
@@ -248,7 +295,10 @@ class Controller:
                     stderr=subprocess.STDOUT,
                     shell=False,
                 )
-                created = psutil.Process(process.pid).create_time()
+                try:
+                    created = psutil.Process(process.pid).create_time()
+                except psutil.NoSuchProcess:
+                    created = None  # A short successful child can exit before identity inspection.
                 with self.db:
                     self.db.execute(
                         "UPDATE jobs SET pid=?,created=? WHERE id=?",
@@ -256,13 +306,18 @@ class Controller:
                     )
                 import threading
 
+                drain_errors = []
+
                 def drain():
                     retained = 0
-                    with log.open("wb") as handle:
-                        while chunk := process.stdout.read(8192):
-                            take = min(len(chunk), max(0, max_log_bytes - retained))
-                            handle.write(chunk[:take])
-                            retained += take
+                    try:
+                        with log.open("wb") as handle:
+                            while chunk := process.stdout.read(8192):
+                                take = min(len(chunk), max(0, max_log_bytes - retained))
+                                handle.write(chunk[:take])
+                                retained += take
+                    except (OSError, ValueError) as exc:
+                        drain_errors.append(str(exc))
 
                 reader = threading.Thread(target=drain, daemon=True)
                 reader.start()
@@ -286,6 +341,8 @@ class Controller:
                 reader.join(timeout=10)
                 if reader.is_alive():
                     raise RuntimeError("Output drain incomplete")
+                if drain_errors:
+                    raise RuntimeError("Output drain failed: " + drain_errors[0])
                 if failure or code != 0:
                     raise RuntimeError(failure or f"Native exit {code}")
                 outputs = self._check_outputs(job)
@@ -304,7 +361,13 @@ class Controller:
                     },
                 )
                 status, error = "SUCCEEDED", None
-            except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+            except (
+                OSError,
+                ValueError,
+                RuntimeError,
+                subprocess.SubprocessError,
+                psutil.Error,
+            ) as exc:
                 code = process.returncode if process is not None else None
                 status, error = (
                     (
@@ -314,12 +377,30 @@ class Controller:
                     ),
                     str(exc),
                 )
+                if failure is None and code in json.loads(job["retry_codes"]):
+                    decision = recover(
+                        {"retries": job["attempts"]},
+                        "TRANSIENT",
+                        writer_id=job["id"],
+                        max_retries=job["max_retries"],
+                    )
+                    if decision["status"] == "RESUMABLE":
+                        status = "RETRY_PENDING"
             with self.db:
                 if status == "QUEUED":
                     self.db.execute("UPDATE jobs SET attempts=attempts-1 WHERE id=?", (job["id"],))
                 self.db.execute(
-                    "UPDATE jobs SET status=?,exit_code=?,error=?,finished=? WHERE id=?",
-                    (status, code, error, time.time(), job["id"]),
+                    "UPDATE jobs SET status=?,exit_code=?,error=?,finished=?,not_before=? WHERE id=?",
+                    (
+                        "QUEUED" if status == "RETRY_PENDING" else status,
+                        code,
+                        error,
+                        time.time(),
+                        time.time() + min(300, job["retry_backoff"] * 2 ** job["attempts"])
+                        if status == "RETRY_PENDING"
+                        else 0,
+                        job["id"],
+                    ),
                 )
             return {
                 "status": status,

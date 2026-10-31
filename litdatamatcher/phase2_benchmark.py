@@ -25,6 +25,7 @@ from unittest.mock import patch
 
 import psutil
 
+from . import __version__
 from .data_plane import Catalog, atomic_json, atomic_write, digest
 from .scientific_v2 import compile_evidence, rank_candidates
 from .v2 import normalize_dataset
@@ -75,6 +76,24 @@ ASSAYS.update({family: family for family in set(ASSAYS.values())})
 
 def file_sha256(path: str | Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def source_identity(repository: Path) -> dict:
+    """Report an available Git revision without inventing one for distributions."""
+    identity = {"kind": "source_files_only", "commit": None, "package_version": __version__}
+    try:
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=repository, text=True, stderr=subprocess.PIPE
+        ).strip()
+    except OSError as error:
+        identity["git_error"] = type(error).__name__
+    except subprocess.CalledProcessError as error:
+        identity.update(git_error=type(error).__name__, git_returncode=error.returncode)
+    else:
+        if not re.fullmatch(r"[0-9a-f]{40}", commit):
+            raise ValueError("Git did not return an immutable commit SHA")
+        identity.update(kind="git_checkout", commit=commit)
+    return identity
 
 
 def verify_acquisition_input(path: str | Path, receipt_path: str | Path) -> dict:
@@ -875,14 +894,14 @@ def run_benchmark(
         "litdatamatcher/schemas.py",
         "scripts/v2/run_phase2_benchmark.py",
     ]
+    identity = source_identity(repository)
     receipt = {
         "schema_version": SCHEMA,
         "completed_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "command": plan["command"],
         "working_directory": plan["working_directory"],
-        "source_commit": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=repository, text=True
-        ).strip(),
+        "source_commit": identity["commit"] or "UNKNOWN",
+        "source_identity": identity,
         "source_file_sha256": {name: file_sha256(repository / name) for name in source_files},
         "plan_path": str(output / "BENCHMARK_PLAN.json"),
         "plan_sha256": file_sha256(output / "BENCHMARK_PLAN.json"),

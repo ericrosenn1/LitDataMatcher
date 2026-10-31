@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 
 import pytest
 
@@ -153,7 +154,23 @@ def test_point_measures_real_catalog_paths_without_scientific_promotion(tmp_path
     assert receipt["disk_bytes"] > 0
 
 
-def test_complete_receipt_refuses_missing_real_challenge_coverage(tmp_path):
+@pytest.mark.parametrize("git_failure", [None, "missing_binary", "not_a_repository"])
+def test_complete_receipt_refuses_missing_real_challenge_coverage(
+    tmp_path, monkeypatch, git_failure
+):
+    if git_failure:
+        import litdatamatcher.phase2_benchmark as benchmark
+
+        original = benchmark.subprocess.check_output
+
+        def git_unavailable(command, *args, **kwargs):
+            if command[0] == "git":
+                if git_failure == "missing_binary":
+                    raise FileNotFoundError("Synthetic missing Git executable")
+                raise subprocess.CalledProcessError(128, command)
+            return original(command, *args, **kwargs)
+
+        monkeypatch.setattr(benchmark.subprocess, "check_output", git_unavailable)
     literature = tmp_path / "literature.jsonl"
     datasets = tmp_path / "datasets.jsonl"
     write_records(literature, [{"document_id": "fixture-literature", "title": "Unit fixture"}])
@@ -183,6 +200,13 @@ def test_complete_receipt_refuses_missing_real_challenge_coverage(tmp_path):
     assert receipt["recovery"]["checks"]["equal_to_clean_catalog"] is True
     assert receipt["calibration_status"] == "UNCALIBRATED_HEURISTIC"
     assert receipt["expert_validation"] == "PENDING_EXPERT_REVIEW"
+    assert receipt["source_identity"]["package_version"] == "0.4.0"
+    assert receipt["source_file_sha256"]
+    if git_failure:
+        assert receipt["source_commit"] == "UNKNOWN"
+        assert receipt["source_identity"]["commit"] is None
+        assert receipt["source_identity"]["kind"] == "source_files_only"
+        assert receipt["source_identity"]["git_error"]
     assert all(
         file_sha256(output / name) == expected
         for name, expected in receipt["artifact_hashes"].items()

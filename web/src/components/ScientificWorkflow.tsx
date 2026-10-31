@@ -760,12 +760,7 @@ export function ScientificWorkflow() {
         <div className="scientific-actions">
           <button
             className="primary-button"
-            disabled={
-              !health ||
-              !!busy ||
-              (!question.trim() && !query.trim()) ||
-              !sources.datasets.length
-            }
+            disabled={!health || !!busy || (!question.trim() && !query.trim())}
             onClick={() => void launch()}
           >
             {busy === "launch" ? (

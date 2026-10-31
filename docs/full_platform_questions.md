@@ -45,7 +45,7 @@ source views use the existing 128-sentence source selector and 200,000-character
 input ceiling. Large articles need explicit upstream windows. Failed views,
 empty results and truncated result sets remain distinguishable.
 
-Validation: 26 focused discovery/compiler tests passed. A fresh execution over
+Validation: 27 focused discovery/compiler tests passed. A fresh execution over
 the 30 existing development source documents retained 20 passages: 14 research
 questions, five source-stated unresolved passages and one limitation, without
 technical failures. All 20 remained underdetermined under the unchanged

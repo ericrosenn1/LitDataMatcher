@@ -122,3 +122,51 @@ accuracy. Its complete sample protocol and receipt are in
 outputs, validation and verified ZIP are under the separate
 `question-scale-1000-abstracts-v1` location beside the earlier corrected cohort.
 Both valid demonstrations and the superseded diagnostic remain preserved.
+
+The next bounded milestone uses 10,000 distinct nonempty abstracts in ten
+1,000-record batches through the existing `CheckpointRun`, with no additional
+scheduler. The completed first batch was reused. Nine further batches were
+selected using the same topic filters below the first batch's minimum numeric
+PMID, preserving a separate committed snapshot and input hash for every batch.
+The first batch uses snapshot prefix 677; the added batches use prefixes
+885–887. These mixed prefixes are explicitly recorded and are not described as
+one corpus snapshot.
+
+The real run stopped after batch three, leaving the native checkpoint
+`INTERRUPTED`, then resumed to `COMPLETE`. All three successful checkpoint
+artifacts retained their SHA-256 hashes and nanosecond modification times;
+only batches four through ten were computed during resume. Six synthetic
+regressions cover this behavior, changed-input/dependency rejection, preserved
+seed results, source-view fidelity and exact input-count accounting.
+
+Of 10,000 inputs, 24 were lifecycle-excluded and 9,976 were processed. There
+were 9,120 empty extraction results and 856 source records with 935 retained
+literal passages: 686 source-stated unresolved passages, 204 limitations and
+45 research questions. There were no failures or truncation. Independent
+artifact reconciliation verified every input/status count and question-list
+count, unique native IDs, 8,137 preserved native null values and 17,851 retained
+result null values. No missing value was filled to produce these counts.
+
+The nine newly computed batches took 5.36 seconds for extraction and grouping;
+the earlier 1,000-record computation was not repeated. Maximum sampled process
+RSS was 70.16 MiB. Runtime, RSS, input hashes, lifecycle checks and exact-source
+validation are recorded per batch. These are bounded engineering measurements;
+clustering occurs within each batch and establishes neither global deduplication
+nor scientific accuracy, novelty or independent evidence.
+
+The reproducible entry point is `scripts/validate_question_discovery_batches.py`:
+`prepare` writes bounded inputs, then `run --stop-after 3` deliberately exits
+after preserving three stages, and `run --resume` reuses them. The previously
+completed first-batch receipt records only its three historical extraction/compiler
+hashes; other historical dependency identity is not asserted. Its literal
+fidelity and lifecycle decisions are revalidated when imported. The new
+checkpoint fingerprint binds every package Python file, the rulebook, input
+files, runner and Python/psutil versions.
+
+Committed evidence is in
+`docs/validation/question-discovery-10000-scale-20261031.json` and the adjacent
+`question-discovery-10000-audit-20261031.json`. The complete native checkpoint,
+sample protocol, source inputs, per-batch results, manifest and verified 11.25 MB
+archive are retained under
+`C:\Codex\LitDataMatcher-v2\data\full_platform_20261031\question-scale-10000-v1`
+and its adjacent `.zip`. The previous milestones remain preserved.

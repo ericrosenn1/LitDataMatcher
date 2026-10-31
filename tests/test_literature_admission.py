@@ -53,3 +53,54 @@ def test_checkpoint_event_counter_must_match_committed_receipts(tmp_path):
         index._set_metadata("events_applied", 999)
     with pytest.raises(ValueError, match="event counter"):
         materialize_pubmed(corpus, manifest, db)
+
+
+def test_version_deletion_does_not_scan_all_current_foreign_key_references(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(i) for i in range(1, 20001)]])
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db) as index:
+        callbacks = 0
+
+        def bounded_work():
+            nonlocal callbacks
+            callbacks += 1
+            return callbacks > 100
+
+        index.conn.set_progress_handler(bounded_work, 100)
+        try:
+            module._apply_batch(index, [(event(1, 1, "delete"), None)], {})
+        finally:
+            index.conn.set_progress_handler(None, 0)
+        index.conn.commit()
+        assert index.get(1) is None
+        assert index.status()["current_records"] == 19999
+        assert index.validate()["fts_content"] == "PASS"
+
+
+def test_reference_index_migration_preserves_current_projection_and_source_snapshot(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(1)], [event(1, 2), event(2)]])
+    materialize_pubmed(corpus, manifest, db, max_shards=None)
+    with LiteratureIndex(db) as index:
+        records = list(index.iter_records())
+        snapshot = index.snapshot_identity()
+        index.conn.execute("DROP INDEX current_version_reference")
+        index.conn.commit()
+        old_plan = [
+            tuple(row)
+            for row in index.conn.execute(
+                "EXPLAIN QUERY PLAN DELETE FROM versions WHERE pmid=? AND version=?", ("1", 1)
+            )
+        ]
+        assert any("SCAN current_records" in row[-1] for row in old_plan)
+    with LiteratureIndex(db) as index:
+        assert list(index.iter_records()) == records
+        assert index.snapshot_identity() == snapshot
+        new_plan = [
+            tuple(row)
+            for row in index.conn.execute(
+                "EXPLAIN QUERY PLAN DELETE FROM versions WHERE pmid=? AND version=?", ("1", 1)
+            )
+        ]
+        assert not any("SCAN current_records" in row[-1] for row in new_plan)
+        assert any("current_version_reference" in row[-1] for row in new_plan)
+        assert index.validate_admission()["schema"] == "PASS"

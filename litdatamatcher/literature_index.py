@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS unresolved_deletions(
   pmid TEXT NOT NULL, position TEXT NOT NULL, PRIMARY KEY(pmid, position));
 CREATE TABLE IF NOT EXISTS current_records(
   pmid TEXT UNIQUE NOT NULL, version_id INTEGER NOT NULL REFERENCES versions(id));
+CREATE INDEX IF NOT EXISTS current_version_reference ON current_records(version_id);
 CREATE VIEW IF NOT EXISTS search_content AS
   SELECT c.rowid AS rowid, v.title, v.abstract
   FROM current_records c JOIN versions v ON v.id=c.version_id;

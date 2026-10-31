@@ -26,6 +26,10 @@ SQLite/FTS validation is required separately for final acceptance and is explici
 marked as pending in materialization receipts. Title metadata remains searchable,
 but records with missing abstracts have empty evidence text; titles are never
 silently substituted for abstract or full-paper evidence.
+The current-version foreign-key reference has its own lookup index, so each
+citation-version deletion avoids scanning all current citations. Existing indexes
+receive this additive SQLite index automatically; source rows, selection rules,
+and committed shard identities are preserved.
 An interrupted shard rolls back; a resumed invocation verifies the existing
 checkpoint prefix and continues at the next shard. Appended update manifests can
 extend an index. Changed or removed previously applied ledger entries are rejected.

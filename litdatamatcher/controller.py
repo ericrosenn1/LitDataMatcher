@@ -14,7 +14,9 @@ import json
 import os
 import sqlite3
 import subprocess
+import sys
 import time
+import uuid
 from pathlib import Path
 
 import psutil
@@ -90,6 +92,52 @@ def is_alive(pid: int | None, creation_time: float | None) -> bool:
         return True  # unknown identity cannot authorize takeover
 
 
+def _start_gated_worker(root, job_id, admission_token, cwd, admission_timeout=15):
+    """Keep payload stdin unchanged; use a separate inherited admission pipe."""
+    read_fd, write_fd = os.pipe()
+    options = {}
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            os.set_inheritable(read_fd, True)
+            gate_handle = msvcrt.get_osfhandle(read_fd)
+            startup = subprocess.STARTUPINFO()
+            startup.lpAttributeList = {"handle_list": [gate_handle]}
+            options["startupinfo"] = startup
+            gate = ["--gate-handle", str(gate_handle)]
+        else:
+            options["pass_fds"] = (read_fd,)
+            gate = ["--gate-fd", str(read_fd)]
+        process = subprocess.Popen(
+            [
+                sys.executable,
+                str(Path(__file__).with_name("controller_worker.py")),
+                "--root",
+                str(root),
+                "--job-id",
+                job_id,
+                "--token",
+                admission_token,
+                "--admission-timeout",
+                str(admission_timeout),
+                *gate,
+            ],
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=False,
+            **options,
+        )
+        writer = os.fdopen(write_fd, "wb", buffering=0)
+        write_fd = None
+        return process, writer
+    finally:
+        os.close(read_fd)
+        if write_fd is not None:
+            os.close(write_fd)
+
+
 class Controller:
     def __init__(self, root: str | Path):
         self.root = Path(root).resolve()
@@ -110,6 +158,10 @@ class Controller:
             ("max_retries", "INTEGER NOT NULL DEFAULT 0"),
             ("retry_backoff", "REAL NOT NULL DEFAULT 0"),
             ("not_before", "REAL NOT NULL DEFAULT 0"),
+            ("admission_token", "TEXT"),
+            ("admission_state", "TEXT"),
+            ("payload_pid", "INTEGER"),
+            ("payload_created", "REAL"),
         ):
             if name not in columns:
                 self.db.execute(f"ALTER TABLE jobs ADD COLUMN {name} {declaration}")
@@ -209,9 +261,27 @@ class Controller:
         repaired = []
         for job in self.jobs():
             if job["status"] == "RUNNING":
-                if is_alive(job["pid"], job["created"]) or is_alive(
-                    job["owner_pid"], job["owner_created"]
+                if (
+                    is_alive(job["pid"], job["created"])
+                    or is_alive(job["owner_pid"], job["owner_created"])
+                    or is_alive(job["payload_pid"], job["payload_created"])
                 ):
+                    continue
+                if job["admission_state"] in {"LAUNCHING", "PAYLOAD"}:
+                    with self.db:
+                        self.db.execute(
+                            "UPDATE jobs SET status='RECOVERY_REQUIRED',error=? WHERE id=?",
+                            (
+                                "Worker died after admission without confirming payload-tree shutdown",
+                                job["id"],
+                            ),
+                        )
+                    repaired.append(
+                        {
+                            "job_id": job["id"],
+                            "reason": "Ambiguous admitted payload; automatic requeue refused",
+                        }
+                    )
                     continue
                 reason = "Abandoned task process and runner"
             elif job["status"] == "SUCCEEDED":
@@ -264,6 +334,14 @@ class Controller:
                         "next_eligible_at": waiting,
                         "repairs": repaired,
                     }
+                blocked = [j["id"] for j in self.jobs() if j["status"] == "RECOVERY_REQUIRED"]
+                if blocked:
+                    return {
+                        "status": "RECOVERY_REQUIRED",
+                        "executed": False,
+                        "job_ids": blocked,
+                        "repairs": repaired,
+                    }
                 return {"status": "IDLE", "executed": False, "repairs": repaired}
             job = dict(row)
             # Prevent a stale result from being mistaken for success after a no-op command.
@@ -278,22 +356,27 @@ class Controller:
             logs.mkdir(exist_ok=True)
             log = logs / (hashlib.sha256(job["id"].encode()).hexdigest() + ".log")
             started = time.time()
+            admission_token = uuid.uuid4().hex
             with self.db:
                 self.db.execute(
                     """UPDATE jobs SET status='RUNNING',attempts=attempts+1,
-                  owner_pid=?,owner_created=?,started=?,exit_code=NULL WHERE id=?""",
-                    (os.getpid(), psutil.Process().create_time(), started, job["id"]),
+                  owner_pid=?,owner_created=?,started=?,exit_code=NULL,pid=NULL,created=NULL,
+                  admission_token=?,admission_state='WAITING',payload_pid=NULL,payload_created=NULL WHERE id=?""",
+                    (
+                        os.getpid(),
+                        psutil.Process().create_time(),
+                        started,
+                        admission_token,
+                        job["id"],
+                    ),
                 )
             process = None
+            gate = None
             failure = None
             try:
                 # Reader threads drain both streams with a fixed-size retained diagnostic buffer.
-                process = subprocess.Popen(
-                    json.loads(job["command"]),
-                    cwd=job["cwd"],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    shell=False,
+                process, gate = _start_gated_worker(
+                    self.root, job["id"], admission_token, job["cwd"]
                 )
                 try:
                     created = psutil.Process(process.pid).create_time()
@@ -304,6 +387,8 @@ class Controller:
                         "UPDATE jobs SET pid=?,created=? WHERE id=?",
                         (process.pid, created, job["id"]),
                     )
+                # Commit the identity before permitting any payload code to execute.
+                gate.write((admission_token + "\n").encode("ascii"))
                 import threading
 
                 drain_errors = []
@@ -367,6 +452,7 @@ class Controller:
                 RuntimeError,
                 subprocess.SubprocessError,
                 psutil.Error,
+                sqlite3.Error,
             ) as exc:
                 code = process.returncode if process is not None else None
                 status, error = (
@@ -386,6 +472,9 @@ class Controller:
                     )
                     if decision["status"] == "RESUMABLE":
                         status = "RETRY_PENDING"
+            finally:
+                if gate is not None:
+                    gate.close()
             with self.db:
                 if status == "QUEUED":
                     self.db.execute("UPDATE jobs SET attempts=attempts-1 WHERE id=?", (job["id"],))
@@ -429,7 +518,7 @@ def main(argv=None):
             )
             result = {"mode": c.mode()}
         print(json.dumps(result, indent=2))
-        return int(result.get("status") == "FAILED")
+        return int(result.get("status") in {"FAILED", "RECOVERY_REQUIRED"})
     finally:
         c.close()
 

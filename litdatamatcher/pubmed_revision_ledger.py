@@ -10,12 +10,13 @@ import gzip
 import hashlib
 import json
 import multiprocessing
+import os
 import re
 import time
 import uuid
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from .controller import integration_lease
 from .data_plane import atomic_json
@@ -36,9 +37,37 @@ def _hashes(path: Path) -> dict:
     return {"sha256": sha.hexdigest(), "md5": md5.hexdigest(), "size_bytes": after.st_size}
 
 
+def _comparison_path(path: Path):
+    """Compare equivalent Windows DOS/UNC anchors without changing the I/O path.
+
+    Windows realpath can retain an extended prefix while a missing ancestor is
+    concurrently created. Device and volume namespaces are not DOS/UNC aliases.
+    Callers still resolve symlinks before testing containment.
+    """
+    if os.name != "nt":
+        return path
+    value = str(path)
+    if value[:8].casefold() == "\\\\?\\unc\\":
+        value = "\\\\" + value[8:]
+    elif re.match(r"^\\\\\?\\[A-Za-z]:\\", value):
+        value = value[4:]
+    elif value.startswith(("\\\\?\\", "\\\\.\\")):
+        raise ValueError("Unsupported Windows device namespace")
+    return PureWindowsPath(value)
+
+
+def _resolved_path(path: Path) -> Path:
+    _comparison_path(path)  # Reject device input before realpath can erase its prefix.
+    return path.resolve()
+
+
+def _is_inside(path: Path, root: Path) -> bool:
+    return _comparison_path(path).is_relative_to(_comparison_path(root))
+
+
 def _inside(root: Path, relative: str) -> Path:
-    path = (root / relative).resolve()
-    if not path.is_relative_to(root):
+    path = _resolved_path(root / relative)
+    if not _is_inside(path, root):
         raise ValueError("Input or derivative path escapes its declared root")
     return path
 
@@ -169,8 +198,8 @@ def build_shard(corpus_root: Path, output: Path, shard: dict, shard_order: int) 
     import pyarrow as pa
     import pyarrow.parquet as pq
 
-    corpus_root, output = Path(corpus_root).resolve(), Path(output).resolve()
-    if output.is_relative_to(corpus_root) or corpus_root.is_relative_to(output):
+    corpus_root, output = _resolved_path(Path(corpus_root)), _resolved_path(Path(output))
+    if _is_inside(output, corpus_root) or _is_inside(corpus_root, output):
         raise ValueError("Ledger output must be outside and separate from the original corpus")
     raw = _inside(corpus_root, shard["raw_relative_path"])
     legacy = _inside(corpus_root, shard["relative_path"])
@@ -296,8 +325,8 @@ def build_revision_ledger(corpus_root: Path, snapshot_path: Path, output: Path, 
         raise ValueError("max_shards must be a positive integer")
     if executor not in {"thread", "process"}:
         raise ValueError("executor must be thread or process")
-    corpus_root, output = Path(corpus_root).resolve(), Path(output).resolve()
-    if output.is_relative_to(corpus_root) or corpus_root.is_relative_to(output):
+    corpus_root, output = _resolved_path(Path(corpus_root)), _resolved_path(Path(output))
+    if _is_inside(output, corpus_root) or _is_inside(corpus_root, output):
         raise ValueError("Ledger output must be outside and separate from the original corpus")
     snapshot_bytes = Path(snapshot_path).read_bytes()
     snapshot = json.loads(snapshot_bytes)

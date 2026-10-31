@@ -4,12 +4,16 @@ import gzip
 import hashlib
 import io
 import json
+import os
+from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
 from litdatamatcher.pubmed_revision_ledger import (
+    _inside,
+    _is_inside,
     build_revision_ledger,
     build_shard,
     iter_xml_events,
@@ -284,3 +288,67 @@ def test_invalid_executor_is_rejected(tmp_path):
         build_revision_ledger(
             tmp_path / "corpus", tmp_path / "snapshot", tmp_path / "output", executor="unbounded"
         )
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows namespace semantics")
+@pytest.mark.parametrize(
+    "root,target,allowed",
+    [
+        (r"C:\root", r"\\?\C:\root\partitions\x", True),
+        (r"\\?\C:\root", r"C:\root\partitions\x", True),
+        (r"C:\root", r"\\?\C:\root-other\x", False),
+        (r"C:\root", r"\\?\D:\root\x", False),
+        (r"\\server\share\root", r"\\?\UNC\server\share\root\x", True),
+        (r"\\?\unc\SERVER\share\root", r"\\server\SHARE\root\x", True),
+        (r"\\server\share\root", r"\\?\UNC\server\other\root\x", False),
+    ],
+)
+def test_equivalent_windows_namespace_containment(root, target, allowed):
+    assert _is_inside(Path(target), Path(root)) is allowed
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows namespace semantics")
+def test_transient_extended_path_keeps_resolved_io_path(monkeypatch):
+    root = Path(r"C:\root")
+    extended = Path(r"\\?\C:\root\partitions\updates\pubmed26n1339")
+    monkeypatch.setattr(Path, "resolve", lambda self: extended)
+    result = _inside(root, "partitions/updates/pubmed26n1339")
+    assert result == extended
+    assert str(result).startswith("\\\\?\\")
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows namespace semantics")
+@pytest.mark.parametrize(
+    "device", [r"\\.\C:\root\x", r"\\?\Volume{00000000-0000-0000-0000-000000000000}\x"]
+)
+def test_device_namespaces_fail_before_resolution(device, monkeypatch):
+    monkeypatch.setattr(Path, "resolve", lambda self: pytest.fail("Device path reached I/O"))
+    with pytest.raises(ValueError, match="device namespace"):
+        _inside(Path(r"C:\root"), device)
+
+
+def test_resolved_traversal_still_fails(tmp_path):
+    root = tmp_path / "root"
+    root.mkdir()
+    for relative in ("../outside", str(tmp_path / "outside")):
+        with pytest.raises(ValueError, match="escapes"):
+            _inside(root.resolve(), relative)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows directory junction")
+def test_junction_outside_declared_root_still_fails(tmp_path):
+    import subprocess
+
+    root, outside = tmp_path / "root", tmp_path / "outside"
+    root.mkdir()
+    outside.mkdir()
+    source = outside / "source.txt"
+    source.write_text("untouched source", encoding="utf-8")
+    junction = root / "junction"
+    created = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(junction), str(outside)], capture_output=True
+    )
+    assert created.returncode == 0, created.stderr
+    with pytest.raises(ValueError, match="escapes"):
+        _inside(root.resolve(), "junction/source.txt")
+    assert source.read_text(encoding="utf-8") == "untouched source"

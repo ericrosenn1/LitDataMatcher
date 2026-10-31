@@ -126,6 +126,69 @@ def test_observed_variables_are_searchable_without_title_overlap():
     assert _select([row], "radius1 diagnosis", 5, "dataset_id") == [row]
 
 
+def test_workflow_comparison_scope_stays_bound_to_one_question(catalog, tmp_path):
+    from litdatamatcher.tabular_contracts import comparison_constraints, inspect_tabular_comparisons
+
+    table = tmp_path / "measurements.csv"
+    table.write_text("value,group\n1,A\n2,B\n", encoding="utf-8")
+    metadata = {
+        "dataset_id": "measured",
+        "num_instances": 2,
+        "variables": [
+            {
+                "name": "value",
+                "role": "Feature",
+                "type": "Continuous",
+                "description": "Recorded concentration",
+            },
+            {
+                "name": "group",
+                "role": "Target",
+                "type": "Categorical",
+                "description": "Recorded source group A or B",
+            },
+        ],
+    }
+    specification = {
+        "outcome_variable": "value",
+        "grouping_variable": "group",
+        "group_values": ["A", "B"],
+        "definition_evidence": {
+            row["name"]: {"json_pointer": f"/variables/{i}/description", "text": row["description"]}
+            for i, row in enumerate(metadata["variables"])
+        },
+    }
+    profile = inspect_tabular_comparisons(
+        table,
+        metadata,
+        [specification],
+        source_url="https://example.org/table.csv",
+        metadata_url="https://example.org/definitions",
+    )
+    (catalog / "catalog/studies.jsonl").write_text(json.dumps(profile) + "\n", encoding="utf-8")
+    constraints = comparison_constraints("value", "group", ["A", "B"])
+    question = "What is the difference between group A and group B in recorded value?"
+    result = run_workflow(
+        validate_request(request(query="value group", question=question, requirements=constraints)),
+        {"catalog_root": str(catalog)},
+        tmp_path / "comparison",
+    )
+    assert result["candidates"][0]["assessment"]["eligibility"] == "DIRECT_FIT"
+    assessed = {r["field"]: r for r in result["candidates"][0]["assessment"]["requirements"]}
+    assert assessed["joint_observation"]["status"] == "MATCH"
+    assert assessed["outcome_ascertainment"]["status"] == "MATCH"
+    assert result["candidates"][0]["dataset"]["comparison_scope"]["outcome_variable"] == "value"
+    assert "comparison_scope" not in result["datasets"][0]
+    assert "joint_observation" not in result["datasets"][0]["capabilities"]
+    alternate = run_workflow(
+        validate_request(request(query="value group", question=question, requirements=[])),
+        {"catalog_root": str(catalog)},
+        tmp_path / "unbound",
+    )
+    assert alternate["status"] == "QUESTION_UNDERDETERMINED"
+    assert alternate["candidates"] == []
+
+
 def test_same_pmid_preserves_alternate_source_and_lifecycle():
     first = {"document_id": "PMID:123", "text": "Future work is needed.", "source": "pubmed"}
     second = {

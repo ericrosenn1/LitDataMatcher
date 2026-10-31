@@ -25,6 +25,7 @@ from .question_compiler import compile_question
 from .retrieval import BM25Index
 from .scientific_v2 import rank_candidates
 from .strict_artifacts import strict_json_loads
+from .tabular_contracts import scope_tabular_comparison
 from .v2 import normalize_dataset, read_rows
 from .workflow_checkpoint import CheckpointRun, file_identity
 
@@ -440,8 +441,10 @@ def _qualify(request, config, extracted, inspected, acquired, work):
     cosine = {r["id"]: r["score"] for r in dense}
     lexical_rank = {r["id"]: i + 1 for i, r in enumerate(lexical)}
     dense_rank = {r["id"]: i + 1 for i, r in enumerate(dense)}
-    ranked = rank_candidates(requirements, datasets, cosine) if requirements else []
-    lookup = {d["dataset_id"]: d for d in datasets}
+    # Project only this compiled contract; keep persisted catalog profiles unchanged.
+    scoped = [scope_tabular_comparison(dataset, requirements) for dataset in datasets]
+    ranked = rank_candidates(requirements, scoped, cosine) if requirements else []
+    lookup = {d["dataset_id"]: d for d in scoped}
     for row in ranked:
         key = row["dataset_id"]
         row["dataset"] = lookup[key]
@@ -528,6 +531,29 @@ def _report(result):
             lines.append(
                 f"- {requirement['field']}: {requirement['status']}; required {requirement['expected']}; observed {observation['value']}; source {observation['source_locator'] or 'unreported'}"
             )
+        scope = row["dataset"].get("comparison_scope")
+        if scope:
+            evidence = next(
+                item
+                for item in row["dataset"]["inspection"]["comparison_evidence"]
+                if item["evidence_id"] == scope["evidence_id"]
+            )
+            lines.append(
+                "Exact comparison: "
+                + scope["outcome_variable"]
+                + " by "
+                + scope["grouping_variable"]
+                + " groups "
+                + ", ".join(scope["group_values"])
+            )
+            lines.append(
+                "Joint observed rows by group: " + json.dumps(evidence["joint_rows_by_group"])
+            )
+            for definition in evidence["definition_evidence"]:
+                lines.append(
+                    f"Source definition of {definition['variable']}: {definition['text']} ({definition['source_locator']})"
+                )
+            lines.extend("- " + text for text in evidence["limitations"])
         lines.append("")
     lines.extend(
         ["## Coverage and limitations", "", *["- " + value for value in result["limitations"]]]

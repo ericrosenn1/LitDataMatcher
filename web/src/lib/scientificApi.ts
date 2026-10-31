@@ -72,10 +72,18 @@ export interface ResearchResult {
   candidates: ScientificCandidate[];
   questions?: {
     questions: DiscoveredQuestion[];
-    coverage?: { failed_documents?: number; truncated?: boolean };
+    coverage?: {
+      processed_documents?: number;
+      failed_documents?: number;
+      metadata_only_documents?: number;
+      excluded_documents?: number;
+      truncated?: boolean;
+    };
   };
   documents?: ResearchDocument[];
   scientific_status?: string;
+  processing_status?: string;
+  limitations?: string[];
   status?: string;
   sources?: unknown;
 }

@@ -21,8 +21,16 @@ const result = {
   },
   compilation: contract,
   status: "PARTIAL",
+  processing_status: "PARTIAL_RETRYABLE",
   scientific_status: "UNVALIDATED_DEVELOPMENT_FIXTURE",
   questions: {
+    coverage: {
+      processed_documents: 1,
+      failed_documents: 1,
+      metadata_only_documents: 2,
+      excluded_documents: 1,
+      truncated: false,
+    },
     questions: [
       {
         question_id: "fixture-q",
@@ -212,6 +220,17 @@ test("explicit requirements reach a queued job and source evidence remains inspe
       ?.requirements,
   ).toEqual([{ field: "paired", expected: false, essential: false }]);
   await expect(page.locator(".scientific-candidates > article")).toHaveCount(2);
+  const coverage = page.getByRole("status", { name: "Research coverage" });
+  await expect(coverage).toContainText("Some processing stages are incomplete");
+  await expect(coverage).toContainText(
+    "Metadata-only documents without source text to extract: 2",
+  );
+  await expect(coverage).toContainText(
+    "Documents excluded by source lifecycle or version review: 1",
+  );
+  await expect(coverage).toContainText(
+    "Documents that could not be processed: 1",
+  );
   await page.getByLabel("Compatibility filter").selectOption("DIRECT_FIT");
   await expect(page.locator(".scientific-candidates > article")).toHaveCount(1);
   await page.getByText("Inspect requirement evidence", { exact: true }).click();

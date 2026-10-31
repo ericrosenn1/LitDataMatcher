@@ -860,6 +860,62 @@ export function ScientificWorkflow() {
           <p className="scientific-result-status">
             {label(result.scientific_status || result.status)}
           </p>
+          {(result.processing_status || result.questions?.coverage) && (
+            <div
+              className="scientific-coverage"
+              role="status"
+              aria-label="Research coverage"
+            >
+              {result.processing_status && (
+                <p>
+                  {result.processing_status === "COMPLETE"
+                    ? "All requested processing stages completed."
+                    : result.processing_status === "PARTIAL_RETRYABLE"
+                      ? "Some processing stages are incomplete and can be retried."
+                      : `Processing status: ${label(result.processing_status)}.`}
+                </p>
+              )}
+              {typeof result.questions?.coverage?.processed_documents ===
+                "number" && (
+                <p>
+                  Documents with source text processed:{" "}
+                  {result.questions.coverage.processed_documents}.
+                </p>
+              )}
+              {!!result.questions?.coverage?.metadata_only_documents && (
+                <p>
+                  Metadata-only documents without source text to extract:{" "}
+                  {result.questions.coverage.metadata_only_documents}.
+                </p>
+              )}
+              {!!result.questions?.coverage?.excluded_documents && (
+                <p>
+                  Documents excluded by source lifecycle or version review:{" "}
+                  {result.questions.coverage.excluded_documents}.
+                </p>
+              )}
+              {!!result.questions?.coverage?.failed_documents && (
+                <p>
+                  Documents that could not be processed:{" "}
+                  {result.questions.coverage.failed_documents}. Their failures
+                  remain in the dossier.
+                </p>
+              )}
+              {result.questions?.coverage?.truncated && (
+                <p>The retained question list reached its configured limit.</p>
+              )}
+            </div>
+          )}
+          {!!result.limitations?.length && (
+            <details>
+              <summary>Coverage and interpretation limits</summary>
+              <ul className="scientific-limitations">
+                {result.limitations.map((limitation, index) => (
+                  <li key={index}>{limitation}</li>
+                ))}
+              </ul>
+            </details>
+          )}
           {!!result.questions?.questions.length && (
             <details className="scientific-extracted">
               <summary>

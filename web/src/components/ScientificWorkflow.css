@@ -301,6 +301,20 @@
   border-bottom: 1px solid var(--line);
   padding: 15px 0;
 }
+.scientific-coverage {
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: #f7f9f5;
+  color: #536457;
+  line-height: 1.6;
+}
+.scientific-coverage p {
+  margin: 3px 0;
+}
+.scientific-limitations {
+  padding-left: 24px;
+  line-height: 1.6;
+}
 .scientific-extracted article > p {
   margin-top: 8px;
   line-height: 1.5;

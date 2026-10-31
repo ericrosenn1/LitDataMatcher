@@ -326,7 +326,9 @@ def _split_summary_section(splits: JsonDict) -> list[str]:
     lines.extend(_dict_bullets("Group counts", splits.get("split_group_counts", {})))
     warnings = splits.get("warnings", [])
     if warnings:
-        lines.extend(_dict_bullets("Split warnings", {str(i + 1): item for i, item in enumerate(warnings)}))
+        lines.extend(
+            _dict_bullets("Split warnings", {str(i + 1): item for i, item in enumerate(warnings)})
+        )
     lines.append("")
     return lines
 
@@ -342,7 +344,9 @@ def _issue_section(title: str, issues: list[JsonDict]) -> list[str]:
     for code, count in sorted(code_counts.items()):
         lines.append(f"| `{_md(code)}` | {count} |")
     lines.extend(["", "Examples:", ""])
-    lines.extend(["| Source row | Code | Field | Target | Message |", "| ---: | --- | --- | --- | --- |"])
+    lines.extend(
+        ["| Source row | Code | Field | Target | Message |", "| ---: | --- | --- | --- | --- |"]
+    )
     for issue in issues[:5]:
         lines.append(
             "| "

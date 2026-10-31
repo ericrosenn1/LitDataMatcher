@@ -258,9 +258,7 @@ def _summary_markdown(summary: JsonDict) -> str:
         "| --- | --- | ---: |",
     ]
     for artifact in summary.get("artifacts", []):
-        lines.append(
-            f"| `{artifact['path']}` | {artifact['exists']} | {artifact['size_bytes']} |"
-        )
+        lines.append(f"| `{artifact['path']}` | {artifact['exists']} | {artifact['size_bytes']} |")
     lines.extend(
         [
             "",

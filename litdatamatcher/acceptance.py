@@ -402,8 +402,12 @@ def _validate_run_entry(root: Path, entry: JsonObject) -> tuple[JsonObject | Non
             faults.extend(f"{check['target']}/{check['id']}: {fault}" for fault in check_faults)
         else:
             usable_checks.append(check)
-    return {"manifest": manifest, "manifest_path": manifest_path, "checks": usable_checks,
-            "validated_artifacts": artifacts}, faults
+    return {
+        "manifest": manifest,
+        "manifest_path": manifest_path,
+        "checks": usable_checks,
+        "validated_artifacts": artifacts,
+    }, faults
 
 
 def _validate_check(
@@ -444,9 +448,7 @@ def _validate_check(
                 f"check artifact is not a hashed, validated manifest artifact: {artifact_path}"
             )
     if not faults and not _has_semantic_attestation(check, run_root):
-        faults.append(
-            "no referenced structured audit attests this exact target/kind as PASS"
-        )
+        faults.append("no referenced structured audit attests this exact target/kind as PASS")
     return faults
 
 
@@ -624,13 +626,16 @@ def _calibration(runs: list[JsonObject]) -> tuple[str, list[str]]:
     for entry in runs:
         manifest = entry["manifest"]
         evaluation = manifest["evaluation"]
-        if (evaluation.get("split_role") not in {"VALIDATION", "TRANSFER"}
-                or evaluation.get("holdout_exposed_to_tuning") is not False
-                or evaluation.get("label_origins") != ["expert"]):
+        if (
+            evaluation.get("split_role") not in {"VALIDATION", "TRANSFER"}
+            or evaluation.get("holdout_exposed_to_tuning") is not False
+            or evaluation.get("label_origins") != ["expert"]
+        ):
             continue
         run_root = Path(entry["manifest_path"]).parent
         references = {
-            path for check in entry.get("checks", [])
+            path
+            for check in entry.get("checks", [])
             if check.get("target") == "G10" and check.get("kind") == "label_provenance"
             for path in check.get("artifacts", [])
         }
@@ -641,11 +646,15 @@ def _calibration(runs: list[JsonObject]) -> tuple[str, list[str]]:
                 continue
             try:
                 # Recheck at consumption time rather than trusting a prior hash.
-                if path.stat().st_size != artifact["size_bytes"] or _sha256(path) != artifact["sha256"]:
+                if (
+                    path.stat().st_size != artifact["size_bytes"]
+                    or _sha256(path) != artifact["sha256"]
+                ):
                     continue
                 result = _read_json(path)
-                if (result.get("protocol", {}).get("protocol_id") == evaluation.get("protocol_version")
-                        and verify_calibration_result(result, require_real_expert=True)):
+                if result.get("protocol", {}).get("protocol_id") == evaluation.get(
+                    "protocol_version"
+                ) and verify_calibration_result(result, require_real_expert=True):
                     calibrated_evidence.append(str(path))
             except (OSError, ValueError, TypeError, AttributeError):
                 continue

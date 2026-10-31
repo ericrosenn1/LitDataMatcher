@@ -207,7 +207,9 @@ def validate_review_rows(
     )
 
 
-def validate_review_row(row: dict, include_unlabeled: bool = False) -> tuple[list[ReviewIssue], list[ReviewIssue]]:
+def validate_review_row(
+    row: dict, include_unlabeled: bool = False
+) -> tuple[list[ReviewIssue], list[ReviewIssue]]:
     """Validate one review row without checking cross-row duplicates."""
 
     warnings: list[ReviewIssue] = []
@@ -216,9 +218,7 @@ def validate_review_row(row: dict, include_unlabeled: bool = False) -> tuple[lis
     needs_ids = has_label or include_unlabeled
 
     if not str(row.get("_effective_annotator_id", "")).strip():
-        warnings.append(
-            _issue(row, "blank_annotator_id", "No annotator/reviewer ID was provided.")
-        )
+        warnings.append(_issue(row, "blank_annotator_id", "No annotator/reviewer ID was provided."))
 
     if needs_ids:
         for field_name in ("match_id", "question_id", "dataset_id"):
@@ -269,7 +269,10 @@ def _effective_annotator(row: dict, default: str = "") -> str:
 def _has_training_label(row: dict) -> bool:
     """Return true when a row contains any reviewer-supplied label content."""
 
-    return any(str(row.get(field_name, "") or "").strip() for field_name in (*RELEVANCE_FIELDS, *QUALITY_FIELDS, *NOTE_FIELDS))
+    return any(
+        str(row.get(field_name, "") or "").strip()
+        for field_name in (*RELEVANCE_FIELDS, *QUALITY_FIELDS, *NOTE_FIELDS)
+    )
 
 
 def _validate_numeric_field(row: dict, field_name: str, maximum: float) -> list[ReviewIssue]:

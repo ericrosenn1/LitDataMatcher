@@ -46,9 +46,15 @@ def main():
         canonical = json.dumps(json.loads(raw), ensure_ascii=False, separators=(",", ":"))
         repaired = schema_parser(document)
         incumbent = JsonSchemaParser(source_schema(document), config=repaired.config)
-        results.append({"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                        "serialization": "JSON whitespace normalized; field values unchanged",
-                        "incumbent_grammar": accepts(incumbent, canonical), "repaired_grammar": accepts(repaired, canonical)})
+        results.append(
+            {
+                "path": str(path),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "serialization": "JSON whitespace normalized; field values unchanged",
+                "incumbent_grammar": accepts(incumbent, canonical),
+                "repaired_grammar": accepts(repaired, canonical),
+            }
+        )
     if not results:
         raise ValueError("No preserved generation diagnostics found")
     token_result = None
@@ -67,15 +73,31 @@ def main():
         brace = tokenizer.encode("{", add_special_tokens=False)
         closer = tokenizer.encode("]", add_special_tokens=False)
         assert len(brace) == len(closer) == 1
-        token_result = {"tokenizer_dir": str(args.tokenizer_dir), "allowed_tokens": len(allowed),
-                        "opening_object_allowed": brace[0] in allowed, "array_closer_allowed": closer[0] in allowed}
+        token_result = {
+            "tokenizer_dir": str(args.tokenizer_dir),
+            "allowed_tokens": len(allowed),
+            "opening_object_allowed": brace[0] in allowed,
+            "array_closer_allowed": closer[0] in allowed,
+        }
         if token_result["opening_object_allowed"] or not token_result["array_closer_allowed"]:
             raise AssertionError("Tokenizer-level empty-array constraint failed")
-    receipt = {"status": "PASS" if all(r["incumbent_grammar"]["accepted"] and not r["repaired_grammar"]["accepted"] for r in results) else "FAIL",
-               "scope": "Development grammar replay; no model inference or scientific validity claim",
-               "document": {"path": str(args.document), "sha256": hashlib.sha256(args.document.read_bytes()).hexdigest()},
-               "decoding": decoding_metadata(document), "diagnostics": results,
-               "tokenizer_probe": token_result, "elapsed_seconds": time.perf_counter() - started}
+    receipt = {
+        "status": "PASS"
+        if all(
+            r["incumbent_grammar"]["accepted"] and not r["repaired_grammar"]["accepted"]
+            for r in results
+        )
+        else "FAIL",
+        "scope": "Development grammar replay; no model inference or scientific validity claim",
+        "document": {
+            "path": str(args.document),
+            "sha256": hashlib.sha256(args.document.read_bytes()).hexdigest(),
+        },
+        "decoding": decoding_metadata(document),
+        "diagnostics": results,
+        "tokenizer_probe": token_result,
+        "elapsed_seconds": time.perf_counter() - started,
+    }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(receipt, indent=2, ensure_ascii=False))

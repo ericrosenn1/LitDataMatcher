@@ -64,7 +64,9 @@ def build_agreement_artifacts(
     return summary, adjudication_records
 
 
-def _labels_by_target(labels: list[QuestionDataMatchLabel]) -> dict[str, list[QuestionDataMatchLabel]]:
+def _labels_by_target(
+    labels: list[QuestionDataMatchLabel],
+) -> dict[str, list[QuestionDataMatchLabel]]:
     """Group match labels by the ranked match they judge."""
 
     by_target: dict[str, list[QuestionDataMatchLabel]] = {}
@@ -76,9 +78,7 @@ def _labels_by_target(labels: list[QuestionDataMatchLabel]) -> dict[str, list[Qu
     return by_target
 
 
-def _pair_summaries(
-    labels_by_target: dict[str, list[QuestionDataMatchLabel]]
-) -> list[JsonDict]:
+def _pair_summaries(labels_by_target: dict[str, list[QuestionDataMatchLabel]]) -> list[JsonDict]:
     """Compute pairwise binary overlap and agreement counts."""
 
     pair_values: dict[tuple[str, str], list[tuple[int, int]]] = {}
@@ -119,7 +119,7 @@ def _pair_summaries(
 
 
 def _cross_reviewer_disagreements(
-    labels_by_target: dict[str, list[QuestionDataMatchLabel]]
+    labels_by_target: dict[str, list[QuestionDataMatchLabel]],
 ) -> list[JsonDict]:
     """Return adjudication records where reviewers disagree on a target."""
 
@@ -143,7 +143,9 @@ def _cross_reviewer_disagreements(
                 "match_id": representative.match_id,
                 "question_id": representative.question_id,
                 "dataset_id": representative.dataset_id,
-                "primary_source_id": _metadata_value(representative, "primary_source_id", "source_id"),
+                "primary_source_id": _metadata_value(
+                    representative, "primary_source_id", "source_id"
+                ),
                 "source_id": _metadata_value(representative, "source_id", "primary_source_id"),
                 "reviewers": sorted(by_reviewer),
                 "labels_by_reviewer": {
@@ -182,7 +184,9 @@ def _validation_conflict_records(conflicts: list[JsonDict]) -> list[JsonDict]:
                 "labels_by_reviewer": {
                     str(issue.get("annotator_id", "") or "blank"): {
                         "raw_match_relevance": str(row.get("match_relevance", "") or ""),
-                        "expert_question_quality": str(row.get("expert_question_quality", "") or ""),
+                        "expert_question_quality": str(
+                            row.get("expert_question_quality", "") or ""
+                        ),
                         "expert_data_match_quality": str(
                             row.get("expert_data_match_quality", "") or ""
                         ),

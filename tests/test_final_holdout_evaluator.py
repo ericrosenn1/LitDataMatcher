@@ -53,7 +53,12 @@ def _audit():
             "geo_samples": [],
             "pubmed": [],
             "pmc": [],
-            "ena_sra": {"study_accession": [], "secondary_study_accession": [], "sample_accession": [], "run_accession": []},
+            "ena_sra": {
+                "study_accession": [],
+                "secondary_study_accession": [],
+                "sample_accession": [],
+                "run_accession": [],
+            },
         },
         "candidate_relation_status": {
             "publication_complete": True,
@@ -62,9 +67,29 @@ def _audit():
             "raw_files": {"PRJNA-test": {"rows": 3, "complete_under_limit": True}},
         },
         "official_relation_status": {
-            "gds_to_pubmed": {"queried_series": 1, "indexed_links": 1, "explicit_no_indexed_links": [], "errors": [], "truncated": []},
-            "pubmed_to_pmc": {"queried_pubmed": 1, "indexed_links": 1, "explicit_no_indexed_links": [], "errors": [], "truncated": []},
-            "ena_sra": {"queried_bioproject_or_sra": 1, "indexed_links": 1, "explicit_no_indexed_links": [], "errors": [], "truncated": [], "maximum_rows_returned": 3, "raw_files": {"PRJNA-test": {"rows": 3, "complete_under_limit": True}}},
+            "gds_to_pubmed": {
+                "queried_series": 1,
+                "indexed_links": 1,
+                "explicit_no_indexed_links": [],
+                "errors": [],
+                "truncated": [],
+            },
+            "pubmed_to_pmc": {
+                "queried_pubmed": 1,
+                "indexed_links": 1,
+                "explicit_no_indexed_links": [],
+                "errors": [],
+                "truncated": [],
+            },
+            "ena_sra": {
+                "queried_bioproject_or_sra": 1,
+                "indexed_links": 1,
+                "explicit_no_indexed_links": [],
+                "errors": [],
+                "truncated": [],
+                "maximum_rows_returned": 3,
+                "raw_files": {"PRJNA-test": {"rows": 3, "complete_under_limit": True}},
+            },
         },
     }
 
@@ -73,7 +98,9 @@ def _sealed_paths(tmp_path):
     audit_path = tmp_path / "audit.json"
     _write(audit_path, _audit())
     reservation_path = tmp_path / "reservation.json"
-    _write(reservation_path, _reservation(hashlib.sha256(audit_path.read_bytes()).hexdigest().upper()))
+    _write(
+        reservation_path, _reservation(hashlib.sha256(audit_path.read_bytes()).hexdigest().upper())
+    )
     return reservation_path, audit_path
 
 
@@ -98,7 +125,9 @@ def test_tampered_audit_and_overlap_each_refuse_before_snapshot_access(tmp_path)
     with pytest.raises(ValueError, match="audit hash"):
         EVALUATOR.validate_preconditions(reservation_path, audit_path)
 
-    _write(reservation_path, _reservation(hashlib.sha256(audit_path.read_bytes()).hexdigest().upper()))
+    _write(
+        reservation_path, _reservation(hashlib.sha256(audit_path.read_bytes()).hexdigest().upper())
+    )
     with pytest.raises(ValueError, match="overlap"):
         EVALUATOR.validate_preconditions(reservation_path, audit_path)
 
@@ -190,21 +219,85 @@ def test_missing_jsonschema_preflight_never_marks_consumed_or_reads_source(tmp_p
 
 
 def test_final_holdout_manifest_requires_proven_disjointness_with_zero_unknowns(tmp_path):
-    schema = Path(__file__).parents[1] / "litdatamatcher" / "schemas_v2" / "RUN_MANIFEST.schema.json"
+    schema = (
+        Path(__file__).parents[1] / "litdatamatcher" / "schemas_v2" / "RUN_MANIFEST.schema.json"
+    )
     manifest = {
         "schema_version": "2.0",
         "run_id": "final-test",
         "execution_status": "PASS",
         "started_at": "2026-09-07T00:00:00+00:00",
         "finished_at": "2026-09-07T00:01:00+00:00",
-        "source": {"repository": "ericrosenn1/LitDataMatcher", "commit": "a", "working_tree_digest": "b", "spec_digest": "c", "config_digest": "d"},
-        "environment": {"python": "test", "platform": "test", "dependency_lock_digest": "test", "hardware_record": "test"},
-        "models": [{"id": "model", "revision": "rev", "runtime": "test", "license_status": "test", "prompt_version": "test"}],
-        "source_snapshots": [{"source": "test", "snapshot_id": "test", "retrieved_at": "2026-09-07T00:00:00+00:00", "manifest_digest": "test"}],
-        "commands": [{"command": "test", "cwd": "test", "started_at": "2026-09-07T00:00:00+00:00", "exit_code": 0, "log_reference": "metrics.json"}],
-        "evaluation": {"protocol_version": "EP-test", "split_id": "GSE999999", "split_role": "FINAL_HOLDOUT", "label_origins": ["source_determined"], "holdout_exposed_to_tuning": False, "source_disjointness": {"status": "PROVEN_SOURCE_DISJOINT", "selected_accession": "GSE999999", "unknown_overlap_count": 0}},
-        "coverage": {"unique_literature_records": 0, "parsed_full_texts": 0, "unique_accession_studies": 1, "sample_profiled_studies": 0, "inspected_processed_studies": 0, "external_structured_resources": 0, "distinct_pilot_contexts": 1, "case_dossiers": 1},
-        "artifacts": [{"path": "metrics.json", "sha256": "0" * 64, "size_bytes": 1, "kind": "test", "validation": "PASS"}],
+        "source": {
+            "repository": "ericrosenn1/LitDataMatcher",
+            "commit": "a",
+            "working_tree_digest": "b",
+            "spec_digest": "c",
+            "config_digest": "d",
+        },
+        "environment": {
+            "python": "test",
+            "platform": "test",
+            "dependency_lock_digest": "test",
+            "hardware_record": "test",
+        },
+        "models": [
+            {
+                "id": "model",
+                "revision": "rev",
+                "runtime": "test",
+                "license_status": "test",
+                "prompt_version": "test",
+            }
+        ],
+        "source_snapshots": [
+            {
+                "source": "test",
+                "snapshot_id": "test",
+                "retrieved_at": "2026-09-07T00:00:00+00:00",
+                "manifest_digest": "test",
+            }
+        ],
+        "commands": [
+            {
+                "command": "test",
+                "cwd": "test",
+                "started_at": "2026-09-07T00:00:00+00:00",
+                "exit_code": 0,
+                "log_reference": "metrics.json",
+            }
+        ],
+        "evaluation": {
+            "protocol_version": "EP-test",
+            "split_id": "GSE999999",
+            "split_role": "FINAL_HOLDOUT",
+            "label_origins": ["source_determined"],
+            "holdout_exposed_to_tuning": False,
+            "source_disjointness": {
+                "status": "PROVEN_SOURCE_DISJOINT",
+                "selected_accession": "GSE999999",
+                "unknown_overlap_count": 0,
+            },
+        },
+        "coverage": {
+            "unique_literature_records": 0,
+            "parsed_full_texts": 0,
+            "unique_accession_studies": 1,
+            "sample_profiled_studies": 0,
+            "inspected_processed_studies": 0,
+            "external_structured_resources": 0,
+            "distinct_pilot_contexts": 1,
+            "case_dossiers": 1,
+        },
+        "artifacts": [
+            {
+                "path": "metrics.json",
+                "sha256": "0" * 64,
+                "size_bytes": 1,
+                "kind": "test",
+                "validation": "PASS",
+            }
+        ],
         "network": {"mode": "OFFLINE", "offline_block_test": True, "external_requests_observed": 0},
         "inference": {"fresh_calls": 1, "cache_replays": 0, "backend_qualified": True},
         "failures": [],

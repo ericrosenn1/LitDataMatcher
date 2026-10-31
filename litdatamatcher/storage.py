@@ -93,7 +93,11 @@ class PipelineStore:
             """,
             [
                 # Full JSON payloads preserve nested evidence while columns support lookup.
-                (question.question_id, question.question, json.dumps(question.to_dict(), sort_keys=True))
+                (
+                    question.question_id,
+                    question.question,
+                    json.dumps(question.to_dict(), sort_keys=True),
+                )
                 for question in questions
             ],
         )

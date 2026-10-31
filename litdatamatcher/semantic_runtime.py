@@ -166,9 +166,14 @@ def _relation_scope(quote: str, claim: dict) -> tuple[str, str]:
     boundaries = list(_CLAUSE_BOUNDARY.finditer(quote))
     if any(subject[0] < boundary.start() < target[1] for boundary in boundaries):
         raise ValueError("Relation crosses clauses and requires scope review")
-    start = max((boundary.end() for boundary in boundaries if boundary.end() <= subject[0]), default=0)
-    end = min((boundary.start() for boundary in boundaries if boundary.start() >= target[1]), default=len(quote))
-    return quote[start:end], quote[subject[1]:target[0]]
+    start = max(
+        (boundary.end() for boundary in boundaries if boundary.end() <= subject[0]), default=0
+    )
+    end = min(
+        (boundary.start() for boundary in boundaries if boundary.start() >= target[1]),
+        default=len(quote),
+    )
+    return quote[start:end], quote[subject[1] : target[0]]
 
 
 def validate_extraction(payload: Any, document: dict) -> dict:
@@ -185,7 +190,17 @@ def validate_extraction(payload: Any, document: dict) -> dict:
         try:
             if not isinstance(claim, dict):
                 raise ValueError("Claim must be an object")
-            if set(claim) - {"quote", "subject", "predicate", "object", "direction", "negated", "status", "context", "comparator"}:
+            if set(claim) - {
+                "quote",
+                "subject",
+                "predicate",
+                "object",
+                "direction",
+                "negated",
+                "status",
+                "context",
+                "comparator",
+            }:
                 raise ValueError("Claim contains unsupported fields")
             span = _span(text, claim.get("quote"))
             quote = span["text"]
@@ -224,7 +239,8 @@ def validate_extraction(payload: Any, document: dict) -> dict:
                 raise ValueError("Invalid claim status")
             if claim["status"] == "direct_experiment" and re.search(
                 r"\b(?:systematic review|meta[- ]analysis|we reviewed\s+\d+\s+(?:studies|trials)|this review|our review)\b",
-                quote + " " + str(document.get("title", "")), re.I,
+                quote + " " + str(document.get("title", "")),
+                re.I,
             ):
                 raise ValueError("Explicit evidence synthesis is not a direct experiment")
             if (
@@ -340,7 +356,9 @@ class LocalSemanticRuntime:
 
         constrained = self.config.decoding_mode == "source_schema"
         if constrained and system_prompt != SYSTEM_PROMPT:
-            raise ValueError("source_schema is an extraction-only profile; use unconstrained for requirement proposals")
+            raise ValueError(
+                "source_schema is an extraction-only profile; use unconstrained for requirement proposals"
+            )
         self._load()
         generation_options = {}
         if constrained:
@@ -455,12 +473,14 @@ class LocalSemanticRuntime:
             except (ValueError, RuntimeError, OSError) as error:
                 # A retry must not erase source-validated records from an earlier
                 # attempt. Initial generation failures still fail explicitly.
-                attempts.append({
-                    "attempt": attempt,
-                    "parse_valid": False,
-                    "generation_error": type(error).__name__,
-                    "error": str(error),
-                })
+                attempts.append(
+                    {
+                        "attempt": attempt,
+                        "parse_valid": False,
+                        "generation_error": type(error).__name__,
+                        "error": str(error),
+                    }
+                )
                 if not accepted_claims and not accepted_questions:
                     raise
                 break

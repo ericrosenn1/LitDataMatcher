@@ -47,7 +47,9 @@ def synthesize_question_cluster(cluster: list[QuestionCandidate]) -> EvidenceSyn
         for term in question.domain_terms:
             terms[term] += 1
     # Top terms make the synthesis summary inspectable without re-reading every sentence.
-    top_terms = [term for term, _ in sorted(terms.items(), key=lambda item: item[1], reverse=True)[:5]]
+    top_terms = [
+        term for term, _ in sorted(terms.items(), key=lambda item: item[1], reverse=True)[:5]
+    ]
 
     support_count = len(all_evidence)
     # Recurrence is a source-diversity signal, not a formal meta-analytic effect size.
@@ -60,9 +62,8 @@ def synthesize_question_cluster(cluster: list[QuestionCandidate]) -> EvidenceSyn
     # Evidence strength blends extraction confidence with independent-source recurrence.
     evidence_strength = min(1.0, 0.5 * mean_extraction_confidence + 0.5 * recurrence_score)
     uncertainty = max(0.05, 1.0 - evidence_strength)
-    summary = (
-        f"{len(cluster)} question candidate(s) across {len(source_ids)} source(s)"
-        + (f" involving {', '.join(top_terms)}." if top_terms else ".")
+    summary = f"{len(cluster)} question candidate(s) across {len(source_ids)} source(s)" + (
+        f" involving {', '.join(top_terms)}." if top_terms else "."
     )
     return EvidenceSynthesis(
         cluster_id=stable_id("cluster", *question_ids),

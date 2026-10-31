@@ -116,7 +116,9 @@ def test_runtime_qualification_requires_matching_fresh_model(tmp_path):
         ),
         encoding="utf-8",
     )
-    assert qualified_runtime(path, runtime)[0] is False  # Legacy revision-only proof is insufficient.
+    assert (
+        qualified_runtime(path, runtime)[0] is False
+    )  # Legacy revision-only proof is insufficient.
 
 
 def test_artifact_validation_parses_content(tmp_path):

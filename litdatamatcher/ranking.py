@@ -118,7 +118,9 @@ def _population_fit(question: QuestionCandidate, dataset: DatasetRecord) -> floa
     return 0.2 if pops else 0.4
 
 
-def _variable_overlap(question: QuestionCandidate, dataset: DatasetRecord) -> tuple[float, list[str]]:
+def _variable_overlap(
+    question: QuestionCandidate, dataset: DatasetRecord
+) -> tuple[float, list[str]]:
     """Return required-variable coverage and missing variables."""
 
     feasibility = assess_pair_feasibility(question, dataset)
@@ -146,7 +148,8 @@ def score_question_dataset(
     if question.domain_terms:
         semantic_relevance = max(
             semantic_relevance,
-            len(set(question.domain_terms) & dataset_terms) / max(1, len(set(question.domain_terms))),
+            len(set(question.domain_terms) & dataset_terms)
+            / max(1, len(set(question.domain_terms))),
         )
     population_fit = feasibility_assessment.population_fit
     sample_adequacy = feasibility_assessment.sample_adequacy
@@ -189,8 +192,7 @@ def score_question_dataset(
         governance=round(governance.reuse_score, 3),
         design_fit=round(
             # Design fit summarizes whether assays and study timing match the question.
-            0.5 * feasibility_assessment.assay_fit
-            + 0.5 * feasibility_assessment.longitudinal_fit,
+            0.5 * feasibility_assessment.assay_fit + 0.5 * feasibility_assessment.longitudinal_fit,
             3,
         ),
     )
@@ -243,7 +245,9 @@ def rank_matches(
         synthesis = syntheses_by_question.get(question.question_id)
         for dataset in datasets:
             # Every positive-scoring pair becomes a reviewable MatchCandidate.
-            score, rationale, missing, assessments = score_question_dataset(question, dataset, synthesis)
+            score, rationale, missing, assessments = score_question_dataset(
+                question, dataset, synthesis
+            )
             # A declared incompatible modality/organism cannot be rescued by
             # lexical or semantic relevance. Unknown remains reviewable.
             if assessments["modality_contract"]["status"] == "INCOMPATIBLE":

@@ -79,7 +79,17 @@ def test_adapter_profiles_and_module_ownership_are_inspectable():
     profiles = adapter_source_profile_table()
     ownership = module_ownership_registry()
 
-    assert set(profiles) == {"clinicaltrials", "crossref", "datacite", "ena", "europepmc", "geo", "mgnify", "openalex", "pubmed"}
+    assert set(profiles) == {
+        "clinicaltrials",
+        "crossref",
+        "datacite",
+        "ena",
+        "europepmc",
+        "geo",
+        "mgnify",
+        "openalex",
+        "pubmed",
+    }
     assert "permission to reuse underlying files" in profiles["datacite"]["do_not_infer"]
     assert profiles["clinicaltrials"]["native_id_fields"] == ["nct_id"]
     assert ownership["xml_parsing"]["owner_module"] == "litdatamatcher.literature_xml"

@@ -51,7 +51,9 @@ def run_pipeline(
     matches = rank_matches(questions, datasets, synthesis_index(syntheses), top_n=top_n)
 
     # Artifacts are written twice: portable JSONL/Markdown for review, SQLite for querying.
-    write_pipeline_outputs(output_dir, questions, datasets, syntheses, matches, source_records=records)
+    write_pipeline_outputs(
+        output_dir, questions, datasets, syntheses, matches, source_records=records
+    )
     store = PipelineStore(output_dir / "litdatamatcher.sqlite")
     try:
         store.reset_run_tables()
@@ -120,7 +122,9 @@ def write_pipeline_outputs(
     export_review_jsonl(matches, output_dir / "review_sheet.jsonl")
 
 
-def write_markdown_summary(path: str | Path, matches: list[MatchCandidate], limit: int = 25) -> None:
+def write_markdown_summary(
+    path: str | Path, matches: list[MatchCandidate], limit: int = 25
+) -> None:
     """Write a compact Markdown table of top ranked matches."""
 
     path = Path(path)

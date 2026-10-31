@@ -41,7 +41,9 @@ def process_status(pid: int) -> dict[str, Any]:
             alive=proc.is_running() and proc.status() != psutil.STATUS_ZOMBIE,
             cpu_percent=proc.cpu_percent(interval=None),
             rss_bytes=proc.memory_info().rss,
-            create_time_utc=dt.datetime.fromtimestamp(proc.create_time(), tz=dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+            create_time_utc=dt.datetime.fromtimestamp(proc.create_time(), tz=dt.timezone.utc)
+            .isoformat()
+            .replace("+00:00", "Z"),
             command=proc.cmdline(),
         )
         return result
@@ -84,13 +86,21 @@ def memory_status() -> dict[str, int] | None:
     status.length = ctypes.sizeof(MemoryStatus)
     if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
         return None
-    return {"total_bytes": status.total_phys, "available_bytes": status.avail_phys, "load_percent": status.memory_load}
+    return {
+        "total_bytes": status.total_phys,
+        "available_bytes": status.avail_phys,
+        "load_percent": status.memory_load,
+    }
 
 
 def gpu_status() -> list[dict[str, str]] | None:
     try:
         completed = subprocess.run(
-            ["nvidia-smi", "--query-gpu=index,name,utilization.gpu,memory.used,memory.total", "--format=csv,noheader,nounits"],
+            [
+                "nvidia-smi",
+                "--query-gpu=index,name,utilization.gpu,memory.used,memory.total",
+                "--format=csv,noheader,nounits",
+            ],
             capture_output=True,
             text=True,
             check=False,
@@ -101,7 +111,11 @@ def gpu_status() -> list[dict[str, str]] | None:
     if completed.returncode != 0:
         return None
     fields = ("index", "name", "utilization_percent", "memory_used_mb", "memory_total_mb")
-    return [dict(zip(fields, (part.strip() for part in line.split(",")), strict=True)) for line in completed.stdout.splitlines() if line.strip()]
+    return [
+        dict(zip(fields, (part.strip() for part in line.split(",")), strict=True))
+        for line in completed.stdout.splitlines()
+        if line.strip()
+    ]
 
 
 def tree_metrics(root: Path) -> dict[str, Any]:
@@ -125,7 +139,11 @@ def tree_metrics(root: Path) -> dict[str, Any]:
         "file_count": file_count,
         "total_bytes": total_bytes,
         "latest_artifact": str(latest) if latest else None,
-        "latest_artifact_utc": dt.datetime.fromtimestamp(latest_mtime, tz=dt.timezone.utc).isoformat().replace("+00:00", "Z") if latest else None,
+        "latest_artifact_utc": dt.datetime.fromtimestamp(latest_mtime, tz=dt.timezone.utc)
+        .isoformat()
+        .replace("+00:00", "Z")
+        if latest
+        else None,
     }
 
 
@@ -145,11 +163,19 @@ def pubmed_progress(corpus_root: Path) -> dict[str, Any] | None:
         completed = entry.get("completed_utc")
         if completed and (latest is None or completed > latest):
             latest = completed
-    return {"expected_shards": state.get("expected_shards"), "status_counts": tally, "verified_bytes": verified_bytes, "latest_success_utc": latest, "state_updated_utc": state.get("updated_utc")}
+    return {
+        "expected_shards": state.get("expected_shards"),
+        "status_counts": tally,
+        "verified_bytes": verified_bytes,
+        "latest_success_utc": latest,
+        "state_updated_utc": state.get("updated_utc"),
+    }
 
 
 def pubmed_normalization_progress(corpus_root: Path) -> dict[str, Any] | None:
-    state = json_load(corpus_root / "manifests" / "acquisition" / "pubmed_2026_normalization_state.json")
+    state = json_load(
+        corpus_root / "manifests" / "acquisition" / "pubmed_2026_normalization_state.json"
+    )
     if not state:
         return None
     shards = state.get("shards", {}).values()
@@ -164,7 +190,12 @@ def pubmed_normalization_progress(corpus_root: Path) -> dict[str, Any] | None:
         completed = entry.get("completed_utc")
         if completed and (latest is None or completed > latest):
             latest = completed
-    return {"status_counts": tally, "normalized_records": records, "latest_success_utc": latest, "state_created_utc": state.get("created_utc")}
+    return {
+        "status_counts": tally,
+        "normalized_records": records,
+        "latest_success_utc": latest,
+        "state_created_utc": state.get("created_utc"),
+    }
 
 
 def heartbeat(args: argparse.Namespace) -> dict[str, Any]:
@@ -187,7 +218,7 @@ def heartbeat(args: argparse.Namespace) -> dict[str, Any]:
         "pubmed_normalization_progress": pubmed_normalization_progress(corpus_root),
         "last_successful_checkpoint": campaign_state.get("last_progress_timestamp"),
         "last_error": None,
-        "watchdog_policy": "OBSERVE_ONLY__NO_JOB_CONTROL__NO_SCIENTIFIC_CONCLUSIONS"
+        "watchdog_policy": "OBSERVE_ONLY__NO_JOB_CONTROL__NO_SCIENTIFIC_CONCLUSIONS",
     }
 
 
@@ -204,10 +235,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--corpus-root", type=Path, required=True)
-    parser.add_argument("--out", type=Path, default=Path(r"C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller"))
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=Path(r"C:\\Codex\\LitDataMatcher-v2\\data\\v0.4_compiler_20260913\\controller"),
+    )
     parser.add_argument("--pid", type=int, action="append", default=[])
     parser.add_argument("--once", action="store_true", help="Write one heartbeat (the default).")
-    parser.add_argument("--loop", action="store_true", help="Repeat at a conservative heartbeat interval.")
+    parser.add_argument(
+        "--loop", action="store_true", help="Repeat at a conservative heartbeat interval."
+    )
     parser.add_argument("--interval-minutes", type=int, default=15)
     args = parser.parse_args()
     if args.loop and not 10 <= args.interval_minutes <= 30:
@@ -217,7 +254,15 @@ def main() -> int:
     while True:
         record = heartbeat(args)
         write_record(record, args.out)
-        print(json.dumps({"heartbeat": str(args.out / "heartbeat.json"), "timestamp_utc": record["timestamp_utc"]}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "heartbeat": str(args.out / "heartbeat.json"),
+                    "timestamp_utc": record["timestamp_utc"],
+                },
+                sort_keys=True,
+            )
+        )
         if not args.loop:
             return 0
         time.sleep(args.interval_minutes * 60)

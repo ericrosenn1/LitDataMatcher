@@ -117,7 +117,13 @@ def render_artifact_validation_report(summary: JsonDict) -> str:
     ]
     for name, artifact in summary.get("artifacts", {}).items():
         expected = "required" if artifact.get("required") else "optional"
-        status = "ok" if artifact.get("exists") and artifact.get("readable") else "missing" if not artifact.get("exists") else "needs review"
+        status = (
+            "ok"
+            if artifact.get("exists") and artifact.get("readable")
+            else "missing"
+            if not artifact.get("exists")
+            else "needs review"
+        )
         notes = "; ".join(str(note) for note in artifact.get("notes", []))
         lines.append(
             f"| `{name}` | {expected} | {status} | {artifact.get('records', '')} | {_md(notes)} |"
@@ -235,7 +241,9 @@ def _inspect_artifact(path: Path, *, role: str, required: bool) -> JsonDict:
         return result
     result["bytes"] = path.stat().st_size
     if path.stat().st_size == 0:
-        result["_issues"].append(_issue("error" if required else "info", "empty_artifact", f"{path.name} is empty."))
+        result["_issues"].append(
+            _issue("error" if required else "info", "empty_artifact", f"{path.name} is empty.")
+        )
         return result
     try:
         if path.suffix == ".jsonl":
@@ -269,9 +277,13 @@ def _inspect_artifact(path: Path, *, role: str, required: bool) -> JsonDict:
             result["readable"] = True
             result["notes"].append("Binary or unparsed artifact; existence checked only.")
     except (OSError, UnicodeDecodeError, json.JSONDecodeError, sqlite3.Error) as exc:
-        result["_issues"].append(_issue("error", "unreadable_artifact", f"{path.name} could not be read: {exc}"))
+        result["_issues"].append(
+            _issue("error", "unreadable_artifact", f"{path.name} could not be read: {exc}")
+        )
     if result["readable"] and required and result["records"] == 0:
-        result["_issues"].append(_issue("warning", "empty_required_records", f"{path.name} has no records."))
+        result["_issues"].append(
+            _issue("warning", "empty_required_records", f"{path.name} has no records.")
+        )
     return result
 
 
@@ -299,11 +311,19 @@ def _provenance_coverage(loaded: dict[str, object]) -> JsonDict:
         for provenance in _iter_provenance(rows):
             source_types[str(provenance.get("source_type", "unknown") or "unknown")] += 1
             content_scopes[str(provenance.get("content_scope", "unknown") or "unknown")] += 1
-            acquisition_methods[str(provenance.get("acquisition_method", "unknown") or "unknown")] += 1
+            acquisition_methods[
+                str(provenance.get("acquisition_method", "unknown") or "unknown")
+            ] += 1
 
     for surface, counts in surfaces.items():
         if counts["records"] and not counts["with_provenance"]:
-            issues.append(_issue("warning", "missing_provenance", f"{surface} records do not expose source provenance."))
+            issues.append(
+                _issue(
+                    "warning",
+                    "missing_provenance",
+                    f"{surface} records do not expose source provenance.",
+                )
+            )
         if counts.get("malformed_provenance"):
             issues.append(
                 _issue(
@@ -326,11 +346,29 @@ def _provenance_coverage(loaded: dict[str, object]) -> JsonDict:
     ):
         summary = loaded["source_provenance_summary.json"]
         if not summary.get("source_types"):
-            issues.append(_issue("warning", "summary_missing_source_types", "source_provenance_summary.json has no source type counts."))
+            issues.append(
+                _issue(
+                    "warning",
+                    "summary_missing_source_types",
+                    "source_provenance_summary.json has no source type counts.",
+                )
+            )
         if not summary.get("review_caveats"):
-            issues.append(_issue("warning", "summary_missing_caveats", "source_provenance_summary.json has no review caveat counts."))
+            issues.append(
+                _issue(
+                    "warning",
+                    "summary_missing_caveats",
+                    "source_provenance_summary.json has no review caveat counts.",
+                )
+            )
     elif "source_provenance_summary.json" in loaded:
-        issues.append(_issue("warning", "summary_unreadable", "source_provenance_summary.json was not loaded as an object."))
+        issues.append(
+            _issue(
+                "warning",
+                "summary_unreadable",
+                "source_provenance_summary.json was not loaded as an object.",
+            )
+        )
 
     return {
         "surfaces": surfaces,
@@ -351,11 +389,23 @@ def _advisory_artifact_audit(loaded: dict[str, object]) -> JsonDict:
     boundary_present = isinstance(boundary, dict)
     transfer_present = isinstance(transfer, dict)
     if boundary_present and not any("provenance" in key for key in boundary):
-        issues.append(_issue("warning", "boundary_map_thin", "module_boundary_map.json does not include a provenance module boundary."))
+        issues.append(
+            _issue(
+                "warning",
+                "boundary_map_thin",
+                "module_boundary_map.json does not include a provenance module boundary.",
+            )
+        )
     if transfer_present:
         status = str(transfer.get("status", "unknown"))
         if status not in {"pass", "needs_review"}:
-            issues.append(_issue("warning", "transfer_status_unknown", f"Unexpected provenance transfer status: {status}."))
+            issues.append(
+                _issue(
+                    "warning",
+                    "transfer_status_unknown",
+                    f"Unexpected provenance transfer status: {status}.",
+                )
+            )
     else:
         status = "missing"
     return {
@@ -363,7 +413,9 @@ def _advisory_artifact_audit(loaded: dict[str, object]) -> JsonDict:
         "module_boundary_count": len(boundary) if isinstance(boundary, dict) else 0,
         "transfer_check_present": transfer_present,
         "transfer_check_status": status,
-        "transfer_issue_count": len(transfer.get("issues", [])) if isinstance(transfer, dict) else 0,
+        "transfer_issue_count": len(transfer.get("issues", []))
+        if isinstance(transfer, dict)
+        else 0,
         "appears_advisory": transfer_present and status in {"pass", "needs_review"},
         "issues": issues,
     }
@@ -379,14 +431,34 @@ def _review_readiness(run_path: Path, loaded: dict[str, object]) -> JsonDict:
     caveat_terms = _term_counts(report_text)
     if isinstance(review_csv, list) and review_csv:
         if not any(_record_caveats(row) for row in review_csv if isinstance(row, dict)):
-            issues.append(_issue("warning", "review_csv_no_caveats", "review_sheet.csv has rows but no source caveat values."))
+            issues.append(
+                _issue(
+                    "warning",
+                    "review_csv_no_caveats",
+                    "review_sheet.csv has rows but no source caveat values.",
+                )
+            )
     if isinstance(review_jsonl, list) and review_jsonl:
         if not any(_record_caveats(row) for row in review_jsonl if isinstance(row, dict)):
-            issues.append(_issue("warning", "review_jsonl_no_caveats", "review_sheet.jsonl has rows but no source caveat values."))
+            issues.append(
+                _issue(
+                    "warning",
+                    "review_jsonl_no_caveats",
+                    "review_sheet.jsonl has rows but no source caveat values.",
+                )
+            )
     if report_text and not any(caveat_terms.values()):
-        issues.append(_issue("warning", "report_caveats_not_detected", "publication_report.md lacks expected conservative caveat terms."))
+        issues.append(
+            _issue(
+                "warning",
+                "report_caveats_not_detected",
+                "publication_report.md lacks expected conservative caveat terms.",
+            )
+        )
     annotation_dir = run_path / "annotations"
-    annotation_outputs = sorted(path.name for path in annotation_dir.glob("*") if annotation_dir.exists())
+    annotation_outputs = sorted(
+        path.name for path in annotation_dir.glob("*") if annotation_dir.exists()
+    )
     return {
         "review_csv_rows": len(review_csv) if isinstance(review_csv, list) else 0,
         "review_jsonl_rows": len(review_jsonl) if isinstance(review_jsonl, list) else 0,
@@ -421,7 +493,9 @@ def _sqlite_consistency_audit(artifacts: dict[str, JsonDict]) -> JsonDict:
         artifact = artifacts.get(artifact_name, {})
         if not artifact.get("exists") or not artifact.get("readable"):
             continue
-        sqlite_records = int(sqlite_counts.get(table, -1)) if isinstance(sqlite_counts, dict) else -1
+        sqlite_records = (
+            int(sqlite_counts.get(table, -1)) if isinstance(sqlite_counts, dict) else -1
+        )
         artifact_records = int(artifact.get("records", 0))
         matches = sqlite_records == artifact_records
         tables[table] = {
@@ -591,7 +665,9 @@ def _coverage_counts(
 ) -> JsonDict:
     """Build a stable coverage object for reports and tests."""
 
-    state_counts = {state: states.get(state, 0) for state in ("populated", "empty", "malformed", "absent")}
+    state_counts = {
+        state: states.get(state, 0) for state in ("populated", "empty", "malformed", "absent")
+    }
     return {
         "records": records,
         "with_provenance": with_provenance,
@@ -651,15 +727,9 @@ def _review_side_provenance(row: JsonDict, side: str) -> tuple[list[JsonDict], s
         match = row.get("match", {})
         nested = match.get("question", {}) if isinstance(match, dict) else {}
     else:
-        values.extend(
-            row.get(field)
-            for field in ("dataset_source_provenance",)
-            if field in row
-        )
+        values.extend(row.get(field) for field in ("dataset_source_provenance",) if field in row)
         json_values.extend(
-            row.get(field)
-            for field in ("dataset_source_provenance_json",)
-            if field in row
+            row.get(field) for field in ("dataset_source_provenance_json",) if field in row
         )
         flat_fields = (
             "dataset_source_types",
@@ -680,7 +750,9 @@ def _review_side_provenance(row: JsonDict, side: str) -> tuple[list[JsonDict], s
     return [], _combine_states([state, json_state, nested_state])
 
 
-def _entries_from_values(values: Iterable[object], *, parse_json: bool = False) -> tuple[list[JsonDict], str]:
+def _entries_from_values(
+    values: Iterable[object], *, parse_json: bool = False
+) -> tuple[list[JsonDict], str]:
     """Extract provenance dictionaries and classify empty/malformed containers."""
 
     entries: list[JsonDict] = []
@@ -743,7 +815,11 @@ def _dedupe_provenance(values: list[JsonDict]) -> list[JsonDict]:
     seen: set[tuple[str, str, str]] = set()
     for item in values:
         key = (
-            str(item.get("source_locator", "") or item.get("source_url", "") or item.get("local_path", "")),
+            str(
+                item.get("source_locator", "")
+                or item.get("source_url", "")
+                or item.get("local_path", "")
+            ),
             str(item.get("source_type", "")),
             str(item.get("content_scope", "")),
         )
@@ -789,7 +865,9 @@ def _read_jsonl_lenient(path: Path) -> tuple[list[JsonDict], list[str]]:
             if isinstance(parsed, dict):
                 rows.append(parsed)
             else:
-                errors.append(f"{path.name}:{line_number}: row is {type(parsed).__name__}, expected object")
+                errors.append(
+                    f"{path.name}:{line_number}: row is {type(parsed).__name__}, expected object"
+                )
     return rows, errors
 
 
@@ -820,7 +898,11 @@ def _inspect_sqlite(path: Path) -> JsonDict:
                 counts[table] = -1
     finally:
         conn.close()
-    return {"sqlite_readable": True, "sqlite_counts": counts, "records": sum(max(0, value) for value in counts.values())}
+    return {
+        "sqlite_readable": True,
+        "sqlite_counts": counts,
+        "records": sum(max(0, value) for value in counts.values()),
+    }
 
 
 def _format_for_path(path: Path) -> str:
@@ -847,7 +929,9 @@ def _artifact_counts(artifacts: dict[str, JsonDict]) -> JsonDict:
         "present": sum(1 for item in artifacts.values() if item.get("exists")),
         "missing": sum(1 for item in artifacts.values() if not item.get("exists")),
         "readable": sum(1 for item in artifacts.values() if item.get("readable")),
-        "required_missing": sum(1 for item in artifacts.values() if item.get("required") and not item.get("exists")),
+        "required_missing": sum(
+            1 for item in artifacts.values() if item.get("required") and not item.get("exists")
+        ),
     }
 
 

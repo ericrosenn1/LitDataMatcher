@@ -28,15 +28,7 @@ def format_file_block(path: Path, repo_root: Path) -> str:
 
     relative = path.relative_to(repo_root).as_posix()
     content = path.read_text(encoding="utf-8")
-    return (
-        "\n"
-        + "=" * 88
-        + f"\nFILE: {relative}\n"
-        + "=" * 88
-        + "\n\n"
-        + content.rstrip()
-        + "\n"
-    )
+    return "\n" + "=" * 88 + f"\nFILE: {relative}\n" + "=" * 88 + "\n\n" + content.rstrip() + "\n"
 
 
 def export_main_scripts(repo_root: Path, output_path: Path) -> Path:

@@ -85,12 +85,20 @@ def validate(source: Path, data: Path) -> dict:
     delivery = _json(data / "release_final3" / "DELIVERY_VALIDATION.json")
     semantic_checks = {
         "baseline_commit_present": commit_present,
-        "acceptance_hardened_alpha_ready": acceptance.get("product_status") == "HARDENED_ALPHA_READY",
-        "acceptance_supervisor_disabled": acceptance.get("automation_status") == "DISABLED_AT_COMPLETION",
-        "closeout_pass": not closeout.get("blockers") and closeout.get("summary", {}).get("PASS", 0) >= 109,
+        "acceptance_hardened_alpha_ready": acceptance.get("product_status")
+        == "HARDENED_ALPHA_READY",
+        "acceptance_supervisor_disabled": acceptance.get("automation_status")
+        == "DISABLED_AT_COMPLETION",
+        "closeout_pass": not closeout.get("blockers")
+        and closeout.get("summary", {}).get("PASS", 0) >= 109,
         "delivery_pass": delivery.get("status") == "PASS",
     }
-    status = "PASS" if all(item["status"] == "PASS" for item in artifact_checks) and all(semantic_checks.values()) else "FAIL"
+    status = (
+        "PASS"
+        if all(item["status"] == "PASS" for item in artifact_checks)
+        and all(semantic_checks.values())
+        else "FAIL"
+    )
     return {
         "schema_version": "alpha-baseline-non-regression-v1",
         "baseline_commit": ALPHA_BASELINE_COMMIT,

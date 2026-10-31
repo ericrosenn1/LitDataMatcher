@@ -19,7 +19,11 @@ BENCHMARK_SCHEMA_VERSION = "v2_5_local_benchmark_v1"
 
 def _elapsed(start: float, items: int) -> dict:
     seconds = time.perf_counter() - start
-    return {"items": items, "seconds": seconds, "throughput_per_second": items / seconds if seconds else None}
+    return {
+        "items": items,
+        "seconds": seconds,
+        "throughput_per_second": items / seconds if seconds else None,
+    }
 
 
 def _disk_bytes(root: Path) -> int:
@@ -27,7 +31,21 @@ def _disk_bytes(root: Path) -> int:
 
 
 def _records(count: int) -> list[dict]:
-    return [{"dataset_id": f"fixture-{index:04d}", "title": f"Fixture transcriptome {index}", "summary": "human inflammatory transcriptomics", "capabilities": {"species": {"value": "Homo sapiens", "status": "observed", "source_locator": "fixture"}}} for index in range(count)]
+    return [
+        {
+            "dataset_id": f"fixture-{index:04d}",
+            "title": f"Fixture transcriptome {index}",
+            "summary": "human inflammatory transcriptomics",
+            "capabilities": {
+                "species": {
+                    "value": "Homo sapiens",
+                    "status": "observed",
+                    "source_locator": "fixture",
+                }
+            },
+        }
+        for index in range(count)
+    ]
 
 
 def run_local_benchmark(root: str | Path, count: int = 32) -> dict:
@@ -42,7 +60,12 @@ def run_local_benchmark(root: str | Path, count: int = 32) -> dict:
     started = time.perf_counter()
     catalog = Catalog(catalog_root)
     for record in records:
-        catalog.upsert("dataset", record["dataset_id"], record, search_text=record["title"] + " " + record["summary"])
+        catalog.upsert(
+            "dataset",
+            record["dataset_id"],
+            record,
+            search_text=record["title"] + " " + record["summary"],
+        )
     ingestion = _elapsed(started, count)
     started = time.perf_counter()
     indexed = catalog.search("dataset", "human transcriptomics", count)
@@ -75,13 +98,38 @@ def run_local_benchmark(root: str | Path, count: int = 32) -> dict:
     replay_payload = __import__("json").loads(cache_path.read_text(encoding="utf-8"))
     atomic_json(cache_path, replay_payload)
 
-    question = {"question_id": "fixture-question", "proposition_id": "fixture-proposition", "conditions": {"organism": "human"}}
+    question = {
+        "question_id": "fixture-question",
+        "proposition_id": "fixture-proposition",
+        "conditions": {"organism": "human"},
+    }
     profiles = [dict(record, independent_units=None) for record in records]
     started = time.perf_counter()
-    ranked = rank_candidates([{"field": "species", "expected": "Homo sapiens"}], profiles, {record["dataset_id"]: 0.0 for record in records})
+    ranked = rank_candidates(
+        [{"field": "species", "expected": "Homo sapiens"}],
+        profiles,
+        {record["dataset_id"]: 0.0 for record in records},
+    )
     matching = _elapsed(started, len(ranked))
     started = time.perf_counter()
-    bundle = compile_evidence(question, [{"evidence_id": "fixture-evidence", "proposition_id": "fixture-proposition", "role": "background", "direction": "supports", "source_locator": "fixture:span", "conditions": {"organism": "human"}, "measurement_type": "observation", "scope_match": "exact", "publication_date": "2026-09-01"}], "2026-09-08", [{"source": "fixture", "status": "success"}])
+    bundle = compile_evidence(
+        question,
+        [
+            {
+                "evidence_id": "fixture-evidence",
+                "proposition_id": "fixture-proposition",
+                "role": "background",
+                "direction": "supports",
+                "source_locator": "fixture:span",
+                "conditions": {"organism": "human"},
+                "measurement_type": "observation",
+                "scope_match": "exact",
+                "publication_date": "2026-09-01",
+            }
+        ],
+        "2026-09-08",
+        [{"source": "fixture", "status": "success"}],
+    )
     compilation = _elapsed(started, 1)
     _current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -90,21 +138,68 @@ def run_local_benchmark(root: str | Path, count: int = 32) -> dict:
         "schema_version": BENCHMARK_SCHEMA_VERSION,
         "scope": "bounded synthetic derivative fixture; measured values do not establish production-scale performance",
         "fixture": {"record_count": count, "input_digest": digest(records)},
-        "backend": {"catalog": "sqlite_fts5", "matching": "scientific_v2 deterministic heuristic", "evidence_compiler": "scientific_v2"},
-        "hardware": {"platform": platform.platform(), "python": platform.python_version(), "cpu_count": os.cpu_count(), "free_disk_bytes": disk.free},
-        "limits": {"max_records": 1000, "network": "not used", "model_inference": "not used", "llm_context": "not used"},
-        "measurements": {"catalog_ingestion": ingestion, "index_query": index_query, "matching": matching, "evidence_compilation": compilation, "memory_peak_bytes": peak, "disk_bytes_written": _disk_bytes(root), "cache_hit": {"replay_used_existing_manifest": existed_before_replay, "digest": digest(replay_payload)}, "recovery": {"interrupted_index_persisted_count": persisted_before_resume, "recovered_index_count": recovered_count, "interrupted_cache_ignored": replay_payload == cache_payload}},
-        "validation_status": "PASS" if len(indexed) and len(ranked) == count and recovered_count == count and replay_payload == cache_payload and bundle["question_id"] == question["question_id"] else "FAIL",
+        "backend": {
+            "catalog": "sqlite_fts5",
+            "matching": "scientific_v2 deterministic heuristic",
+            "evidence_compiler": "scientific_v2",
+        },
+        "hardware": {
+            "platform": platform.platform(),
+            "python": platform.python_version(),
+            "cpu_count": os.cpu_count(),
+            "free_disk_bytes": disk.free,
+        },
+        "limits": {
+            "max_records": 1000,
+            "network": "not used",
+            "model_inference": "not used",
+            "llm_context": "not used",
+        },
+        "measurements": {
+            "catalog_ingestion": ingestion,
+            "index_query": index_query,
+            "matching": matching,
+            "evidence_compilation": compilation,
+            "memory_peak_bytes": peak,
+            "disk_bytes_written": _disk_bytes(root),
+            "cache_hit": {
+                "replay_used_existing_manifest": existed_before_replay,
+                "digest": digest(replay_payload),
+            },
+            "recovery": {
+                "interrupted_index_persisted_count": persisted_before_resume,
+                "recovered_index_count": recovered_count,
+                "interrupted_cache_ignored": replay_payload == cache_payload,
+            },
+        },
+        "validation_status": "PASS"
+        if len(indexed)
+        and len(ranked) == count
+        and recovered_count == count
+        and replay_payload == cache_payload
+        and bundle["question_id"] == question["question_id"]
+        else "FAIL",
     }
     return receipt
 
 
 def validate_benchmark_receipt(receipt: dict) -> bool:
-    if receipt.get("schema_version") != BENCHMARK_SCHEMA_VERSION or receipt.get("validation_status") != "PASS":
+    if (
+        receipt.get("schema_version") != BENCHMARK_SCHEMA_VERSION
+        or receipt.get("validation_status") != "PASS"
+    ):
         return False
     measurements = receipt.get("measurements", {})
     required = ["catalog_ingestion", "index_query", "matching", "evidence_compilation"]
-    return all(type(measurements.get(key, {}).get("seconds")) is float and measurements[key]["seconds"] >= 0 for key in required) and type(measurements.get("memory_peak_bytes")) is int and measurements["memory_peak_bytes"] >= 0
+    return (
+        all(
+            type(measurements.get(key, {}).get("seconds")) is float
+            and measurements[key]["seconds"] >= 0
+            for key in required
+        )
+        and type(measurements.get("memory_peak_bytes")) is int
+        and measurements["memory_peak_bytes"] >= 0
+    )
 
 
 def compare_benchmark_baseline(receipt: dict, baseline: dict) -> dict:
@@ -112,7 +207,10 @@ def compare_benchmark_baseline(receipt: dict, baseline: dict) -> dict:
     required = {"fixture", "hardware", "backend", "measurements", "tolerances"}
     if not required <= set(baseline) or not validate_benchmark_receipt(receipt):
         return {"status": "INVALID_BASELINE_OR_RECEIPT"}
-    if baseline["fixture"].get("input_digest") != receipt["fixture"].get("input_digest") or baseline["backend"] != receipt["backend"]:
+    if (
+        baseline["fixture"].get("input_digest") != receipt["fixture"].get("input_digest")
+        or baseline["backend"] != receipt["backend"]
+    ):
         return {"status": "INCOMPARABLE_FIXTURE_OR_BACKEND"}
     if baseline["hardware"].get("cpu_count") != receipt["hardware"].get("cpu_count"):
         return {"status": "INCOMPARABLE_HARDWARE"}
@@ -120,11 +218,22 @@ def compare_benchmark_baseline(receipt: dict, baseline: dict) -> dict:
     if receipt["measurements"]["cache_hit"].get("replay_used_existing_manifest") is not True:
         return {"status": "FAIL_CACHE_MISS"}
     recovery = receipt["measurements"]["recovery"]
-    if recovery.get("recovered_index_count") != receipt["fixture"].get("record_count") or not recovery.get("interrupted_cache_ignored"):
+    if recovery.get("recovered_index_count") != receipt["fixture"].get(
+        "record_count"
+    ) or not recovery.get("interrupted_cache_ignored"):
         return {"status": "FAIL_RECOVERY"}
     regressions = []
     for name, baseline_seconds in baseline["measurements"].items():
         observed = receipt["measurements"].get(name, {}).get("seconds")
-        if type(baseline_seconds) is not float or type(observed) is not float or observed > baseline_seconds * tolerance["max_latency_multiplier"]:
+        if (
+            type(baseline_seconds) is not float
+            or type(observed) is not float
+            or observed > baseline_seconds * tolerance["max_latency_multiplier"]
+        ):
             regressions.append(name)
-    return {"status": "PASS" if not regressions else "FAIL_PERFORMANCE_REGRESSION", "regressions": regressions, "tolerances": tolerance, "scope": "bounded fixture comparison only; not a production-scale claim"}
+    return {
+        "status": "PASS" if not regressions else "FAIL_PERFORMANCE_REGRESSION",
+        "regressions": regressions,
+        "tolerances": tolerance,
+        "scope": "bounded fixture comparison only; not a production-scale claim",
+    }

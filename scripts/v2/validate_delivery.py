@@ -102,7 +102,13 @@ def validate(args) -> dict:
     release_manifest = _json(release / "RELEASE_MANIFEST.json")
     holdout_manifest = _json(holdout_run / "RUN_MANIFEST.json")
     remote = subprocess.check_output(
-        ["git", "-C", str(source), "rev-parse", "refs/remotes/origin/codex/litdatamatcher-v2-build"],
+        [
+            "git",
+            "-C",
+            str(source),
+            "rev-parse",
+            "refs/remotes/origin/codex/litdatamatcher-v2-build",
+        ],
         text=True,
     ).strip()
     head = subprocess.check_output(

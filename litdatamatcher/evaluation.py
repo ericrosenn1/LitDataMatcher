@@ -67,7 +67,9 @@ def evaluate_question_extraction(
     """
 
     predictions = list(predicted)
-    gold_questions = [str(row.get("question", "")).strip() for row in gold_rows if row.get("question")]
+    gold_questions = [
+        str(row.get("question", "")).strip() for row in gold_rows if row.get("question")
+    ]
     matched_gold: set[int] = set()
     tp = 0
     fp = 0

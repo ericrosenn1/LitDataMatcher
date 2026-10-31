@@ -27,10 +27,16 @@ def write_methods_report(run_dir: str | Path, output_path: str | Path | None = N
     run_dir = Path(run_dir)
     output_path = Path(output_path) if output_path else run_dir / "publication_report.md"
     # Missing artifacts are treated as empty so partial runs can still be inspected.
-    questions = read_jsonl(run_dir / "questions.jsonl") if (run_dir / "questions.jsonl").exists() else []
-    datasets = read_jsonl(run_dir / "datasets.jsonl") if (run_dir / "datasets.jsonl").exists() else []
+    questions = (
+        read_jsonl(run_dir / "questions.jsonl") if (run_dir / "questions.jsonl").exists() else []
+    )
+    datasets = (
+        read_jsonl(run_dir / "datasets.jsonl") if (run_dir / "datasets.jsonl").exists() else []
+    )
     matches = read_jsonl(run_dir / "matches.jsonl") if (run_dir / "matches.jsonl").exists() else []
-    syntheses = read_jsonl(run_dir / "syntheses.jsonl") if (run_dir / "syntheses.jsonl").exists() else []
+    syntheses = (
+        read_jsonl(run_dir / "syntheses.jsonl") if (run_dir / "syntheses.jsonl").exists() else []
+    )
     # Provenance summaries describe input depth and caveats, not answerability.
     provenance_summary = summarize_source_provenance([*questions, *datasets])
 
@@ -103,22 +109,32 @@ def write_methods_report(run_dir: str | Path, output_path: str | Path | None = N
                 "| --- | ---: |",
             ]
         )
-        for caveat, count in sorted(review_caveats.items(), key=lambda item: (-int(item[1]), item[0])):
+        for caveat, count in sorted(
+            review_caveats.items(), key=lambda item: (-int(item[1]), item[0])
+        ):
             lines.append(f"| {_md_cell(caveat)} | {count} |")
         lines.append("")
 
     lines.extend(
         [
-        "## Dataset Sources",
-        "",
-        "| Source | Count |",
-        "| --- | ---: |",
+            "## Dataset Sources",
+            "",
+            "| Source | Count |",
+            "| --- | ---: |",
         ]
     )
     for source, count in dataset_sources.most_common():
         lines.append(f"| {source or 'unknown'} | {count} |")
 
-    lines.extend(["", "## Most Common Normalized Variables", "", "| Variable | Dataset Count |", "| --- | ---: |"])
+    lines.extend(
+        [
+            "",
+            "## Most Common Normalized Variables",
+            "",
+            "| Variable | Dataset Count |",
+            "| --- | ---: |",
+        ]
+    )
     for variable, count in variables.most_common(15):
         lines.append(f"| {variable} | {count} |")
 
@@ -146,7 +162,9 @@ def write_methods_report(run_dir: str | Path, output_path: str | Path | None = N
             )
         )
 
-    lines.extend(["", "## Ontology Concepts", "", "| Concept | Category | Synonyms |", "| --- | --- | --- |"])
+    lines.extend(
+        ["", "## Ontology Concepts", "", "| Concept | Category | Synonyms |", "| --- | --- | --- |"]
+    )
     for concept in concept_table():
         lines.append(f"| {concept['label']} | {concept['category']} | {concept['synonyms']} |")
 
@@ -165,7 +183,9 @@ def write_methods_report(run_dir: str | Path, output_path: str | Path | None = N
 
     if (run_dir / "litdatamatcher.sqlite").exists():
         # SQLite counts cross-check the JSONL artifacts without requiring manual queries.
-        lines.extend(["", "## SQLite Tables", "", *sqlite_table_summary(run_dir / "litdatamatcher.sqlite")])
+        lines.extend(
+            ["", "## SQLite Tables", "", *sqlite_table_summary(run_dir / "litdatamatcher.sqlite")]
+        )
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return output_path

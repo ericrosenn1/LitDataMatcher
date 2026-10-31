@@ -44,8 +44,11 @@ def top_k_indices(scores: np.ndarray, identifiers: list[str], k: int) -> list[in
         return []
     boundary = float(np.partition(scores, len(scores) - count)[len(scores) - count])
     above = np.flatnonzero(scores > boundary).tolist()
-    tied = heapq.nsmallest(count - len(above), np.flatnonzero(scores == boundary).tolist(),
-                          key=lambda i: identifiers[i])
+    tied = heapq.nsmallest(
+        count - len(above),
+        np.flatnonzero(scores == boundary).tolist(),
+        key=lambda i: identifiers[i],
+    )
     return sorted(above + tied, key=lambda i: (-float(scores[i]), identifiers[i]))
 
 
@@ -106,7 +109,9 @@ class BM25Index:
                     1 - self.b + self.b * self.lengths[index] / max(self.average_length, 1.0)
                 )
                 scores[index] += idf * frequency * (self.k1 + 1) / (frequency + normalizer)
-        order = heapq.nsmallest(k, scores, key=lambda index: (-scores[index], self.records[index]["id"]))
+        order = heapq.nsmallest(
+            k, scores, key=lambda index: (-scores[index], self.records[index]["id"])
+        )
         return [
             {
                 "id": self.records[index]["id"],

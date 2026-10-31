@@ -64,7 +64,9 @@ def validate(dist: Path) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dist", type=Path, default=Path("dist"), help="Directory containing build outputs.")
+    parser.add_argument(
+        "--dist", type=Path, default=Path("dist"), help="Directory containing build outputs."
+    )
     args = parser.parse_args()
     errors = validate(args.dist)
     if errors:

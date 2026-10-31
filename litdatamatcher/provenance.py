@@ -27,17 +27,41 @@ PARSER_CAVEAT_RECORDS: dict[str, JsonDict] = {
     "missing_body_text": {
         "kind": "warning",
         "message": "No body text was extracted; question extraction may only see title or abstract.",
-        "applies_to": ["jats", "grobid_tei", "generic_xml", "pdfminer", "text", "markdown", "jsonl_passthrough"],
+        "applies_to": [
+            "jats",
+            "grobid_tei",
+            "generic_xml",
+            "pdfminer",
+            "text",
+            "markdown",
+            "jsonl_passthrough",
+        ],
     },
     "missing_abstract": {
         "kind": "warning",
         "message": "No abstract was available or inferred.",
-        "applies_to": ["jats", "grobid_tei", "generic_xml", "pdfminer", "text", "markdown", "jsonl_passthrough"],
+        "applies_to": [
+            "jats",
+            "grobid_tei",
+            "generic_xml",
+            "pdfminer",
+            "text",
+            "markdown",
+            "jsonl_passthrough",
+        ],
     },
     "weak_sections": {
         "kind": "warning",
         "message": "Section structure is weak or absent; section-level evidence context may be shallow.",
-        "applies_to": ["jats", "grobid_tei", "generic_xml", "pdfminer", "text", "markdown", "jsonl_passthrough"],
+        "applies_to": [
+            "jats",
+            "grobid_tei",
+            "generic_xml",
+            "pdfminer",
+            "text",
+            "markdown",
+            "jsonl_passthrough",
+        ],
     },
     "generic_xml_fallback": {
         "kind": "warning",
@@ -52,7 +76,15 @@ PARSER_CAVEAT_RECORDS: dict[str, JsonDict] = {
     "partial_parse_quality": {
         "kind": "warning",
         "message": "Parsed content appears short or shallow and should be reviewed before scale-up.",
-        "applies_to": ["jats", "grobid_tei", "generic_xml", "pdfminer", "text", "markdown", "jsonl_passthrough"],
+        "applies_to": [
+            "jats",
+            "grobid_tei",
+            "generic_xml",
+            "pdfminer",
+            "text",
+            "markdown",
+            "jsonl_passthrough",
+        ],
     },
     "pdf_parse_partial": {
         "kind": "limitation",
@@ -62,12 +94,28 @@ PARSER_CAVEAT_RECORDS: dict[str, JsonDict] = {
     "no_offsets": {
         "kind": "limitation",
         "message": "Parser does not preserve source character offsets for evidence-span review.",
-        "applies_to": ["jats", "grobid_tei", "generic_xml", "pdfminer", "text", "markdown", "jsonl_passthrough"],
+        "applies_to": [
+            "jats",
+            "grobid_tei",
+            "generic_xml",
+            "pdfminer",
+            "text",
+            "markdown",
+            "jsonl_passthrough",
+        ],
     },
     "no_figures_tables": {
         "kind": "limitation",
         "message": "Figures, tables, captions, and supplementary files are not parsed as structured evidence.",
-        "applies_to": ["jats", "grobid_tei", "generic_xml", "pdfminer", "text", "markdown", "jsonl_passthrough"],
+        "applies_to": [
+            "jats",
+            "grobid_tei",
+            "generic_xml",
+            "pdfminer",
+            "text",
+            "markdown",
+            "jsonl_passthrough",
+        ],
     },
     "no_reference_filtering": {
         "kind": "limitation",
@@ -118,7 +166,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["local_path", "source_sha256"],
         "strengths": ["hashable local input", "simple reproducible smoke-test source"],
         "limitations": ["article structure is inferred from plain text"],
-        "review_caveats": ["Confirm whether the local text is full article text or a partial excerpt."],
+        "review_caveats": [
+            "Confirm whether the local text is full article text or a partial excerpt."
+        ],
         "do_not_infer": ["publication status", "complete article structure"],
     },
     "markdown": {
@@ -129,7 +179,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["local_path", "source_sha256"],
         "strengths": ["readable local input", "headings may help section inference"],
         "limitations": ["Markdown headings may reflect notes rather than article sections"],
-        "review_caveats": ["Treat Markdown section structure as curator-provided, not validated article structure."],
+        "review_caveats": [
+            "Treat Markdown section structure as curator-provided, not validated article structure."
+        ],
         "do_not_infer": ["peer-reviewed full text from formatting alone"],
     },
     "pdf": {
@@ -140,7 +192,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["local_path", "source_sha256"],
         "strengths": ["works when XML or TEI is unavailable"],
         "limitations": ["text order and tables/captions can be noisy", "no OCR"],
-        "review_caveats": ["Review PDF-derived questions for extraction noise and missing table/figure context."],
+        "review_caveats": [
+            "Review PDF-derived questions for extraction noise and missing table/figure context."
+        ],
         "do_not_infer": ["clean structured full text"],
     },
     "jats": {
@@ -151,7 +205,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["doi", "pmcid", "pmid", "local_path", "source_sha256"],
         "strengths": ["article metadata and sections often preserved"],
         "limitations": ["schema validation and exact span offsets are not yet implemented"],
-        "review_caveats": ["Use JATS sections as strong context, but not as exact evidence-span provenance."],
+        "review_caveats": [
+            "Use JATS sections as strong context, but not as exact evidence-span provenance."
+        ],
         "do_not_infer": ["license compliance", "schema validity"],
     },
     "grobid_tei": {
@@ -161,7 +217,10 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "acquisition_method": "local_file",
         "native_id_fields": ["doi", "pmcid", "pmid", "local_path", "source_sha256"],
         "strengths": ["can recover structure from PDFs"],
-        "limitations": ["quality depends on upstream GROBID output", "exact offsets are not preserved"],
+        "limitations": [
+            "quality depends on upstream GROBID output",
+            "exact offsets are not preserved",
+        ],
         "review_caveats": ["Inspect TEI-derived questions for upstream PDF parsing artifacts."],
         "do_not_infer": ["that LitDataMatcher managed or validated the GROBID service"],
     },
@@ -173,7 +232,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["local_path", "source_sha256"],
         "strengths": ["conservative fallback for unknown XML"],
         "limitations": ["may miss metadata, sections, and article IDs"],
-        "review_caveats": ["Treat generic XML output as triage-level until a source-specific parser exists."],
+        "review_caveats": [
+            "Treat generic XML output as triage-level until a source-specific parser exists."
+        ],
         "do_not_infer": ["structured full text equivalence"],
     },
     "jsonl": {
@@ -195,7 +256,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["pmid", "doi", "pmcid"],
         "strengths": ["PMID/DOI tracking", "citation metadata", "abstract-level triage"],
         "limitations": ["not full text", "abstract availability varies"],
-        "review_caveats": ["PubMed records should be treated as abstract-level evidence unless full text is separately linked."],
+        "review_caveats": [
+            "PubMed records should be treated as abstract-level evidence unless full text is separately linked."
+        ],
         "do_not_infer": ["full methods", "full limitations", "complete future-work context"],
     },
     "openalex": {
@@ -206,7 +269,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["openalex_work_id", "doi"],
         "strengths": ["broad scholarly discovery", "citation/concept metadata"],
         "limitations": ["reconstructed abstracts are not article body text"],
-        "review_caveats": ["OpenAlex records are discovery metadata and should not be treated as article-body extraction."],
+        "review_caveats": [
+            "OpenAlex records are discovery metadata and should not be treated as article-body extraction."
+        ],
         "do_not_infer": ["full article evidence"],
     },
     "europepmc": {
@@ -215,10 +280,23 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "content_scope": "abstract plus metadata, or metadata only",
         "acquisition_method": "europepmc_rest_api",
         "native_id_fields": ["europepmc_source", "europepmc_id", "pmid", "pmcid", "doi"],
-        "strengths": ["Europe PMC identifiers", "publication metadata", "open-access status metadata"],
-        "limitations": ["search response is not article body text", "version relations require source-specific review"],
-        "review_caveats": ["Europe PMC search rows are discovery metadata unless full text is separately acquired and parsed."],
-        "do_not_infer": ["full methods", "full article evidence", "license clearance from metadata alone"],
+        "strengths": [
+            "Europe PMC identifiers",
+            "publication metadata",
+            "open-access status metadata",
+        ],
+        "limitations": [
+            "search response is not article body text",
+            "version relations require source-specific review",
+        ],
+        "review_caveats": [
+            "Europe PMC search rows are discovery metadata unless full text is separately acquired and parsed."
+        ],
+        "do_not_infer": [
+            "full methods",
+            "full article evidence",
+            "license clearance from metadata alone",
+        ],
     },
     "crossref": {
         "source_type": "crossref",
@@ -228,23 +306,34 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["doi"],
         "strengths": ["DOI normalization", "publication update and relation metadata"],
         "limitations": ["not article body text", "metadata quality varies by registrant"],
-        "review_caveats": ["Crossref rows support DOI-level linking and version review, not scientific evidence extraction by themselves."],
-        "do_not_infer": ["full article evidence", "current retraction or correction status without source review"],
+        "review_caveats": [
+            "Crossref rows support DOI-level linking and version review, not scientific evidence extraction by themselves."
+        ],
+        "do_not_infer": [
+            "full article evidence",
+            "current retraction or correction status without source review",
+        ],
     },
     "pride": {
-        "source_type": "pride", "category": "proteomics_metadata",
-        "content_scope": "bounded project metadata", "native_id_fields": ["accession"],
+        "source_type": "pride",
+        "category": "proteomics_metadata",
+        "content_scope": "bounded project metadata",
+        "native_id_fields": ["accession"],
         "strengths": ["declared organisms, protocols, instruments and file names"],
         "limitations": ["no raw measurements or donor identity inspected; bounded first page"],
         "review_caveats": ["Inspect source files and cohort lineage before analysis or pooling."],
         "do_not_infer": ["sample independence", "processed alignment", "feature units"],
     },
     "metabolomicsworkbench": {
-        "source_type": "metabolomicsworkbench", "category": "metabolomics_metadata",
-        "content_scope": "bounded study summaries", "native_id_fields": ["study_id"],
+        "source_type": "metabolomicsworkbench",
+        "category": "metabolomics_metadata",
+        "content_scope": "bounded study summaries",
+        "native_id_fields": ["study_id"],
         "strengths": ["declared species, analysis type, source version and license when present"],
         "limitations": ["reported samples are not independent donors; no measurements inspected"],
-        "review_caveats": ["Inspect factors, measurements, units, lineage and per-source reuse terms."],
+        "review_caveats": [
+            "Inspect factors, measurements, units, lineage and per-source reuse terms."
+        ],
         "do_not_infer": ["sample independence", "controls", "aligned metabolite measurements"],
     },
     "clinicaltrials": {
@@ -255,7 +344,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["nct_id"],
         "strengths": ["intervention, condition, design, and outcome metadata"],
         "limitations": ["not patient-level data", "reuse rights require study-specific review"],
-        "review_caveats": ["ClinicalTrials.gov metadata can suggest a study, not guarantee usable individual-level data."],
+        "review_caveats": [
+            "ClinicalTrials.gov metadata can suggest a study, not guarantee usable individual-level data."
+        ],
         "do_not_infer": ["patient-level access", "analysis-ready trial data"],
     },
     "ena": {
@@ -263,11 +354,28 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "category": "sequencing_repository_metadata",
         "content_scope": "study, sample, experiment, and run metadata",
         "acquisition_method": "ena_portal_api",
-        "native_id_fields": ["study_accession", "sample_accession", "run_accession", "bioproject_accession"],
-        "strengths": ["stable study/sample/run accessions", "library strategy and file-availability metadata"],
-        "limitations": ["technical runs are not biological samples", "donor and independence links may be ambiguous"],
-        "review_caveats": ["Inspect ENA study/sample relationships and file metadata before treating a record as analysis-ready."],
-        "do_not_infer": ["donor identity", "biological-sample count from runs", "processed-data availability from raw-read metadata"],
+        "native_id_fields": [
+            "study_accession",
+            "sample_accession",
+            "run_accession",
+            "bioproject_accession",
+        ],
+        "strengths": [
+            "stable study/sample/run accessions",
+            "library strategy and file-availability metadata",
+        ],
+        "limitations": [
+            "technical runs are not biological samples",
+            "donor and independence links may be ambiguous",
+        ],
+        "review_caveats": [
+            "Inspect ENA study/sample relationships and file metadata before treating a record as analysis-ready."
+        ],
+        "do_not_infer": [
+            "donor identity",
+            "biological-sample count from runs",
+            "processed-data availability from raw-read metadata",
+        ],
     },
     "datacite": {
         "source_type": "datacite",
@@ -275,10 +383,20 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "content_scope": "dataset DOI metadata",
         "acquisition_method": "datacite_public_api",
         "native_id_fields": ["doi", "related_identifiers"],
-        "strengths": ["persistent dataset identifiers", "source-declared rights and publication links"],
+        "strengths": [
+            "persistent dataset identifiers",
+            "source-declared rights and publication links",
+        ],
         "limitations": ["metadata may omit measurements, sample units, and file access conditions"],
-        "review_caveats": ["Inspect the DOI landing page and source files before judging suitability or reuse rights."],
-        "do_not_infer": ["downloaded datasets", "measured variables", "independent sample counts", "permission to reuse underlying files"],
+        "review_caveats": [
+            "Inspect the DOI landing page and source files before judging suitability or reuse rights."
+        ],
+        "do_not_infer": [
+            "downloaded datasets",
+            "measured variables",
+            "independent sample counts",
+            "permission to reuse underlying files",
+        ],
     },
     "geo": {
         "source_type": "geo",
@@ -288,7 +406,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["geo_accession", "gds_uid"],
         "strengths": ["omics accession discovery", "study-level summary"],
         "limitations": ["variable-level metadata requires file inspection"],
-        "review_caveats": ["GEO summaries identify candidate datasets; inspect files before judging variable availability."],
+        "review_caveats": [
+            "GEO summaries identify candidate datasets; inspect files before judging variable availability."
+        ],
         "do_not_infer": ["downloaded matrices", "analysis-ready expression data"],
     },
     "mgnify": {
@@ -299,7 +419,9 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["mgnify_accession", "study_accession"],
         "strengths": ["microbiome study discovery", "sample-count metadata when available"],
         "limitations": ["sample tables and detailed biome metadata may need follow-up"],
-        "review_caveats": ["MGnify list records are study metadata, not automatically usable sample tables."],
+        "review_caveats": [
+            "MGnify list records are study metadata, not automatically usable sample tables."
+        ],
         "do_not_infer": ["analysis-ready microbiome feature tables"],
     },
     "curated_biomedical_catalog": {
@@ -309,9 +431,18 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "acquisition_method": "bundled_curated_catalog",
         "native_id_fields": ["dataset_id", "source", "url"],
         "strengths": ["deterministic offline matching", "transparent built-in examples"],
-        "limitations": ["not a live repository snapshot", "source-specific validation is still required"],
-        "review_caveats": ["Default offline catalog metadata should be verified against source repositories before publication use."],
-        "do_not_infer": ["live database coverage", "downloaded datasets", "analysis-ready variables"],
+        "limitations": [
+            "not a live repository snapshot",
+            "source-specific validation is still required",
+        ],
+        "review_caveats": [
+            "Default offline catalog metadata should be verified against source repositories before publication use."
+        ],
+        "do_not_infer": [
+            "live database coverage",
+            "downloaded datasets",
+            "analysis-ready variables",
+        ],
     },
     "capability_registry": {
         "source_type": "capability_registry",
@@ -321,12 +452,24 @@ SOURCE_INTERPRETATION_PROFILES: dict[str, JsonDict] = {
         "native_id_fields": ["dataset_id", "variable_name", "derivation_rule_id"],
         "strengths": ["makes possible derivations inspectable before analysis"],
         "limitations": ["derived capabilities are not computed analyses"],
-        "review_caveats": ["Capability records describe plausible availability, not completed derivation or validation."],
+        "review_caveats": [
+            "Capability records describe plausible availability, not completed derivation or validation."
+        ],
         "do_not_infer": ["computed variables", "statistical evidence"],
     },
 }
 
-ADAPTER_SOURCE_TYPES = ("pubmed", "openalex", "europepmc", "crossref", "clinicaltrials", "ena", "geo", "mgnify", "datacite")
+ADAPTER_SOURCE_TYPES = (
+    "pubmed",
+    "openalex",
+    "europepmc",
+    "crossref",
+    "clinicaltrials",
+    "ena",
+    "geo",
+    "mgnify",
+    "datacite",
+)
 
 # Module boundaries are developer-facing documentation, not runtime dispatch rules.
 MODULE_BOUNDARIES: dict[str, JsonDict] = {
@@ -463,8 +606,7 @@ def parser_caveat_records() -> list[JsonDict]:
     """Return standardized parser caveat records for developer inspection."""
 
     return [
-        {"code": code, **dict(record)}
-        for code, record in sorted(PARSER_CAVEAT_RECORDS.items())
+        {"code": code, **dict(record)} for code, record in sorted(PARSER_CAVEAT_RECORDS.items())
     ]
 
 
@@ -481,7 +623,9 @@ def source_profile(source_type: str) -> JsonDict:
         "content_scope": "unknown",
         "strengths": [],
         "limitations": ["Source type is not yet profiled."],
-        "review_caveats": ["Unprofiled source type; inspect source provenance before interpretation."],
+        "review_caveats": [
+            "Unprofiled source type; inspect source provenance before interpretation."
+        ],
         "do_not_infer": ["validated content depth"],
     }
 
@@ -559,12 +703,21 @@ def provenance_review_caveats(provenances: Iterable[JsonDict]) -> list[str]:
         profile = source_profile(source_type)
         caveats.extend(profile.get("review_caveats", []))
         content_scope = str(provenance.get("content_scope", "") or "").lower()
-        if "metadata_only" in content_scope or content_scope in {"study_metadata", "dataset_metadata"}:
-            caveats.append("Metadata-only records should not be treated as direct evidence of answerability.")
+        if "metadata_only" in content_scope or content_scope in {
+            "study_metadata",
+            "dataset_metadata",
+        }:
+            caveats.append(
+                "Metadata-only records should not be treated as direct evidence of answerability."
+            )
         if "abstract" in content_scope:
-            caveats.append("Abstract-level records may miss methods, limitations, and full future-work context.")
+            caveats.append(
+                "Abstract-level records may miss methods, limitations, and full future-work context."
+            )
         if "derived" in content_scope or source_type == "capability_registry":
-            caveats.append("Derived capability records are plausibility catalog entries, not computed analyses.")
+            caveats.append(
+                "Derived capability records are plausibility catalog entries, not computed analyses."
+            )
         for warning in provenance.get("warnings", []) or []:
             caveats.append(str(warning))
         for limitation in provenance.get("limitations", []) or []:
@@ -611,7 +764,9 @@ def check_provenance_transfer(
         "report_summary": {
             "records": 1 if report_summary else 0,
             "with_provenance": 1 if report_summary.get("records_with_provenance", 0) else 0,
-            "without_provenance": 0 if report_summary.get("records_with_provenance", 0) else (1 if report_summary else 0),
+            "without_provenance": 0
+            if report_summary.get("records_with_provenance", 0)
+            else (1 if report_summary else 0),
             "provenance_entries": int(report_summary.get("records_with_provenance", 0) or 0),
             "has_review_caveats": bool(report_summary.get("review_caveats")),
             "has_interpretation": bool(report_summary.get("interpretation")),
@@ -850,7 +1005,11 @@ def _dedupe_provenance(values: list[JsonDict]) -> list[JsonDict]:
     seen: set[tuple[str, str, str]] = set()
     for item in values:
         key = (
-            str(item.get("source_locator", "") or item.get("source_url", "") or item.get("local_path", "")),
+            str(
+                item.get("source_locator", "")
+                or item.get("source_url", "")
+                or item.get("local_path", "")
+            ),
             str(item.get("source_type", "")),
             str(item.get("content_scope", "")),
         )
@@ -955,7 +1114,11 @@ def _review_visibility_counts(records: list[JsonDict]) -> JsonDict:
             question_json_cells += 1
         if dataset_visible["json"]:
             dataset_json_cells += 1
-        if record.get("source_caveats") or record.get("question_source_caveats") or record.get("dataset_source_caveats"):
+        if (
+            record.get("source_caveats")
+            or record.get("question_source_caveats")
+            or record.get("dataset_source_caveats")
+        ):
             caveats += 1
     return {
         "records": len(records),
@@ -1089,5 +1252,7 @@ def _record_identifier(record: JsonDict) -> str:
             return value
     nested_question = record.get("question", {})
     if isinstance(nested_question, dict):
-        return str(nested_question.get("question_id", "") or nested_question.get("question", "") or "")
+        return str(
+            nested_question.get("question_id", "") or nested_question.get("question", "") or ""
+        )
     return ""

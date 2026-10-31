@@ -39,11 +39,18 @@ def main() -> int:
     args = parser.parse_args()
     if args.out.exists():
         raise FileExistsError(f"Refusing to overwrite: {args.out}")
-    questions = {row["question_id"]: row for row in pq.read_table(args.corpus_root / "normalized" / "questions" / "questions.parquet").to_pylist()}
+    questions = {
+        row["question_id"]: row
+        for row in pq.read_table(
+            args.corpus_root / "normalized" / "questions" / "questions.parquet"
+        ).to_pylist()
+    }
     assignments = pq.read_table(args.split_assignments).to_pylist()
     development_ids = {row["question_id"] for row in assignments if row["split"] == "development"}
     relations_by_question: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for row in pq.read_table(args.corpus_root / "normalized" / "evidence_relations" / "evidence_relations.parquet").to_pylist():
+    for row in pq.read_table(
+        args.corpus_root / "normalized" / "evidence_relations" / "evidence_relations.parquet"
+    ).to_pylist():
         if row["question_id"] in development_ids:
             relations_by_question[row["question_id"]].append(row)
 
@@ -56,9 +63,15 @@ def main() -> int:
     with detail_path.open("w", encoding="utf-8") as handle:
         for question_id in sorted(development_ids):
             question = questions[question_id]
-            compilation = compile_question(question["question_text"], source_locator=f"corpus-question:{question_id}")
+            compilation = compile_question(
+                question["question_text"], source_locator=f"corpus-question:{question_id}"
+            )
             status_counts[compilation["compilation_status"]] += 1
-            observed = {role["field"]: role["expected"] for role in compilation.get("entity_roles", []) if role["field"] in {"intervention", "comparator", "outcome"}}
+            observed = {
+                role["field"]: role["expected"]
+                for role in compilation.get("entity_roles", [])
+                if role["field"] in {"intervention", "comparator", "outcome"}
+            }
             for field in observed:
                 explicit_fields[field] += 1
             relations = relations_by_question.get(question_id, [])
@@ -66,12 +79,29 @@ def main() -> int:
             if relations:
                 eligible += 1
                 for field in ("intervention", "comparator", "outcome"):
-                    field_matches[field] = field in observed and any(canonical(observed[field]) == canonical(row.get(field)) for row in relations)
+                    field_matches[field] = field in observed and any(
+                        canonical(observed[field]) == canonical(row.get(field)) for row in relations
+                    )
                     if field_matches[field]:
                         matched_fields[field] += 1
                 if all(field_matches.values()):
                     matched_questions += 1
-            handle.write(json.dumps({"question_id": question_id, "question_sha256": hashlib.sha256(question["question_text"].encode()).hexdigest(), "compilation_status": compilation["compilation_status"], "source_explicit_roles": observed, "relation_count": len(relations), "relation_consistency": field_matches}, sort_keys=True) + "\n")
+            handle.write(
+                json.dumps(
+                    {
+                        "question_id": question_id,
+                        "question_sha256": hashlib.sha256(
+                            question["question_text"].encode()
+                        ).hexdigest(),
+                        "compilation_status": compilation["compilation_status"],
+                        "source_explicit_roles": observed,
+                        "relation_count": len(relations),
+                        "relation_consistency": field_matches,
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
 
     receipt = {
         "schema_version": "v0.4-structured-pico-consistency-1.0",
@@ -94,8 +124,15 @@ def main() -> int:
             "No evaluation_candidate or sealed-holdout record was used for this development receipt.",
         ],
     }
-    (args.out / "COMPILER_SOURCE_CONSISTENCY.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"status": receipt["status"], "counts": receipt["counts"], "out": str(args.out)}, sort_keys=True))
+    (args.out / "COMPILER_SOURCE_CONSISTENCY.json").write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print(
+        json.dumps(
+            {"status": receipt["status"], "counts": receipt["counts"], "out": str(args.out)},
+            sort_keys=True,
+        )
+    )
     return 0
 
 

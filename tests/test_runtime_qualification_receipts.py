@@ -32,18 +32,28 @@ class FakeRuntime:
         return {"identity": "synthetic-expected", "config": asdict(self.config)}
 
     def backend_identity(self):
-        return {"backend": "changed" if self.changed_backend and self.calls else "synthetic-test-double",
-                "config": asdict(self.config)}
+        return {
+            "backend": "changed"
+            if self.changed_backend and self.calls
+            else "synthetic-test-double",
+            "config": asdict(self.config),
+        }
 
     def extract(self, document, cache, force_fresh=False):
         self.calls += 1
         fingerprint = self.inference_fingerprint(document)
         if self.changed_identity:
             fingerprint = {"identity": "synthetic-changed"}
-        return {"claims": self.claims, "questions": [], "inference_manifest": {
-            "origin": "fresh_local_inference" if force_fresh else "cache_replay",
-            "fingerprint": fingerprint, "configuration": asdict(self.config), "elapsed_seconds": 0,
-        }}
+        return {
+            "claims": self.claims,
+            "questions": [],
+            "inference_manifest": {
+                "origin": "fresh_local_inference" if force_fresh else "cache_replay",
+                "fingerprint": fingerprint,
+                "configuration": asdict(self.config),
+                "elapsed_seconds": 0,
+            },
+        }
 
 
 @pytest.fixture
@@ -55,9 +65,22 @@ def qualifier(monkeypatch, tmp_path):
     monkeypatch.setattr(FakeRuntime, "changed_identity", False)
     monkeypatch.setattr(FakeRuntime, "changed_backend", False)
     source = tmp_path / "development.json"
-    source.write_text(json.dumps({"document_id": "synthetic-development", "title": "Test", "text": "Test source."}))
+    source.write_text(
+        json.dumps(
+            {"document_id": "synthetic-development", "title": "Test", "text": "Test source."}
+        )
+    )
     output = tmp_path / "qualification.json"
-    args = ["--model-dir", str(tmp_path), "--embedding-dir", str(tmp_path), "--document", str(source), "--output", str(output)]
+    args = [
+        "--model-dir",
+        str(tmp_path),
+        "--embedding-dir",
+        str(tmp_path),
+        "--document",
+        str(source),
+        "--output",
+        str(output),
+    ]
     return args, output
 
 
@@ -84,7 +107,10 @@ def test_changed_runtime_identity_cannot_qualify(qualifier, monkeypatch):
 
 def test_source_profile_cli_records_explicit_configuration(qualifier):
     args, output = qualifier
-    assert runtime_qualify.main([*args, "--decoding-mode", "source_schema", "--max-new-tokens", "384"]) == 1
+    assert (
+        runtime_qualify.main([*args, "--decoding-mode", "source_schema", "--max-new-tokens", "384"])
+        == 1
+    )
     report = json.loads(output.read_text())
     assert report["configuration"]["decoding_mode"] == "source_schema"
     assert report["configuration"]["max_new_tokens"] == 384

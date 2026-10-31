@@ -65,29 +65,51 @@ def test_cursor_pagination_records_complete_multi_page_request_and_cache_lineage
 
 
 def test_cursor_pagination_repeated_token_and_truncation_are_partial_not_complete():
-    repeated = _paginate(FakeClient([{"items": [{"id": "one"}], "next": "again"}, {"items": [{"id": "two"}], "next": "again"}]))
-    truncated = _paginate(FakeClient([{"items": [], "next": "two"}, {"items": [], "next": "three"}]), max_pages=2)
+    repeated = _paginate(
+        FakeClient(
+            [
+                {"items": [{"id": "one"}], "next": "again"},
+                {"items": [{"id": "two"}], "next": "again"},
+            ]
+        )
+    )
+    truncated = _paginate(
+        FakeClient([{"items": [], "next": "two"}, {"items": [], "next": "three"}]), max_pages=2
+    )
     for result, status in ((repeated, "REPEATED_CURSOR"), (truncated, "TRUNCATED_PAGE_LIMIT")):
         assert result["pagination"]["status"] == status
         assert result["pagination"]["completed"] is False
-        assert result["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+        assert (
+            result["pagination"]["candidate_universe_status"]
+            == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+        )
 
 
 def test_cursor_pagination_schema_drift_and_offline_replay_are_explicit(tmp_path, monkeypatch):
     drift = _paginate(FakeClient([{"items": "not-a-list"}]))
     assert drift["pagination"]["status"] == "SCHEMA_DRIFT"
-    assert drift["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+    assert (
+        drift["pagination"]["candidate_universe_status"]
+        == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+    )
 
     cached = CachedHttpClient(cache_dir=tmp_path)
     url = "https://fixture.invalid/paged"
     first = {"query": "fixture", "page_size": 1}
     second = {**first, "cursor": "token-2"}
-    cached._cache_path(url, first).write_text(json.dumps({"items": [{"id": "one"}], "next": "token-2"}), encoding="utf-8")
-    cached._cache_path(url, second).write_text(json.dumps({"items": [{"id": "two"}]}), encoding="utf-8")
+    cached._cache_path(url, first).write_text(
+        json.dumps({"items": [{"id": "one"}], "next": "token-2"}), encoding="utf-8"
+    )
+    cached._cache_path(url, second).write_text(
+        json.dumps({"items": [{"id": "two"}]}), encoding="utf-8"
+    )
     monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
     replay = _paginate(CachedHttpClient(cache_dir=tmp_path, offline=True))
     assert replay["pagination"]["status"] == "COMPLETE"
-    assert all(page["cache_lineage"]["cache_status"] == "cache_hit" for page in replay["pagination"]["pages"])
+    assert all(
+        page["cache_lineage"]["cache_status"] == "cache_hit"
+        for page in replay["pagination"]["pages"]
+    )
 
 
 def test_cursor_pagination_fetch_error_is_partial_not_a_clean_empty_result():
@@ -99,7 +121,10 @@ def test_cursor_pagination_fetch_error_is_partial_not_a_clean_empty_result():
     assert result["items"] == []
     assert result["pagination"]["status"] == "ERROR"
     assert result["pagination"]["error"] == "RuntimeError"
-    assert result["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+    assert (
+        result["pagination"]["candidate_universe_status"]
+        == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+    )
 
 
 def test_pubmed_literature_adapter_normalizes_esummary_rows():
@@ -143,10 +168,25 @@ def test_pubmed_literature_adapter_normalizes_esummary_rows():
 
 def test_europepmc_adapter_normalizes_identifiers_versions_and_malformed_rows():
     client = FakeClient(
-        [{"resultList": {"result": [
-            {"source": "MED", "id": "123", "pmcid": "PMC123", "doi": "10.1/Example", "title": "Versioned study", "abstractText": "Abstract", "firstPublicationDate": "2025-01-02", "commentCorrectionList": {"commentCorrection": [{"id": "456"}]}},
-            {"source": "MED", "id": "", "title": "Malformed missing id"},
-        ]}}]
+        [
+            {
+                "resultList": {
+                    "result": [
+                        {
+                            "source": "MED",
+                            "id": "123",
+                            "pmcid": "PMC123",
+                            "doi": "10.1/Example",
+                            "title": "Versioned study",
+                            "abstractText": "Abstract",
+                            "firstPublicationDate": "2025-01-02",
+                            "commentCorrectionList": {"commentCorrection": [{"id": "456"}]},
+                        },
+                        {"source": "MED", "id": "", "title": "Malformed missing id"},
+                    ]
+                }
+            }
+        ]
     )
 
     rows = EuropePMCLiteratureAdapter(client).search_literature("study", limit=5)
@@ -161,10 +201,23 @@ def test_europepmc_adapter_normalizes_identifiers_versions_and_malformed_rows():
 
 def test_crossref_adapter_skips_missing_doi_and_preserves_update_metadata():
     client = FakeClient(
-        [{"message": {"items": [
-            {"DOI": "https://doi.org/10.2/Example", "title": ["Corrected study"], "published-online": {"date-parts": [[2024, 2, 1]]}, "relation": {"is-correction-of": [{"id": "10.2/original"}]}, "indexed": {"date-time": "2025-01-01T00:00:00Z"}, "author": [{"given": "Ada", "family": "Lovelace"}]},
-            {"title": ["Missing DOI"]},
-        ]}}]
+        [
+            {
+                "message": {
+                    "items": [
+                        {
+                            "DOI": "https://doi.org/10.2/Example",
+                            "title": ["Corrected study"],
+                            "published-online": {"date-parts": [[2024, 2, 1]]},
+                            "relation": {"is-correction-of": [{"id": "10.2/original"}]},
+                            "indexed": {"date-time": "2025-01-01T00:00:00Z"},
+                            "author": [{"given": "Ada", "family": "Lovelace"}],
+                        },
+                        {"title": ["Missing DOI"]},
+                    ]
+                }
+            }
+        ]
     )
 
     rows = CrossrefLiteratureAdapter(client).search_literature("study", limit=5)
@@ -184,11 +237,29 @@ def test_crossref_adapter_skips_missing_doi_and_preserves_update_metadata():
         ("is-version-of", "VERSIONED_REQUIRES_VERSION_REVIEW"),
     ],
 )
-def test_literature_search_merges_cross_source_doi_and_lifecycle_relations(relation_key, expected_lifecycle):
+def test_literature_search_merges_cross_source_doi_and_lifecycle_relations(
+    relation_key, expected_lifecycle
+):
     client = FakeClient(
         [
-            {"resultList": {"result": [{"source": "MED", "id": "123", "doi": "10.3/shared", "title": "Shared"}]}},
-            {"message": {"items": [{"DOI": "10.3/shared", "title": ["Shared"], "relation": {relation_key: [{"id": "10.3/old"}]}}]}},
+            {
+                "resultList": {
+                    "result": [
+                        {"source": "MED", "id": "123", "doi": "10.3/shared", "title": "Shared"}
+                    ]
+                }
+            },
+            {
+                "message": {
+                    "items": [
+                        {
+                            "DOI": "10.3/shared",
+                            "title": ["Shared"],
+                            "relation": {relation_key: [{"id": "10.3/old"}]},
+                        }
+                    ]
+                }
+            },
         ]
     )
 
@@ -196,9 +267,15 @@ def test_literature_search_merges_cross_source_doi_and_lifecycle_relations(relat
 
     assert len(rows) == 1
     assert rows[0]["metadata"]["alternate_source_ids"] == ["crossref:10.3/shared"]
-    assert rows[0]["metadata"]["version_relationships"]["crossref"][relation_key][0]["id"] == "10.3/old"
+    assert (
+        rows[0]["metadata"]["version_relationships"]["crossref"][relation_key][0]["id"]
+        == "10.3/old"
+    )
     assert rows[0]["metadata"]["literature_integrity"]["lifecycle_status"] == expected_lifecycle
-    assert rows[0]["metadata"]["literature_integrity"]["evidence_eligibility"] == "INELIGIBLE_REQUIRES_VERSION_REVIEW"
+    assert (
+        rows[0]["metadata"]["literature_integrity"]["evidence_eligibility"]
+        == "INELIGIBLE_REQUIRES_VERSION_REVIEW"
+    )
 
 
 def test_cached_http_client_offline_replays_and_fails_closed_on_miss(tmp_path, monkeypatch):
@@ -214,7 +291,9 @@ def test_cached_http_client_offline_replays_and_fails_closed_on_miss(tmp_path, m
         offline.get_json(url, params={"query": "missing"})
 
 
-def test_cached_http_client_refresh_replaces_only_after_success_and_records_lineage(tmp_path, monkeypatch):
+def test_cached_http_client_refresh_replaces_only_after_success_and_records_lineage(
+    tmp_path, monkeypatch
+):
     client = CachedHttpClient(cache_dir=tmp_path)
     url = "https://example.test/works"
     params = {"query": "one"}
@@ -235,7 +314,9 @@ def test_cached_http_client_refresh_replaces_only_after_success_and_records_line
     assert client.last_response_metadata["replaced_cache_content_sha256"] == old_sha256
     new_sha256 = client.last_response_metadata["cache_content_sha256"]
     assert new_sha256 != old_sha256
-    assert CachedHttpClient(cache_dir=tmp_path, offline=True).get_json(url, params) == {"message": "new"}
+    assert CachedHttpClient(cache_dir=tmp_path, offline=True).get_json(url, params) == {
+        "message": "new"
+    }
 
 
 def test_cached_http_client_failed_refresh_preserves_prior_entry(tmp_path, monkeypatch):
@@ -250,7 +331,9 @@ def test_cached_http_client_failed_refresh_preserves_prior_entry(tmp_path, monke
     )
     with pytest.raises(RuntimeError, match="HTTP JSON request failed"):
         client.get_json(url, params, refresh=True, retries=0)
-    assert CachedHttpClient(cache_dir=tmp_path, offline=True).get_json(url, params) == {"message": "preserved"}
+    assert CachedHttpClient(cache_dir=tmp_path, offline=True).get_json(url, params) == {
+        "message": "preserved"
+    }
 
 
 def test_geo_dataset_adapter_normalizes_dataset_records():
@@ -282,14 +365,42 @@ def test_geo_dataset_adapter_normalizes_dataset_records():
 def test_clinicaltrials_adapter_preserves_registry_design_without_sample_claims():
     study = {
         "protocolSection": {
-            "identificationModule": {"nctId": "NCT01234567", "briefTitle": "Active treatment study"},
-            "statusModule": {"overallStatus": "RECRUITING", "lastUpdatePostDateStruct": {"date": "2026-01-02"}},
+            "identificationModule": {
+                "nctId": "NCT01234567",
+                "briefTitle": "Active treatment study",
+            },
+            "statusModule": {
+                "overallStatus": "RECRUITING",
+                "lastUpdatePostDateStruct": {"date": "2026-01-02"},
+            },
             "descriptionModule": {"briefSummary": "Registry summary."},
             "conditionsModule": {"conditions": ["Inflammatory bowel disease"]},
-            "designModule": {"studyType": "INTERVENTIONAL", "phases": ["PHASE2"], "enrollmentInfo": {"count": 120, "type": "ESTIMATED"}, "designInfo": {"allocation": "RANDOMIZED", "interventionModel": "PARALLEL"}},
-            "armsInterventionsModule": {"armGroups": [{"label": "Placebo", "type": "PLACEBO_COMPARATOR", "interventionNames": ["Placebo"]}], "interventions": [{"name": "Drug A", "type": "DRUG"}]},
-            "outcomesModule": {"primaryOutcomes": [{"measure": "Clinical remission", "timeFrame": "Week 12"}]},
-            "eligibilityModule": {"sex": "ALL", "minimumAge": "18 Years", "maximumAge": "65 Years", "healthyVolunteers": False, "eligibilityCriteria": "Eligible adults."},
+            "designModule": {
+                "studyType": "INTERVENTIONAL",
+                "phases": ["PHASE2"],
+                "enrollmentInfo": {"count": 120, "type": "ESTIMATED"},
+                "designInfo": {"allocation": "RANDOMIZED", "interventionModel": "PARALLEL"},
+            },
+            "armsInterventionsModule": {
+                "armGroups": [
+                    {
+                        "label": "Placebo",
+                        "type": "PLACEBO_COMPARATOR",
+                        "interventionNames": ["Placebo"],
+                    }
+                ],
+                "interventions": [{"name": "Drug A", "type": "DRUG"}],
+            },
+            "outcomesModule": {
+                "primaryOutcomes": [{"measure": "Clinical remission", "timeFrame": "Week 12"}]
+            },
+            "eligibilityModule": {
+                "sex": "ALL",
+                "minimumAge": "18 Years",
+                "maximumAge": "65 Years",
+                "healthyVolunteers": False,
+                "eligibilityCriteria": "Eligible adults.",
+            },
         }
     }
     record = ClinicalTrialsDatasetAdapter(FakeClient([{"studies": [study]}])).search("ibd")[0]
@@ -297,7 +408,10 @@ def test_clinicaltrials_adapter_preserves_registry_design_without_sample_claims(
     assert record.dataset_id == "NCT01234567"
     assert record.sample_size == 0
     assert record.metadata["enrollment"]["count"] == 120
-    assert record.metadata["enrollment"]["interpretation"] == "registry enrollment; not analyzed sample count"
+    assert (
+        record.metadata["enrollment"]["interpretation"]
+        == "registry enrollment; not analyzed sample count"
+    )
     assert record.metadata["study_type"] == "INTERVENTIONAL"
     assert record.metadata["primary_outcomes"][0]["time_frame"] == "Week 12"
     assert record.metadata["comparators"][0]["label"] == "Placebo"
@@ -307,9 +421,37 @@ def test_clinicaltrials_adapter_preserves_registry_design_without_sample_claims(
 
 def test_clinicaltrials_observational_and_duplicate_versions_remain_nonperturbational():
     def study(version, status):
-        return {"protocolSection": {"identificationModule": {"nctId": "NCT76543210", "briefTitle": "Observational cohort"}, "statusModule": {"overallStatus": status, "lastUpdatePostDateStruct": {"date": version}}, "designModule": {"studyType": "OBSERVATIONAL", "enrollmentInfo": {"count": "20"}}, "conditionsModule": {}, "armsInterventionsModule": {}, "outcomesModule": {}, "eligibilityModule": {}}}
+        return {
+            "protocolSection": {
+                "identificationModule": {
+                    "nctId": "NCT76543210",
+                    "briefTitle": "Observational cohort",
+                },
+                "statusModule": {
+                    "overallStatus": status,
+                    "lastUpdatePostDateStruct": {"date": version},
+                },
+                "designModule": {"studyType": "OBSERVATIONAL", "enrollmentInfo": {"count": "20"}},
+                "conditionsModule": {},
+                "armsInterventionsModule": {},
+                "outcomesModule": {},
+                "eligibilityModule": {},
+            }
+        }
 
-    record = ClinicalTrialsDatasetAdapter(FakeClient([{"studies": [study("2024-01-01", "COMPLETED"), study("2025-01-01", "RECRUITING"), {"protocolSection": {"identificationModule": {"nctId": "bad"}}}]}])).search("cohort")[0]
+    record = ClinicalTrialsDatasetAdapter(
+        FakeClient(
+            [
+                {
+                    "studies": [
+                        study("2024-01-01", "COMPLETED"),
+                        study("2025-01-01", "RECRUITING"),
+                        {"protocolSection": {"identificationModule": {"nctId": "bad"}}},
+                    ]
+                }
+            ]
+        )
+    ).search("cohort")[0]
 
     assert record.metadata["causal_interpretation"] == "NOT_PERTURBATIONAL"
     assert record.metadata["overall_status"] == "RECRUITING"
@@ -321,19 +463,73 @@ def test_dataset_search_cli_replays_clinicaltrials_cache_offline(tmp_path, capsy
     cache = CachedHttpClient(cache_dir=tmp_path / "cache")
     url = "https://clinicaltrials.gov/api/v2/studies"
     params = {"query.term": "study", "pageSize": 25, "format": "json"}
-    cache._cache_path(url, params).write_text(json.dumps({"studies": [{"protocolSection": {"identificationModule": {"nctId": "NCT11111111", "briefTitle": "Cached study"}, "designModule": {"studyType": "OBSERVATIONAL"}}}]}), encoding="utf-8")
+    cache._cache_path(url, params).write_text(
+        json.dumps(
+            {
+                "studies": [
+                    {
+                        "protocolSection": {
+                            "identificationModule": {
+                                "nctId": "NCT11111111",
+                                "briefTitle": "Cached study",
+                            },
+                            "designModule": {"studyType": "OBSERVATIONAL"},
+                        }
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
     out = tmp_path / "records.jsonl"
     monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
 
-    assert main(["dataset-search", "--query", "study", "--source", "clinicaltrials", "--cache-dir", str(cache.cache_dir), "--offline", "--out", str(out)]) == 0
+    assert (
+        main(
+            [
+                "dataset-search",
+                "--query",
+                "study",
+                "--source",
+                "clinicaltrials",
+                "--cache-dir",
+                str(cache.cache_dir),
+                "--offline",
+                "--out",
+                str(out),
+            ]
+        )
+        == 0
+    )
     assert read_jsonl(out)[0]["metadata"]["causal_interpretation"] == "NOT_PERTURBATIONAL"
     assert json.loads(capsys.readouterr().out)["records"] == 1
 
 
 def test_ena_adapter_groups_runs_without_equating_them_to_samples():
     rows = [
-        {"study_accession": "ERP12345", "secondary_study_accession": "PRJEB123", "study_title": "Sequencing study", "run_accession": "ERR1", "experiment_accession": "ERX1", "sample_accession": "ERS1", "secondary_sample_accession": "SAME1", "sample_title": "Sample one", "scientific_name": "Homo sapiens", "library_strategy": "RNA-SEQ", "fastq_ftp": "ftp://x", "last_updated": "2025-01-01"},
-        {"study_accession": "ERP12345", "run_accession": "ERR2", "experiment_accession": "ERX2", "sample_accession": "ERS1", "scientific_name": "Homo sapiens", "library_strategy": "RNA-SEQ", "last_updated": "2025-01-02"},
+        {
+            "study_accession": "ERP12345",
+            "secondary_study_accession": "PRJEB123",
+            "study_title": "Sequencing study",
+            "run_accession": "ERR1",
+            "experiment_accession": "ERX1",
+            "sample_accession": "ERS1",
+            "secondary_sample_accession": "SAME1",
+            "sample_title": "Sample one",
+            "scientific_name": "Homo sapiens",
+            "library_strategy": "RNA-SEQ",
+            "fastq_ftp": "ftp://x",
+            "last_updated": "2025-01-01",
+        },
+        {
+            "study_accession": "ERP12345",
+            "run_accession": "ERR2",
+            "experiment_accession": "ERX2",
+            "sample_accession": "ERS1",
+            "scientific_name": "Homo sapiens",
+            "library_strategy": "RNA-SEQ",
+            "last_updated": "2025-01-02",
+        },
         {"study_accession": "bad", "run_accession": "ERR_BAD"},
         "schema-drift-row",
     ]
@@ -349,7 +545,20 @@ def test_ena_adapter_groups_runs_without_equating_them_to_samples():
 
 
 def test_ena_adapter_deduplicates_repeated_run_links_and_missing_fields():
-    rows = [{"study_accession": "SRP12345", "study_title": "Run duplicate", "run_accession": "SRR1", "sample_accession": "SRS1"}, {"study_accession": "SRP12345", "study_title": "Run duplicate", "run_accession": "SRR1", "sample_accession": "SRS1"}]
+    rows = [
+        {
+            "study_accession": "SRP12345",
+            "study_title": "Run duplicate",
+            "run_accession": "SRR1",
+            "sample_accession": "SRS1",
+        },
+        {
+            "study_accession": "SRP12345",
+            "study_title": "Run duplicate",
+            "run_accession": "SRR1",
+            "sample_accession": "SRS1",
+        },
+    ]
     record = ENASRADatasetAdapter(FakeClient([{"data": rows}])).search("ignored")[0]
 
     assert record.metadata["runs"] == ["SRR1"]
@@ -360,12 +569,46 @@ def test_ena_adapter_deduplicates_repeated_run_links_and_missing_fields():
 def test_dataset_search_cli_replays_ena_cache_offline(tmp_path, capsys, monkeypatch):
     cache = CachedHttpClient(cache_dir=tmp_path / "cache")
     url = "https://www.ebi.ac.uk/ena/portal/api/search"
-    params = {"result": "read_run", "query": "study", "fields": "study_accession,secondary_study_accession,secondary_project,study_title,study_alias,run_accession,experiment_accession,sample_accession,secondary_sample_accession,sample_alias,sample_title,sample_description,scientific_name,library_strategy,library_source,library_selection,fastq_ftp,submitted_ftp,sra_ftp,first_public,last_updated", "format": "json", "limit": 100}
-    cache._cache_path(url, params).write_text(json.dumps([{"study_accession": "ERP77777", "study_title": "Cached ENA", "run_accession": "ERR7", "sample_accession": "ERS7"}]), encoding="utf-8")
+    params = {
+        "result": "read_run",
+        "query": "study",
+        "fields": "study_accession,secondary_study_accession,secondary_project,study_title,study_alias,run_accession,experiment_accession,sample_accession,secondary_sample_accession,sample_alias,sample_title,sample_description,scientific_name,library_strategy,library_source,library_selection,fastq_ftp,submitted_ftp,sra_ftp,first_public,last_updated",
+        "format": "json",
+        "limit": 100,
+    }
+    cache._cache_path(url, params).write_text(
+        json.dumps(
+            [
+                {
+                    "study_accession": "ERP77777",
+                    "study_title": "Cached ENA",
+                    "run_accession": "ERR7",
+                    "sample_accession": "ERS7",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
     out = tmp_path / "ena.jsonl"
     monkeypatch.setattr("requests.get", lambda *args, **kwargs: pytest.fail("network attempted"))
 
-    assert main(["dataset-search", "--query", "study", "--source", "ena", "--cache-dir", str(cache.cache_dir), "--offline", "--out", str(out)]) == 0
+    assert (
+        main(
+            [
+                "dataset-search",
+                "--query",
+                "study",
+                "--source",
+                "ena",
+                "--cache-dir",
+                str(cache.cache_dir),
+                "--offline",
+                "--out",
+                str(out),
+            ]
+        )
+        == 0
+    )
     assert read_jsonl(out)[0]["dataset_id"] == "ERP77777"
     assert json.loads(capsys.readouterr().out)["records"] == 1
 
@@ -383,7 +626,7 @@ def test_mgnify_dataset_adapter_normalizes_json_api_rows():
                         "sample_count": 12,
                         "experiment_type": "metagenomics",
                     }
-                ]
+                ],
             }
         ]
     )

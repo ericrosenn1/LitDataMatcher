@@ -20,10 +20,15 @@ def _strings(value):
 def _provenance(client, name, identity, url, version, limitations):
     snapshot = dict(getattr(client, "last_response_metadata", {}))
     return remote_source_provenance(
-        source_type=name, source_url=url, adapter_name=name, adapter_version=version,
+        source_type=name,
+        source_url=url,
+        adapter_name=name,
+        adapter_version=version,
         retrieval_time_utc=snapshot.get("retrieval_time_utc", ""),
-        acquisition_method="public_metadata_api", content_scope="study_metadata_only",
-        raw_record_id=identity, limitations=limitations,
+        acquisition_method="public_metadata_api",
+        content_scope="study_metadata_only",
+        raw_record_id=identity,
+        limitations=limitations,
         next_handoff="inspect experimental compatibility and source files",
         metadata={"cache_snapshot": snapshot},
     ).to_dict()
@@ -38,24 +43,36 @@ class PRIDEDatasetAdapter:
         endpoint = "https://www.ebi.ac.uk/pride/ws/archive/v2/search/projects"
         params = {"keyword": query, "pageSize": 25, "page": 0}
         data = self.client.get_json(
-            endpoint, params=params,
+            endpoint,
+            params=params,
         )
         if not isinstance(data, list) or not all(isinstance(item, dict) for item in data):
             raise ValueError("PRIDE schema drift: expected project list")
         records = []
         for index, item in enumerate(data):
             identity = item.get("accession", "")
-            if not isinstance(identity, str) or not re.fullmatch(r"PXD\d{6,}", identity) or not item.get("title"):
+            if (
+                not isinstance(identity, str)
+                or not re.fullmatch(r"PXD\d{6,}", identity)
+                or not item.get("title")
+            ):
                 raise ValueError("PRIDE project lacks valid identity/title")
             url = f"https://www.ebi.ac.uk/pride/archive/projects/{identity}"
             organisms = _strings(item.get("organisms"))
             declared_assays = _strings(item.get("experimentTypes"))
             field_locator = f"{endpoint}?{urlencode(params)}#/{index}"
-            provenance = _provenance(self.client, self.name, identity, url, "pride_archive_v2_metadata_1", [
-                "Project/sample counts do not establish donors or independent units.",
-                "File names are availability metadata, not inspected processed measurements.",
-                "Projects may share subjects; independence requires an explicit lineage review.",
-            ])
+            provenance = _provenance(
+                self.client,
+                self.name,
+                identity,
+                url,
+                "pride_archive_v2_metadata_1",
+                [
+                    "Project/sample counts do not establish donors or independent units.",
+                    "File names are availability metadata, not inspected processed measurements.",
+                    "Projects may share subjects; independence requires an explicit lineage review.",
+                ],
+            )
             metadata = {
                 "source_provenance": provenance,
                 "version_time": item.get("updatedDate", "UNKNOWN"),
@@ -65,25 +82,70 @@ class PRIDEDatasetAdapter:
                 "instruments": _strings(item.get("instruments")),
                 "file_names": _strings(item.get("projectFileNames")),
                 "publication_references": item.get("references", []),
-                "source_protocols": {key: item.get(key, "") for key in ("sampleProcessingProtocol", "dataProcessingProtocol")},
-                "omics_contract": {"feature_type": "UNKNOWN", "feature_unit": "UNKNOWN", "quantification": "UNKNOWN", "normalization": "UNKNOWN"},
-                "dependence": {"donor_links": "AMBIGUOUS_NOT_INFERRED"},
-                "pagination": {"status": "BOUNDED_PAGE_NOT_COMPLETE_CENSUS", "page": 0, "page_size": 25, "returned_items": len(data)},
-                "access_status": "PUBLIC_METADATA_ONLY",
-                "missingness": {key: "UNKNOWN" for key in ("donors", "comparator", "outcomes", "temporal_design", "processed_alignment")},
-                "field_evidence": {
-                    "organisms": {"status": "observed" if organisms else "unknown", "value": organisms, "source_locator": field_locator + "/organisms", "mapping_type": "exact"},
-                    "assay_types": {"status": "observed" if declared_assays else "unknown", "value": declared_assays, "source_locator": field_locator + "/experimentTypes", "mapping_type": "exact"},
+                "source_protocols": {
+                    key: item.get(key, "")
+                    for key in ("sampleProcessingProtocol", "dataProcessingProtocol")
                 },
-                "source_fields": {key: item[key] for key in ("organisms", "experimentTypes") if key in item},
+                "omics_contract": {
+                    "feature_type": "UNKNOWN",
+                    "feature_unit": "UNKNOWN",
+                    "quantification": "UNKNOWN",
+                    "normalization": "UNKNOWN",
+                },
+                "dependence": {"donor_links": "AMBIGUOUS_NOT_INFERRED"},
+                "pagination": {
+                    "status": "BOUNDED_PAGE_NOT_COMPLETE_CENSUS",
+                    "page": 0,
+                    "page_size": 25,
+                    "returned_items": len(data),
+                },
+                "access_status": "PUBLIC_METADATA_ONLY",
+                "missingness": {
+                    key: "UNKNOWN"
+                    for key in (
+                        "donors",
+                        "comparator",
+                        "outcomes",
+                        "temporal_design",
+                        "processed_alignment",
+                    )
+                },
+                "field_evidence": {
+                    "organisms": {
+                        "status": "observed" if organisms else "unknown",
+                        "value": organisms,
+                        "source_locator": field_locator + "/organisms",
+                        "mapping_type": "exact",
+                    },
+                    "assay_types": {
+                        "status": "observed" if declared_assays else "unknown",
+                        "value": declared_assays,
+                        "source_locator": field_locator + "/experimentTypes",
+                        "mapping_type": "exact",
+                    },
+                },
+                "source_fields": {
+                    key: item[key] for key in ("organisms", "experimentTypes") if key in item
+                },
             }
-            records.append(classify_dataset_record({
-                "dataset_id": identity, "title": item["title"], "description": item.get("projectDescription", ""),
-                "source": "PRIDE", "url": url, "organisms": organisms,
-                "assay_types": declared_assays or ["proteomics"], "sample_size": 0, "variables": [],
-                "access_type": "public metadata; file-level inspection required",
-                "license": "Source-specific terms require review before redistribution", "metadata": metadata,
-            }))
+            records.append(
+                classify_dataset_record(
+                    {
+                        "dataset_id": identity,
+                        "title": item["title"],
+                        "description": item.get("projectDescription", ""),
+                        "source": "PRIDE",
+                        "url": url,
+                        "organisms": organisms,
+                        "assay_types": declared_assays or ["proteomics"],
+                        "sample_size": 0,
+                        "variables": [],
+                        "access_type": "public metadata; file-level inspection required",
+                        "license": "Source-specific terms require review before redistribution",
+                        "metadata": metadata,
+                    }
+                )
+            )
         return records
 
 
@@ -110,43 +172,111 @@ class MetabolomicsWorkbenchDatasetAdapter:
         records = []
         for index, item in enumerate(items[:100]):
             identity = item.get("study_id", "")
-            if not isinstance(identity, str) or not re.fullmatch(r"ST\d{6}", identity) or not item.get("study_title"):
+            if (
+                not isinstance(identity, str)
+                or not re.fullmatch(r"ST\d{6}", identity)
+                or not item.get("study_title")
+            ):
                 raise ValueError("Metabolomics study lacks valid identity/title")
             url = f"https://www.metabolomicsworkbench.org/data/DRCCMetadata.php?StudyID={identity}"
             organisms = _strings(item.get("species") or item.get("subject_species"))
             declared_assays = _strings(item.get("analysis_type"))
             if isinstance(data, dict):
-                pointer = "" if "study_id" in data else "/" + next(key.replace("~", "~0").replace("/", "~1") for key, value in data.items() if value is item)
+                pointer = (
+                    ""
+                    if "study_id" in data
+                    else "/"
+                    + next(
+                        key.replace("~", "~0").replace("/", "~1")
+                        for key, value in data.items()
+                        if value is item
+                    )
+                )
             else:
                 pointer = f"/{index}"
             field_locator = endpoint + "#" + pointer
-            provenance = _provenance(self.client, self.name, identity, url, "mw_rest_study_summary_1", [
-                "Summary records do not establish independent donors, aligned measurements, or controls.",
-                "No sample measurements, raw files, or matrix files were downloaded.",
-            ])
+            provenance = _provenance(
+                self.client,
+                self.name,
+                identity,
+                url,
+                "mw_rest_study_summary_1",
+                [
+                    "Summary records do not establish independent donors, aligned measurements, or controls.",
+                    "No sample measurements, raw files, or matrix files were downloaded.",
+                ],
+            )
             metadata = {
-                "source_provenance": provenance, "version_time": item.get("revision_datetime", "UNKNOWN"),
-                "source_version": item.get("version", "UNKNOWN"), "source_revision": item.get("revision_no", "UNKNOWN"),
-                "publication_date": item.get("release_date", "UNKNOWN"), "analysis_type": item.get("analysis_type", "UNKNOWN"),
+                "source_provenance": provenance,
+                "version_time": item.get("revision_datetime", "UNKNOWN"),
+                "source_version": item.get("version", "UNKNOWN"),
+                "source_revision": item.get("revision_no", "UNKNOWN"),
+                "publication_date": item.get("release_date", "UNKNOWN"),
+                "analysis_type": item.get("analysis_type", "UNKNOWN"),
                 "reported_sample_count": item.get("number_of_samples", "UNKNOWN"),
                 "license_url": item.get("license_url", "UNKNOWN"),
-                "omics_contract": {"feature_type": "UNKNOWN", "feature_unit": "UNKNOWN", "quantification": "UNKNOWN", "normalization": "UNKNOWN"},
-                "dependence": {"donor_links": "AMBIGUOUS_NOT_INFERRED"},
-                "pagination": {"status": "BOUNDED_RESPONSE_NOT_COMPLETE_CENSUS", "returned_items": len(items), "retained_limit": 100},
-                "access_status": "PUBLIC_METADATA_ONLY",
-                "missingness": {key: "UNKNOWN" for key in ("donors", "comparator", "outcomes", "temporal_design", "processed_alignment")},
-                "field_evidence": {
-                    "organisms": {"status": "observed" if organisms else "unknown", "value": organisms, "source_locator": field_locator + ("/species" if item.get("species") else "/subject_species"), "mapping_type": "exact"},
-                    "assay_types": {"status": "observed" if declared_assays else "unknown", "value": declared_assays, "source_locator": field_locator + "/analysis_type", "mapping_type": "exact"},
+                "omics_contract": {
+                    "feature_type": "UNKNOWN",
+                    "feature_unit": "UNKNOWN",
+                    "quantification": "UNKNOWN",
+                    "normalization": "UNKNOWN",
                 },
-                "source_fields": {key: item[key] for key in ("species", "subject_species", "analysis_type") if key in item},
+                "dependence": {"donor_links": "AMBIGUOUS_NOT_INFERRED"},
+                "pagination": {
+                    "status": "BOUNDED_RESPONSE_NOT_COMPLETE_CENSUS",
+                    "returned_items": len(items),
+                    "retained_limit": 100,
+                },
+                "access_status": "PUBLIC_METADATA_ONLY",
+                "missingness": {
+                    key: "UNKNOWN"
+                    for key in (
+                        "donors",
+                        "comparator",
+                        "outcomes",
+                        "temporal_design",
+                        "processed_alignment",
+                    )
+                },
+                "field_evidence": {
+                    "organisms": {
+                        "status": "observed" if organisms else "unknown",
+                        "value": organisms,
+                        "source_locator": field_locator
+                        + ("/species" if item.get("species") else "/subject_species"),
+                        "mapping_type": "exact",
+                    },
+                    "assay_types": {
+                        "status": "observed" if declared_assays else "unknown",
+                        "value": declared_assays,
+                        "source_locator": field_locator + "/analysis_type",
+                        "mapping_type": "exact",
+                    },
+                },
+                "source_fields": {
+                    key: item[key]
+                    for key in ("species", "subject_species", "analysis_type")
+                    if key in item
+                },
             }
-            records.append(classify_dataset_record({
-                "dataset_id": identity, "title": item["study_title"], "description": item.get("study_summary", ""),
-                "source": "Metabolomics Workbench", "url": url,
-                "organisms": organisms,
-                "assay_types": declared_assays or ["metabolomics"], "sample_size": 0, "variables": [],
-                "access_type": "public metadata; file-level inspection required",
-                "license": item.get("license", "UNKNOWN; source-specific terms require review"), "metadata": metadata,
-            }))
+            records.append(
+                classify_dataset_record(
+                    {
+                        "dataset_id": identity,
+                        "title": item["study_title"],
+                        "description": item.get("study_summary", ""),
+                        "source": "Metabolomics Workbench",
+                        "url": url,
+                        "organisms": organisms,
+                        "assay_types": declared_assays or ["metabolomics"],
+                        "sample_size": 0,
+                        "variables": [],
+                        "access_type": "public metadata; file-level inspection required",
+                        "license": item.get(
+                            "license", "UNKNOWN; source-specific terms require review"
+                        ),
+                        "metadata": metadata,
+                    }
+                )
+            )
         return records

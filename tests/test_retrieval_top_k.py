@@ -20,13 +20,16 @@ def test_all_ties_select_identifiers_instead_of_partition_accident():
     assert top_k_indices(np.zeros(5), ["e", "d", "c", "b", "a"], 2) == [4, 3]
 
 
-@pytest.mark.parametrize("scores,ids,k", [
-    (np.array([float("nan")]), ["a"], 1),
-    (np.array([float("inf")]), ["a"], 1),
-    (np.ones((1, 1)), ["a"], 1),
-    (np.zeros(2), ["a"], 1),
-    (np.zeros(1), ["a"], 0),
-])
+@pytest.mark.parametrize(
+    "scores,ids,k",
+    [
+        (np.array([float("nan")]), ["a"], 1),
+        (np.array([float("inf")]), ["a"], 1),
+        (np.ones((1, 1)), ["a"], 1),
+        (np.zeros(2), ["a"], 1),
+        (np.zeros(1), ["a"], 0),
+    ],
+)
 def test_invalid_rank_inputs_fail_closed(scores, ids, k):
     with pytest.raises(ValueError):
         top_k_indices(scores, ids, k)

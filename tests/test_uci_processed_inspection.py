@@ -6,11 +6,17 @@ from scripts.campaign_20261031.inspect_uci_data import download, inspect_table
 
 
 def metadata():
-    return {"num_instances": 2, "num_features": 1, "missing_values_symbol": "?",
-            "target_col": ["label"], "index_col": None, "variables": [
-                {"name": "age", "role": "Feature", "type": "Integer", "units": "years"},
-                {"name": "label", "role": "Target", "type": "Categorical"},
-            ]}
+    return {
+        "num_instances": 2,
+        "num_features": 1,
+        "missing_values_symbol": "?",
+        "target_col": ["label"],
+        "index_col": None,
+        "variables": [
+            {"name": "age", "role": "Feature", "type": "Integer", "units": "years"},
+            {"name": "label", "role": "Target", "type": "Categorical"},
+        ],
+    }
 
 
 def test_missingness_and_nonfinite_remain_distinct_and_raw_is_untouched(tmp_path):
@@ -24,7 +30,15 @@ def test_missingness_and_nonfinite_remain_distinct_and_raw_is_untouched(tmp_path
     assert path.read_text() == content
 
 
-@pytest.mark.parametrize("content", ["<html>blocked</html>", "age,label\n2,A\n", "age,label\nwrong,A\n4,B\n", "age,label\n3,A,extra\n4,B\n"])
+@pytest.mark.parametrize(
+    "content",
+    [
+        "<html>blocked</html>",
+        "age,label\n2,A\n",
+        "age,label\nwrong,A\n4,B\n",
+        "age,label\n3,A,extra\n4,B\n",
+    ],
+)
 def test_inaccessible_or_malformed_tables_fail(tmp_path, content):
     path = tmp_path / "source.csv"
     path.write_text(content)

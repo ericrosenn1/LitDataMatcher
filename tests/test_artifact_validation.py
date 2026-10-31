@@ -75,8 +75,7 @@ def test_validate_artifacts_treats_empty_provenance_json_as_empty(tmp_path):
     assert review_csv["with_provenance"] == 0
     assert review_csv["empty_provenance"] == 1
     assert any(
-        issue["category"] == "review_dataset_provenance_hidden"
-        for issue in summary["issues"]
+        issue["category"] == "review_dataset_provenance_hidden" for issue in summary["issues"]
     )
 
 
@@ -128,10 +127,7 @@ def test_validate_artifacts_warns_on_sqlite_jsonl_count_mismatch(tmp_path):
     assert summary["status"] == "needs_review"
     assert summary["sqlite_consistency"]["tables"]["questions"]["sqlite_records"] == 2
     assert summary["sqlite_consistency"]["tables"]["questions"]["artifact_records"] == 1
-    assert any(
-        issue["category"] == "sqlite_artifact_count_mismatch"
-        for issue in summary["issues"]
-    )
+    assert any(issue["category"] == "sqlite_artifact_count_mismatch" for issue in summary["issues"])
 
 
 def _write_minimal_run(run_dir):
@@ -169,9 +165,13 @@ def _write_minimal_run(run_dir):
     review = {
         "match_id": "match-1",
         "source_provenance": [provenance],
-        "source_caveats": ["Default offline catalog metadata should be verified against source repositories before publication use."],
+        "source_caveats": [
+            "Default offline catalog metadata should be verified against source repositories before publication use."
+        ],
         "dataset_source_provenance": [provenance],
-        "dataset_source_caveats": ["Default offline catalog metadata should be verified against source repositories before publication use."],
+        "dataset_source_caveats": [
+            "Default offline catalog metadata should be verified against source repositories before publication use."
+        ],
         "match": match,
     }
     write_jsonl(run_dir / "questions.jsonl", [question])
@@ -188,7 +188,9 @@ def _write_minimal_run(run_dir):
                 "source_types": {"curated_biomedical_catalog": 1},
                 "content_scopes": {"dataset_metadata": 1},
                 "acquisition_methods": {"bundled_curated_catalog": 1},
-                "review_caveats": {"metadata-only records should not be treated as direct evidence": 1},
+                "review_caveats": {
+                    "metadata-only records should not be treated as direct evidence": 1
+                },
             }
         ),
         encoding="utf-8",

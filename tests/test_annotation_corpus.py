@@ -148,9 +148,7 @@ def test_annotation_export_reports_reviewer_agreement(tmp_path):
 
     agreement = json.loads((tmp_path / "labels_out" / "agreement_summary.json").read_text())
     adjudication = read_jsonl(tmp_path / "labels_out" / "adjudication_needed.jsonl")
-    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(
-        encoding="utf-8"
-    )
+    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(encoding="utf-8")
 
     assert agreement["reviewer_count"] == 2
     assert agreement["schema_version"] == AGREEMENT_SCHEMA_VERSION
@@ -198,9 +196,7 @@ def test_annotation_export_reports_reviewer_disagreement_for_adjudication(tmp_pa
 
     agreement = json.loads((tmp_path / "labels_out" / "agreement_summary.json").read_text())
     adjudication = read_jsonl(tmp_path / "labels_out" / "adjudication_needed.jsonl")
-    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(
-        encoding="utf-8"
-    )
+    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(encoding="utf-8")
 
     assert agreement["reviewer_pairs"][0]["overlap_count"] == 1
     assert agreement["reviewer_pairs"][0]["disagreement_count"] == 1
@@ -367,9 +363,7 @@ def test_annotation_export_skips_malformed_and_missing_labeled_rows(tmp_path):
 
     match_labels = read_jsonl(tmp_path / "labels_out" / "question_data_match_labels.jsonl")
     skipped = read_jsonl(tmp_path / "labels_out" / "skipped_rows.jsonl")
-    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(
-        encoding="utf-8"
-    )
+    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(encoding="utf-8")
     skip_codes = {row["code"] for row in skipped}
 
     assert len(match_labels) == 1
@@ -426,9 +420,7 @@ def test_annotation_export_detects_duplicates_and_conflicts(tmp_path):
     duplicates = read_jsonl(tmp_path / "labels_out" / "duplicates.jsonl")
     conflicts = read_jsonl(tmp_path / "labels_out" / "conflicts.jsonl")
     skipped = read_jsonl(tmp_path / "labels_out" / "skipped_rows.jsonl")
-    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(
-        encoding="utf-8"
-    )
+    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(encoding="utf-8")
 
     assert len(match_labels) == 2
     assert duplicates[0]["code"] == "duplicate_row"

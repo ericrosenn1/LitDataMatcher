@@ -52,7 +52,12 @@ def _stat_identity(path):
         return None
     stat = path.stat()
     if path.is_dir():
-        return ("directory", tuple(sorted(str(item.relative_to(path)) for item in path.rglob("*") if item.is_file())))
+        return (
+            "directory",
+            tuple(
+                sorted(str(item.relative_to(path)) for item in path.rglob("*") if item.is_file())
+            ),
+        )
     return ("file", stat.st_size, stat.st_mtime_ns)
 
 
@@ -63,17 +68,33 @@ class AnalysisSession:
     stat checks protect every case boundary. Per-case documents are hashed anew.
     """
 
-    def __init__(self, root, model_dir, embedding_dir, *, device="cpu", vector_cache=None, runtime_config=None, runtime_qualification=None):
-        self.root, self.model_dir, self.embedding_dir = (Path(path).resolve() for path in (root, model_dir, embedding_dir))
+    def __init__(
+        self,
+        root,
+        model_dir,
+        embedding_dir,
+        *,
+        device="cpu",
+        vector_cache=None,
+        runtime_config=None,
+        runtime_qualification=None,
+    ):
+        self.root, self.model_dir, self.embedding_dir = (
+            Path(path).resolve() for path in (root, model_dir, embedding_dir)
+        )
         self.device = device
         self.vector_cache = str(Path(vector_cache).resolve()) if vector_cache else None
         self.runtime_config = runtime_configuration(device, runtime_config)
-        self.runtime_qualification = str(Path(runtime_qualification).resolve()) if runtime_qualification else None
+        self.runtime_qualification = (
+            str(Path(runtime_qualification).resolve()) if runtime_qualification else None
+        )
         if self.runtime_qualification and not Path(self.runtime_qualification).is_file():
             raise ValueError("Explicit runtime qualification must be an existing file")
         self._base = analysis_fingerprint(self.root, self.model_dir, self.embedding_dir, {})
         self._base["runtime_environment"] = runtime_environment()
-        self._base["qualification_override"] = file_identity(self.runtime_qualification) if self.runtime_qualification else None
+        self._base["qualification_override"] = (
+            file_identity(self.runtime_qualification) if self.runtime_qualification else None
+        )
         self._stats = {path: _stat_identity(path) for path in _identity_paths(self._base)}
         self._owner = threading.get_ident()
         self._process = os.getpid()
@@ -84,9 +105,17 @@ class AnalysisSession:
         self._closed = False
 
     def _config_digest(self):
-        return digest({"root": str(self.root), "model": str(self.model_dir), "embeddings": str(self.embedding_dir),
-                       "device": self.device, "vector_cache": self.vector_cache, "runtime_config": self.runtime_config,
-                       "runtime_qualification": self.runtime_qualification})
+        return digest(
+            {
+                "root": str(self.root),
+                "model": str(self.model_dir),
+                "embeddings": str(self.embedding_dir),
+                "device": self.device,
+                "vector_cache": self.vector_cache,
+                "runtime_config": self.runtime_config,
+                "runtime_qualification": self.runtime_qualification,
+            }
+        )
 
     def validate_unchanged(self, *, full=False):
         if self._closed:
@@ -100,21 +129,30 @@ class AnalysisSession:
         if full:
             current = analysis_fingerprint(self.root, self.model_dir, self.embedding_dir, {})
             current["runtime_environment"] = runtime_environment()
-            current["qualification_override"] = file_identity(self.runtime_qualification) if self.runtime_qualification else None
+            current["qualification_override"] = (
+                file_identity(self.runtime_qualification) if self.runtime_qualification else None
+            )
             if current != self._base:
                 raise ValueError("Session content fingerprint changed")
 
     @contextmanager
     def claim(self, root, model_dir, embedding_dir, parameters):
-        if os.getpid() != self._process or threading.get_ident() != self._owner or not self._lock.acquire(blocking=False):
+        if (
+            os.getpid() != self._process
+            or threading.get_ident() != self._owner
+            or not self._lock.acquire(blocking=False)
+        ):
             raise OwnershipConflict("Analysis session requires its original serial owner")
         try:
             actual = tuple(str(Path(path).resolve()) for path in (root, model_dir, embedding_dir))
             expected = tuple(str(path) for path in (self.root, self.model_dir, self.embedding_dir))
-            if (actual != expected or parameters.get("device") != self.device
-                    or parameters.get("vector_cache") != self.vector_cache
-                    or parameters.get("runtime_config") != self.runtime_config
-                    or parameters.get("runtime_qualification") != self.runtime_qualification):
+            if (
+                actual != expected
+                or parameters.get("device") != self.device
+                or parameters.get("vector_cache") != self.vector_cache
+                or parameters.get("runtime_config") != self.runtime_config
+                or parameters.get("runtime_qualification") != self.runtime_qualification
+            ):
                 raise ValueError("Analysis session configuration identity mismatch")
             self.validate_unchanged()
             yield self
@@ -126,27 +164,41 @@ class AnalysisSession:
         self.validate_unchanged()
         value = deepcopy(self._base)
         value["parameters"] = deepcopy(parameters)
-        value["document"] = file_identity(parameters["document_path"]) if parameters.get("document_path") else None
+        value["document"] = (
+            file_identity(parameters["document_path"]) if parameters.get("document_path") else None
+        )
         return value
 
     @property
     def runtime(self):
-        if os.getpid() != self._process or threading.get_ident() != self._owner or not self._lock.locked():
+        if (
+            os.getpid() != self._process
+            or threading.get_ident() != self._owner
+            or not self._lock.locked()
+        ):
             raise OwnershipConflict("Runtime access requires an active serial session claim")
         if self._runtime is None:
             from .semantic_runtime import LocalSemanticRuntime, RuntimeConfig
 
-            self._runtime = LocalSemanticRuntime(self.model_dir, RuntimeConfig(**self.runtime_config))
+            self._runtime = LocalSemanticRuntime(
+                self.model_dir, RuntimeConfig(**self.runtime_config)
+            )
         return self._runtime
 
     def retriever(self, records):
-        if os.getpid() != self._process or threading.get_ident() != self._owner or not self._lock.locked():
+        if (
+            os.getpid() != self._process
+            or threading.get_ident() != self._owner
+            or not self._lock.locked()
+        ):
             raise OwnershipConflict("Retriever access requires an active serial session claim")
         if self._retriever is None:
             if self.vector_cache:
                 from .retrieval import CachedSemanticIndex
 
-                self._retriever = CachedSemanticIndex(self.embedding_dir, self.vector_cache, device=self.device)
+                self._retriever = CachedSemanticIndex(
+                    self.embedding_dir, self.vector_cache, device=self.device
+                )
             else:
                 from .semantic_runtime import PretrainedSemanticIndex
 

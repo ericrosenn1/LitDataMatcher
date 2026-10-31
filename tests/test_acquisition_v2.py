@@ -7,7 +7,16 @@ import pytest
 import requests
 import numpy as np
 
-from litdatamatcher.acquisition_v2 import DeferredRetry, SnapshotClient, StageLease, align_same_study_partitions, parse_article, parse_series_matrix, profile_capabilities, sync_targeted_studies
+from litdatamatcher.acquisition_v2 import (
+    DeferredRetry,
+    SnapshotClient,
+    StageLease,
+    align_same_study_partitions,
+    parse_article,
+    parse_series_matrix,
+    profile_capabilities,
+    sync_targeted_studies,
+)
 
 
 class Response:
@@ -43,13 +52,17 @@ class Session:
 
 
 def test_retry_after_transient_and_network_free_replay(tmp_path, monkeypatch):
-    session = Session(Response(429, headers={"Retry-After": "1"}), Response(503), Response(content=b'{"ok":true}'))
+    session = Session(
+        Response(429, headers={"Retry-After": "1"}), Response(503), Response(content=b'{"ok":true}')
+    )
     delays = []
     client = SnapshotClient(tmp_path, session=session, sleep=delays.append)
     data, meta = client.get("https://example.test/resource")
     assert data == b'{"ok":true}' and meta["attempts"] == 3
     assert delays == [1, 4]
-    monkeypatch.setattr(requests, "Session", lambda: pytest.fail("offline attempted network session"))
+    monkeypatch.setattr(
+        requests, "Session", lambda: pytest.fail("offline attempted network session")
+    )
     assert SnapshotClient(tmp_path, offline=True).get("https://example.test/resource")[0] == data
     assert len(list((tmp_path / "objects").iterdir())) == 1
 
@@ -57,15 +70,23 @@ def test_retry_after_transient_and_network_free_replay(tmp_path, monkeypatch):
 def test_retry_after_long_and_http_date_honored_or_deferred(tmp_path):
     delays = []
     session = Session(Response(429, headers={"Retry-After": "30"}), Response())
-    SnapshotClient(tmp_path / "numeric", session=session, sleep=delays.append).get("https://example.test/a")
+    SnapshotClient(tmp_path / "numeric", session=session, sleep=delays.append).get(
+        "https://example.test/a"
+    )
     assert delays == [30]
     session = Session(Response(429, headers={"Retry-After": "120"}), Response())
     with pytest.raises(DeferredRetry, match="next_eligible_at") as error:
-        SnapshotClient(tmp_path / "defer", session=session, sleep=delays.append, clock=lambda: 0).get("https://example.test/a")
+        SnapshotClient(
+            tmp_path / "defer", session=session, sleep=delays.append, clock=lambda: 0
+        ).get("https://example.test/a")
     assert error.value.next_eligible_at == "1970-01-01T00:02:00+00:00"
     assert session.calls == 1
-    session = Session(Response(503, headers={"Retry-After": "Thu, 01 Jan 1970 00:00:40 GMT"}), Response())
-    SnapshotClient(tmp_path / "date", session=session, sleep=delays.append, clock=lambda: 10).get("https://example.test/a")
+    session = Session(
+        Response(503, headers={"Retry-After": "Thu, 01 Jan 1970 00:00:40 GMT"}), Response()
+    )
+    SnapshotClient(tmp_path / "date", session=session, sleep=delays.append, clock=lambda: 10).get(
+        "https://example.test/a"
+    )
     assert delays == [30, 30]
 
 
@@ -81,7 +102,12 @@ def test_stage_lease_prevents_duplicate_writers_and_releases(tmp_path):
 def test_killed_writer_os_lease_can_resume(tmp_path):
     path = tmp_path / "interrupted.lock"
     script = "import sys,time;from litdatamatcher.acquisition_v2 import StageLease\nwith StageLease(sys.argv[1]):\n print('locked',flush=True)\n time.sleep(30)\n"
-    process = subprocess.Popen([sys.executable, "-c", script, str(path)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(
+        [sys.executable, "-c", script, str(path)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
     try:
         assert process.stdout.readline().strip() == "locked"
         with pytest.raises(RuntimeError, match="already has a writer"):
@@ -96,7 +122,9 @@ def test_killed_writer_os_lease_can_resume(tmp_path):
 
 def test_interrupted_download_never_installs_partial_object(tmp_path):
     session = Session(Response(content=b"partial", interrupted=True), Response(content=b"complete"))
-    data, _ = SnapshotClient(tmp_path, session=session, sleep=lambda x: None).get("https://example.test/file")
+    data, _ = SnapshotClient(tmp_path, session=session, sleep=lambda x: None).get(
+        "https://example.test/file"
+    )
     assert data == b"complete"
     assert [p.read_bytes() for p in (tmp_path / "objects").iterdir()] == [b"complete"]
 
@@ -130,7 +158,7 @@ def test_limit_and_permanent_error_are_not_retried(tmp_path):
     assert not (tmp_path / "objects").exists()
 
 
-MATRIX = '''!Sample_geo_accession\t"GSM1"\t"GSM2"
+MATRIX = """!Sample_geo_accession\t"GSM1"\t"GSM2"
 !Sample_title\t"donor99 LPS control"\t"donor98 treatment"
 !Sample_characteristics_ch1\t"treatment: vehicle"\t"treatment: LPS"
 !Sample_organism_ch1\t"Homo sapiens"\t"Homo sapiens"
@@ -139,7 +167,7 @@ MATRIX = '''!Sample_geo_accession\t"GSM1"\t"GSM2"
 "gene1"\t1\t2
 "gene2"\tNA\t3
 !series_matrix_table_end
-'''
+"""
 
 
 def test_matrix_actual_values_alignment_and_unknown_donors():
@@ -157,22 +185,28 @@ def test_matrix_actual_values_alignment_and_unknown_donors():
 
 
 def test_matrix_mismatch_nonfinite_and_metadata_only_are_not_pass():
-    _, bad = parse_series_matrix(MATRIX.replace('"ID_REF"\t"GSM1"\t"GSM2"', '"ID_REF"\t"GSM2"\t"GSM1"').encode(), "GSE1")
+    _, bad = parse_series_matrix(
+        MATRIX.replace('"ID_REF"\t"GSM1"\t"GSM2"', '"ID_REF"\t"GSM2"\t"GSM1"').encode(), "GSE1"
+    )
     assert bad["status"] != "PASS"
-    _, bad = parse_series_matrix(MATRIX.replace('"gene1"\t1\t2', '"gene1"\tinf\t2').encode(), "GSE1")
+    _, bad = parse_series_matrix(
+        MATRIX.replace('"gene1"\t1\t2', '"gene1"\tinf\t2').encode(), "GSE1"
+    )
     assert bad["status"] != "PASS" and bad["invalid_cells"] == 1
-    _, metadata = parse_series_matrix(MATRIX.split("!series_matrix_table_begin")[0].encode(), "GSE1")
+    _, metadata = parse_series_matrix(
+        MATRIX.split("!series_matrix_table_begin")[0].encode(), "GSE1"
+    )
     assert not metadata["processed_measurements_present"]
     assert metadata["status"] != "PASS"
 
 
 def test_paragraph_spans_recover_qualifiers_without_duplication():
     paragraph = "Treatment did not increase expression. " * 10
-    xml = f'<article><body><sec><title>Results</title><p>{paragraph}</p><sec><title>Null findings</title><p>Unknown donor linkage.</p></sec></sec></body></article>'.encode()
+    xml = f"<article><body><sec><title>Results</title><p>{paragraph}</p><sec><title>Null findings</title><p>Unknown donor linkage.</p></sec></sec></body></article>".encode()
     result = parse_article(xml)
     assert len(result["sections"]) == 2
     for span in result["sections"]:
-        assert result["text"][span["start"]:span["end"]] == span["text"]
+        assert result["text"][span["start"] : span["end"]] == span["text"]
     assert result["text"].count("Unknown donor linkage.") == 1
     with pytest.raises(ValueError, match="body missing"):
         parse_article(b"<article><front/></article>")
@@ -180,7 +214,12 @@ def test_paragraph_spans_recover_qualifiers_without_duplication():
 
 def test_exact_alignment_preserves_values_and_missingness_and_rejects_invalid():
     base = {"study_id": "GSE1", "units_contract": "same array units", "source_matrix_sha256": "a"}
-    p1 = {**base, "feature_ids": ["b", "a"], "sample_ids": ["s1"], "values": [[2.0], [float("nan")]]}
+    p1 = {
+        **base,
+        "feature_ids": ["b", "a"],
+        "sample_ids": ["s1"],
+        "values": [[2.0], [float("nan")]],
+    }
     p2 = {**base, "feature_ids": ["a", "b"], "sample_ids": ["s2"], "values": [[3.0], [4.0]]}
     aligned = align_same_study_partitions([p2, p1], ["a", "b"], ["s1", "s2"])
     assert np.array_equal(aligned, [[float("nan"), 3], [2, 4]], equal_nan=True)
@@ -192,10 +231,14 @@ def test_exact_alignment_preserves_values_and_missingness_and_rejects_invalid():
     with pytest.raises(ValueError, match="missing sample"):
         align_same_study_partitions([p1], ["a", "b"], ["s1", "s2"])
     with pytest.raises(ValueError, match="feature"):
-        align_same_study_partitions([p1, {**p2, "feature_ids": ["c", "b"]}], ["a", "b"], ["s1", "s2"])
+        align_same_study_partitions(
+            [p1, {**p2, "feature_ids": ["c", "b"]}], ["a", "b"], ["s1", "s2"]
+        )
 
 
-def test_targeted_acquisition_does_not_contaminate_catalog_and_propagates_reserve(tmp_path, monkeypatch):
+def test_targeted_acquisition_does_not_contaminate_catalog_and_propagates_reserve(
+    tmp_path, monkeypatch
+):
     def fixture_get(client, url, params=None):
         if params:
             accession = params["acc"]
@@ -203,6 +246,7 @@ def test_targeted_acquisition_does_not_contaminate_catalog_and_propagates_reserv
         else:
             raw = b"<html>no matrix files</html>"
         return raw, {"sha256": "fixture", "object_path": "fixture"}
+
     monkeypatch.setattr(SnapshotClient, "get", fixture_get)
     catalog = tmp_path / "catalog"
     catalog.mkdir()

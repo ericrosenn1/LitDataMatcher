@@ -35,9 +35,16 @@ def file_hash(path: Path) -> str:
 def validate_source_url(url: str, accession: str) -> None:
     parsed = urlsplit(url)
     expected = rf"/geo/series/GSE\d+nnn/{re.escape(accession)}/matrix/{re.escape(accession)}(?:-GPL\d+)?_series_matrix\.txt\.gz"
-    if (parsed.scheme != "https" or parsed.netloc != "ftp.ncbi.nlm.nih.gov"
-            or parsed.query or parsed.fragment or not re.fullmatch(expected, parsed.path)):
-        raise ValueError("Only accession-matched primary GEO processed series matrices are supported")
+    if (
+        parsed.scheme != "https"
+        or parsed.netloc != "ftp.ncbi.nlm.nih.gov"
+        or parsed.query
+        or parsed.fragment
+        or not re.fullmatch(expected, parsed.path)
+    ):
+        raise ValueError(
+            "Only accession-matched primary GEO processed series matrices are supported"
+        )
 
 
 def download_matrix(url: str, accession: str, destination: Path, remaining_bytes: int) -> dict:
@@ -49,11 +56,18 @@ def download_matrix(url: str, accession: str, destination: Path, remaining_bytes
     temporary = destination.with_suffix(destination.suffix + ".part")
     digest, count = hashlib.sha256(), 0
     try:
-        with requests.get(url, stream=True, timeout=(10, 45), headers={"User-Agent": "LitDataMatcher/0.4 processed-data inspection"}) as response:
+        with requests.get(
+            url,
+            stream=True,
+            timeout=(10, 45),
+            headers={"User-Agent": "LitDataMatcher/0.4 processed-data inspection"},
+        ) as response:
             response.raise_for_status()
             validate_source_url(response.url, accession)
             if response.headers.get("Content-Encoding", "identity").lower() != "identity":
-                raise ValueError("Unexpected HTTP content encoding; raw-file identity would be ambiguous")
+                raise ValueError(
+                    "Unexpected HTTP content encoding; raw-file identity would be ambiguous"
+                )
             expected_size = int(response.headers.get("Content-Length", "0"))
             if expected_size > remaining_bytes:
                 raise ValueError("Source file exceeds remaining compressed download budget")
@@ -66,11 +80,21 @@ def download_matrix(url: str, accession: str, destination: Path, remaining_bytes
                     handle.write(block)
             if count == 0 or (expected_size and count != expected_size):
                 raise ValueError("Empty or incomplete source download")
-            response_metadata = {"http_status": response.status_code, "content_type": response.headers.get("Content-Type"),
-                                 "last_modified": response.headers.get("Last-Modified"), "final_url": response.url}
+            response_metadata = {
+                "http_status": response.status_code,
+                "content_type": response.headers.get("Content-Type"),
+                "last_modified": response.headers.get("Last-Modified"),
+                "final_url": response.url,
+            }
         temporary.replace(destination)
-        return {"accession": accession, "url": url, "downloaded_utc": datetime.now(timezone.utc).isoformat(),
-                "compressed_bytes": count, "source_sha256": digest.hexdigest(), **response_metadata}
+        return {
+            "accession": accession,
+            "url": url,
+            "downloaded_utc": datetime.now(timezone.utc).isoformat(),
+            "compressed_bytes": count,
+            "source_sha256": digest.hexdigest(),
+            **response_metadata,
+        }
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -105,7 +129,11 @@ def inspect_matrix(path: Path, *, max_decoded_bytes: int = 800 * 1024 * 1024) ->
             values = next(csv.reader([line], delimiter="\t", quotechar='"'))
             if in_table:
                 if header is None:
-                    if len(values) < 2 or values[0] != "ID_REF" or len(set(values[1:])) != len(values) - 1:
+                    if (
+                        len(values) < 2
+                        or values[0] != "ID_REF"
+                        or len(set(values[1:])) != len(values) - 1
+                    ):
                         raise ValueError("Unsupported or duplicate sample column headers")
                     header = values
                     continue
@@ -139,22 +167,46 @@ def inspect_matrix(path: Path, *, max_decoded_bytes: int = 800 * 1024 * 1024) ->
     accessions = sample_fields.get("Sample_geo_accession", [])
     if accessions and (len(accessions) != 1 or accessions[0] != header[1:]):
         raise ValueError("Reported sample accessions disagree with matrix columns")
-    metadata_width_issues = {key: [len(row) for row in rows if len(row) != len(header) - 1]
-                             for key, rows in sample_fields.items()}
+    metadata_width_issues = {
+        key: [len(row) for row in rows if len(row) != len(header) - 1]
+        for key, rows in sample_fields.items()
+    }
     metadata_width_issues = {key: value for key, value in metadata_width_issues.items() if value}
-    characteristic_labels = sorted({cell.split(":", 1)[0].strip() for key, rows in sample_fields.items()
-                                    if key.startswith("Sample_characteristics") for row in rows for cell in row if ":" in cell})
-    return {"status": "PARSED", "format": "GEO series matrix", "source_sha256": file_hash(path),
-            "features": len(feature_ids), "sample_columns": len(header) - 1, "cells": cells,
-            "finite_numeric_cells": finite, "missing_cells": missing, "nonfinite_cells": nonfinite,
-            "finite_value_min": minimum, "finite_value_max": maximum,
-            "feature_id_examples": sorted(feature_ids)[:5], "sample_ids": header[1:],
-            "reported_characteristic_labels": characteristic_labels, "sample_metadata_fields": sample_fields,
-            "series_metadata_fields": series_fields, "metadata_width_issues": metadata_width_issues,
-            "derived_summary_not_source_claim": True,
-            "limitations": ["Feature rows and sample columns are observed matrix dimensions, not independent genes or donors.",
-                            "Values retain their source processing and units; no normalization, imputation, or power analysis was performed.",
-                            "Public file access does not itself establish a redistribution license or participant-consent clearance."]}
+    characteristic_labels = sorted(
+        {
+            cell.split(":", 1)[0].strip()
+            for key, rows in sample_fields.items()
+            if key.startswith("Sample_characteristics")
+            for row in rows
+            for cell in row
+            if ":" in cell
+        }
+    )
+    return {
+        "status": "PARSED",
+        "format": "GEO series matrix",
+        "source_sha256": file_hash(path),
+        "features": len(feature_ids),
+        "sample_columns": len(header) - 1,
+        "cells": cells,
+        "finite_numeric_cells": finite,
+        "missing_cells": missing,
+        "nonfinite_cells": nonfinite,
+        "finite_value_min": minimum,
+        "finite_value_max": maximum,
+        "feature_id_examples": sorted(feature_ids)[:5],
+        "sample_ids": header[1:],
+        "reported_characteristic_labels": characteristic_labels,
+        "sample_metadata_fields": sample_fields,
+        "series_metadata_fields": series_fields,
+        "metadata_width_issues": metadata_width_issues,
+        "derived_summary_not_source_claim": True,
+        "limitations": [
+            "Feature rows and sample columns are observed matrix dimensions, not independent genes or donors.",
+            "Values retain their source processing and units; no normalization, imputation, or power analysis was performed.",
+            "Public file access does not itself establish a redistribution license or participant-consent clearance.",
+        ],
+    }
 
 
 def build_inspections(out: Path, *, max_total_bytes: int = MAX_TOTAL_BYTES) -> dict:
@@ -170,22 +222,44 @@ def build_inspections(out: Path, *, max_total_bytes: int = MAX_TOTAL_BYTES) -> d
             downloaded = download_matrix(url, accession, path, max_total_bytes - used)
             used += downloaded["compressed_bytes"]
             inspection = inspect_matrix(path)
-            (out / f"{accession}_inspection.json").write_text(json.dumps(inspection, indent=2, ensure_ascii=True), encoding="utf-8")
-            results.append({**downloaded, "status": "PASS", "record_url": f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={accession}",
-                            "features": inspection["features"], "sample_columns": inspection["sample_columns"],
-                            "missing_cells": inspection["missing_cells"], "nonfinite_cells": inspection["nonfinite_cells"],
-                            "license_status": "NOT_ESTABLISHED_FROM_MATRIX", "access_status": "PUBLIC_FILE_RETRIEVED"})
+            (out / f"{accession}_inspection.json").write_text(
+                json.dumps(inspection, indent=2, ensure_ascii=True), encoding="utf-8"
+            )
+            results.append(
+                {
+                    **downloaded,
+                    "status": "PASS",
+                    "record_url": f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={accession}",
+                    "features": inspection["features"],
+                    "sample_columns": inspection["sample_columns"],
+                    "missing_cells": inspection["missing_cells"],
+                    "nonfinite_cells": inspection["nonfinite_cells"],
+                    "license_status": "NOT_ESTABLISHED_FROM_MATRIX",
+                    "access_status": "PUBLIC_FILE_RETRIEVED",
+                }
+            )
         except (OSError, ValueError, requests.RequestException) as exc:
-            results.append({"accession": accession, "url": url, "status": "FAIL", "error": str(exc)})
+            results.append(
+                {"accession": accession, "url": url, "status": "FAIL", "error": str(exc)}
+            )
             if not path.exists():
                 # A failed transport can consume bytes without producing a file.
                 # Stop rather than underestimate the remaining network budget.
                 break
-    manifest = {"schema_version": "processed-matrix-inspection-v1", "status": "PASS" if all(row["status"] == "PASS" for row in results) else "PARTIAL_OR_FAIL",
-                "created_utc": datetime.now(timezone.utc).isoformat(), "compressed_bytes_downloaded": used,
-                "max_total_bytes": max_total_bytes, "sources": results,
-                "analysis_scope": "Observed processed matrix dimensions/missingness and reported sample metadata only; no scientific feasibility or independence claim",
-                "outputs": [{"path": path.name, "bytes": path.stat().st_size, "sha256": file_hash(path)} for path in sorted(out.iterdir()) if path.is_file()]}
+    manifest = {
+        "schema_version": "processed-matrix-inspection-v1",
+        "status": "PASS" if all(row["status"] == "PASS" for row in results) else "PARTIAL_OR_FAIL",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "compressed_bytes_downloaded": used,
+        "max_total_bytes": max_total_bytes,
+        "sources": results,
+        "analysis_scope": "Observed processed matrix dimensions/missingness and reported sample metadata only; no scientific feasibility or independence claim",
+        "outputs": [
+            {"path": path.name, "bytes": path.stat().st_size, "sha256": file_hash(path)}
+            for path in sorted(out.iterdir())
+            if path.is_file()
+        ],
+    }
     (out / "INSPECTION_MANIFEST.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest
 

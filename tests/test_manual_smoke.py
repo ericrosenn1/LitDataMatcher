@@ -62,9 +62,7 @@ def test_manual_smoke_excludes_local_helper_files(tmp_path):
     for path in (paper, readme, inventory, instructions):
         path.write_text("Future studies should examine microbiome recovery.", encoding="utf-8")
 
-    kept, excluded = filter_manual_smoke_input_files(
-        [paper, readme, inventory, instructions]
-    )
+    kept, excluded = filter_manual_smoke_input_files([paper, readme, inventory, instructions])
 
     assert kept == [paper]
     assert sorted(path.name for path in excluded) == [

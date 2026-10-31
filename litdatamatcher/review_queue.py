@@ -23,10 +23,9 @@ def write_daily_review_queue(
     run_dir = Path(run_dir)
     out_path = Path(out_path)
     review_date = review_date or date.today().isoformat()
-    matches = [
-        MatchCandidate.from_dict(row)
-        for row in read_jsonl(run_dir / "matches.jsonl")
-    ][: max(0, int(limit))]
+    matches = [MatchCandidate.from_dict(row) for row in read_jsonl(run_dir / "matches.jsonl")][
+        : max(0, int(limit))
+    ]
     rows = match_review_rows(matches)
     for row in rows:
         row["reviewer_id"] = reviewer_id

@@ -157,8 +157,7 @@ def test_literature_preserves_limitation_and_infers_fallback_fields():
     assert len(questions) == 1
     question = questions[0]
     assert question.question == (
-        "Can the reported finding be validated with larger, better-balanced "
-        "labeled samples?"
+        "Can the reported finding be validated with larger, better-balanced labeled samples?"
     )
     assert "sample_size" in question.required_variables
     assert "class_label" in question.required_variables
@@ -243,9 +242,7 @@ def test_score_question_dataset_penalizes_missing_variables_and_reports_rational
     complete_score, _complete_rationale, complete_missing, _ = score_question_dataset(
         question, complete
     )
-    sparse_score, sparse_rationale, sparse_missing, _ = score_question_dataset(
-        question, sparse
-    )
+    sparse_score, sparse_rationale, sparse_missing, _ = score_question_dataset(question, sparse)
 
     assert complete_missing == []
     assert "antibiotic_exposure" in sparse_missing
@@ -290,9 +287,7 @@ def test_score_question_dataset_returns_stable_assessment_payload():
         ["antibiotic_exposure", "microbiome_composition", "timepoint"],
     )
 
-    _score, _rationale, _missing, assessments = score_question_dataset(
-        question, dataset
-    )
+    _score, _rationale, _missing, assessments = score_question_dataset(question, dataset)
 
     assert set(assessments) == {
         "feasibility",
@@ -300,18 +295,12 @@ def test_score_question_dataset_returns_stable_assessment_payload():
         "capability_support",
         "modality_contract",
     }
-    assert {"overall", "variable_coverage", "recommended_design"} <= set(
-        assessments["feasibility"]
-    )
-    assert {"reuse_score", "license_score", "risk_flags"} <= set(
-        assessments["governance"]
-    )
+    assert {"overall", "variable_coverage", "recommended_design"} <= set(assessments["feasibility"])
+    assert {"reuse_score", "license_score", "risk_flags"} <= set(assessments["governance"])
     assert {"direct_capabilities", "missing_capabilities", "answerability_class"} <= set(
         assessments["capability_support"]
     )
-    assert {"status", "contract", "required_modality"} <= set(
-        assessments["modality_contract"]
-    )
+    assert {"status", "contract", "required_modality"} <= set(assessments["modality_contract"])
 
 
 def test_ranking_uses_synthesis_strength_and_respects_top_n():
@@ -339,9 +328,7 @@ def test_ranking_uses_synthesis_strength_and_respects_top_n():
         uncertainty=0.1,
     )
 
-    matches = rank_matches(
-        [question], datasets, {question.question_id: synthesis}, top_n=1
-    )
+    matches = rank_matches([question], datasets, {question.question_id: synthesis}, top_n=1)
 
     assert len(matches) == 1
     assert matches[0].dataset.dataset_id == "strong"

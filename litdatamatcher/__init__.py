@@ -24,7 +24,11 @@ from .schemas import (
     QuestionQualityScore,
     stable_id,
 )
-from .capability_registry import DEFAULT_DERIVED_RULES, capability_summary, infer_dataset_capabilities
+from .capability_registry import (
+    DEFAULT_DERIVED_RULES,
+    capability_summary,
+    infer_dataset_capabilities,
+)
 from .ontology import normalize_variable_name
 
 __all__ = [

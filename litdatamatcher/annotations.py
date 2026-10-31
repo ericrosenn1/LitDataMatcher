@@ -238,9 +238,7 @@ def export_annotation_corpus(
         f"{pair['reviewer_a']}|{pair['reviewer_b']}": pair["overlap_count"]
         for pair in agreement_summary.get("reviewer_pairs", [])
     }
-    summary["unresolved_adjudication_count"] = agreement_summary.get(
-        "adjudication_needed_count", 0
-    )
+    summary["unresolved_adjudication_count"] = agreement_summary.get("adjudication_needed_count", 0)
     readiness = assess_training_readiness(
         summary,
         warnings=warning_rows,

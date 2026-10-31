@@ -138,9 +138,7 @@ def _provenance_metadata(provenance: Iterable[dict]) -> dict[str, object]:
             item.get("status", "") for item in provenance
         ),
         "source_limitations": _clean_review_list(
-            limitation
-            for item in provenance
-            for limitation in item.get("limitations", []) or []
+            limitation for item in provenance for limitation in item.get("limitations", []) or []
         ),
         "source_warnings": _clean_review_list(
             warning for item in provenance for warning in item.get("warnings", []) or []
@@ -154,9 +152,7 @@ def _question_source_metadata(match: MatchCandidate) -> dict[str, object]:
 
     question = match.question
     evidence = list(question.evidence)
-    source_ids = _clean_review_list(
-        [*question.source_ids, *(item.source_id for item in evidence)]
-    )
+    source_ids = _clean_review_list([*question.source_ids, *(item.source_id for item in evidence)])
     primary_source_id = source_ids[0] if source_ids else ""
     metadata = dict(question.metadata or {})
     source_metadata = _provenance_metadata(_question_provenance_records(metadata))
@@ -298,9 +294,7 @@ def match_review_rows(matches: Iterable[MatchCandidate]) -> list[dict]:
                 "question_source_limitations": _list_cell(source_metadata["source_limitations"]),
                 "question_source_warnings": _list_cell(source_metadata["source_warnings"]),
                 "question_source_caveats": _list_cell(source_metadata["source_caveats"]),
-                "question_source_provenance_json": _json_cell(
-                    source_metadata["source_provenance"]
-                ),
+                "question_source_provenance_json": _json_cell(source_metadata["source_provenance"]),
                 "dataset_title": match.dataset.title,
                 "dataset_source": match.dataset.source,
                 "dataset_source_types": _list_cell(dataset_source_metadata["source_types"]),
@@ -415,9 +409,7 @@ def match_review_records(matches: Iterable[MatchCandidate]) -> list[dict]:
                 "dataset_source": match.dataset.source,
                 "dataset_source_provenance": dataset_source_metadata["source_provenance"],
                 "dataset_source_types": dataset_source_metadata["source_types"],
-                "dataset_source_content_scopes": dataset_source_metadata[
-                    "source_content_scopes"
-                ],
+                "dataset_source_content_scopes": dataset_source_metadata["source_content_scopes"],
                 "dataset_source_acquisition_methods": dataset_source_metadata[
                     "source_acquisition_methods"
                 ],
@@ -812,7 +804,9 @@ def summarize_review_labels(rows: Iterable[dict]) -> dict:
         row
         for row in rows
         if str(
-            _first_review_field(row, "match_relevance", "expert_match_relevance", "expert_relevance")
+            _first_review_field(
+                row, "match_relevance", "expert_match_relevance", "expert_relevance"
+            )
         ).strip()
     ]
     question_quality = _numeric_labels(rows, "expert_question_quality")

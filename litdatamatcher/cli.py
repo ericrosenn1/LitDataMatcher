@@ -125,8 +125,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # Pipeline commands create the canonical run artifacts.
     run = subparsers.add_parser("run", help="Run the full pipeline on a JSONL literature file.")
-    run.add_argument("--input", required=True, help="JSONL file with title, abstract, text, doi fields.")
-    run.add_argument("--out", default="run", help="Output directory for JSONL, SQLite, and summary files.")
+    run.add_argument(
+        "--input", required=True, help="JSONL file with title, abstract, text, doi fields."
+    )
+    run.add_argument(
+        "--out", default="run", help="Output directory for JSONL, SQLite, and summary files."
+    )
     run.add_argument("--catalog", default=None, help="Optional JSONL dataset catalog.")
     run.add_argument("--top-n", type=int, default=100, help="Maximum ranked matches to write.")
 
@@ -134,28 +138,40 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument("--out", default="run/demo", help="Output directory for demo artifacts.")
 
     # Evaluation and review commands operate on completed run directories.
-    evaluate = subparsers.add_parser("evaluate", help="Evaluate a completed run against gold labels.")
-    evaluate.add_argument("--run-dir", required=True, help="Directory containing questions/matches JSONL.")
+    evaluate = subparsers.add_parser(
+        "evaluate", help="Evaluate a completed run against gold labels."
+    )
+    evaluate.add_argument(
+        "--run-dir", required=True, help="Directory containing questions/matches JSONL."
+    )
     evaluate.add_argument("--gold-questions", default=None, help="Gold question JSONL.")
     evaluate.add_argument("--gold-ranking", default=None, help="Gold match relevance JSONL.")
     evaluate.add_argument("--out", default=None, help="Evaluation JSONL path.")
     evaluate.add_argument("--k", type=int, default=10, help="Ranking cutoff.")
 
-    review = subparsers.add_parser("review-export", help="Export a run's matches for expert review.")
+    review = subparsers.add_parser(
+        "review-export", help="Export a run's matches for expert review."
+    )
     review.add_argument("--run-dir", required=True, help="Directory containing matches.jsonl.")
     review.add_argument("--out", required=True, help="CSV output path.")
 
-    review_summary = subparsers.add_parser("review-summary", help="Summarize completed review labels.")
+    review_summary = subparsers.add_parser(
+        "review-summary", help="Summarize completed review labels."
+    )
     review_summary.add_argument("--labels", required=True, help="CSV or JSONL review labels.")
 
     review_queue = subparsers.add_parser(
         "review-queue", help="Write a small daily scoring queue from ranked matches."
     )
-    review_queue.add_argument("--run-dir", required=True, help="Directory containing matches.jsonl.")
+    review_queue.add_argument(
+        "--run-dir", required=True, help="Directory containing matches.jsonl."
+    )
     review_queue.add_argument("--out", required=True, help="CSV or JSONL queue output path.")
     review_queue.add_argument("--limit", type=int, default=5, help="Number of matches to queue.")
     review_queue.add_argument("--reviewer-id", default="", help="Reviewer ID to prefill.")
-    review_queue.add_argument("--review-date", default=None, help="Optional YYYY-MM-DD review date.")
+    review_queue.add_argument(
+        "--review-date", default=None, help="Optional YYYY-MM-DD review date."
+    )
 
     annotations = subparsers.add_parser(
         "annotation-export", help="Export completed review labels as training JSONL."
@@ -208,7 +224,9 @@ def build_parser() -> argparse.ArgumentParser:
         "stress-demo", help="Run a deterministic synthetic corpus stress test."
     )
     stress.add_argument("--out", required=True, help="Output directory.")
-    stress.add_argument("--documents", type=int, default=25, help="Synthetic documents to generate.")
+    stress.add_argument(
+        "--documents", type=int, default=25, help="Synthetic documents to generate."
+    )
     stress.add_argument("--top-n", type=int, default=100, help="Maximum ranked matches to write.")
 
     manual_smoke = subparsers.add_parser(
@@ -328,9 +346,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "capability-export":
         datasets = [DatasetRecord.from_dict(row) for row in read_jsonl(args.datasets)]
         capabilities = [
-            capability
-            for dataset in datasets
-            for capability in infer_dataset_capabilities(dataset)
+            capability for dataset in datasets for capability in infer_dataset_capabilities(dataset)
         ]
         write_jsonl(args.out, [capability.to_dict() for capability in capabilities])
         metrics = {"out": args.out, **capability_summary(capabilities)}
@@ -384,7 +400,10 @@ def main(argv: list[str] | None = None) -> int:
 def _acquisition_status(records, output: str) -> dict:
     statuses = getattr(records, "source_statuses", [])
     failed = [row for row in statuses if row["status"] != "OBSERVED"]
-    result = {"status": ("PARTIAL" if records else "FAIL") if failed else "PASS", "source_statuses": statuses}
+    result = {
+        "status": ("PARTIAL" if records else "FAIL") if failed else "PASS",
+        "source_statuses": statuses,
+    }
     atomic_json(str(output) + ".status.json", result)
     return result
 

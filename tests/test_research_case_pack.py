@@ -17,16 +17,47 @@ def fixture_benchmark(root):
     root.mkdir()
     queries, docs = [], []
     for i in range(36):
-        queries.append({"id": f"q{i}", "query": f"Original query {i}", "positive_doc_id": f"pmid:{i+1}",
-                        "source_corpus": "A" if i % 2 else "B", "split": "development", "provenance_relative_path": "raw/source.json"})
-        docs.append({"id": f"pmid:{i+1}", "title": f"Source {i}", "abstract": "Original abstract.",
-                     "text": f"Source {i}\n\nOriginal abstract.", "pmid": str(i+1), "pmcid": None, "doi": None,
-                     "source_shard": "baseline.parquet", "source_sha256": "a"*64, "row_locator": {"row_index": i}})
+        queries.append(
+            {
+                "id": f"q{i}",
+                "query": f"Original query {i}",
+                "positive_doc_id": f"pmid:{i + 1}",
+                "source_corpus": "A" if i % 2 else "B",
+                "split": "development",
+                "provenance_relative_path": "raw/source.json",
+            }
+        )
+        docs.append(
+            {
+                "id": f"pmid:{i + 1}",
+                "title": f"Source {i}",
+                "abstract": "Original abstract.",
+                "text": f"Source {i}\n\nOriginal abstract.",
+                "pmid": str(i + 1),
+                "pmcid": None,
+                "doi": None,
+                "source_shard": "baseline.parquet",
+                "source_sha256": "a" * 64,
+                "row_locator": {"row_index": i},
+            }
+        )
     write_jsonl(root / "development.jsonl", queries)
     write_jsonl(root / "documents.jsonl", docs)
-    (root / "BENCHMARK_MANIFEST.json").write_text(json.dumps({"status": "PASS", "outputs": [
-        {"path": name, "sha256": file_hash(root/name), "bytes": (root/name).stat().st_size}
-        for name in ("development.jsonl", "documents.jsonl")]}))
+    (root / "BENCHMARK_MANIFEST.json").write_text(
+        json.dumps(
+            {
+                "status": "PASS",
+                "outputs": [
+                    {
+                        "path": name,
+                        "sha256": file_hash(root / name),
+                        "bytes": (root / name).stat().st_size,
+                    }
+                    for name in ("development.jsonl", "documents.jsonl")
+                ],
+            }
+        )
+    )
 
 
 def test_source_stratification_is_fixed_and_reproducible(tmp_path):

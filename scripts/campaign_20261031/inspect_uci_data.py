@@ -50,8 +50,14 @@ def download(url: str, path: Path, allowed_urls: set[str], budget: int) -> dict:
                 raise ValueError("Empty source file")
             final_url, content_type = response.url, response.headers.get("Content-Type")
         temporary.replace(path)
-        return {"url": url, "final_url": final_url, "bytes": count, "sha256": sha256(path),
-                "content_type": content_type, "retrieved_utc": datetime.now(timezone.utc).isoformat()}
+        return {
+            "url": url,
+            "final_url": final_url,
+            "bytes": count,
+            "sha256": sha256(path),
+            "content_type": content_type,
+            "retrieved_utc": datetime.now(timezone.utc).isoformat(),
+        }
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -66,15 +72,29 @@ def inspect_table(path: Path, metadata: dict) -> dict:
     missing_symbols = {"", "?", "na", "n/a", "null"}
     if metadata.get("missing_values_symbol"):
         missing_symbols.add(str(metadata["missing_values_symbol"]).casefold())
-    summary = {name: {"source_role": item.get("role"), "source_type": item.get("type"),
-                      "units": item.get("units"), "description": item.get("description"),
-                      "missing_count": 0, "nonfinite_count": 0, "numeric_count": 0,
-                      "minimum": None, "maximum": None, "categorical_counts": Counter()}
-               for name, item in by_name.items()}
+    summary = {
+        name: {
+            "source_role": item.get("role"),
+            "source_type": item.get("type"),
+            "units": item.get("units"),
+            "description": item.get("description"),
+            "missing_count": 0,
+            "nonfinite_count": 0,
+            "numeric_count": 0,
+            "minimum": None,
+            "maximum": None,
+            "categorical_counts": Counter(),
+        }
+        for name, item in by_name.items()
+    }
     rows = 0
     with path.open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
-        if reader.fieldnames is None or len(set(reader.fieldnames)) != len(reader.fieldnames) or set(reader.fieldnames) != set(by_name):
+        if (
+            reader.fieldnames is None
+            or len(set(reader.fieldnames)) != len(reader.fieldnames)
+            or set(reader.fieldnames) != set(by_name)
+        ):
             raise ValueError("CSV columns disagree with source dictionary")
         for record in reader:
             if None in record or any(value is None for value in record.values()):
@@ -92,29 +112,46 @@ def inspect_table(path: Path, metadata: dict) -> dict:
                     number = float(value)
                 except ValueError as exc:
                     if variable.get("type") in {"Integer", "Continuous", "Real"}:
-                        raise ValueError(f"Invalid numeric value in declared column {name}") from exc
+                        raise ValueError(
+                            f"Invalid numeric value in declared column {name}"
+                        ) from exc
                     continue
                 if not math.isfinite(number):
                     stat["nonfinite_count"] += 1
                 else:
                     stat["numeric_count"] += 1
-                    stat["minimum"] = number if stat["minimum"] is None else min(stat["minimum"], number)
-                    stat["maximum"] = number if stat["maximum"] is None else max(stat["maximum"], number)
+                    stat["minimum"] = (
+                        number if stat["minimum"] is None else min(stat["minimum"], number)
+                    )
+                    stat["maximum"] = (
+                        number if stat["maximum"] is None else max(stat["maximum"], number)
+                    )
     if rows == 0 or rows != metadata.get("num_instances"):
         raise ValueError("Observed row count disagrees with reported source count")
     features = sum(item.get("role") == "Feature" for item in variables)
     if features != metadata.get("num_features"):
         raise ValueError("Feature roles disagree with source count")
-    return {"status": "PASS", "rows": rows, "columns": len(by_name), "features": features,
-            "reported_instances": metadata.get("num_instances"), "reported_features": metadata.get("num_features"),
-            "target_columns": metadata.get("target_col"), "id_columns": metadata.get("index_col"),
-            "missing_cells": sum(item["missing_count"] for item in summary.values()),
-            "nonfinite_cells": sum(item["nonfinite_count"] for item in summary.values()),
-            "missing_symbols_interpreted": sorted(missing_symbols), "variables": summary,
-            "source_sha256": sha256(path), "summary_kind": "computed directly from unchanged processed source CSV",
-            "limitations": ["Rows are reported instances; subject independence is not inferred.",
-                            "Source feature/target definitions are retained, not reinterpreted as validated endpoints.",
-                            "No imputation, normalization, model fitting, or statistical-power calculation was performed."]}
+    return {
+        "status": "PASS",
+        "rows": rows,
+        "columns": len(by_name),
+        "features": features,
+        "reported_instances": metadata.get("num_instances"),
+        "reported_features": metadata.get("num_features"),
+        "target_columns": metadata.get("target_col"),
+        "id_columns": metadata.get("index_col"),
+        "missing_cells": sum(item["missing_count"] for item in summary.values()),
+        "nonfinite_cells": sum(item["nonfinite_count"] for item in summary.values()),
+        "missing_symbols_interpreted": sorted(missing_symbols),
+        "variables": summary,
+        "source_sha256": sha256(path),
+        "summary_kind": "computed directly from unchanged processed source CSV",
+        "limitations": [
+            "Rows are reported instances; subject independence is not inferred.",
+            "Source feature/target definitions are retained, not reinterpreted as validated endpoints.",
+            "No imputation, normalization, model fitting, or statistical-power calculation was performed.",
+        ],
+    }
 
 
 def build(out: Path) -> dict:
@@ -131,31 +168,78 @@ def build(out: Path) -> dict:
         data_path = out / f"uci_{dataset_id}.csv"
         page_path = out / f"uci_{dataset_id}_repository.html"
         try:
-            for url, path in [(metadata_url, metadata_path), (data_url, data_path), (repository_url, page_path)]:
+            for url, path in [
+                (metadata_url, metadata_path),
+                (data_url, data_path),
+                (repository_url, page_path),
+            ]:
                 entry = download(url, path, allowed, remaining)
                 remaining -= entry["bytes"]
                 downloaded.append(entry)
             envelope = json.loads(metadata_path.read_text(encoding="utf-8"))
             metadata = envelope["data"]
-            if envelope.get("status") != 200 or metadata.get("uci_id") != dataset_id or metadata.get("data_url") != data_url:
+            if (
+                envelope.get("status") != 200
+                or metadata.get("uci_id") != dataset_id
+                or metadata.get("data_url") != data_url
+            ):
                 raise ValueError("Unexpected UCI metadata identity")
             inspection = inspect_table(data_path, metadata)
             page = page_path.read_text(encoding="utf-8")
             license_present = "creativecommons.org/licenses/by/4.0" in page
-            inspection.update({"uci_id": dataset_id, "name": metadata["name"], "doi": metadata.get("dataset_doi"),
-                               "repository_url": repository_url, "data_url": data_url,
-                               "license": "CC BY 4.0 as reported on captured repository page" if license_present else "UNKNOWN",
-                               "license_evidence_file": page_path.name, "access": "public source files retrieved"})
-            (out / f"uci_{dataset_id}_inspection.json").write_text(json.dumps(inspection, indent=2, ensure_ascii=True), encoding="utf-8")
-            results.append({key: inspection[key] for key in ["uci_id", "name", "doi", "rows", "columns", "features", "missing_cells", "nonfinite_cells", "license", "status"]})
+            inspection.update(
+                {
+                    "uci_id": dataset_id,
+                    "name": metadata["name"],
+                    "doi": metadata.get("dataset_doi"),
+                    "repository_url": repository_url,
+                    "data_url": data_url,
+                    "license": "CC BY 4.0 as reported on captured repository page"
+                    if license_present
+                    else "UNKNOWN",
+                    "license_evidence_file": page_path.name,
+                    "access": "public source files retrieved",
+                }
+            )
+            (out / f"uci_{dataset_id}_inspection.json").write_text(
+                json.dumps(inspection, indent=2, ensure_ascii=True), encoding="utf-8"
+            )
+            results.append(
+                {
+                    key: inspection[key]
+                    for key in [
+                        "uci_id",
+                        "name",
+                        "doi",
+                        "rows",
+                        "columns",
+                        "features",
+                        "missing_cells",
+                        "nonfinite_cells",
+                        "license",
+                        "status",
+                    ]
+                }
+            )
         except (OSError, ValueError, KeyError, requests.RequestException) as exc:
             results.append({"uci_id": dataset_id, "status": "FAIL", "error": str(exc)})
             break
-    manifest = {"schema_version": "processed-biomedical-table-inspection-v1",
-                "status": "PASS" if len(results) == len(DATASETS) and all(item["status"] == "PASS" for item in results) else "PARTIAL_OR_FAIL",
-                "created_utc": datetime.now(timezone.utc).isoformat(), "sources": results,
-                "downloaded_bytes": MAX_TOTAL_BYTES - remaining, "max_total_bytes": MAX_TOTAL_BYTES, "retrievals": downloaded,
-                "outputs": [{"path": path.name, "bytes": path.stat().st_size, "sha256": sha256(path)} for path in sorted(out.iterdir()) if path.is_file()]}
+    manifest = {
+        "schema_version": "processed-biomedical-table-inspection-v1",
+        "status": "PASS"
+        if len(results) == len(DATASETS) and all(item["status"] == "PASS" for item in results)
+        else "PARTIAL_OR_FAIL",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "sources": results,
+        "downloaded_bytes": MAX_TOTAL_BYTES - remaining,
+        "max_total_bytes": MAX_TOTAL_BYTES,
+        "retrievals": downloaded,
+        "outputs": [
+            {"path": path.name, "bytes": path.stat().st_size, "sha256": sha256(path)}
+            for path in sorted(out.iterdir())
+            if path.is_file()
+        ],
+    }
     (out / "INSPECTION_MANIFEST.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     return manifest
 
@@ -165,7 +249,11 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     report = build(args.out)
-    print(json.dumps({key: report[key] for key in ["status", "sources", "downloaded_bytes"]}, indent=2))
+    print(
+        json.dumps(
+            {key: report[key] for key in ["status", "sources", "downloaded_bytes"]}, indent=2
+        )
+    )
     return 0 if report["status"] == "PASS" else 1
 
 

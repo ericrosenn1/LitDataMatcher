@@ -60,7 +60,9 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def choose_split(component_id: str, component_size: int, allocated: Counter[str], total: int, seed: str) -> str:
+def choose_split(
+    component_id: str, component_size: int, allocated: Counter[str], total: int, seed: str
+) -> str:
     # Deterministic priority avoids order-dependent assignments, while the
     # deficit score keeps component-weighted allocations close to targets.
     rank = int(hashlib.sha256(f"{seed}|{component_id}".encode()).hexdigest()[:16], 16)
@@ -110,7 +112,10 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     total = len(questions)
     allocated: Counter[str] = Counter()
     component_splits: dict[str, str] = {}
-    for root, members in sorted(components.items(), key=lambda item: (-len(item[1]), hashlib.sha256(item[0].encode()).hexdigest())):
+    for root, members in sorted(
+        components.items(),
+        key=lambda item: (-len(item[1]), hashlib.sha256(item[0].encode()).hexdigest()),
+    ):
         component_splits[root] = choose_split(root, len(members), allocated, total, args.seed)
         allocated[component_splits[root]] += len(members)
 
@@ -120,16 +125,20 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         group_id = hashlib.sha256(f"{args.seed}|{root}".encode()).hexdigest()[:20]
         for question_id in members:
             row = by_question[question_id]
-            assignments.append({
-                "question_id": question_id,
-                "split": split,
-                "group_id": group_id,
-                "source_corpus": row.get("source_corpus"),
-                "source_partition": row.get("source_partition"),
-                "source_record_id": row.get("source_record_id"),
-                "canonical_question_sha256": hashlib.sha256(canonical_question(row.get("question_text")).encode()).hexdigest(),
-                "has_question_paper_edge": question_id in edge_questions,
-            })
+            assignments.append(
+                {
+                    "question_id": question_id,
+                    "split": split,
+                    "group_id": group_id,
+                    "source_corpus": row.get("source_corpus"),
+                    "source_partition": row.get("source_partition"),
+                    "source_record_id": row.get("source_record_id"),
+                    "canonical_question_sha256": hashlib.sha256(
+                        canonical_question(row.get("question_text")).encode()
+                    ).hexdigest(),
+                    "has_question_paper_edge": question_id in edge_questions,
+                }
+            )
     assignments.sort(key=lambda row: row["question_id"])
 
     split_by_question = {row["question_id"]: row["split"] for row in assignments}
@@ -143,38 +152,72 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     leaked_papers = sorted(paper for paper, values in paper_splits.items() if len(values) > 1)
     leaked_questions = sorted(key for key, values in duplicate_splits.items() if len(values) > 1)
     if leaked_papers or leaked_questions:
-        raise AssertionError(f"leakage detected: papers={len(leaked_papers)} question_texts={len(leaked_questions)}")
+        raise AssertionError(
+            f"leakage detected: papers={len(leaked_papers)} question_texts={len(leaked_questions)}"
+        )
     if len(assignments) != total:
         raise AssertionError("every normalized question must receive one split")
 
     args.out.mkdir(parents=True, exist_ok=False)
-    pq.write_table(pa.Table.from_pylist(assignments), args.out / "split_assignments.parquet", compression="zstd")
+    pq.write_table(
+        pa.Table.from_pylist(assignments),
+        args.out / "split_assignments.parquet",
+        compression="zstd",
+    )
     with (args.out / "split_assignments.tsv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(assignments[0]), delimiter="\t")
         writer.writeheader()
         writer.writerows(assignments)
     source_counts: dict[str, dict[str, int]] = {}
     for split in SPLITS:
-        source_counts[split] = dict(sorted(Counter(row["source_corpus"] for row in assignments if row["split"] == split).items()))
+        source_counts[split] = dict(
+            sorted(
+                Counter(
+                    row["source_corpus"] for row in assignments if row["split"] == split
+                ).items()
+            )
+        )
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "created_utc": utc_now(),
         "purpose": "group-aware development split and leakage audit; not a final held-out evaluation",
         "seed": args.seed,
         "input_artifacts": {
-            "questions": {"relative_path": str(questions_path.relative_to(args.corpus_root)), "sha256": sha256(questions_path), "rows": len(questions)},
-            "question_paper": {"relative_path": str(edges_path.relative_to(args.corpus_root)), "sha256": sha256(edges_path), "rows": len(edges)}
+            "questions": {
+                "relative_path": str(questions_path.relative_to(args.corpus_root)),
+                "sha256": sha256(questions_path),
+                "rows": len(questions),
+            },
+            "question_paper": {
+                "relative_path": str(edges_path.relative_to(args.corpus_root)),
+                "sha256": sha256(edges_path),
+                "rows": len(edges),
+            },
         },
-        "grouping_rules": ["same question identifier", "same canonicalized exact question text", "same normalized paper_id through question_paper edges"],
+        "grouping_rules": [
+            "same question identifier",
+            "same canonicalized exact question text",
+            "same normalized paper_id through question_paper edges",
+        ],
         "split_counts": dict(allocated),
         "source_counts_by_split": source_counts,
         "component_count": len(components),
         "largest_component_questions": max(len(members) for members in components.values()),
         "questions_without_question_paper_edge": len(questions) - len(edge_questions),
-        "audit": {"paper_cross_split_count": len(leaked_papers), "duplicate_question_cross_split_count": len(leaked_questions), "status": "PASS"},
-        "limitations": ["Does not infer study-level identity beyond normalized paper_id.", "Evaluation_candidate is a development allocation, not the sealed final holdout.", "Cross-corpus semantic question variants require future reviewed identity expansion before a release evaluation."],
+        "audit": {
+            "paper_cross_split_count": len(leaked_papers),
+            "duplicate_question_cross_split_count": len(leaked_questions),
+            "status": "PASS",
+        },
+        "limitations": [
+            "Does not infer study-level identity beyond normalized paper_id.",
+            "Evaluation_candidate is a development allocation, not the sealed final holdout.",
+            "Cross-corpus semantic question variants require future reviewed identity expansion before a release evaluation.",
+        ],
     }
-    (args.out / "LEAKAGE_AUDIT.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (args.out / "LEAKAGE_AUDIT.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return manifest
 
 
@@ -185,7 +228,16 @@ def main() -> int:
     parser.add_argument("--seed", default="LITDATAMATCHER_V04_SPLIT_V1")
     args = parser.parse_args()
     manifest = build(args)
-    print(json.dumps({"status": manifest["audit"]["status"], "split_counts": manifest["split_counts"], "out": str(args.out)}, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "status": manifest["audit"]["status"],
+                "split_counts": manifest["split_counts"],
+                "out": str(args.out),
+            },
+            sort_keys=True,
+        )
+    )
     return 0
 
 

@@ -31,7 +31,9 @@ def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
     return any(term in lowered for term in terms)
 
 
-def assess_governance(dataset: DatasetRecord, *, policy: str = "metadata-aware-v2") -> GovernanceAssessment:
+def assess_governance(
+    dataset: DatasetRecord, *, policy: str = "metadata-aware-v2"
+) -> GovernanceAssessment:
     """Score likely governance readiness for downstream reuse.
 
     The score is intentionally conservative: unclear access, restrictive terms,
@@ -44,7 +46,9 @@ def assess_governance(dataset: DatasetRecord, *, policy: str = "metadata-aware-v
     if policy not in {"legacy-v1", "metadata-aware-v2"}:
         raise ValueError(f"Unknown governance policy: {policy}")
     restricted = _contains_any(access, ("controlled", "restricted", "application", "dbgap"))
-    metadata_only = "metadata" in access and not _contains_any(access, ("individual data public", "participant data public"))
+    metadata_only = "metadata" in access and not _contains_any(
+        access, ("individual data public", "participant data public")
+    )
 
     # Access terms estimate whether a researcher can realistically obtain the data.
     if policy == "metadata-aware-v2" and restricted:

@@ -22,32 +22,61 @@ def build_receipt() -> dict:
         "gap_status": "unresolved-in-searched-coverage",
     }
     paper = {
-        "evidence_id": "paper", "proposition_id": question["proposition_id"],
-        "role": "perturbational_observation", "direction": "supports",
-        "source_id": "PMID:receipt", "publication_id": "PMID:receipt",
-        "study_id": "GSE:receipt", "conditions": question["conditions"],
-        "measurement_type": "observation", "scope_match": "exact", "answers_question": True,
-        "publication_date": "2026-09-01", "source_locator": "fixture:paper",
+        "evidence_id": "paper",
+        "proposition_id": question["proposition_id"],
+        "role": "perturbational_observation",
+        "direction": "supports",
+        "source_id": "PMID:receipt",
+        "publication_id": "PMID:receipt",
+        "study_id": "GSE:receipt",
+        "conditions": question["conditions"],
+        "measurement_type": "observation",
+        "scope_match": "exact",
+        "answers_question": True,
+        "publication_date": "2026-09-01",
+        "source_locator": "fixture:paper",
     }
     repository = {
-        "evidence_id": "repository", "proposition_id": question["proposition_id"],
-        "role": "metadata", "direction": "supports", "source_id": "GSE:receipt",
-        "study_id": "GSE:receipt", "conditions": question["conditions"],
-        "measurement_type": "metadata", "scope_match": "exact", "answers_question": False,
-        "publication_date": "2026-09-01", "source_locator": "fixture:repository",
-        "relation_assertions": [{
-            "target_evidence_id": "paper", "relation_type": "derivative_evidence",
-            "source_locator": "fixture:repository:linked-publication",
-        }],
+        "evidence_id": "repository",
+        "proposition_id": question["proposition_id"],
+        "role": "metadata",
+        "direction": "supports",
+        "source_id": "GSE:receipt",
+        "study_id": "GSE:receipt",
+        "conditions": question["conditions"],
+        "measurement_type": "metadata",
+        "scope_match": "exact",
+        "answers_question": False,
+        "publication_date": "2026-09-01",
+        "source_locator": "fixture:repository",
+        "relation_assertions": [
+            {
+                "target_evidence_id": "paper",
+                "relation_type": "derivative_evidence",
+                "source_locator": "fixture:repository:linked-publication",
+            }
+        ],
     }
     kg = {
-        "evidence_id": "kg", "related_proposition_id": question["proposition_id"],
-        "role": "curation", "direction": "supports", "source_id": "KG:receipt",
-        "source_of_source": "GSE:receipt", "conditions": question["conditions"],
-        "measurement_type": "curation", "scope_match": "related", "answers_question": False,
-        "publication_date": "2026-09-01", "source_locator": "fixture:kg",
+        "evidence_id": "kg",
+        "related_proposition_id": question["proposition_id"],
+        "role": "curation",
+        "direction": "supports",
+        "source_id": "KG:receipt",
+        "source_of_source": "GSE:receipt",
+        "conditions": question["conditions"],
+        "measurement_type": "curation",
+        "scope_match": "related",
+        "answers_question": False,
+        "publication_date": "2026-09-01",
+        "source_locator": "fixture:kg",
     }
-    bundle = compile_evidence(question, [paper, repository, kg], "2026-09-08", [{"source": "fixture", "status": "success"}])
+    bundle = compile_evidence(
+        question,
+        [paper, repository, kg],
+        "2026-09-08",
+        [{"source": "fixture", "status": "success"}],
+    )
     relation_types = {edge["relation_type"] for edge in bundle["relation_graph"]["edges"]}
     return {
         "schema_version": "v2_3_evidence_compiler_receipt_v1",
@@ -60,7 +89,11 @@ def build_receipt() -> dict:
         "known_dependence_edge_count": bundle["known_dependence_edge_count"],
         "independent_support_count": bundle["independent_support_count"],
         "relation_types": sorted(relation_types),
-        "validation_status": "PASS" if {"derivative_evidence", "same_underlying_evidence"} <= relation_types and len(bundle["dependence_groups"]) == 1 and bundle["independent_support_count"] is None else "FAIL",
+        "validation_status": "PASS"
+        if {"derivative_evidence", "same_underlying_evidence"} <= relation_types
+        and len(bundle["dependence_groups"]) == 1
+        and bundle["independent_support_count"] is None
+        else "FAIL",
     }
 
 

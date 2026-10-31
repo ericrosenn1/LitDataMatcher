@@ -19,16 +19,29 @@ from litdatamatcher.structured_decoding import (
 
 
 def document():
-    return {"document_id": "synthetic:structured", "text": "Notably, treatment reduced IL6 in human cells. Future studies should examine durability."}
+    return {
+        "document_id": "synthetic:structured",
+        "text": "Notably, treatment reduced IL6 in human cells. Future studies should examine durability.",
+    }
 
 
 def payload():
-    return {"claims": [{
-        "quote": "Notably, treatment reduced IL6 in human cells.",
-        "subject": "treatment", "predicate": "reduced", "object": "IL6",
-        "direction": "decrease", "negated": False, "status": "direct_experiment",
-        "context": None, "comparator": None,
-    }], "questions": [{"quote": "Future studies should examine durability."}]}
+    return {
+        "claims": [
+            {
+                "quote": "Notably, treatment reduced IL6 in human cells.",
+                "subject": "treatment",
+                "predicate": "reduced",
+                "object": "IL6",
+                "direction": "decrease",
+                "negated": False,
+                "status": "direct_experiment",
+                "context": None,
+                "comparator": None,
+            }
+        ],
+        "questions": [{"quote": "Future studies should examine durability."}],
+    }
 
 
 def test_source_choices_preserve_prefix_unicode_and_whitespace():
@@ -38,7 +51,10 @@ def test_source_choices_preserve_prefix_unicode_and_whitespace():
 
 
 def test_repeated_or_incomplete_sentences_are_not_usable_choices():
-    assert complete_source_sentences("Treatment improved sleep. Treatment improved sleep. trailing") == []
+    assert (
+        complete_source_sentences("Treatment improved sleep. Treatment improved sleep. trailing")
+        == []
+    )
     schema = source_schema({"text": "No complete sentence"})
     assert schema["properties"]["claims"]["maxItems"] == 0
 
@@ -50,7 +66,9 @@ def test_schema_bounds_outputs_and_uses_exact_sentence_enums():
     validate_source_schema(payload(), document())
 
 
-@pytest.mark.parametrize("mutation", ["many_claims", "context", "comparator", "prefix", "question", "extra_field"])
+@pytest.mark.parametrize(
+    "mutation", ["many_claims", "context", "comparator", "prefix", "question", "extra_field"]
+)
 def test_schema_rejects_known_generation_failures(mutation):
     value = payload()
     if mutation == "many_claims":
@@ -98,7 +116,11 @@ def test_schema_hash_tracks_source_choices_and_library_pin(monkeypatch):
 
 
 def test_runtime_fingerprint_includes_profile_and_source_schema(monkeypatch):
-    monkeypatch.setattr(importlib.metadata, "version", lambda name: "0.11.3" if name == "lm-format-enforcer" else "synthetic-version")
+    monkeypatch.setattr(
+        importlib.metadata,
+        "version",
+        lambda name: "0.11.3" if name == "lm-format-enforcer" else "synthetic-version",
+    )
     runtime = LocalSemanticRuntime.__new__(LocalSemanticRuntime)
     runtime.config = RuntimeConfig(decoding_mode="source_schema")
     runtime.model_manifest = {"model_id": "synthetic-test", "revision": "0" * 40, "license": "test"}
@@ -112,7 +134,11 @@ def test_runtime_fingerprint_includes_profile_and_source_schema(monkeypatch):
 
 
 def test_backend_identity_is_document_independent_and_tracks_configuration(monkeypatch):
-    monkeypatch.setattr(importlib.metadata, "version", lambda name: "0.11.3" if name == "lm-format-enforcer" else "synthetic-version")
+    monkeypatch.setattr(
+        importlib.metadata,
+        "version",
+        lambda name: "0.11.3" if name == "lm-format-enforcer" else "synthetic-version",
+    )
     runtime = LocalSemanticRuntime.__new__(LocalSemanticRuntime)
     runtime.config = RuntimeConfig(decoding_mode="source_schema")
     runtime.model_manifest = {"model_id": "synthetic-test", "revision": "0" * 40}
@@ -172,9 +198,11 @@ def test_actual_character_parser_accepts_only_bounded_source_output():
 @pytest.mark.parametrize("field", ["claims", "questions"])
 def test_actual_parser_forbids_first_item_in_required_empty_array(field):
     pytest.importorskip("lmformatenforcer")
-    source = {"text": "Incomplete source fragment"} if field == "claims" else {
-        "text": "Treatment reduced IL6 in human cells."
-    }
+    source = (
+        {"text": "Incomplete source fragment"}
+        if field == "claims"
+        else {"text": "Treatment reduced IL6 in human cells."}
+    )
     value = {"claims": [], "questions": []}
     value[field] = [{"quote": "Invented future research."}]
     assert not _accepts(schema_parser(source), value)
@@ -209,7 +237,9 @@ def _character_tokenizer():
     tokenizer_impl = Tokenizer(models.WordLevel(vocabulary, unk_token="<unk>"))
     tokenizer_impl.pre_tokenizer = pre_tokenizers.Split("", behavior="isolated")
     tokenizer_impl.decoder = decoders.Fuse()
-    return PreTrainedTokenizerFast(tokenizer_object=tokenizer_impl, unk_token="<unk>", eos_token="<eos>", pad_token="<eos>")
+    return PreTrainedTokenizerFast(
+        tokenizer_object=tokenizer_impl, unk_token="<unk>", eos_token="<eos>", pad_token="<eos>"
+    )
 
 
 def test_actual_prefix_hook_forbids_nonempty_question_after_array_opener():
@@ -237,11 +267,29 @@ def test_actual_tiny_cpu_generation_obeys_empty_source_schema():
 
     tokenizer = _character_tokenizer()
     torch.manual_seed(1729)
-    model = GPT2LMHeadModel(GPT2Config(vocab_size=len(tokenizer), n_positions=256, n_embd=16, n_layer=1, n_head=2, eos_token_id=1, pad_token_id=1)).eval()
+    model = GPT2LMHeadModel(
+        GPT2Config(
+            vocab_size=len(tokenizer),
+            n_positions=256,
+            n_embd=16,
+            n_layer=1,
+            n_head=2,
+            eos_token_id=1,
+            pad_token_id=1,
+        )
+    ).eval()
     source = {"text": "Incomplete source fragment"}
     prefix, _ = prefix_constraint(tokenizer, source)
     inputs = tokenizer("0", return_tensors="pt")
     with torch.inference_mode():
-        generated = model.generate(**inputs, max_new_tokens=128, do_sample=False, prefix_allowed_tokens_fn=prefix, pad_token_id=1)
-    decoded = tokenizer.decode(generated[0, inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
+        generated = model.generate(
+            **inputs,
+            max_new_tokens=128,
+            do_sample=False,
+            prefix_allowed_tokens_fn=prefix,
+            pad_token_id=1,
+        )
+    decoded = tokenizer.decode(
+        generated[0, inputs["input_ids"].shape[-1] :], skip_special_tokens=True
+    )
     assert json.loads(decoded) == {"claims": [], "questions": []}

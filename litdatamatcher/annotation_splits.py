@@ -86,8 +86,7 @@ def build_split_metadata(
 
     fractions_dict = normalize_split_fractions(fractions)
     split_group_counts = {
-        name: len({_split_group(row) for row in split_rows.get(name, [])})
-        for name in SPLIT_NAMES
+        name: len({_split_group(row) for row in split_rows.get(name, [])}) for name in SPLIT_NAMES
     }
     warnings = list(warnings)
     warnings.extend(_empty_split_warnings(split_group_counts, fractions_dict))
@@ -204,8 +203,10 @@ def _group_key(row: JsonDict, strategy: str, index: int) -> tuple[str, str, str]
         return f"source:{document_key}", grouping_field, ""
     question_id = _first_nonblank(row, "question_id")
     if question_id:
-        return f"question:{question_id}", "question_id", (
-            f"{strategy} fell back to question_id for rows missing source/document IDs"
+        return (
+            f"question:{question_id}",
+            "question_id",
+            (f"{strategy} fell back to question_id for rows missing source/document IDs"),
         )
     return f"row:{index}", "row_index", f"{strategy} fell back to row index for missing IDs"
 
@@ -224,7 +225,9 @@ def _document_or_source_key(row: JsonDict, strategy: str) -> tuple[str, str]:
     return "", ""
 
 
-def _attach_split_metadata(row: JsonDict, group_key: str, strategy: str, grouping_field: str) -> None:
+def _attach_split_metadata(
+    row: JsonDict, group_key: str, strategy: str, grouping_field: str
+) -> None:
     """Store split bookkeeping inside metadata instead of polluting label roots."""
 
     metadata = row.get("metadata", {})
@@ -290,10 +293,7 @@ def _assign_groups(
 def _target_split_counts(group_count: int, fractions: JsonDict) -> dict[str, int]:
     """Convert fractional split targets into whole group counts."""
 
-    raw_counts = {
-        name: group_count * float(fractions.get(name, 0.0))
-        for name in SPLIT_NAMES
-    }
+    raw_counts = {name: group_count * float(fractions.get(name, 0.0)) for name in SPLIT_NAMES}
     counts = {name: int(raw_counts[name]) for name in SPLIT_NAMES}
     remaining = group_count - sum(counts.values())
     remainders = sorted(

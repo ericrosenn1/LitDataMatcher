@@ -103,14 +103,22 @@ def main() -> None:
                 "datasetId": match.dataset.dataset_id,
                 "score": round(match.score.combined * 100, 1),
                 "components": [
-                    {"label": label, "score": round(getattr(match.score, key) * 100, 1), "weight": weight}
+                    {
+                        "label": label,
+                        "score": round(getattr(match.score, key) * 100, 1),
+                        "weight": weight,
+                    }
                     for label, key, weight in weights
                 ],
                 "rationale": match.rationale,
                 "caveats": [
                     "Illustrative source text and curated source-collection metadata; not a validated scientific finding.",
                     "Catalog sample counts, quality values, and completeness are demonstration assumptions used by the existing Python scorer.",
-                    *([f"Missing required variables: {', '.join(match.missing_variables)}."] if match.missing_variables else []),
+                    *(
+                        [f"Missing required variables: {', '.join(match.missing_variables)}."]
+                        if match.missing_variables
+                        else []
+                    ),
                     *match.assessments.get("feasibility", {}).get("caveats", []),
                 ],
                 "terms": match.question.domain_terms,
@@ -134,7 +142,9 @@ def main() -> None:
     target = ROOT / "web" / "src" / "data" / "demo.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(workspace, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Built {target}: {len(RECORDS)} briefs, {len(datasets)} source collections, {len(matches)} matches.")
+    print(
+        f"Built {target}: {len(RECORDS)} briefs, {len(datasets)} source collections, {len(matches)} matches."
+    )
 
 
 if __name__ == "__main__":

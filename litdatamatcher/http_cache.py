@@ -135,7 +135,12 @@ class CachedHttpClient:
                 response.raise_for_status()
                 text = response.text
                 if use_cache:
-                    self._write_cache_response(path, text, "live_cached", request_scope={"url": url, "params": params or {}, "method": "GET"})
+                    self._write_cache_response(
+                        path,
+                        text,
+                        "live_cached",
+                        request_scope={"url": url, "params": params or {}, "method": "GET"},
+                    )
                 return text
             except requests.RequestException as exc:
                 last_error = exc
@@ -148,9 +153,11 @@ class CachedHttpClient:
     ) -> dict[str, str]:
         """Build cache identity and refresh lineage before publishing provenance."""
 
-        timestamp = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(
-            timespec="seconds"
-        ).replace("+00:00", "Z")
+        timestamp = (
+            datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+            .isoformat(timespec="seconds")
+            .replace("+00:00", "Z")
+        )
         metadata = {
             "cache_path": str(path),
             "cache_status": cache_status,
@@ -170,7 +177,12 @@ class CachedHttpClient:
         return metadata
 
     def _write_cache_response(
-        self, path: Path, text: str, cache_status: str, *, replaced_sha256: str = "",
+        self,
+        path: Path,
+        text: str,
+        cache_status: str,
+        *,
+        replaced_sha256: str = "",
         request_scope: dict | None = None,
     ) -> None:
         """Promote a complete response and its metadata without truncating prior cache."""
@@ -189,7 +201,9 @@ class CachedHttpClient:
             metadata["schema_version"] = "cache-acquisition-v1"
             metadata["retrieval_time_basis"] = "recorded_content_acquisition"
             if request_scope:
-                metadata["request_scope"] = json.dumps(_redacted_scope(request_scope), sort_keys=True)
+                metadata["request_scope"] = json.dumps(
+                    _redacted_scope(request_scope), sort_keys=True
+                )
             envelope_path = _acquisition_path(path, metadata["cache_content_sha256"])
             envelope_path.parent.mkdir(parents=True, exist_ok=True)
             _create_acquisition_envelope(envelope_path, metadata)
@@ -247,7 +261,12 @@ class CachedHttpClient:
                 response.raise_for_status()
                 text = response.text
                 if use_cache:
-                    self._write_cache_response(path, text, "live_cached", request_scope={"url": url, "params": cache_params, "method": "POST"})
+                    self._write_cache_response(
+                        path,
+                        text,
+                        "live_cached",
+                        request_scope={"url": url, "params": cache_params, "method": "POST"},
+                    )
                 return text
             except requests.RequestException as exc:
                 last_error = exc
@@ -275,22 +294,33 @@ def _redacted_scope(scope: dict) -> dict:
     """Keep scientific query provenance without copying credential parameters."""
     sensitive = {"api_key", "apikey", "token", "access_token", "authorization", "key"}
     parsed = urlsplit(str(scope.get("url", "")))
-    query = [(key, "REDACTED" if key.lower() in sensitive else value)
-             for key, value in parse_qsl(parsed.query, keep_blank_values=True)]
+    query = [
+        (key, "REDACTED" if key.lower() in sensitive else value)
+        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+    ]
     safe_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), ""))
-    return {**scope, "url": safe_url,
-            "params": {key: "REDACTED" if str(key).lower() in sensitive else value
-                       for key, value in scope.get("params", {}).items()}}
+    return {
+        **scope,
+        "url": safe_url,
+        "params": {
+            key: "REDACTED" if str(key).lower() in sensitive else value
+            for key, value in scope.get("params", {}).items()
+        },
+    }
 
 
 def _read_acquisition_envelope(path: Path, digest: str) -> dict:
     value = json.loads(path.read_text(encoding="utf-8"))
-    if (not isinstance(value, dict)
-            or value.get("schema_version") != "cache-acquisition-v1"
-            or value.get("cache_content_sha256") != digest):
+    if (
+        not isinstance(value, dict)
+        or value.get("schema_version") != "cache-acquisition-v1"
+        or value.get("cache_content_sha256") != digest
+    ):
         raise ValueError("Cache acquisition envelope does not match its content")
     try:
-        acquired = datetime.fromisoformat(value.get("retrieval_time_utc", "").replace("Z", "+00:00"))
+        acquired = datetime.fromisoformat(
+            value.get("retrieval_time_utc", "").replace("Z", "+00:00")
+        )
     except (TypeError, ValueError, AttributeError) as exc:
         raise ValueError("Cache acquisition timestamp is invalid") from exc
     if acquired.tzinfo is None:
@@ -300,7 +330,9 @@ def _read_acquisition_envelope(path: Path, digest: str) -> dict:
 
 def _create_acquisition_envelope(path: Path, metadata: dict) -> bool:
     """Atomically add an immutable receipt without replacing an existing receipt."""
-    with NamedTemporaryFile(dir=path.parent, prefix=".acquisition-", suffix=".tmp", delete=False) as handle:
+    with NamedTemporaryFile(
+        dir=path.parent, prefix=".acquisition-", suffix=".tmp", delete=False
+    ) as handle:
         temporary = Path(handle.name)
     try:
         temporary.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")

@@ -26,7 +26,9 @@ class DataSourceAdapter(Protocol):
         """Return candidate dataset records for a query."""
 
 
-def _var(name: str, category: str, count: int, completeness: float, *synonyms: str) -> DatasetVariable:
+def _var(
+    name: str, category: str, count: int, completeness: float, *synonyms: str
+) -> DatasetVariable:
     """Build a normalized variable record for the curated catalog."""
 
     return DatasetVariable(
@@ -38,7 +40,9 @@ def _var(name: str, category: str, count: int, completeness: float, *synonyms: s
     )
 
 
-def _cap(name: str, category: str, count: int, completeness: float, *synonyms: str) -> DatasetVariable:
+def _cap(
+    name: str, category: str, count: int, completeness: float, *synonyms: str
+) -> DatasetVariable:
     """Build a study-design or ML-readiness capability variable."""
 
     return _var(name, category, count, completeness, *synonyms)
@@ -87,7 +91,14 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("timepoint", "temporal_structure", 850, 0.7, "visit"),
                     _cap("sample_size", "study_design_feature", 2000, 0.95, "cohort_size"),
                     _cap("longitudinal_time", "temporal_structure", 850, 0.7, "timepoint"),
-                    _cap("predictor", "derived_or_proxy_capability", 1500, 0.55, "feature", "16s_feature"),
+                    _cap(
+                        "predictor",
+                        "derived_or_proxy_capability",
+                        1500,
+                        0.55,
+                        "feature",
+                        "16s_feature",
+                    ),
                     _cap("covariate", "metadata_variable", 1200, 0.65, "age", "body_site"),
                 ],
                 populations=["human", "adult", "pediatric"],
@@ -133,7 +144,14 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("disease_activity", "phenotype", 900, 0.45, "IBD"),
                     _var("age", "metadata", 2500, 0.55),
                     _cap("sample_size", "study_design_feature", 5000, 0.95, "cohort_size"),
-                    _cap("predictor", "derived_or_proxy_capability", 5000, 0.6, "feature", "metagenomic_feature"),
+                    _cap(
+                        "predictor",
+                        "derived_or_proxy_capability",
+                        5000,
+                        0.6,
+                        "feature",
+                        "metagenomic_feature",
+                    ),
                     _cap("covariate", "metadata_variable", 2500, 0.45, "age", "body_site"),
                 ],
                 populations=["human", "adult"],
@@ -173,10 +191,27 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("treatment", "clinical", 900, 0.62, "therapy"),
                     _var("outcome", "clinical", 850, 0.58, "response"),
                     _cap("sample_size", "study_design_feature", 1800, 0.95, "cohort_size"),
-                    _cap("predictor", "derived_or_proxy_capability", 1800, 0.68, "feature", "gene_expression_feature"),
-                    _cap("class_label", "supervised_learning_label", 1600, 0.55, "label", "outcome_label", "disease_state"),
+                    _cap(
+                        "predictor",
+                        "derived_or_proxy_capability",
+                        1800,
+                        0.68,
+                        "feature",
+                        "gene_expression_feature",
+                    ),
+                    _cap(
+                        "class_label",
+                        "supervised_learning_label",
+                        1600,
+                        0.55,
+                        "label",
+                        "outcome_label",
+                        "disease_state",
+                    ),
                     _cap("outcome_label", "evaluation_outcome", 850, 0.58, "label", "response"),
-                    _cap("covariate", "metadata_variable", 900, 0.5, "treatment", "disease_activity"),
+                    _cap(
+                        "covariate", "metadata_variable", 900, 0.5, "treatment", "disease_activity"
+                    ),
                 ],
                 populations=["human", "adult", "pediatric"],
                 organisms=["human"],
@@ -223,7 +258,15 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("disease_activity", "phenotype", 1000, 0.7),
                     _cap("sample_size", "study_design_feature", 1200, 0.95, "cohort_size"),
                     _cap("outcome_label", "evaluation_outcome", 1200, 0.9, "label", "endpoint"),
-                    _cap("class_label", "supervised_learning_label", 1200, 0.45, "label", "study_arm", "outcome_label"),
+                    _cap(
+                        "class_label",
+                        "supervised_learning_label",
+                        1200,
+                        0.45,
+                        "label",
+                        "study_arm",
+                        "outcome_label",
+                    ),
                     _cap("covariate", "metadata_variable", 1200, 0.72, "eligibility", "age", "sex"),
                 ],
                 populations=["human", "adult", "pediatric"],
@@ -263,8 +306,22 @@ class CuratedBiomedicalCatalogAdapter:
                     _var("disease_activity", "phenotype", 450, 0.58),
                     _var("treatment", "clinical", 250, 0.42),
                     _cap("sample_size", "study_design_feature", 700, 0.9, "cohort_size"),
-                    _cap("predictor", "derived_or_proxy_capability", 700, 0.62, "feature", "metabolomic_feature"),
-                    _cap("outcome_label", "evaluation_outcome", 450, 0.45, "label", "disease_activity"),
+                    _cap(
+                        "predictor",
+                        "derived_or_proxy_capability",
+                        700,
+                        0.62,
+                        "feature",
+                        "metabolomic_feature",
+                    ),
+                    _cap(
+                        "outcome_label",
+                        "evaluation_outcome",
+                        450,
+                        0.45,
+                        "label",
+                        "disease_activity",
+                    ),
                     _cap("covariate", "metadata_variable", 300, 0.48, "diet", "treatment"),
                 ],
                 populations=["human", "mouse"],
@@ -303,9 +360,9 @@ class CuratedBiomedicalCatalogAdapter:
             # Blend text, inferred-variable, and domain-term signals for transparent ranking.
             text_score = lexical_similarity(query, record.searchable_text())
             var_score = len(query_vars & record.variable_aliases()) / max(1, len(query_vars))
-            term_score = len(query_terms & set(extract_domain_terms(record.searchable_text(), 20))) / max(
-                1, len(query_terms)
-            )
+            term_score = len(
+                query_terms & set(extract_domain_terms(record.searchable_text(), 20))
+            ) / max(1, len(query_terms))
             score = max(text_score, 0.7 * var_score + 0.3 * term_score)
             if score > 0 or not query_terms:
                 scored.append((score, record))
@@ -324,8 +381,14 @@ class JsonlCatalogAdapter:
     def search(self, query: str) -> list[DatasetRecord]:
         """Search local JSONL records by lexical similarity."""
 
-        scored = [(lexical_similarity(query, record.searchable_text()), record) for record in self.records]
-        return [record for score, record in sorted(scored, key=lambda item: item[0], reverse=True) if score > 0]
+        scored = [
+            (lexical_similarity(query, record.searchable_text()), record) for record in self.records
+        ]
+        return [
+            record
+            for score, record in sorted(scored, key=lambda item: item[0], reverse=True)
+            if score > 0
+        ]
 
 
 def classify_dataset_record(raw: dict) -> DatasetRecord:
@@ -357,7 +420,10 @@ def classify_dataset_record(raw: dict) -> DatasetRecord:
         source=source,
         description=description,
         url=raw.get("url", ""),
-        variables=[DatasetVariable.from_dict(v) if isinstance(v, dict) else DatasetVariable(v) for v in variables],
+        variables=[
+            DatasetVariable.from_dict(v) if isinstance(v, dict) else DatasetVariable(v)
+            for v in variables
+        ],
         populations=raw.get("populations") or [infer_population(f"{title} {description}")],
         organisms=raw.get("organisms", []),
         assay_types=raw.get("assay_types", []),

@@ -9,7 +9,12 @@ MODALITY_FAMILIES = {
     "bulk_transcriptomics": {"rna-seq", "microarray", "transcriptomics"},
     "single_cell_transcriptomics": {"single-cell rna-seq", "scrna-seq"},
     "sequencing_genomics": {"wgs", "whole genome sequencing", "genomics"},
-    "perturbational_screens": {"crispr screen", "pooled crispr screen", "rnai screen", "perturbational screen"},
+    "perturbational_screens": {
+        "crispr screen",
+        "pooled crispr screen",
+        "rnai screen",
+        "perturbational screen",
+    },
     "clinical_registry": {"clinical study registry metadata", "clinical registry"},
     "microbiome_metagenomics": {"metagenomics", "shotgun metagenomics", "16s rrna sequencing"},
     "proteomics": {"proteomics", "mass spectrometry proteomics"},
@@ -48,17 +53,38 @@ def modality_contract(record: JsonDict) -> JsonDict:
     assays = {str(x).strip().lower() for x in record.get("assay_types", []) if str(x).strip()}
     families = sorted({family for assay in assays for family in modality_families(assay)})
     metadata = record.get("metadata", {}) if isinstance(record.get("metadata"), dict) else {}
-    dependence = metadata.get("dependence", {}) if isinstance(metadata.get("dependence"), dict) else {}
-    omics = metadata.get("omics_contract", {}) if isinstance(metadata.get("omics_contract"), dict) else {}
-    temporal = metadata.get("temporal_contract", {}) if isinstance(metadata.get("temporal_contract"), dict) else {}
+    dependence = (
+        metadata.get("dependence", {}) if isinstance(metadata.get("dependence"), dict) else {}
+    )
+    omics = (
+        metadata.get("omics_contract", {})
+        if isinstance(metadata.get("omics_contract"), dict)
+        else {}
+    )
+    temporal = (
+        metadata.get("temporal_contract", {})
+        if isinstance(metadata.get("temporal_contract"), dict)
+        else {}
+    )
     biological_unit = "UNKNOWN"
     capabilities = record.get("capabilities", {})
     if isinstance(capabilities, dict) and dependence.get("donor_links") != "AMBIGUOUS_NOT_INFERRED":
-        for field in ("biological_sample", "donor", "independent_unit", "biological_sample_count", "donor_count", "independent_unit_count"):
+        for field in (
+            "biological_sample",
+            "donor",
+            "independent_unit",
+            "biological_sample_count",
+            "donor_count",
+            "independent_unit_count",
+        ):
             observation = capabilities.get(field, {})
-            if (isinstance(observation, dict) and observation.get("status") == "observed"
-                    and observation.get("value") is not None and observation.get("source_locator")
-                    and observation.get("mapping_type", "exact") in {"exact", "synonym"}):
+            if (
+                isinstance(observation, dict)
+                and observation.get("status") == "observed"
+                and observation.get("value") is not None
+                and observation.get("source_locator")
+                and observation.get("mapping_type", "exact") in {"exact", "synonym"}
+            ):
                 biological_unit = "OBSERVED"
     return {
         "modality": families or ["UNKNOWN"],
@@ -101,6 +127,10 @@ def compatibility(required_modality: str, required_organism: str, record: JsonDi
             return "INCOMPATIBLE"
         if not any(value is True for value in comparisons):
             return "UNKNOWN"
-    if not required_families or contract["modality"] == ["UNKNOWN"] or contract["organism"] == "UNKNOWN":
+    if (
+        not required_families
+        or contract["modality"] == ["UNKNOWN"]
+        or contract["organism"] == "UNKNOWN"
+    ):
         return "UNKNOWN"
     return "PARTIAL"

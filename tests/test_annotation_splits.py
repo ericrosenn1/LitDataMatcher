@@ -53,9 +53,7 @@ def test_annotation_export_writes_grouped_question_splits(tmp_path):
 
     split_rows = _read_split_rows(tmp_path / "labels_out")
     split_total = sum(len(rows) for rows in split_rows.values())
-    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(
-        encoding="utf-8"
-    )
+    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(encoding="utf-8")
 
     assert manifest["split_strategy"] == "by_question_id"
     assert manifest["split_seed"] == 7
@@ -145,9 +143,7 @@ def test_source_split_warns_and_falls_back_when_source_ids_are_missing(tmp_path)
 
     split_rows = _read_split_rows(tmp_path / "labels_out")
     grouping_fields = {
-        row["metadata"]["split_grouping_field"]
-        for rows in split_rows.values()
-        for row in rows
+        row["metadata"]["split_grouping_field"] for rows in split_rows.values() for row in rows
     }
 
     assert grouping_fields == {"question_id"}
@@ -205,9 +201,7 @@ def test_zero_label_split_reports_not_training_ready(tmp_path):
     )
 
     split_rows = _read_split_rows(tmp_path / "labels_out")
-    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(
-        encoding="utf-8"
-    )
+    report = (tmp_path / "labels_out" / "annotation_corpus_report.md").read_text(encoding="utf-8")
 
     assert sum(len(rows) for rows in split_rows.values()) == 0
     assert manifest["summary"]["exported_label_rows"] == 0

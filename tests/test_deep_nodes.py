@@ -54,7 +54,10 @@ def test_entity_contract_preserves_ambiguity_deprecation_and_source_failure():
     assert normalize_entity("cd3", "gene_protein")["status"] == "AMBIGUOUS"
     assert normalize_entity("gut", "tissue_cell_type")["status"] == "AMBIGUOUS"
     assert normalize_entity("HGNC:OLDTP53", "gene_protein")["status"] == "DEPRECATED"
-    assert normalize_entity("TP53", "gene_protein", source_available=False)["status"] == "SOURCE_UNAVAILABLE"
+    assert (
+        normalize_entity("TP53", "gene_protein", source_available=False)["status"]
+        == "SOURCE_UNAVAILABLE"
+    )
 
 
 def test_ontology_handles_noisy_variable_names_and_empty_requirements():

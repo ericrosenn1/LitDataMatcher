@@ -1,4 +1,5 @@
 """Write a deterministic receipt for bounded adapter pagination semantics."""
+
 from __future__ import annotations
 
 import argparse
@@ -42,14 +43,56 @@ def main() -> None:
     repeated = pages([{"items": [], "next": "again"}, {"items": [], "next": "again"}])
     truncated = pages([{"items": [], "next": "two"}, {"items": [], "next": "three"}], max_pages=2)
     drift = pages([{"items": "schema-drift"}])
+
     class ErrorClient:
         def get_json(self, url, params=None):
             raise RuntimeError("fixture failure")
-    error = _bounded_cursor_pages(ErrorClient(), "https://fixture.invalid/paged", {"query": "fixture"}, extract_items=lambda payload: payload.get("items"), cursor_field="next", cursor_param="cursor")
-    statuses = {"complete": complete["pagination"]["status"], "repeated": repeated["pagination"]["status"], "truncated": truncated["pagination"]["status"], "schema_drift": drift["pagination"]["status"], "error": error["pagination"]["status"]}
+
+    error = _bounded_cursor_pages(
+        ErrorClient(),
+        "https://fixture.invalid/paged",
+        {"query": "fixture"},
+        extract_items=lambda payload: payload.get("items"),
+        cursor_field="next",
+        cursor_param="cursor",
+    )
+    statuses = {
+        "complete": complete["pagination"]["status"],
+        "repeated": repeated["pagination"]["status"],
+        "truncated": truncated["pagination"]["status"],
+        "schema_drift": drift["pagination"]["status"],
+        "error": error["pagination"]["status"],
+    }
     partial = [repeated, truncated, drift, error]
-    passed = statuses == {"complete": "COMPLETE", "repeated": "REPEATED_CURSOR", "truncated": "TRUNCATED_PAGE_LIMIT", "schema_drift": "SCHEMA_DRIFT", "error": "ERROR"} and complete["pagination"]["candidate_universe_status"] == "COMPLETE_CANDIDATE_UNIVERSE" and all(item["pagination"]["candidate_universe_status"] == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE" for item in partial)
-    atomic_json(args.out, {"schema_version": "v2_adapter_pagination_receipt_v1", "fixture_scope": "synthetic/local cursor pages only", "statuses": statuses, "complete_request_scopes": complete["pagination"]["pages"], "input_digest": digest({"complete": complete, "repeated": repeated, "truncated": truncated, "drift": drift}), "validation_status": "PASS" if passed else "FAIL"})
+    passed = (
+        statuses
+        == {
+            "complete": "COMPLETE",
+            "repeated": "REPEATED_CURSOR",
+            "truncated": "TRUNCATED_PAGE_LIMIT",
+            "schema_drift": "SCHEMA_DRIFT",
+            "error": "ERROR",
+        }
+        and complete["pagination"]["candidate_universe_status"] == "COMPLETE_CANDIDATE_UNIVERSE"
+        and all(
+            item["pagination"]["candidate_universe_status"]
+            == "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"
+            for item in partial
+        )
+    )
+    atomic_json(
+        args.out,
+        {
+            "schema_version": "v2_adapter_pagination_receipt_v1",
+            "fixture_scope": "synthetic/local cursor pages only",
+            "statuses": statuses,
+            "complete_request_scopes": complete["pagination"]["pages"],
+            "input_digest": digest(
+                {"complete": complete, "repeated": repeated, "truncated": truncated, "drift": drift}
+            ),
+            "validation_status": "PASS" if passed else "FAIL",
+        },
+    )
 
 
 if __name__ == "__main__":

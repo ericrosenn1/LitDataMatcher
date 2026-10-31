@@ -39,32 +39,48 @@ def _span(text: str, value: str, *, source_locator: str) -> dict[str, Any]:
 
 
 def _rulebook() -> dict[str, Any]:
-    with resources.files(__package__).joinpath("question_compiler_rules_v1.json").open(
-        encoding="utf-8"
-    ) as handle:
+    with (
+        resources.files(__package__)
+        .joinpath("question_compiler_rules_v1.json")
+        .open(encoding="utf-8") as handle
+    ):
         return json.load(handle)
 
 
 def _question_type(question: str) -> str:
     value = question.casefold()
-    if all(re.search(rf"\b{field}\s*:", value) for field in ("intervention", "comparator", "outcome")):
+    if all(
+        re.search(rf"\b{field}\s*:", value) for field in ("intervention", "comparator", "outcome")
+    ):
         # A structured PICO-style source states a comparison even if it is not
         # written as an interrogative sentence. This recognizes source text;
         # it does not infer roles from a study annotation.
         return "comparative"
     if re.search(r"\b(literature|published evidence|review (?:the )?evidence)\b", value):
         return "literature_only"
-    if re.search(r"\b(predict(?:s|ed|ing|ion|ions|ive|or|ors)?|prognos(?:is|tic)|classif(?:y|ies|ied|ying|ication|ications|ier|iers))\b", value):
+    if re.search(
+        r"\b(predict(?:s|ed|ing|ion|ions|ive|or|ors)?|prognos(?:is|tic)|classif(?:y|ies|ied|ying|ication|ications|ier|iers))\b",
+        value,
+    ):
         return "prediction"
     if re.search(r"\b(over time|longitudinal|trajectory|change from baseline|follow-?up)\b", value):
         return "longitudinal_change"
-    if re.search(r"\b(knockdown|knock-out|knockout|crispr|perturb(?:s|ed|ing|ation|ations)?|stimulat(?:e|es|ed|ing|ion|ions|ory)|inhibit(?:s|ed|ing|ion|ions|ory)?|treated with|administered)\b", value):
+    if re.search(
+        r"\b(knockdown|knock-out|knockout|crispr|perturb(?:s|ed|ing|ation|ations)?|stimulat(?:e|es|ed|ing|ion|ions|ory)|inhibit(?:s|ed|ing|ion|ions|ory)?|treated with|administered)\b",
+        value,
+    ):
         return "perturbational_mechanistic"
     if re.search(r"\b(which|what) (?:genes|features|biomarkers|entities)\b", value):
         return "entity_discovery"
-    if re.search(r"\b(risks?|associat(?:e|es|ed|ing|ion|ions)|correlat(?:e|es|ed|ing|ion|ions)|related to)\b", value):
+    if re.search(
+        r"\b(risks?|associat(?:e|es|ed|ing|ion|ions)|correlat(?:e|es|ed|ing|ion|ions)|related to)\b",
+        value,
+    ):
         return "associational"
-    if re.search(r"\b(compared with|versus|vs\.?|difference between|does .+ (?:alter|affect|reduce|increase))\b", value):
+    if re.search(
+        r"\b(compared with|versus|vs\.?|difference between|does .+ (?:alter|affect|reduce|increase))\b",
+        value,
+    ):
         return "comparative"
     return "QUESTION_UNDERDETERMINED"
 
@@ -83,7 +99,9 @@ def _normal_question(gap: str) -> str:
 
 
 def _role_matches(
-    question: str, context: str, source_locator: str,
+    question: str,
+    context: str,
+    source_locator: str,
     diagnostics: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Extract only bounded lexical roles; normalized values retain their source span."""
@@ -121,7 +139,10 @@ def _role_matches(
 
     species = [
         (r"\b(?:human|humans)\b", "human"),
-        (r"\b(?:adult(?:s)?|patients?|participants?|people|children|child(?!-)|p[ae]ediatric|adolescents?|infants?|neonates?)\b", "human"),
+        (
+            r"\b(?:adult(?:s)?|patients?|participants?|people|children|child(?!-)|p[ae]ediatric|adolescents?|infants?|neonates?)\b",
+            "human",
+        ),
         (r"\b(?:mouse|mice|murine)\b", "mouse"),
         (r"\b(?:rat|rats)\b", "rat"),
     ]
@@ -129,26 +150,44 @@ def _role_matches(
     for pattern, normalized in species:
         found = re.search(pattern, question, re.I)
         if found and normalized not in species_roles:
-            add("species", normalized, found.group(0), "NORMALIZED" if normalized != found.group(0).casefold() else "SOURCE_EXPLICIT")
+            add(
+                "species",
+                normalized,
+                found.group(0),
+                "NORMALIZED" if normalized != found.group(0).casefold() else "SOURCE_EXPLICIT",
+            )
             species_roles[normalized] = found.group(0)
     if len(species_roles) > 1:
-        diagnostics.append({
-            "code": "AMBIGUOUS_MULTIPLE_SPECIES", "field": "species",
-            "observed": list(species_roles),
-            "message": "Multiple species are explicit; choose the intended population before dataset qualification.",
-        })
+        diagnostics.append(
+            {
+                "code": "AMBIGUOUS_MULTIPLE_SPECIES",
+                "field": "species",
+                "observed": list(species_roles),
+                "message": "Multiple species are explicit; choose the intended population before dataset qualification.",
+            }
+        )
 
-    tissue = re.search(r"\b(?:in|from) ((?:human |mouse |murine |rat )?[A-Za-z][A-Za-z -]{1,60}?(?:cells?|tissue|tissues|organoids?|blood|plasma|serum))\b", question, re.I)
+    tissue = re.search(
+        r"\b(?:in|from) ((?:human |mouse |murine |rat )?[A-Za-z][A-Za-z -]{1,60}?(?:cells?|tissue|tissues|organoids?|blood|plasma|serum))\b",
+        question,
+        re.I,
+    )
     if tissue:
         add("tissue", _clean(tissue.group(1)), tissue.group(1))
 
     if "comparator" not in structured_fields:
-        comparator = re.search(r"\b(?:compared with|versus|vs\.?|than)\s+(.+?)" + _ROLE_END, question, re.I | re.S)
+        comparator = re.search(
+            r"\b(?:compared with|versus|vs\.?|than)\s+(.+?)" + _ROLE_END, question, re.I | re.S
+        )
         if comparator:
             observed = comparator.group(1).strip()
             add("comparator", _clean(observed), observed)
 
-    time = re.search(r"\b(?:over|after|at|within) ([0-9]+\s*(?:hours?|days?|weeks?|months?|years?))\b", question, re.I)
+    time = re.search(
+        r"\b(?:over|after|at|within) ([0-9]+\s*(?:hours?|days?|weeks?|months?|years?))\b",
+        question,
+        re.I,
+    )
     if time:
         add("time", _clean(time.group(1)), time.group(1))
 
@@ -161,7 +200,11 @@ def _role_matches(
             re.I,
         )
         if not intervention:
-            intervention = re.search(r"\b(?:treated with|exposed to|administered)\s+([A-Za-z0-9][A-Za-z0-9 -]{1,70}?)(?:\s+in\b|\s+compared\b|[?.;,])", question, re.I)
+            intervention = re.search(
+                r"\b(?:treated with|exposed to|administered)\s+([A-Za-z0-9][A-Za-z0-9 -]{1,70}?)(?:\s+in\b|\s+compared\b|[?.;,])",
+                question,
+                re.I,
+            )
         if intervention:
             observed = intervention.group(1).strip()
             add("intervention", _clean(observed), observed)
@@ -183,7 +226,8 @@ def _role_matches(
     copular = re.search(
         r"(?:^|:\s*)(?:is|are|was|were)\s+(.{1,70}?)\s+"
         r"(?:predictive of|associated with|correlated with|related to)\s+(.+?)" + _ROLE_END,
-        question, re.I | re.S,
+        question,
+        re.I | re.S,
     )
     if copular:
         for field, group in (("intervention", 1), ("outcome", 2)):
@@ -196,7 +240,10 @@ def _role_matches(
         # An arbitrary acronym is not an antecedent. Require an explicit risk
         # relation, retain its exact context span, and abstain on competing targets.
         mentions = []
-        for pattern in (r"\b(?i:risk (?:of|for))\s+(?P<target>[A-Z][A-Z0-9-]{2,})\b", r"\b(?P<target>[A-Z][A-Z0-9-]{2,})\s+(?i:risk)\b"):
+        for pattern in (
+            r"\b(?i:risk (?:of|for))\s+(?P<target>[A-Z][A-Z0-9-]{2,})\b",
+            r"\b(?P<target>[A-Z][A-Z0-9-]{2,})\s+(?i:risk)\b",
+        ):
             mentions.extend(re.finditer(pattern, context))
         targets = {match.group("target") for match in mentions}
         roles = [role for role in roles if role["field"] != "outcome"]
@@ -206,14 +253,19 @@ def _role_matches(
             add("outcome", f"risk of {mention.group('target')}", observed, "NORMALIZED")
             roles[-1]["antecedent_evidence"] = {
                 "source_locator": source_locator + "#context",
-                "start": mention.start(), "end": mention.end(), "text": mention.group(0),
+                "start": mention.start(),
+                "end": mention.end(),
+                "text": mention.group(0),
             }
         else:
-            diagnostics.append({
-                "code": "UNRESOLVED_RISK_REFERENCE", "field": "outcome",
-                "candidate_targets": sorted(targets),
-                "message": "A unique explicit risk antecedent is required; unrelated acronyms are not substitutes.",
-            })
+            diagnostics.append(
+                {
+                    "code": "UNRESOLVED_RISK_REFERENCE",
+                    "field": "outcome",
+                    "candidate_targets": sorted(targets),
+                    "message": "A unique explicit risk antecedent is required; unrelated acronyms are not substitutes.",
+                }
+            )
 
     return roles
 
@@ -248,7 +300,9 @@ def _requirement(
         "operator": "EQUALS",
         "essential": essential,
         "provenance": provenance,
-        "source_locator": (evidence or {}).get("source_locator", f"method-rule:{rule_id}" if rule_id else "user input"),
+        "source_locator": (evidence or {}).get(
+            "source_locator", f"method-rule:{rule_id}" if rule_id else "user input"
+        ),
         "dependencies": dependencies or [],
         "alternative_acceptable_realizations": alternatives or [],
         "unresolved_parameters": unresolved_parameters or [],
@@ -261,8 +315,12 @@ def _method_requirements(question_type: str, rulebook: dict[str, Any]) -> list[d
     for rule in rulebook["question_types"].get(question_type, {}).get("requirements", []):
         result.append(
             _requirement(
-                rule["field"], rule["expected"], bool(rule["essential"]), "METHOD_DERIVED",
-                rule_id=rule["rule_id"], dependencies=rule.get("dependencies", []),
+                rule["field"],
+                rule["expected"],
+                bool(rule["essential"]),
+                "METHOD_DERIVED",
+                rule_id=rule["rule_id"],
+                dependencies=rule.get("dependencies", []),
                 alternatives=rule.get("alternatives", []),
                 unresolved_parameters=rule.get("unresolved_parameters", []),
             )
@@ -336,8 +394,12 @@ def compile_question(
     roles = _role_matches(question, context, source_locator, diagnostics)
     requirements = [
         _requirement(
-            role["field"], role["expected"], True, role["provenance_category"],
-            evidence=role["evidence"], antecedent_evidence=role.get("antecedent_evidence"),
+            role["field"],
+            role["expected"],
+            True,
+            role["provenance_category"],
+            evidence=role["evidence"],
+            antecedent_evidence=role.get("antecedent_evidence"),
         )
         for role in roles
     ]
@@ -354,7 +416,14 @@ def compile_question(
                 if item["field"] == field and item["effective"]:
                     item["effective"] = False
                     if item["expected"] != expected:
-                        diagnostics.append({"code": "USER_OVERRIDE_CONFLICT", "field": field, "compiled": item["expected"], "user": expected})
+                        diagnostics.append(
+                            {
+                                "code": "USER_OVERRIDE_CONFLICT",
+                                "field": field,
+                                "compiled": item["expected"],
+                                "user": expected,
+                            }
+                        )
             requirements.append(_requirement(field, expected, essential, "USER_SPECIFIED"))
     effective = [item for item in requirements if item["effective"] and item["essential"]]
     has_effective_user_constraint = any(
@@ -386,14 +455,27 @@ def compile_question(
     missing_roles = sorted(needed_roles - {role["field"] for role in roles})
     if missing_roles and not has_effective_user_constraint:
         status = "QUESTION_UNDERDETERMINED"
-        diagnostics.append({
-            "code": "UNRESOLVED_TARGET_ROLES", "fields": missing_roles,
-            "message": "Task family recognized, but automatic data qualification needs named source-grounded target roles.",
-        })
+        diagnostics.append(
+            {
+                "code": "UNRESOLVED_TARGET_ROLES",
+                "fields": missing_roles,
+                "message": "Task family recognized, but automatic data qualification needs named source-grounded target roles.",
+            }
+        )
     if question_type == "QUESTION_UNDERDETERMINED":
-        diagnostics.append({"code": "UNSUPPORTED_OR_AMBIGUOUS_QUESTION_TYPE", "message": "Provide a target relationship, outcome, or supported question family."})
+        diagnostics.append(
+            {
+                "code": "UNSUPPORTED_OR_AMBIGUOUS_QUESTION_TYPE",
+                "message": "Provide a target relationship, outcome, or supported question family.",
+            }
+        )
     if not effective:
-        diagnostics.append({"code": "NO_ASSESSABLE_NECESSITIES", "message": "No candidate-data ranking will be performed."})
+        diagnostics.append(
+            {
+                "code": "NO_ASSESSABLE_NECESSITIES",
+                "message": "No candidate-data ranking will be performed.",
+            }
+        )
     return {
         "schema_version": SCHEMA_VERSION,
         "compiler_version": COMPILER_VERSION,
@@ -404,7 +486,9 @@ def compile_question(
         "question_purpose": question_type,
         "entity_roles": roles,
         "answer_specification": _answer_specification(question_type, roles),
-        "analysis_plans": rulebook["question_types"].get(question_type, {}).get("analysis_plans", []),
+        "analysis_plans": rulebook["question_types"]
+        .get(question_type, {})
+        .get("analysis_plans", []),
         "requirements": requirements,
         "ambiguities": [item for item in diagnostics if item["code"] != "USER_OVERRIDE_CONFLICT"],
         "diagnostics": diagnostics,
@@ -430,8 +514,12 @@ def matching_requirements(
             expected = item.get("expected")
             if expected is None or type(item.get("essential")) is not bool:
                 raise ValueError("Invalid compiler-to-assessor requirement mapping")
-            rows.append({
-                "field": item["field"], "expected": expected,
-                "essential": item["essential"], "source_locator": item["source_locator"],
-            })
+            rows.append(
+                {
+                    "field": item["field"],
+                    "expected": expected,
+                    "essential": item["essential"],
+                    "source_locator": item["source_locator"],
+                }
+            )
     return rows

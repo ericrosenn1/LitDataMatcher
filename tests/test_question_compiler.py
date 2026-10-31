@@ -19,9 +19,19 @@ def test_risk_question_compiles_estimable_contract_without_predicting_direction(
     assert result["answer_specification"]["predicted_value_or_direction"] is None
     requirements = matching_requirements(result)
     assert {row["field"] for row in requirements} >= {
-        "species", "intervention", "outcome", "joint_observation", "temporal_order", "outcome_ascertainment"
+        "species",
+        "intervention",
+        "outcome",
+        "joint_observation",
+        "temporal_order",
+        "outcome_ascertainment",
     }
-    assert next(row for row in result["requirements"] if row["field"] == "temporal_order")["provenance"]["category"] == "METHOD_DERIVED"
+    assert (
+        next(row for row in result["requirements"] if row["field"] == "temporal_order")[
+            "provenance"
+        ]["category"]
+        == "METHOD_DERIVED"
+    )
 
 
 def test_compiled_contract_can_qualify_observed_joint_candidate():
@@ -42,8 +52,12 @@ def test_compiled_contract_can_qualify_observed_joint_candidate():
 
 
 def test_missing_metadata_is_inspection_not_confirmed_absence():
-    result = compile_question("Does semaglutide increase risk of NAION in adults?", source_locator="question")
-    assessment = assess_requirements(matching_requirements(result), {"dataset_id": "metadata-thin", "capabilities": {}})
+    result = compile_question(
+        "Does semaglutide increase risk of NAION in adults?", source_locator="question"
+    )
+    assessment = assess_requirements(
+        matching_requirements(result), {"dataset_id": "metadata-thin", "capabilities": {}}
+    )
     assert assessment["eligibility"] == "REQUIRES_INSPECTION"
     assert any(row["status"] == "UNKNOWN" for row in assessment["requirements"])
 
@@ -63,8 +77,12 @@ def test_user_override_preserves_conflict_and_wins_effective_mapping():
     )
     species = [item for item in result["requirements"] if item["field"] == "species"]
     assert len(species) == 2
-    assert any(item["provenance"]["category"] == "USER_SPECIFIED" and item["effective"] for item in species)
-    assert {item["expected"] for item in matching_requirements(result) if item["field"] == "species"} == {"mouse"}
+    assert any(
+        item["provenance"]["category"] == "USER_SPECIFIED" and item["effective"] for item in species
+    )
+    assert {
+        item["expected"] for item in matching_requirements(result) if item["field"] == "species"
+    } == {"mouse"}
     assert any(item["code"] == "USER_OVERRIDE_CONFLICT" for item in result["diagnostics"])
 
 
@@ -89,8 +107,15 @@ def test_structured_pico_source_compiles_a_verbatim_comparative_contract():
     assert requirements["intervention"]["expected"] == "Liraglutide (1.2 mg) plus glimepiride"
     assert requirements["comparator"]["expected"] == "Rosiglitazone plus glimepiride"
     assert requirements["outcome"]["expected"] == "HbA1c at 26 weeks"
-    assert all(requirements[field]["provenance"]["category"] == "SOURCE_EXPLICIT" for field in ("intervention", "comparator", "outcome"))
-    assert {role["field"] for role in result["entity_roles"]} >= {"intervention", "comparator", "outcome"}
+    assert all(
+        requirements[field]["provenance"]["category"] == "SOURCE_EXPLICIT"
+        for field in ("intervention", "comparator", "outcome")
+    )
+    assert {role["field"] for role in result["entity_roles"]} >= {
+        "intervention",
+        "comparator",
+        "outcome",
+    }
 
 
 def test_structured_pico_fields_take_precedence_over_generic_pattern_matches():
@@ -104,7 +129,18 @@ def test_structured_pico_fields_take_precedence_over_generic_pattern_matches():
 
 def test_compile_cli_writes_machine_readable_artifact(tmp_path):
     output = tmp_path / "compiled.json"
-    assert main(["compile", "--question", "Does semaglutide increase risk of NAION in adults?", "--out", str(output)]) == 0
+    assert (
+        main(
+            [
+                "compile",
+                "--question",
+                "Does semaglutide increase risk of NAION in adults?",
+                "--out",
+                str(output),
+            ]
+        )
+        == 0
+    )
     artifact = json.loads(output.read_text(encoding="utf-8"))
     assert artifact["schema_version"] == SCHEMA_VERSION
     assert artifact["matching_requirements"]
@@ -112,7 +148,20 @@ def test_compile_cli_writes_machine_readable_artifact(tmp_path):
 
 def test_relevance_screen_does_not_promote_shared_species_to_inspection_candidate():
     datasets = [
-        {"dataset_id": "unrelated", "title": "Human UVB skin expression", "summary": "Public risk metadata", "capabilities": {}},
-        {"dataset_id": "relevant-but-thin", "title": "Semaglutide exposure cohort", "summary": "Outcome metadata pending", "capabilities": {}},
+        {
+            "dataset_id": "unrelated",
+            "title": "Human UVB skin expression",
+            "summary": "Public risk metadata",
+            "capabilities": {},
+        },
+        {
+            "dataset_id": "relevant-but-thin",
+            "title": "Semaglutide exposure cohort",
+            "summary": "Outcome metadata pending",
+            "capabilities": {},
+        },
     ]
-    assert [row["dataset_id"] for row in requirement_aware_candidates(datasets, ["semaglutide", "risk of NAION"])] == ["relevant-but-thin"]
+    assert [
+        row["dataset_id"]
+        for row in requirement_aware_candidates(datasets, ["semaglutide", "risk of NAION"])
+    ] == ["relevant-but-thin"]

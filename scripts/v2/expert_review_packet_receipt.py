@@ -11,15 +11,34 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from litdatamatcher.data_plane import atomic_json
-from litdatamatcher.expert_review import agreement_and_adjudication, build_blinded_review_packet, validate_review_labels
+from litdatamatcher.expert_review import (
+    agreement_and_adjudication,
+    build_blinded_review_packet,
+    validate_review_labels,
+)
 
 
 def build_receipt() -> dict:
     record = {
         "match_id": "source-determined-fixture-match",
         "label_origin": "source_determined",
-        "question": {"question": "Does the source-described exposure affect the reported outcome?", "source_ids": ["PMID:fixture"], "evidence": [{"source_locator": "fixture:question:span", "text": "Source-determined fixture span."}]},
-        "dataset": {"dataset_id": "GSE-fixture", "title": "Source-described fixture dataset", "source": "GEO", "organisms": ["Homo sapiens"], "assay_types": ["RNA-seq"]},
+        "question": {
+            "question": "Does the source-described exposure affect the reported outcome?",
+            "source_ids": ["PMID:fixture"],
+            "evidence": [
+                {
+                    "source_locator": "fixture:question:span",
+                    "text": "Source-determined fixture span.",
+                }
+            ],
+        },
+        "dataset": {
+            "dataset_id": "GSE-fixture",
+            "title": "Source-described fixture dataset",
+            "source": "GEO",
+            "organisms": ["Homo sapiens"],
+            "assay_types": ["RNA-seq"],
+        },
         "score": 1.0,
         "rank": 1,
     }
@@ -38,8 +57,12 @@ def build_receipt() -> dict:
         "assignment_count": packet["assignment_count"],
         "expert_label_count": len(validation["valid_labels"]),
         "adjudication_record_count": len(agreement["adjudication_records"]),
-        "masking_validation": "PASS" if "score" not in item and "rank" not in item and item["question_source_spans"] else "FAIL",
-        "validation_status": "PASS" if packet["review_status"] == "PENDING_EXPERT_REVIEW" and not validation["valid_labels"] else "FAIL",
+        "masking_validation": "PASS"
+        if "score" not in item and "rank" not in item and item["question_source_spans"]
+        else "FAIL",
+        "validation_status": "PASS"
+        if packet["review_status"] == "PENDING_EXPERT_REVIEW" and not validation["valid_labels"]
+        else "FAIL",
         "limitation": "No expert labels, adjudication outcome, calibration, or gold-standard claim is present.",
     }
 

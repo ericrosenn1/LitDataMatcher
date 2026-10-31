@@ -138,7 +138,9 @@ def test_cache_path_directory_is_an_error_without_network_or_success_metadata(ca
 
 @pytest.mark.parametrize("offline", [False, True])
 @pytest.mark.parametrize("body", [b'{"truncated":', b""])
-def test_malformed_json_cache_is_preserved_without_fallback_or_success_metadata(tmp_path, offline, body):
+def test_malformed_json_cache_is_preserved_without_fallback_or_success_metadata(
+    tmp_path, offline, body
+):
     client = CachedHttpClient(cache_dir=tmp_path, offline=offline)
     path = tmp_path / f"{GET_KEY}.json"
     path.write_bytes(body)
@@ -167,7 +169,9 @@ def test_offline_refresh_never_fetches_or_replaces_existing_entry(tmp_path, use_
 
 
 @pytest.mark.parametrize("use_cache", [False, True])
-def test_mocked_success_preserves_request_keys_and_clears_stale_metadata(cache_case, monkeypatch, use_cache):
+def test_mocked_success_preserves_request_keys_and_clears_stale_metadata(
+    cache_case, monkeypatch, use_cache
+):
     client, method, upload, path, _, _ = cache_case
     client.offline = False
     client.last_response_metadata = {"cache_status": "previous_request"}
@@ -187,7 +191,10 @@ def test_mocked_success_preserves_request_keys_and_clears_stale_metadata(cache_c
         assert sorted(client.cache_dir.iterdir()) == [client.cache_dir / ".provenance", path]
         receipt = Path(client.last_response_metadata["acquisition_envelope_path"])
         assert receipt.is_file()
-        assert json.loads(receipt.read_text())["cache_content_sha256"] == sha256(path.read_bytes()).hexdigest()
+        assert (
+            json.loads(receipt.read_text())["cache_content_sha256"]
+            == sha256(path.read_bytes()).hexdigest()
+        )
     else:
         assert client.last_response_metadata == {}
         assert list(client.cache_dir.iterdir()) == []
@@ -210,7 +217,9 @@ def test_failed_request_does_not_reuse_previous_response_metadata(cache_case, mo
 
 
 @pytest.mark.parametrize("failure", ["partial_write", "metadata_hash", "replace"])
-def test_failed_cache_promotion_preserves_prior_entry_and_leaves_no_partial_cache(cache_case, monkeypatch, failure):
+def test_failed_cache_promotion_preserves_prior_entry_and_leaves_no_partial_cache(
+    cache_case, monkeypatch, failure
+):
     client, method, upload, path, body, value = cache_case
     client.offline = False
     # JSON supports refresh; text and POST only write on cache misses.
@@ -222,6 +231,7 @@ def test_failed_cache_promotion_preserves_prior_entry_and_leaves_no_partial_cach
 
     with monkeypatch.context() as faults:
         if failure == "partial_write":
+
             def fail_write(target, text, **kwargs):
                 target.write_bytes(b"partial replacement")
                 raise OSError("synthetic partial write")
@@ -237,6 +247,7 @@ def test_failed_cache_promotion_preserves_prior_entry_and_leaves_no_partial_cach
 
             faults.setattr(http_cache, "_file_sha256", fail_new_metadata)
         else:
+
             def fail_replace(*args, **kwargs):
                 raise OSError("synthetic replacement failure")
 

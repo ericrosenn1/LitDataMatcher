@@ -130,10 +130,7 @@ def statement_to_question(sentence: str) -> str:
         and any(term in lowered for term in ("sample", "observation", "observations"))
         and any(term in lowered for term in ("imbalanced", "positive", "negative", "label"))
     ):
-        return (
-            "Can the reported finding be validated with larger, better-balanced "
-            "labeled samples?"
-        )
+        return "Can the reported finding be validated with larger, better-balanced labeled samples?"
     if "missing data" in lowered or "incomplete data" in lowered:
         return "Would more complete public data resolve the reported limitation?"
 
@@ -300,9 +297,7 @@ def should_reject_question_candidate(
     return False
 
 
-def _looks_like_reference_title_question(
-    sentence: str, question: str, signals: list[str]
-) -> bool:
+def _looks_like_reference_title_question(sentence: str, question: str, signals: list[str]) -> bool:
     """Detect bare citation-title questions without suppressing grounded cues."""
 
     if signals != ["explicit_rq"]:

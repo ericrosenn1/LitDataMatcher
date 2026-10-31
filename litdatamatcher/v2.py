@@ -46,15 +46,24 @@ def _observed_metadata_values(record, field, capabilities, aliases):
     evidence = record.get("field_evidence") or metadata.get("field_evidence", {})
     observation = evidence.get(field, {}) if isinstance(evidence, dict) else {}
     values = record.get(field, [])
-    if (isinstance(observation, dict) and observation.get("status") in {"observed", "known"}
-            and observation.get("source_locator") and observation.get("mapping_type", "exact") in {"exact", "synonym"}
-            and isinstance(values, list) and observation.get("value") == values):
+    if (
+        isinstance(observation, dict)
+        and observation.get("status") in {"observed", "known"}
+        and observation.get("source_locator")
+        and observation.get("mapping_type", "exact") in {"exact", "synonym"}
+        and isinstance(values, list)
+        and observation.get("value") == values
+    ):
         return values, observation["source_locator"]
     for alias in aliases:
         observation = capabilities.get(alias, {})
-        if (isinstance(observation, dict) and observation.get("status") == "observed"
-                and observation.get("source_locator") and observation.get("value") is not None
-                and observation.get("mapping_type", "exact") in {"exact", "synonym"}):
+        if (
+            isinstance(observation, dict)
+            and observation.get("status") == "observed"
+            and observation.get("source_locator")
+            and observation.get("value") is not None
+            and observation.get("mapping_type", "exact") in {"exact", "synonym"}
+        ):
             value = observation["value"]
             return value if isinstance(value, list) else [value], observation["source_locator"]
     return [], None
@@ -66,12 +75,14 @@ def _geo_source_fields(record):
     provenance = record.get("source_provenance") or metadata.get("source_provenance", {})
     if not isinstance(provenance, dict):
         return {}
-    if not (provenance.get("source_type") == "geo"
-            and provenance.get("adapter_name") == "geo"
-            and provenance.get("adapter_version") == "ncbi_geo_esummary_source_fidelity_v2"
-            and provenance.get("acquisition_method") == "ncbi_eutilities"
-            and provenance.get("raw_record_id") == record.get("dataset_id")
-            and metadata.get("accession") == record.get("dataset_id")):
+    if not (
+        provenance.get("source_type") == "geo"
+        and provenance.get("adapter_name") == "geo"
+        and provenance.get("adapter_version") == "ncbi_geo_esummary_source_fidelity_v2"
+        and provenance.get("acquisition_method") == "ncbi_eutilities"
+        and provenance.get("raw_record_id") == record.get("dataset_id")
+        and metadata.get("accession") == record.get("dataset_id")
+    ):
         return {}
     uid = metadata.get("uid")
     if not re.fullmatch(r"\d+", str(uid or "")):
@@ -106,16 +117,24 @@ def normalize_dataset(record):
             if k in {"value", "status", "source_locator", "reason", "mapping_type"}
         }
         caps[key] = value
-    organisms, organism_locator = _observed_metadata_values(record, "organisms", caps, ("species", "organism"))
+    organisms, organism_locator = _observed_metadata_values(
+        record, "organisms", caps, ("species", "organism")
+    )
     assays, assay_locator = _observed_metadata_values(record, "assay_types", caps, ("assay",))
     geo_fields = _geo_source_fields(record)
     if not organisms and "organisms" in geo_fields:
         organisms, organism_locator = geo_fields["organisms"]
     if not assays and "assay_types" in geo_fields:
         assays, assay_locator = geo_fields["assay_types"]
-    contract = modality_contract(dict(record, capabilities=caps, organisms=organisms, assay_types=assays))
+    contract = modality_contract(
+        dict(record, capabilities=caps, organisms=organisms, assay_types=assays)
+    )
     provenance = record.get("source_provenance") or metadata.get("source_provenance", {})
-    locator = provenance.get("source_locator") or provenance.get("source_url") if isinstance(provenance, dict) else None
+    locator = (
+        provenance.get("source_locator") or provenance.get("source_url")
+        if isinstance(provenance, dict)
+        else None
+    )
     # Source adapter fields can support narrow metadata compatibility. They do
     # not establish measured outcomes, participant access, or independent units.
     if locator or organism_locator or assay_locator:
@@ -125,16 +144,33 @@ def normalize_dataset(record):
             ("assay", assays, assay_locator),
             ("modality", [v for v in contract["modality"] if v != "UNKNOWN"], assay_locator),
         ):
-            if values and field_locator and (field not in caps or caps[field].get("status") == "unknown"):
-                caps[field] = {"value": values, "status": "observed", "source_locator": field_locator,
-                               "mapping_type": "synonym" if field == "modality" else "exact"}
+            if (
+                values
+                and field_locator
+                and (field not in caps or caps[field].get("status") == "unknown")
+            ):
+                caps[field] = {
+                    "value": values,
+                    "status": "observed",
+                    "source_locator": field_locator,
+                    "mapping_type": "synonym" if field == "modality" else "exact",
+                }
         protocol = metadata.get("protocolSection", {}) if isinstance(metadata, dict) else {}
         design = protocol.get("designModule", {}) if isinstance(protocol, dict) else {}
-        if (locator and isinstance(design, dict) and design.get("studyType") in {"OBSERVATIONAL", "INTERVENTIONAL"}
-                and ("study_design" not in caps or caps["study_design"].get("status") == "unknown")):
+        if (
+            locator
+            and isinstance(design, dict)
+            and design.get("studyType") in {"OBSERVATIONAL", "INTERVENTIONAL"}
+            and ("study_design" not in caps or caps["study_design"].get("status") == "unknown")
+        ):
             info = design.get("designInfo", {})
             allocation = info.get("allocation", "UNKNOWN") if isinstance(info, dict) else "UNKNOWN"
-            caps["study_design"] = {"value": {"study_type": design["studyType"], "allocation": allocation}, "status": "observed", "source_locator": f"{locator}#/protocolSection/designModule", "mapping_type": "exact"}
+            caps["study_design"] = {
+                "value": {"study_type": design["studyType"], "allocation": allocation},
+                "status": "observed",
+                "source_locator": f"{locator}#/protocolSection/designModule",
+                "mapping_type": "exact",
+            }
     result["capabilities"] = caps
     result["modality_contract"] = contract
     result["availability"] = record.get("access_status", metadata.get("access_status", "UNKNOWN"))
@@ -158,8 +194,19 @@ def requirement_aware_candidates(datasets: list[dict], relevance_terms: list[str
     """
     normalized_terms = []
     generic_tokens = {
-        "risk", "outcome", "effect", "change", "increase", "decrease", "response",
-        "disease", "condition", "treatment", "exposure", "cells", "tissue",
+        "risk",
+        "outcome",
+        "effect",
+        "change",
+        "increase",
+        "decrease",
+        "response",
+        "disease",
+        "condition",
+        "treatment",
+        "exposure",
+        "cells",
+        "tissue",
     }
     for term in relevance_terms:
         value = str(term).casefold().strip()
@@ -244,7 +291,9 @@ def source_chunks(document, max_chars=1800, max_chunks=2):
 
 def document_lifecycle_status(document):
     """Check current source relations before reusing or generating scientific evidence."""
-    return consolidate_literature_rows([document])[0]["metadata"]["literature_integrity"]["lifecycle_status"]
+    return consolidate_literature_rows([document])[0]["metadata"]["literature_integrity"][
+        "lifecycle_status"
+    ]
 
 
 _EXPLICIT_GAP = re.compile(
@@ -296,15 +345,27 @@ def deduplicate_questions(questions: list[dict]) -> list[dict]:
         document_id = item.get("source_document_id")
         statement = item.get("question", item.get("text"))
         source_bound = (
-            item.get("origin") != "user" and bool(document_id)
-            and type(span.get("start")) is int and type(span.get("end")) is int
-            and 0 <= span["start"] < span["end"] and isinstance(statement, str)
-            and statement == span.get("text") and len(statement) == span["end"] - span["start"]
+            item.get("origin") != "user"
+            and bool(document_id)
+            and type(span.get("start")) is int
+            and type(span.get("end")) is int
+            and 0 <= span["start"] < span["end"]
+            and isinstance(statement, str)
+            and statement == span.get("text")
+            and len(statement) == span["end"] - span["start"]
         )
         key = (
-            ("source_span", document_id, span["start"], span["end"], statement,
-             digest(item.get("requirements", [])), digest(item.get("conditions", {})))
-            if source_bound else ("question_id", item["question_id"])
+            (
+                "source_span",
+                document_id,
+                span["start"],
+                span["end"],
+                statement,
+                digest(item.get("requirements", [])),
+                digest(item.get("conditions", {})),
+            )
+            if source_bound
+            else ("question_id", item["question_id"])
         )
         if key not in unique:
             unique[key] = dict(item)
@@ -313,10 +374,14 @@ def deduplicate_questions(questions: list[dict]) -> list[dict]:
         if not source_bound:
             # Explicit questions have caller-owned identity and constraints.
             continue
-        records = previous.get("source_question_records", [dict(previous)]) + item.get("source_question_records", [dict(item)])
+        records = previous.get("source_question_records", [dict(previous)]) + item.get(
+            "source_question_records", [dict(item)]
+        )
         records = list({digest(record): record for record in records}.values())
         previous["source_question_records"] = records
-        previous["extraction_origins"] = sorted({record["origin"] for record in records if record.get("origin")})
+        previous["extraction_origins"] = sorted(
+            {record["origin"] for record in records if record.get("origin")}
+        )
         previous["original_question_ids"] = sorted({record["question_id"] for record in records})
     return list(unique.values())
 
@@ -358,7 +423,8 @@ def qualified_runtime(qualification_path: Path, runtime) -> tuple[bool, str | No
         expected_backend = dict(expected)
         source_hash = expected_backend.pop("input_sha256")
         expected_backend["decoding"] = {
-            key: value for key, value in expected_backend["decoding"].items()
+            key: value
+            for key, value in expected_backend["decoding"].items()
             if key not in {"schema_sha256", "complete_sentence_choices"}
         }
         fresh = qualification["fresh"]
@@ -368,8 +434,12 @@ def qualified_runtime(qualification_path: Path, runtime) -> tuple[bool, str | No
             and qualification.get("status") == "PASS"
             and qualification["backend_identity"] == backend == expected_backend
             and re.fullmatch(r"[a-f0-9]{64}", source_hash) is not None
-            and fresh["inference_manifest"]["fingerprint"] == expected == qualification["replay_identity"]
-            and fresh["inference_manifest"]["configuration"] == configuration == qualification["replay_configuration"]
+            and fresh["inference_manifest"]["fingerprint"]
+            == expected
+            == qualification["replay_identity"]
+            and fresh["inference_manifest"]["configuration"]
+            == configuration
+            == qualification["replay_configuration"]
             and runtime_digest(configuration) == backend["config_sha256"]
             and fresh["inference_manifest"]["origin"] == "fresh_local_inference"
             and fresh["inference_manifest"]["model_revision"] == runtime.model_manifest["revision"]
@@ -448,19 +518,30 @@ def evidence_from_claim(claim, document):
 def evidence_from_source_view(document, view):
     """Retain retrieved text as context without converting it into a model claim."""
     span = {"start": view["parent_start"], "end": view["parent_end"], "text": view["text"]}
-    if document["text"][span["start"]:span["end"]] != span["text"]:
+    if document["text"][span["start"] : span["end"]] != span["text"]:
         raise ValueError("Source context span mismatch")
     return {
-        "evidence_id": stable_id("retrieved_context", document["document_id"], span["start"], span["end"]),
-        "proposition_id": None, "role": "background", "direction": "inconclusive",
-        "source_id": document["document_id"], "source_document_id": document["document_id"],
+        "evidence_id": stable_id(
+            "retrieved_context", document["document_id"], span["start"], span["end"]
+        ),
+        "proposition_id": None,
+        "role": "background",
+        "direction": "inconclusive",
+        "source_id": document["document_id"],
+        "source_document_id": document["document_id"],
         "publication_id": document.get("pmid") or document.get("doi"),
         **evidence_publication_date(document),
-        "study_id": None, "cohort_id": None, "source_of_source": None,
-        "measurement_type": "retrieved_text_context", "scope_match": "unresolved",
-        "answers_question": False, "statement": view["text"], "evidence_span": span,
+        "study_id": None,
+        "cohort_id": None,
+        "source_of_source": None,
+        "measurement_type": "retrieved_text_context",
+        "scope_match": "unresolved",
+        "answers_question": False,
+        "statement": view["text"],
+        "evidence_span": span,
         "source_locator": f"{document.get('source_locator', document['document_id'])}#chars={span['start']}:{span['end']}",
-        "evidence_origin": "deterministic_source_passage", "claim_status": "NOT_ASSERTED",
+        "evidence_origin": "deterministic_source_passage",
+        "claim_status": "NOT_ASSERTED",
         "source_provenance": view.get("source_provenance", {}),
     }
 
@@ -470,7 +551,11 @@ def render_report(run: Path) -> Path:
     matches = read_rows(run / "matches.jsonl")
     questions = {q["question_id"]: q for q in read_rows(run / "questions.jsonl")}
     bundles = {b["question_id"]: b for b in read_rows(run / "evidence_bundles.jsonl")}
-    outcomes = read_rows(run / "candidate_outcomes.jsonl") if (run / "candidate_outcomes.jsonl").exists() else []
+    outcomes = (
+        read_rows(run / "candidate_outcomes.jsonl")
+        if (run / "candidate_outcomes.jsonl").exists()
+        else []
+    )
 
     def esc(value):
         return html.escape(str(value), quote=True)
@@ -502,10 +587,26 @@ def render_report(run: Path) -> Path:
 
 
 def analyze(
-    root: Path, out: Path, model_dir: Path, embedding_dir: Path, *, question=None,
-    requirements=None, limit=3, chunks=2, fresh=False, device="cpu", document_path=None,
-    topic=None, reference_accessions=None, question_source_id=None, resume=False, vector_cache=None,
-    runtime_config=None, runtime_qualification=None, _session=None,
+    root: Path,
+    out: Path,
+    model_dir: Path,
+    embedding_dir: Path,
+    *,
+    question=None,
+    requirements=None,
+    limit=3,
+    chunks=2,
+    fresh=False,
+    device="cpu",
+    document_path=None,
+    topic=None,
+    reference_accessions=None,
+    question_source_id=None,
+    resume=False,
+    vector_cache=None,
+    runtime_config=None,
+    runtime_qualification=None,
+    _session=None,
 ):
     """Run or resume fingerprint-checked extraction, compilation and matching stages."""
     from .analysis_session import runtime_configuration, runtime_environment
@@ -516,27 +617,62 @@ def analyze(
     if runtime_qualification and not Path(runtime_qualification).is_file():
         raise ValueError("Explicit runtime qualification must be an existing file")
     root, out, model_dir, embedding_dir = map(Path, (root, out, model_dir, embedding_dir))
-    parameters = dict(question=question, requirements=requirements, limit=limit, chunks=chunks,
-        fresh=fresh, device=device, document_path=str(Path(document_path).resolve()) if document_path else None,
-        topic=topic, reference_accessions=reference_accessions, question_source_id=question_source_id,
+    parameters = dict(
+        question=question,
+        requirements=requirements,
+        limit=limit,
+        chunks=chunks,
+        fresh=fresh,
+        device=device,
+        document_path=str(Path(document_path).resolve()) if document_path else None,
+        topic=topic,
+        reference_accessions=reference_accessions,
+        question_source_id=question_source_id,
         vector_cache=str(Path(vector_cache).resolve()) if vector_cache else None,
         runtime_config=runtime_configuration(device, runtime_config),
-        runtime_qualification=str(Path(runtime_qualification).resolve()) if runtime_qualification else None)
-    owner = _session.claim(root, model_dir, embedding_dir, parameters) if _session else nullcontext()
+        runtime_qualification=str(Path(runtime_qualification).resolve())
+        if runtime_qualification
+        else None,
+    )
+    owner = (
+        _session.claim(root, model_dir, embedding_dir, parameters) if _session else nullcontext()
+    )
     with owner:
-        fingerprint = _session.fingerprint(parameters) if _session else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+        fingerprint = (
+            _session.fingerprint(parameters)
+            if _session
+            else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+        )
         fingerprint["runtime_environment"] = runtime_environment()
-        fingerprint["qualification_override"] = file_identity(runtime_qualification) if runtime_qualification else None
+        fingerprint["qualification_override"] = (
+            file_identity(runtime_qualification) if runtime_qualification else None
+        )
         with CheckpointRun(out, fingerprint, resume) as workflow:
             previous = workflow.completed()
             if previous is not None:
                 return previous
-            result = _analyze_stages(root, out, model_dir, embedding_dir, **parameters, _workflow=workflow, _session=_session)
-            current = _session.fingerprint(parameters) if _session else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+            result = _analyze_stages(
+                root,
+                out,
+                model_dir,
+                embedding_dir,
+                **parameters,
+                _workflow=workflow,
+                _session=_session,
+            )
+            current = (
+                _session.fingerprint(parameters)
+                if _session
+                else analysis_fingerprint(root, model_dir, embedding_dir, parameters)
+            )
             current["runtime_environment"] = runtime_environment()
-            current["qualification_override"] = file_identity(runtime_qualification) if runtime_qualification else None
+            current["qualification_override"] = (
+                file_identity(runtime_qualification) if runtime_qualification else None
+            )
             if current != fingerprint:
-                raise ValueError("Analysis input, model or implementation changed during execution; output is not accepted")
+                raise ValueError(
+                    "Analysis input, model or implementation changed during execution; output is not accepted"
+                )
             workflow.finish(result)
             return result
 
@@ -579,7 +715,9 @@ def _analyze_stages(
         local_state = _workflow.load("local_ingestion")
         if local_state is not None:
             try:
-                if not isinstance(local_state.get("records"), list) or not local_state.get("outputs"):
+                if not isinstance(local_state.get("records"), list) or not local_state.get(
+                    "outputs"
+                ):
                     raise ValueError("Invalid local ingestion checkpoint")
                 for row in local_state["outputs"]:
                     path = (localout / row["name"]).resolve()
@@ -589,16 +727,33 @@ def _analyze_stages(
                         raise ValueError("Local ingestion artifact changed")
                     validate_artifact(path)
             except (OSError, KeyError, TypeError, ValueError) as error:
-                quarantine = out / ".workflow" / "quarantine" / f"ingestion-{dt.datetime.now().strftime('%Y%m%d%H%M%S%f')}"
+                quarantine = (
+                    out
+                    / ".workflow"
+                    / "quarantine"
+                    / f"ingestion-{dt.datetime.now().strftime('%Y%m%d%H%M%S%f')}"
+                )
                 quarantine.parent.mkdir(exist_ok=True)
                 localout.replace(quarantine)
                 localout.mkdir()
-                _workflow.state["repairs"].append({"stage": "local_ingestion", "reason": str(error), "quarantine": str(quarantine)})
+                _workflow.state["repairs"].append(
+                    {
+                        "stage": "local_ingestion",
+                        "reason": str(error),
+                        "quarantine": str(quarantine),
+                    }
+                )
                 local_state = None
         if local_state is None:
             ingest_literature_sources([str(document_path)], localout / "literature.jsonl")
-            local_state = {"records": read_rows(localout / "literature.jsonl"),
-                           "outputs": [{"name": path.name, "identity": file_identity(path)} for path in sorted(localout.iterdir()) if path.is_file()]}
+            local_state = {
+                "records": read_rows(localout / "literature.jsonl"),
+                "outputs": [
+                    {"name": path.name, "identity": file_identity(path)}
+                    for path in sorted(localout.iterdir())
+                    if path.is_file()
+                ],
+            }
             _workflow.save("local_ingestion", local_state)
         documents = local_state["records"]
     if topic:
@@ -636,12 +791,18 @@ def _analyze_stages(
         [
             d
             for d in documents
-            if d.get("split_context", "development") == "development" and d.get("text") and d["document_id"] not in excluded_ids
+            if d.get("split_context", "development") == "development"
+            and d.get("text")
+            and d["document_id"] not in excluded_ids
         ],
         key=lambda d: d["document_id"],
     )[:limit]
     datasets = [d for d in all_datasets if d.get("split_context", "development") == "development"]
-    runtime = _session.runtime if _session else LocalSemanticRuntime(model_dir, RuntimeConfig(**runtime_config))
+    runtime = (
+        _session.runtime
+        if _session
+        else LocalSemanticRuntime(model_dir, RuntimeConfig(**runtime_config))
+    )
     catalog = Catalog(root / "normalized")
     claims = []
     questions = []
@@ -662,12 +823,16 @@ def _analyze_stages(
             extraction = None
         if extraction is not None:
             claims, questions, inferences, failures, views, evidence = (
-                extraction[name] for name in ("claims", "questions", "inferences", "failures", "views", "evidence")
+                extraction[name]
+                for name in ("claims", "questions", "inferences", "failures", "views", "evidence")
             )
         else:
             for document in selected:
                 catalog.upsert(
-                    "document", document["document_id"], document, search_text=document.get("title", "")
+                    "document",
+                    document["document_id"],
+                    document,
+                    search_text=document.get("title", ""),
                 )
                 for view in source_chunks(document, max_chunks=chunks):
                     viewid = digest(view)
@@ -684,7 +849,9 @@ def _analyze_stages(
                     try:
                         result = _workflow.cached(
                             "view:" + viewid,
-                            lambda view=runtime_view: runtime.extract(view, root / "inference_cache", force_fresh=fresh),
+                            lambda view=runtime_view: runtime.extract(
+                                view, root / "inference_cache", force_fresh=fresh
+                            ),
                         )
                     except (ValueError, RuntimeError, OSError) as exc:
                         failures.append(
@@ -699,7 +866,8 @@ def _analyze_stages(
                     evidence.append(evidence_from_source_view(document, view))
                     inferences.append(result["inference_manifest"])
                     result["claims"] = [
-                        rebase_runtime_item(item, document, view, viewid) for item in result["claims"]
+                        rebase_runtime_item(item, document, view, viewid)
+                        for item in result["claims"]
                     ]
                     result["questions"] = [
                         rebase_runtime_item(item, document, view, viewid)
@@ -709,7 +877,10 @@ def _analyze_stages(
                         item["inference_fingerprint"] = result["inference_manifest"]["fingerprint"]
                     for claim in result["claims"]:
                         catalog.upsert(
-                            "claim", claim["claim_id"], claim, [("document", document["document_id"])]
+                            "claim",
+                            claim["claim_id"],
+                            claim,
+                            [("document", document["document_id"])],
                         )
                         claims.append(claim)
                         evidence.append(evidence_from_claim(claim, document))
@@ -733,15 +904,31 @@ def _analyze_stages(
                             }
                         )
             questions.extend(discover_cross_document_gaps(evidence, started[:10]))
-            _workflow.save("extraction", {"claims": claims, "questions": questions,
-                "inferences": inferences, "failures": failures, "views": views, "evidence": evidence})
-        _workflow.state["retryable_stage_failures"] = any(item.get("stage") == "inference" for item in failures)
+            _workflow.save(
+                "extraction",
+                {
+                    "claims": claims,
+                    "questions": questions,
+                    "inferences": inferences,
+                    "failures": failures,
+                    "views": views,
+                    "evidence": evidence,
+                },
+            )
+        _workflow.state["retryable_stage_failures"] = any(
+            item.get("stage") == "inference" for item in failures
+        )
         compilation_state = _workflow.load("compilation", ("extraction",))
         if compilation_state is not None:
-            questions, compilations = compilation_state["questions"], compilation_state["compilations"]
+            questions, compilations = (
+                compilation_state["questions"],
+                compilation_state["compilations"],
+            )
         else:
             if question:
-                if question_source_id and question_source_id not in {item["document_id"] for item in selected}:
+                if question_source_id and question_source_id not in {
+                    item["document_id"] for item in selected
+                }:
                     raise ValueError("Question source must be one of the selected active documents")
                 questions.insert(
                     0,
@@ -753,7 +940,14 @@ def _analyze_stages(
                         "requirements": requirements or [],
                         "conditions": {},
                         "gap_status": "unassessed",
-                        **({"source_document_id": question_source_id, "source_relation": "caller-declared source context; no direct-answer claim"} if question_source_id else {}),
+                        **(
+                            {
+                                "source_document_id": question_source_id,
+                                "source_relation": "caller-declared source context; no direct-answer claim",
+                            }
+                            if question_source_id
+                            else {}
+                        ),
                     },
                 )
             questions = deduplicate_questions(questions)
@@ -771,7 +965,9 @@ def _analyze_stages(
                     q["question"],
                     source_text=source_document.get("text"),
                     source_locator=source_locator,
-                    user_constraints=(q.get("requirements") or []) if q.get("origin") == "user" else None,
+                    user_constraints=(q.get("requirements") or [])
+                    if q.get("origin") == "user"
+                    else None,
                 )
                 q["requirements"] = matching_requirements(
                     compilation,
@@ -799,20 +995,32 @@ def _analyze_stages(
                     }
                 )
                 compilations.append(
-                    {"question_id": q["question_id"], "compilation_id": q["compilation_id"], **compilation}
+                    {
+                        "question_id": q["question_id"],
+                        "compilation_id": q["compilation_id"],
+                        **compilation,
+                    }
                 )
-            _workflow.save("compilation", {"questions": questions, "compilations": compilations}, ("extraction",))
+            _workflow.save(
+                "compilation",
+                {"questions": questions, "compilations": compilations},
+                ("extraction",),
+            )
         matching = _workflow.load("matching", ("compilation",))
         if matching is not None:
             matches, candidate_outcomes, bundles, dossiers = (
                 matching[name] for name in ("matches", "candidate_outcomes", "bundles", "dossiers")
             )
         else:
-            records = [{"id": d["dataset_id"], "text": d["title"] + " " + d.get("summary", "")} for d in datasets]
+            records = [
+                {"id": d["dataset_id"], "text": d["title"] + " " + d.get("summary", "")}
+                for d in datasets
+            ]
             if _session:
                 index = _session.retriever(records) if datasets else None
             elif vector_cache:
                 from .retrieval import CachedSemanticIndex
+
                 index = CachedSemanticIndex(embedding_dir, vector_cache, device=device)
             else:
                 index = PretrainedSemanticIndex(embedding_dir, device=device)
@@ -829,21 +1037,39 @@ def _analyze_stages(
             if (root / "external_evidence/uniprot").exists():
                 from .external_evidence import import_resource
 
-                reference_records = import_resource(root, offline=True, **({"accessions": reference_accessions} if reference_accessions else {}))
+                reference_records = import_resource(
+                    root,
+                    offline=True,
+                    **({"accessions": reference_accessions} if reference_accessions else {}),
+                )
             for q in questions:
                 # Related retrieved claims remain context; exact proposition support requires a separate justified mapping.
                 qtext = q["question"]
                 query_tokens = set(re.findall(r"\w+", qtext.lower()))
                 contextual = []
                 for item in evidence:
-                    if (q.get("source_document_id") and q["source_document_id"] == item.get("source_document_id")) or len(query_tokens & set(re.findall(r"\w+", item["statement"].lower()))) >= 3:
+                    if (
+                        q.get("source_document_id")
+                        and q["source_document_id"] == item.get("source_document_id")
+                    ) or len(
+                        query_tokens & set(re.findall(r"\w+", item["statement"].lower()))
+                    ) >= 3:
                         contextual.append(dict(item, related_proposition_id=q["proposition_id"]))
                 if reference_records:
                     from .external_evidence import query_resource
 
-                    entities = sorted({alias for record in reference_records for alias in record["aliases"] if re.search(r"(?<!\w)" + re.escape(alias) + r"(?!\w)", qtext, re.I)})
+                    entities = sorted(
+                        {
+                            alias
+                            for record in reference_records
+                            for alias in record["aliases"]
+                            if re.search(r"(?<!\w)" + re.escape(alias) + r"(?!\w)", qtext, re.I)
+                        }
+                    )
                     contextual.extend(
-                        query_resource(reference_records, entities, proposition_id=q["proposition_id"])
+                        query_resource(
+                            reference_records, entities, proposition_id=q["proposition_id"]
+                        )
                     )
                 bundle = compile_evidence(q, contextual, started[:10], [])
                 bundles.append(bundle)
@@ -860,12 +1086,17 @@ def _analyze_stages(
                     continue
                 routing_query = " ".join([qtext, *q.get("routing_terms", [])])
                 semantic = (
-                    {r["id"]: r["score"] for r in index.search(routing_query, k=min(50, len(datasets)))}
+                    {
+                        r["id"]: r["score"]
+                        for r in index.search(routing_query, k=min(50, len(datasets)))
+                    }
                     if datasets
                     else {}
                 )
                 lexical = set(catalog.search("dataset", routing_query, 50))
-                initial_candidates = [d for d in datasets if d["dataset_id"] in lexical | set(semantic)]
+                initial_candidates = [
+                    d for d in datasets if d["dataset_id"] in lexical | set(semantic)
+                ]
                 candidates = requirement_aware_candidates(
                     initial_candidates, q.get("candidate_relevance_terms", [])
                 )
@@ -897,18 +1128,50 @@ def _analyze_stages(
                     if bundle["evidence_items"]:
                         from .scientific_dossier import build_dossier
 
-                        linked_question = dict(q, source_evidence_ids=[item["evidence_id"] for item in bundle["evidence_items"]], source_relation="retrieved context; direct support only as classified in the bundle")
-                        candidate = next(item for item in candidates if item["dataset_id"] == m["dataset_id"])
-                        dossier = build_dossier(linked_question, bundle, m["assessment"], candidate, [
-                            "Eligibility is determined by essential observed requirements before ranking.",
-                            f"Uncalibrated heuristic components: {json.dumps(m['components'], sort_keys=True)}",
-                            "Retrieved context does not establish novelty, causal effects or statistical adequacy.",
-                        ])
+                        linked_question = dict(
+                            q,
+                            source_evidence_ids=[
+                                item["evidence_id"] for item in bundle["evidence_items"]
+                            ],
+                            source_relation="retrieved context; direct support only as classified in the bundle",
+                        )
+                        candidate = next(
+                            item for item in candidates if item["dataset_id"] == m["dataset_id"]
+                        )
+                        dossier = build_dossier(
+                            linked_question,
+                            bundle,
+                            m["assessment"],
+                            candidate,
+                            [
+                                "Eligibility is determined by essential observed requirements before ranking.",
+                                f"Uncalibrated heuristic components: {json.dumps(m['components'], sort_keys=True)}",
+                                "Retrieved context does not establish novelty, causal effects or statistical adequacy.",
+                            ],
+                        )
                         accepted_count = sum("claim" in item for item in bundle["evidence_items"])
-                        dossier["extraction_summary"] = {"accepted_model_claims": accepted_count, "source_context_items": sum(item.get("evidence_origin") == "deterministic_source_passage" for item in bundle["evidence_items"]), "status": "SOURCE_CONTEXT_ONLY" if not accepted_count else "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS", "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage."}
+                        dossier["extraction_summary"] = {
+                            "accepted_model_claims": accepted_count,
+                            "source_context_items": sum(
+                                item.get("evidence_origin") == "deterministic_source_passage"
+                                for item in bundle["evidence_items"]
+                            ),
+                            "status": "SOURCE_CONTEXT_ONLY"
+                            if not accepted_count
+                            else "SOURCE_CONTEXT_AND_ACCEPTED_MODEL_CLAIMS",
+                            "interpretation": "Retrieved passages are not model claims or direct support; inspect inference failures and source coverage.",
+                        }
                         dossiers.append(dossier)
-            _workflow.save("matching", {"matches": matches, "candidate_outcomes": candidate_outcomes,
-                "bundles": bundles, "dossiers": dossiers}, ("compilation",))
+            _workflow.save(
+                "matching",
+                {
+                    "matches": matches,
+                    "candidate_outcomes": candidate_outcomes,
+                    "bundles": bundles,
+                    "dossiers": dossiers,
+                },
+                ("compilation",),
+            )
         for name, rows in [
             ("claims", claims),
             ("questions", questions),
@@ -957,7 +1220,11 @@ def _analyze_stages(
             ).strip()
         except (OSError, subprocess.CalledProcessError):
             commit = "installed-distribution"
-        qualification_path = Path(runtime_qualification) if runtime_qualification else root / "runtime-qualification/qualified_7b_pass1.json"
+        qualification_path = (
+            Path(runtime_qualification)
+            if runtime_qualification
+            else root / "runtime-qualification/qualified_7b_pass1.json"
+        )
         backend_qualified, qualification_digest = qualified_runtime(qualification_path, runtime)
         package_assets = Path(__file__).resolve().parent / "schemas_v2"
         lock_path = package_assets / "requirements-v2.lock"
@@ -1158,25 +1425,46 @@ def main(argv=None):
     run.add_argument("--model", required=True)
     run.add_argument("--embeddings", required=True)
     run.add_argument("--question")
-    run.add_argument("--question-source-id", help="Explicit source document for a question; context linkage does not assert an answer")
+    run.add_argument(
+        "--question-source-id",
+        help="Explicit source document for a question; context linkage does not assert an answer",
+    )
     run.add_argument("--requirements")
     run.add_argument("--document")
     run.add_argument("--topic")
-    run.add_argument("--reference-accessions", nargs="+", help="Qualified locally imported UniProt accessions; defaults to the original cytokine panel")
+    run.add_argument(
+        "--reference-accessions",
+        nargs="+",
+        help="Qualified locally imported UniProt accessions; defaults to the original cytokine panel",
+    )
     run.add_argument("--limit", type=int, default=3)
     run.add_argument("--chunks", type=int, default=2)
     run.add_argument("--fresh", action="store_true")
-    run.add_argument("--resume", action="store_true", help="Resume this run only when source, model and configuration fingerprints match")
+    run.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume this run only when source, model and configuration fingerprints match",
+    )
     run.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
-    run.add_argument("--vector-cache", help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores")
+    run.add_argument(
+        "--vector-cache",
+        help="Reuse integrity-checked dataset embeddings across runs; does not change ranking scores",
+    )
     run.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
     run.add_argument("--max-new-tokens", type=int, default=None)
-    run.add_argument("--runtime-qualification", help="Explicit qualification receipt; preserve historical receipts")
+    run.add_argument(
+        "--runtime-qualification",
+        help="Explicit qualification receipt; preserve historical receipts",
+    )
 
-    batch = sub.add_parser("batch", help="Analyze development cases serially with one shared model session")
+    batch = sub.add_parser(
+        "batch", help="Analyze development cases serially with one shared model session"
+    )
     batch.add_argument("--root", required=True)
     batch.add_argument("--out", required=True)
-    batch.add_argument("--inputs", required=True, help="Frozen cases.jsonl or pipeline_inputs.jsonl")
+    batch.add_argument(
+        "--inputs", required=True, help="Frozen cases.jsonl or pipeline_inputs.jsonl"
+    )
     batch.add_argument("--model", required=True)
     batch.add_argument("--embeddings", required=True)
     batch.add_argument("--requirements")
@@ -1189,22 +1477,31 @@ def main(argv=None):
     batch.add_argument("--stop-on-error", action="store_true")
     batch.add_argument("--decoding-mode", choices=["unconstrained", "source_schema"], default=None)
     batch.add_argument("--max-new-tokens", type=int, default=None)
-    batch.add_argument("--runtime-qualification", help="Explicit qualification receipt; hashed into the batch identity")
+    batch.add_argument(
+        "--runtime-qualification",
+        help="Explicit qualification receipt; hashed into the batch identity",
+    )
 
     compile_only = sub.add_parser(
         "compile",
         help="Compile a question into an answer specification and assessable requirements without model inference.",
     )
     compile_only.add_argument("--question", required=True)
-    compile_only.add_argument("--source-text", help="Optional bounded literature context for reference resolution.")
+    compile_only.add_argument(
+        "--source-text", help="Optional bounded literature context for reference resolution."
+    )
     compile_only.add_argument("--source-locator", default="question")
-    compile_only.add_argument("--requirements", help="Optional expert-override JSON file containing a list.")
+    compile_only.add_argument(
+        "--requirements", help="Optional expert-override JSON file containing a list."
+    )
     compile_only.add_argument("--out", help="Optional JSON artifact path.")
 
     report = sub.add_parser("report")
     report.add_argument("--run", required=True)
 
-    reference_sync = sub.add_parser("reference-sync", help="Import or replay a bounded, versioned human UniProt reference panel")
+    reference_sync = sub.add_parser(
+        "reference-sync", help="Import or replay a bounded, versioned human UniProt reference panel"
+    )
     reference_sync.add_argument("--root", required=True)
     reference_sync.add_argument("--accessions", nargs="+", required=True)
     reference_sync.add_argument("--offline", action="store_true")
@@ -1260,7 +1557,12 @@ def main(argv=None):
         from .external_evidence import import_resource
 
         records = import_resource(args.root, accessions=args.accessions, offline=args.offline)
-        result = {"status": "PASS", "accessions": [item["accession"] for item in records], "releases": sorted({item["resource_release"] for item in records}), "interpretation": "Curated reference context; independence and experimental relevance are not inferred."}
+        result = {
+            "status": "PASS",
+            "accessions": [item["accession"] for item in records],
+            "releases": sorted({item["resource_release"] for item in records}),
+            "interpretation": "Curated reference context; independence and experimental relevance are not inferred.",
+        }
     elif args.command == "acceptance":
         from .acceptance import validate_acceptance
 
@@ -1273,12 +1575,33 @@ def main(argv=None):
     elif args.command == "batch":
         from .analysis_batch import run_batch
 
-        runtime_options = {key: value for key, value in {"decoding_mode": args.decoding_mode, "max_new_tokens": args.max_new_tokens}.items() if value is not None}
-        result = run_batch(args.root, args.out, args.model, args.embeddings, args.inputs,
-                           resume=args.resume, stop_on_error=args.stop_on_error, device=args.device,
-                           vector_cache=args.vector_cache, fresh=args.fresh, limit=args.limit, chunks=args.chunks,
-                           requirements=strict_json_loads(Path(args.requirements).read_text(encoding="utf-8")) if args.requirements else None,
-                           runtime_config=runtime_options, runtime_qualification=args.runtime_qualification)
+        runtime_options = {
+            key: value
+            for key, value in {
+                "decoding_mode": args.decoding_mode,
+                "max_new_tokens": args.max_new_tokens,
+            }.items()
+            if value is not None
+        }
+        result = run_batch(
+            args.root,
+            args.out,
+            args.model,
+            args.embeddings,
+            args.inputs,
+            resume=args.resume,
+            stop_on_error=args.stop_on_error,
+            device=args.device,
+            vector_cache=args.vector_cache,
+            fresh=args.fresh,
+            limit=args.limit,
+            chunks=args.chunks,
+            requirements=strict_json_loads(Path(args.requirements).read_text(encoding="utf-8"))
+            if args.requirements
+            else None,
+            runtime_config=runtime_options,
+            runtime_qualification=args.runtime_qualification,
+        )
     elif args.command == "compile":
         constraints = (
             json.loads(Path(args.requirements).read_text(encoding="utf-8"))
@@ -1325,11 +1648,21 @@ def main(argv=None):
             reference_accessions=args.reference_accessions,
             question_source_id=args.question_source_id,
             vector_cache=args.vector_cache,
-            runtime_config={key: value for key, value in {"decoding_mode": args.decoding_mode, "max_new_tokens": args.max_new_tokens}.items() if value is not None},
+            runtime_config={
+                key: value
+                for key, value in {
+                    "decoding_mode": args.decoding_mode,
+                    "max_new_tokens": args.max_new_tokens,
+                }.items()
+                if value is not None
+            },
             runtime_qualification=args.runtime_qualification,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return int(result.get("status") == "FAIL" or (args.command == "batch" and (result.get("failed", 0) or result.get("retryable", 0))))
+    return int(
+        result.get("status") == "FAIL"
+        or (args.command == "batch" and (result.get("failed", 0) or result.get("retryable", 0)))
+    )
 
 
 if __name__ == "__main__":

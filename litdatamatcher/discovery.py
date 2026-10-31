@@ -51,14 +51,25 @@ def validate_plan(plan: dict) -> list[dict]:
         before = len(jobs)
         for kind, registry in (("dataset", DATASET_ADAPTERS), ("literature", LITERATURE_ADAPTERS)):
             sources = row.get(kind + "_sources", [])
-            if (not isinstance(sources, list) or not all(isinstance(s, str) for s in sources)
-                    or len(set(sources)) != len(sources)):
+            if (
+                not isinstance(sources, list)
+                or not all(isinstance(s, str) for s in sources)
+                or len(set(sources)) != len(sources)
+            ):
                 raise ValueError("Sources must be a list without duplicates")
             for source in sources:
                 if source not in registry:
                     raise ValueError(f"Unknown {kind} source: {source}")
-                jobs.append({"job_id": f"{key}--{kind}--{source}", "query_id": key,
-                             "kind": kind, "source": source, "query": row["query"], "limit": limit})
+                jobs.append(
+                    {
+                        "job_id": f"{key}--{kind}--{source}",
+                        "query_id": key,
+                        "kind": kind,
+                        "source": source,
+                        "query": row["query"],
+                        "limit": limit,
+                    }
+                )
         if before == len(jobs):
             raise ValueError("Each query requires at least one source")
     return jobs
@@ -70,18 +81,30 @@ def _fetch(job: dict, cache: Path, offline: bool) -> dict:
     registry = DATASET_ADAPTERS if job["kind"] == "dataset" else LITERATURE_ADAPTERS
     adapter = registry[job["source"]](client)
     try:
-        values = (adapter.search(job["query"]) if job["kind"] == "dataset"
-                  else adapter.search_literature(job["query"], limit=job["limit"]))
+        values = (
+            adapter.search(job["query"])
+            if job["kind"] == "dataset"
+            else adapter.search_literature(job["query"], limit=job["limit"])
+        )
         values = [value.to_dict() if hasattr(value, "to_dict") else value for value in values]
         pagination = getattr(adapter, "last_search_status", {})
         failure = pagination.get("status") in {"ERROR", "SCHEMA_DRIFT", "REPEATED_CURSOR"}
-        return {"status": "PARTIAL_SOURCE_FAILURE" if failure else ("SUCCESS" if values else "EMPTY"),
-                "records": values[:job["limit"]], "source_status": pagination,
-                "returned_before_limit": len(values), "retained_limit": job["limit"],
-                "elapsed_seconds": time.perf_counter() - started}
+        return {
+            "status": "PARTIAL_SOURCE_FAILURE" if failure else ("SUCCESS" if values else "EMPTY"),
+            "records": values[: job["limit"]],
+            "source_status": pagination,
+            "returned_before_limit": len(values),
+            "retained_limit": job["limit"],
+            "elapsed_seconds": time.perf_counter() - started,
+        }
     except (OSError, RuntimeError, ValueError, KeyError, TypeError) as exc:
-        return {"status": "SOURCE_FAILURE", "records": [], "error_type": type(exc).__name__,
-                "error": str(exc), "elapsed_seconds": time.perf_counter() - started}
+        return {
+            "status": "SOURCE_FAILURE",
+            "records": [],
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+            "elapsed_seconds": time.perf_counter() - started,
+        }
 
 
 def _native_record(record: dict, kind: str, job: dict) -> dict:
@@ -90,34 +113,73 @@ def _native_record(record: dict, kind: str, job: dict) -> dict:
     value["discovery_observations"] = [job]
     if kind == "dataset":
         provenance = value.get("metadata", {}).get("source_provenance", {})
-        value.update(schema_version="discovery-metadata-1.0",
-                     summary=value.get("description", ""),
-                     source_locator=provenance.get("source_locator") or value.get("url"),
-                     source_provenance=provenance,
-                     capabilities={field: {"value": None, "status": "unknown",
-                         "source_locator": None, "reason": "Not established by structured source evidence"}
-                         for field in ("species", "organism", "assay", "modality", "tissue", "intervention",
-                                       "comparator", "outcome", "paired", "timepoint")},
-                     independent_units=None, independent_unit_status="unknown")
+        value.update(
+            schema_version="discovery-metadata-1.0",
+            summary=value.get("description", ""),
+            source_locator=provenance.get("source_locator") or value.get("url"),
+            source_provenance=provenance,
+            capabilities={
+                field: {
+                    "value": None,
+                    "status": "unknown",
+                    "source_locator": None,
+                    "reason": "Not established by structured source evidence",
+                }
+                for field in (
+                    "species",
+                    "organism",
+                    "assay",
+                    "modality",
+                    "tissue",
+                    "intervention",
+                    "comparator",
+                    "outcome",
+                    "paired",
+                    "timepoint",
+                )
+            },
+            independent_units=None,
+            independent_unit_status="unknown",
+        )
     else:
         value["document_id"] = value.get("document_id") or value.get("source_id")
         if not value["document_id"]:
             raise ValueError("Literature record lacks source identity")
         value["text"] = value.get("text") or value.get("abstract", "")
-        value["source_locator"] = (value.get("source_provenance", {}).get("source_locator")
-                                   or value.get("url") or value["document_id"])
+        value["source_locator"] = (
+            value.get("source_provenance", {}).get("source_locator")
+            or value.get("url")
+            or value["document_id"]
+        )
     return value
 
 
-def discover(plan: dict, out: Path, *, workers: int = 2, offline: bool = False,
-             resume: bool = False, retry_failed: bool = False, _fetcher=None) -> dict:
+def discover(
+    plan: dict,
+    out: Path,
+    *,
+    workers: int = 2,
+    offline: bool = False,
+    resume: bool = False,
+    retry_failed: bool = False,
+    _fetcher=None,
+) -> dict:
     """Build a native workspace from an explicit plan, retaining node-level evidence."""
     jobs = validate_plan(plan)
     if type(workers) is not int or not 1 <= workers <= 4:
         raise ValueError("Use 1..4 concurrent I/O workers")
     out = Path(out).resolve()
-    implementation = {name: _hash(Path(__file__).with_name(name)) for name in
-                      ("discovery.py", "adapters.py", "omics_adapters.py", "http_cache.py", "provenance.py", "datasets.py")}
+    implementation = {
+        name: _hash(Path(__file__).with_name(name))
+        for name in (
+            "discovery.py",
+            "adapters.py",
+            "omics_adapters.py",
+            "http_cache.py",
+            "provenance.py",
+            "datasets.py",
+        )
+    }
     identity = {"plan": plan, "implementation": implementation, "version": VERSION}
     fingerprint = digest(identity)
     with integration_lease(out, "query-discovery"):
@@ -146,15 +208,20 @@ def discover(plan: dict, out: Path, *, workers: int = 2, offline: bool = False,
             pending.append(job)
         fetcher = _fetcher or _fetch
         with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="discovery") as pool:
-            futures = {pool.submit(fetcher, job, out / "http_cache" / job["job_id"], offline): job
-                       for job in pending}
+            futures = {
+                pool.submit(fetcher, job, out / "http_cache" / job["job_id"], offline): job
+                for job in pending
+            }
             for future in as_completed(futures):
                 job = futures[future]
                 result = future.result()
                 checkpoint = out / "checkpoints" / (job["job_id"] + ".json")
                 # Preserve failed-attempt bytes before an explicitly requested retry.
                 if checkpoint.exists():
-                    atomic_write(out / "attempt_history" / (_hash(checkpoint) + ".json"), checkpoint.read_bytes())
+                    atomic_write(
+                        out / "attempt_history" / (_hash(checkpoint) + ".json"),
+                        checkpoint.read_bytes(),
+                    )
                 atomic_json(checkpoint, {"job": job, "result": result})
                 state["completed"][job["job_id"]] = _hash(checkpoint)
                 atomic_json(state_path, state)
@@ -163,10 +230,20 @@ def discover(plan: dict, out: Path, *, workers: int = 2, offline: bool = False,
         for job in jobs:
             checkpoint = out / "checkpoints" / (job["job_id"] + ".json")
             result = strict_json_loads(checkpoint.read_text(encoding="utf-8"))["result"]
-            statuses.append({"job_id": job["job_id"], "status": result["status"],
-                             "records": len(result["records"]), "checkpoint_sha256": _hash(checkpoint)})
+            statuses.append(
+                {
+                    "job_id": job["job_id"],
+                    "status": result["status"],
+                    "records": len(result["records"]),
+                    "checkpoint_sha256": _hash(checkpoint),
+                }
+            )
             for raw in result["records"]:
-                observation = {**job, "record_sha256": digest(raw), "checkpoint": checkpoint.relative_to(out).as_posix()}
+                observation = {
+                    **job,
+                    "record_sha256": digest(raw),
+                    "checkpoint": checkpoint.relative_to(out).as_posix(),
+                }
                 row = _native_record(raw, job["kind"], observation)
                 key = row["dataset_id" if job["kind"] == "dataset" else "document_id"]
                 if key in catalogues[job["kind"]]:
@@ -177,14 +254,35 @@ def discover(plan: dict, out: Path, *, workers: int = 2, offline: bool = False,
         for kind, filename in (("dataset", "studies.jsonl"), ("literature", "literature.jsonl")):
             rows = [catalogues[kind][key] for key in sorted(catalogues[kind])]
             path = out / "catalog" / filename
-            atomic_write(path, b"".join(json.dumps(row, sort_keys=True, ensure_ascii=False,
-                         allow_nan=False).encode() + b"\n" for row in rows))
-            outputs.append({"path": path.relative_to(out).as_posix(), "sha256": _hash(path), "records": len(rows)})
-        failures = sum(row["status"] in {"SOURCE_FAILURE", "PARTIAL_SOURCE_FAILURE"} for row in statuses)
-        report = {"schema_version": VERSION, "status": "PASS_WITH_SOURCE_FAILURES" if failures else "PASS",
-                  "fingerprint": fingerprint, "jobs": statuses, "failed_source_jobs": failures,
-                  "offline": offline, "workers": workers, "outputs": outputs,
-                  "interpretation": "Bounded metadata discovery; empty retrieval is not evidence of absence; no dataset feasibility inferred."}
+            atomic_write(
+                path,
+                b"".join(
+                    json.dumps(row, sort_keys=True, ensure_ascii=False, allow_nan=False).encode()
+                    + b"\n"
+                    for row in rows
+                ),
+            )
+            outputs.append(
+                {
+                    "path": path.relative_to(out).as_posix(),
+                    "sha256": _hash(path),
+                    "records": len(rows),
+                }
+            )
+        failures = sum(
+            row["status"] in {"SOURCE_FAILURE", "PARTIAL_SOURCE_FAILURE"} for row in statuses
+        )
+        report = {
+            "schema_version": VERSION,
+            "status": "PASS_WITH_SOURCE_FAILURES" if failures else "PASS",
+            "fingerprint": fingerprint,
+            "jobs": statuses,
+            "failed_source_jobs": failures,
+            "offline": offline,
+            "workers": workers,
+            "outputs": outputs,
+            "interpretation": "Bounded metadata discovery; empty retrieval is not evidence of absence; no dataset feasibility inferred.",
+        }
         atomic_json(out / "DISCOVERY_MANIFEST.json", report)
         return report
 
@@ -198,9 +296,14 @@ def main(argv=None) -> int:
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--retry-failed", action="store_true")
     args = parser.parse_args(argv)
-    report = discover(strict_json_loads(args.plan.read_text(encoding="utf-8-sig")), args.out,
-                      workers=args.workers, offline=args.offline, resume=args.resume,
-                      retry_failed=args.retry_failed)
+    report = discover(
+        strict_json_loads(args.plan.read_text(encoding="utf-8-sig")),
+        args.out,
+        workers=args.workers,
+        offline=args.offline,
+        resume=args.resume,
+        retry_failed=args.retry_failed,
+    )
     print(json.dumps(report, indent=2))
     return int(bool(report["failed_source_jobs"]))
 

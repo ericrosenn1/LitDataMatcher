@@ -107,9 +107,7 @@ DEFAULT_DERIVED_RULES: tuple[DerivedVariableRule, ...] = (
     ),
 )
 
-DERIVED_OUTPUT_NAMES = {
-    normalize_token(rule.output_variable) for rule in DEFAULT_DERIVED_RULES
-}
+DERIVED_OUTPUT_NAMES = {normalize_token(rule.output_variable) for rule in DEFAULT_DERIVED_RULES}
 
 CAPABILITY_EVIDENCE_POLICY = "source-evidence-v2"
 
@@ -145,11 +143,19 @@ def infer_dataset_capabilities(
                 capability_type="observed" if observed_metadata else "unknown",
                 source_variable_names=[variable.name],
                 confidence=variable.completeness if evidence_status != "ABSENT" else 0.0,
-                evidence=(f"Observed variable in dataset metadata: {variable.name}" if observed_metadata
-                          else f"{evidence_status.lower()} variable; source-level presence is not established: {variable.name}"),
-                limitations=(["Metadata presence does not establish measured, analysis-ready values."]
-                             if observed_metadata else ["Not an observed capability or a derivation prerequisite."])
-                            + ([] if variable.completeness >= 0.7 else ["variable completeness may be limited"]),
+                evidence=(
+                    f"Observed variable in dataset metadata: {variable.name}"
+                    if observed_metadata
+                    else f"{evidence_status.lower()} variable; source-level presence is not established: {variable.name}"
+                ),
+                limitations=(
+                    ["Metadata presence does not establish measured, analysis-ready values."]
+                    if observed_metadata
+                    else ["Not an observed capability or a derivation prerequisite."]
+                )
+                + (
+                    [] if variable.completeness >= 0.7 else ["variable completeness may be limited"]
+                ),
                 metadata={
                     "category": variable.category,
                     "capability_category": vocabulary.get("category", variable.category),

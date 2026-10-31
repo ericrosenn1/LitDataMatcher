@@ -9,15 +9,27 @@ SPEC.loader.exec_module(evaluate_matches)
 
 
 def row(dataset_id: str, lineage: list[str], topic: str = "primary") -> dict:
-    return {"dataset_id": dataset_id, "topic": topic, "study_lineage": lineage, "organism": "Homo sapiens",
-            "assay": "Expression profiling by high throughput sequencing", "title": "Source-described inflammatory response",
-            "summary": "A source summary", "sample_count_reported": 7, "source_locator": "https://example.test/" + dataset_id,
-            "source_snapshot": {"sha256": "a" * 64, "url": "https://example.test/snapshot"}}
+    return {
+        "dataset_id": dataset_id,
+        "topic": topic,
+        "study_lineage": lineage,
+        "organism": "Homo sapiens",
+        "assay": "Expression profiling by high throughput sequencing",
+        "title": "Source-described inflammatory response",
+        "summary": "A source summary",
+        "sample_count_reported": 7,
+        "source_locator": "https://example.test/" + dataset_id,
+        "source_snapshot": {"sha256": "a" * 64, "url": "https://example.test/snapshot"},
+    }
 
 
 def test_selection_excludes_reserved_and_linked_family_before_scoring() -> None:
-    records = [row("GSE-reserved", ["GSE-reserved"]), row("GSE-a", ["GSE-a", "PRJNA-a"]),
-               row("GSE-copy", ["GSE-copy", "PRJNA-a"]), row("GSE-b", ["GSE-b", "PRJNA-b"])]
+    records = [
+        row("GSE-reserved", ["GSE-reserved"]),
+        row("GSE-a", ["GSE-a", "PRJNA-a"]),
+        row("GSE-copy", ["GSE-copy", "PRJNA-a"]),
+        row("GSE-b", ["GSE-b", "PRJNA-b"]),
+    ]
     selected = evaluate_matches.selected_records(records, "primary", 2, {"GSE-reserved"})
     assert [item["dataset_id"] for item in selected] == ["GSE-a", "GSE-b"]
 

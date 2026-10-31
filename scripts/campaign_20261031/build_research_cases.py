@@ -31,8 +31,9 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
             handle.write(json.dumps(row, sort_keys=True, ensure_ascii=True) + "\n")
 
 
-def build_cases(benchmark: Path, out: Path, *, count: int = 30,
-                seed: str = "research-cases-20261031-v1") -> dict:
+def build_cases(
+    benchmark: Path, out: Path, *, count: int = 30, seed: str = "research-cases-20261031-v1"
+) -> dict:
     if out.exists():
         raise ValueError("Case output must be a fresh directory")
     if count < 30:
@@ -49,7 +50,9 @@ def build_cases(benchmark: Path, out: Path, *, count: int = 30,
     queries = load_jsonl(benchmark / "development.jsonl")
     document_rows = load_jsonl(benchmark / "documents.jsonl")
     documents = {doc["id"]: doc for doc in document_rows}
-    if len(documents) != len(document_rows) or len({query["id"] for query in queries}) != len(queries):
+    if len(documents) != len(document_rows) or len({query["id"] for query in queries}) != len(
+        queries
+    ):
         raise ValueError("Duplicate source document or query identities")
     strata = defaultdict(list)
     for query in queries:
@@ -86,32 +89,64 @@ def build_cases(benchmark: Path, out: Path, *, count: int = 30,
     for query in selected:
         document = documents[query["positive_doc_id"]]
         case_id = "case_" + rank(query)[:20]
-        cases.append({"case_id": case_id, "question_id": query["id"], "question": query["query"],
-                      "source_corpus": query["source_corpus"], "split": "development",
-                      "provenance_relative_path": query["provenance_relative_path"],
-                      "source_document": document, "selection_sha256": rank(query),
-                      "evaluation_scope": "pipeline execution, abstention, and source grounding; no expert gold label"})
-        inputs.append({"source_id": document["id"], "document_id": document["id"], "case_id": case_id,
-                       "title": document["title"], "abstract": document["abstract"], "text": document["text"],
-                       "pmid": document["pmid"], "pmcid": document["pmcid"], "doi": document["doi"],
-                       "question": query["query"], "source_corpus": query["source_corpus"],
-                       "source_shard": document["source_shard"], "source_sha256": document["source_sha256"],
-                       "source_url": f"https://pubmed.ncbi.nlm.nih.gov/{document['pmid']}/" if document.get("pmid") else ""})
+        cases.append(
+            {
+                "case_id": case_id,
+                "question_id": query["id"],
+                "question": query["query"],
+                "source_corpus": query["source_corpus"],
+                "split": "development",
+                "provenance_relative_path": query["provenance_relative_path"],
+                "source_document": document,
+                "selection_sha256": rank(query),
+                "evaluation_scope": "pipeline execution, abstention, and source grounding; no expert gold label",
+            }
+        )
+        inputs.append(
+            {
+                "source_id": document["id"],
+                "document_id": document["id"],
+                "case_id": case_id,
+                "title": document["title"],
+                "abstract": document["abstract"],
+                "text": document["text"],
+                "pmid": document["pmid"],
+                "pmcid": document["pmcid"],
+                "doi": document["doi"],
+                "question": query["query"],
+                "source_corpus": query["source_corpus"],
+                "source_shard": document["source_shard"],
+                "source_sha256": document["source_sha256"],
+                "source_url": f"https://pubmed.ncbi.nlm.nih.gov/{document['pmid']}/"
+                if document.get("pmid")
+                else "",
+            }
+        )
     out.mkdir(parents=True, exist_ok=False)
     write_jsonl(out / "cases.jsonl", cases)
     write_jsonl(out / "pipeline_inputs.jsonl", inputs)
-    report = {"schema_version": "source-backed-research-cases-v1", "status": "FROZEN",
-              "frozen_utc": datetime.now(timezone.utc).isoformat(), "seed": seed,
-              "selection_method": "source-stratified round robin of SHA-256-ranked development queries; unique linked papers",
-              "selection_uses_runtime_results": False, "expert_gold_labels": False,
-              "benchmark_manifest_sha256": file_hash(manifest_path),
-              "benchmark_directory": str(benchmark), "count": len(cases),
-              "counts_by_source": dict(Counter(case["source_corpus"] for case in cases)),
-              "limitations": ["Development cases, not untouched final evaluation.",
-                              "Original-paper links do not establish scientific truth or dataset feasibility.",
-                              "Frozen annual baseline abstracts; updates and complete article bodies are excluded."],
-              "outputs": [{"path": path.name, "sha256": file_hash(path), "bytes": path.stat().st_size}
-                          for path in sorted(out.glob("*.jsonl"))]}
+    report = {
+        "schema_version": "source-backed-research-cases-v1",
+        "status": "FROZEN",
+        "frozen_utc": datetime.now(timezone.utc).isoformat(),
+        "seed": seed,
+        "selection_method": "source-stratified round robin of SHA-256-ranked development queries; unique linked papers",
+        "selection_uses_runtime_results": False,
+        "expert_gold_labels": False,
+        "benchmark_manifest_sha256": file_hash(manifest_path),
+        "benchmark_directory": str(benchmark),
+        "count": len(cases),
+        "counts_by_source": dict(Counter(case["source_corpus"] for case in cases)),
+        "limitations": [
+            "Development cases, not untouched final evaluation.",
+            "Original-paper links do not establish scientific truth or dataset feasibility.",
+            "Frozen annual baseline abstracts; updates and complete article bodies are excluded.",
+        ],
+        "outputs": [
+            {"path": path.name, "sha256": file_hash(path), "bytes": path.stat().st_size}
+            for path in sorted(out.glob("*.jsonl"))
+        ],
+    }
     (out / "CASES_MANIFEST.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
 
@@ -124,7 +159,17 @@ def main() -> int:
     parser.add_argument("--seed", default="research-cases-20261031-v1")
     args = parser.parse_args()
     report = build_cases(args.benchmark, args.out, count=args.count, seed=args.seed)
-    print(json.dumps({"status": report["status"], "count": report["count"], "counts_by_source": report["counts_by_source"], "out": str(args.out)}, indent=2))
+    print(
+        json.dumps(
+            {
+                "status": report["status"],
+                "count": report["count"],
+                "counts_by_source": report["counts_by_source"],
+                "out": str(args.out),
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

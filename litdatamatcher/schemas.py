@@ -379,9 +379,7 @@ class QuestionCandidate:
         self.significance_score = _clamp01(
             self.significance_score, "QuestionCandidate.significance_score"
         )
-        self.answerability = _clamp01(
-            self.answerability, "QuestionCandidate.answerability"
-        )
+        self.answerability = _clamp01(self.answerability, "QuestionCandidate.answerability")
 
     @property
     def normalized_question(self) -> str:
@@ -399,13 +397,9 @@ class QuestionCandidate:
         self.source_ids = _clean_list([*self.source_ids, *other.source_ids])
         self.evidence = [*self.evidence, *other.evidence]
         self.domain_terms = _clean_list([*self.domain_terms, *other.domain_terms])
-        self.required_variables = _clean_list(
-            [*self.required_variables, *other.required_variables]
-        )
+        self.required_variables = _clean_list([*self.required_variables, *other.required_variables])
         self.outcomes = _clean_list([*self.outcomes, *other.outcomes])
-        self.extraction_confidence = max(
-            self.extraction_confidence, other.extraction_confidence
-        )
+        self.extraction_confidence = max(self.extraction_confidence, other.extraction_confidence)
         self.novelty_score = max(self.novelty_score, other.novelty_score)
         self.significance_score = max(self.significance_score, other.significance_score)
         self.answerability = max(self.answerability, other.answerability)
@@ -467,8 +461,12 @@ class EvidenceSynthesis:
         self.summary = " ".join(str(self.summary or "").split())
         self.support_count = max(0, int(self.support_count or 0))
         self.contradiction_count = max(0, int(self.contradiction_count or 0))
-        self.recurrence_score = _clamp01(self.recurrence_score, "EvidenceSynthesis.recurrence_score")
-        self.evidence_strength = _clamp01(self.evidence_strength, "EvidenceSynthesis.evidence_strength")
+        self.recurrence_score = _clamp01(
+            self.recurrence_score, "EvidenceSynthesis.recurrence_score"
+        )
+        self.evidence_strength = _clamp01(
+            self.evidence_strength, "EvidenceSynthesis.evidence_strength"
+        )
         self.uncertainty = _clamp01(self.uncertainty, "EvidenceSynthesis.uncertainty")
 
     def to_dict(self) -> JsonDict:
@@ -784,9 +782,7 @@ class QuestionDataMatchLabel:
         self.notes = str(self.notes or "").strip()
         self.metadata = dict(self.metadata or {})
         if not self.label_id:
-            self.label_id = stable_id(
-                "match_label", self.match_id, self.annotator_id, self.label
-            )
+            self.label_id = stable_id("match_label", self.match_id, self.annotator_id, self.label)
 
     def to_dict(self) -> JsonDict:
         """Serialize the match label to a JSON-compatible dictionary."""
@@ -828,9 +824,7 @@ class DerivedVariableRule:
         self.confidence = _clamp01(self.confidence, "DerivedVariableRule.confidence")
         self.metadata = dict(self.metadata or {})
         if not self.rule_id:
-            self.rule_id = stable_id(
-                "derived_rule", self.output_variable, *self.input_variables
-            )
+            self.rule_id = stable_id("derived_rule", self.output_variable, *self.input_variables)
 
     def to_dict(self) -> JsonDict:
         """Serialize the derived-variable rule to a JSON-compatible dictionary."""
@@ -987,9 +981,7 @@ class ExpertPaperAnnotation:
 
         data = asdict(self)
         data["question_labels"] = [item.to_dict() for item in self.question_labels]
-        data["evidence_span_labels"] = [
-            item.to_dict() for item in self.evidence_span_labels
-        ]
+        data["evidence_span_labels"] = [item.to_dict() for item in self.evidence_span_labels]
         return data
 
     @classmethod
@@ -1002,9 +994,7 @@ class ExpertPaperAnnotation:
             for item in payload.get("question_labels", [])
         ]
         payload["evidence_span_labels"] = [
-            item
-            if isinstance(item, EvidenceSpanLabel)
-            else EvidenceSpanLabel.from_dict(item)
+            item if isinstance(item, EvidenceSpanLabel) else EvidenceSpanLabel.from_dict(item)
             for item in payload.get("evidence_span_labels", [])
         ]
         return cls(**payload)

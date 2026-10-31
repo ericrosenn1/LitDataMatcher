@@ -38,11 +38,17 @@ class SourceSearchResult(list):
 def _search_status(adapter) -> JsonDict:
     pagination = getattr(adapter, "last_search_status", {})
     failure = pagination.get("status") in {"ERROR", "SCHEMA_DRIFT", "REPEATED_CURSOR"}
-    return {"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE" if failure else "OBSERVED", **({"pagination": pagination} if pagination else {})}
+    return {
+        "source": adapter.name,
+        "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE" if failure else "OBSERVED",
+        **({"pagination": pagination} if pagination else {}),
+    }
 
 
 def _response_object(value: object) -> JsonDict:
-    if not isinstance(value, dict) or any(value.get(key) for key in ("error", "errors", "ERROR", "errorlist")):
+    if not isinstance(value, dict) or any(
+        value.get(key) for key in ("error", "errors", "ERROR", "errorlist")
+    ):
         raise ValueError("Provider error or invalid response object")
     return value
 
@@ -62,7 +68,18 @@ class LiteratureSourceAdapter(Protocol):
         """Return literature records with title, abstract, doi, and source_id."""
 
 
-def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonDict, *, extract_items: Callable[[JsonDict], object], cursor_field: str, cursor_param: str, initial_cursor: str | None = None, max_pages: int = 4, cursor_getter: Callable[[JsonDict], object] | None = None) -> JsonDict:
+def _bounded_cursor_pages(
+    client: CachedHttpClient,
+    url: str,
+    base_params: JsonDict,
+    *,
+    extract_items: Callable[[JsonDict], object],
+    cursor_field: str,
+    cursor_param: str,
+    initial_cursor: str | None = None,
+    max_pages: int = 4,
+    cursor_getter: Callable[[JsonDict], object] | None = None,
+) -> JsonDict:
     """Read a bounded cursor sequence without claiming a partial universe is complete."""
     cursor = initial_cursor
     seen_cursors: set[str] = set()
@@ -76,23 +93,45 @@ def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonD
             payload = client.get_json(url, params=params)
         except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
             return _pagination_result(items, pages, "ERROR", error=type(exc).__name__)
-        if not isinstance(payload, dict) or any(payload.get(key) for key in ("error", "errors", "ERROR")):
+        if not isinstance(payload, dict) or any(
+            payload.get(key) for key in ("error", "errors", "ERROR")
+        ):
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="payload_not_object")
         try:
             page_items = extract_items(payload)
         except (KeyError, TypeError, ValueError):
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="invalid_page_envelope")
-        if not isinstance(page_items, list) or not all(isinstance(item, dict) for item in page_items):
+        if not isinstance(page_items, list) or not all(
+            isinstance(item, dict) for item in page_items
+        ):
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="items_not_object_list")
         cache_lineage = _client_response_metadata(client)
         try:
             next_cursor = cursor_getter(payload) if cursor_getter else payload.get(cursor_field)
         except (KeyError, TypeError, ValueError):
-            pages.append({"page_index": page_index, "request_scope": {"url": url, "params": params}, "returned_items": len(page_items), "cursor_in": cursor or "", "cursor_out": "INVALID", "cache_lineage": cache_lineage})
+            pages.append(
+                {
+                    "page_index": page_index,
+                    "request_scope": {"url": url, "params": params},
+                    "returned_items": len(page_items),
+                    "cursor_in": cursor or "",
+                    "cursor_out": "INVALID",
+                    "cache_lineage": cache_lineage,
+                }
+            )
             items.extend(page_items)
             return _pagination_result(items, pages, "SCHEMA_DRIFT", error="invalid_next_cursor")
         next_cursor = str(next_cursor).strip() if next_cursor is not None else ""
-        pages.append({"page_index": page_index, "request_scope": {"url": url, "params": params}, "returned_items": len(page_items), "cursor_in": cursor or "", "cursor_out": next_cursor, "cache_lineage": cache_lineage})
+        pages.append(
+            {
+                "page_index": page_index,
+                "request_scope": {"url": url, "params": params},
+                "returned_items": len(page_items),
+                "cursor_in": cursor or "",
+                "cursor_out": next_cursor,
+                "cache_lineage": cache_lineage,
+            }
+        )
         items.extend(page_items)
         if not next_cursor:
             return _pagination_result(items, pages, "COMPLETE")
@@ -103,10 +142,26 @@ def _bounded_cursor_pages(client: CachedHttpClient, url: str, base_params: JsonD
     return _pagination_result(items, pages, "TRUNCATED_PAGE_LIMIT")
 
 
-def _pagination_result(items: list[JsonDict], pages: list[JsonDict], status: str, *, error: str = "") -> JsonDict:
+def _pagination_result(
+    items: list[JsonDict], pages: list[JsonDict], status: str, *, error: str = ""
+) -> JsonDict:
     """Return explicit pagination/candidate-universe state for downstream provenance."""
     complete = status == "COMPLETE"
-    return {"items": items, "pagination": {"schema_version": "adapter_pagination_v1", "status": status, "candidate_universe_status": "COMPLETE_CANDIDATE_UNIVERSE" if complete else "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE", "completed": complete, "pages_requested": len(pages), "returned_items": len(items), "pages": pages, "error": error or None}}
+    return {
+        "items": items,
+        "pagination": {
+            "schema_version": "adapter_pagination_v1",
+            "status": status,
+            "candidate_universe_status": "COMPLETE_CANDIDATE_UNIVERSE"
+            if complete
+            else "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE",
+            "completed": complete,
+            "pages_requested": len(pages),
+            "returned_items": len(items),
+            "pages": pages,
+            "error": error or None,
+        },
+    }
 
 
 def _item_page_metadata(result: JsonDict, index: int, fallback: JsonDict) -> JsonDict:
@@ -153,7 +208,10 @@ class OpenAlexLiteratureAdapter:
                     "OpenAlex abstracts are reconstructed from an inverted index when available."
                 ],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("openalex"), "cache_snapshot": response_metadata},
+                metadata={
+                    "source_profile": source_profile("openalex"),
+                    "cache_snapshot": response_metadata,
+                },
             ).to_dict()
             rows.append(
                 {
@@ -164,7 +222,11 @@ class OpenAlexLiteratureAdapter:
                     "year": work.get("publication_year"),
                     "source": self.name,
                     "source_provenance": provenance,
-                    "version_relationships": {"is-retracted": {"source": "openalex", "declared": True}} if work.get("is_retracted") is True else {},
+                    "version_relationships": {
+                        "is-retracted": {"source": "openalex", "declared": True}
+                    }
+                    if work.get("is_retracted") is True
+                    else {},
                     "metadata": {
                         "cited_by_count": work.get("cited_by_count", 0),
                         "concepts": [
@@ -208,14 +270,24 @@ class PubMedLiteratureAdapter:
         fetch_snapshot = _client_response_metadata(self.client) if not fetch_error else {}
         missing = [uid for uid in ids if uid not in xml_records]
         if fetch_error or missing:
-            self.last_search_status = {"status": "ERROR", "stage": "pubmed_efetch", "error": fetch_error or "requested_records_missing", "missing_ids": missing, "retained_summary_metadata": True}
+            self.last_search_status = {
+                "status": "ERROR",
+                "stage": "pubmed_efetch",
+                "error": fetch_error or "requested_records_missing",
+                "missing_ids": missing,
+                "retained_summary_metadata": True,
+            }
         rows: list[dict] = []
         for uid in ids:
             item = results.get(uid, {})
             xml_item = xml_records.get(uid, {})
             _response_object(item)
             if not item and not xml_item:
-                self.last_search_status = {"status": "ERROR", "stage": "pubmed_records", "error": "requested_record_missing"}
+                self.last_search_status = {
+                    "status": "ERROR",
+                    "stage": "pubmed_records",
+                    "error": "requested_record_missing",
+                }
                 continue
             article_ids = item.get("articleids", []) if isinstance(item, dict) else []
             doi = xml_item.get("doi", "") or _article_id(article_ids, "doi")
@@ -229,25 +301,43 @@ class PubMedLiteratureAdapter:
                 acquisition_method="ncbi_eutilities",
                 content_scope="abstract_plus_metadata" if abstract else "metadata_only",
                 raw_record_id=uid,
-                retrieval_time_utc=str((fetch_snapshot if abstract else summary_snapshot).get("retrieval_time_utc", "")),
+                retrieval_time_utc=str(
+                    (fetch_snapshot if abstract else summary_snapshot).get("retrieval_time_utc", "")
+                ),
                 limitations=[]
                 if abstract
                 else ["PubMed EFetch did not provide an abstract for this record."],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("pubmed"), "esummary_snapshot": summary_snapshot, "efetch_snapshot": fetch_snapshot, "efetch_status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE" if uid in missing else "OBSERVED"},
+                metadata={
+                    "source_profile": source_profile("pubmed"),
+                    "esummary_snapshot": summary_snapshot,
+                    "efetch_snapshot": fetch_snapshot,
+                    "efetch_status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE"
+                    if uid in missing
+                    else "OBSERVED",
+                },
             ).to_dict()
-            publication_types = list(item.get("pubtype", []) or []) + list(xml_item.get("publication_types", []) or [])
+            publication_types = list(item.get("pubtype", []) or []) + list(
+                xml_item.get("publication_types", []) or []
+            )
             relations = {"commentCorrection": xml_item.get("comments_corrections", [])}
             for publication_type in publication_types:
                 normalized_type = re.sub(r"[^a-z]", "", str(publication_type).casefold())
                 if normalized_type in {"retractedpublication", "retractionofpublication"}:
                     relations.setdefault("retracted_publication_type", []).append(publication_type)
-                elif normalized_type in {"publishederrata", "publishederratum", "correctedandrepublishedarticle"}:
+                elif normalized_type in {
+                    "publishederrata",
+                    "publishederratum",
+                    "correctedandrepublishedarticle",
+                }:
                     relations.setdefault("correction_publication_type", []).append(publication_type)
                 elif normalized_type in {"expressionofconcern"}:
                     relations.setdefault("lifecycle_review", []).append(publication_type)
             if uid in missing:
-                relations["lifecycle_review"] = {"source": "pubmed_efetch", "reason": "Unresolved lifecycle lookup"}
+                relations["lifecycle_review"] = {
+                    "source": "pubmed_efetch",
+                    "reason": "Unresolved lifecycle lookup",
+                }
             rows.append(
                 {
                     "source_id": f"pubmed:{uid}",
@@ -286,10 +376,17 @@ class EuropePMCLiteratureAdapter:
 
         page_size = min(max(1, limit), 100)
         result = _bounded_cursor_pages(
-            self.client, "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+            self.client,
+            "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
             {"query": query, "format": "json", "resultType": "core", "pageSize": page_size},
-            extract_items=lambda payload: payload.get("resultList", {}).get("result", []) if isinstance(payload.get("resultList"), dict) else None,
-            cursor_field="nextCursorMark", cursor_param="cursorMark", initial_cursor="*",
+            extract_items=lambda payload: (
+                payload.get("resultList", {}).get("result", [])
+                if isinstance(payload.get("resultList"), dict)
+                else None
+            ),
+            cursor_field="nextCursorMark",
+            cursor_param="cursorMark",
+            initial_cursor="*",
             max_pages=max(1, min(4, (limit + page_size - 1) // page_size)),
         )
         self.last_search_status = result["pagination"]
@@ -318,7 +415,9 @@ class EuropePMCLiteratureAdapter:
                 acquisition_method="europepmc_rest_api",
                 content_scope="abstract_plus_metadata" if abstract else "metadata_only",
                 raw_record_id=stable_id,
-                limitations=["Europe PMC search records are metadata; no article body was requested."],
+                limitations=[
+                    "Europe PMC search records are metadata; no article body was requested."
+                ],
                 next_handoff="litdatamatcher run",
                 metadata={
                     "source_profile": source_profile("europepmc"),
@@ -336,15 +435,21 @@ class EuropePMCLiteratureAdapter:
                     "doi": doi,
                     "pmid": record_id if source == "MED" else "",
                     "pmcid": str(item.get("pmcid", "") or ""),
-                    "year": _year_from_value(item.get("firstPublicationDate", "") or item.get("pubYear", "")),
+                    "year": _year_from_value(
+                        item.get("firstPublicationDate", "") or item.get("pubYear", "")
+                    ),
                     "source": self.name,
-                    "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                    "version_relationships": version_relationships
+                    if isinstance(version_relationships, dict)
+                    else {},
                     "source_provenance": provenance,
                     "metadata": {
                         "europepmc_source": source,
                         "journal": str(item.get("journalTitle", "") or ""),
                         "first_publication_date": str(item.get("firstPublicationDate", "") or ""),
-                        "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                        "version_relationships": version_relationships
+                        if isinstance(version_relationships, dict)
+                        else {},
                         "source_provenance": provenance,
                         "pagination": result["pagination"],
                     },
@@ -365,11 +470,17 @@ class CrossrefLiteratureAdapter:
 
         data = self.client.get_json(
             "https://api.crossref.org/works",
-            params={"query": query, "rows": min(max(1, limit), 100), "select": "DOI,title,abstract,published,published-online,published-print,indexed,created,relation,update-policy,update-to,container-title,author,type"},
+            params={
+                "query": query,
+                "rows": min(max(1, limit), 100),
+                "select": "DOI,title,abstract,published,published-online,published-print,indexed,created,relation,update-policy,update-to,container-title,author,type",
+            },
         )
         response_metadata = _client_response_metadata(self.client)
         rows: list[dict] = []
-        for item in _response_list(_response_object(_response_object(data).get("message")).get("items")):
+        for item in _response_list(
+            _response_object(_response_object(data).get("message")).get("items")
+        ):
             if not isinstance(item, dict):
                 continue
             doi = _normalize_doi(item.get("DOI", ""))
@@ -381,7 +492,9 @@ class CrossrefLiteratureAdapter:
             version_relationships = dict(item.get("relation", {}) or {})
             if "update-to" in item:
                 updates = _response_list(item["update-to"])
-                version_relationships["commentCorrection"] = [dict(update, type=update.get("type", "")) for update in updates]
+                version_relationships["commentCorrection"] = [
+                    dict(update, type=update.get("type", "")) for update in updates
+                ]
             provenance = remote_source_provenance(
                 source_type="crossref",
                 source_url=source_url,
@@ -391,7 +504,9 @@ class CrossrefLiteratureAdapter:
                 acquisition_method="crossref_works_api",
                 content_scope="metadata_only",
                 raw_record_id=source_id,
-                limitations=["Crossref records are DOI metadata and are not article-body evidence."],
+                limitations=[
+                    "Crossref records are DOI metadata and are not article-body evidence."
+                ],
                 next_handoff="litdatamatcher run",
                 metadata={
                     "source_profile": source_profile("crossref"),
@@ -409,7 +524,9 @@ class CrossrefLiteratureAdapter:
                     "doi": doi,
                     "year": _crossref_year(item),
                     "source": self.name,
-                    "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                    "version_relationships": version_relationships
+                    if isinstance(version_relationships, dict)
+                    else {},
                     "source_provenance": provenance,
                     "metadata": {
                         "container_title": _first_sequence_text(item.get("container-title", [])),
@@ -418,7 +535,9 @@ class CrossrefLiteratureAdapter:
                         "indexed": item.get("indexed", {}),
                         "created": item.get("created", {}),
                         "update_policy": str(item.get("update-policy", "") or ""),
-                        "version_relationships": version_relationships if isinstance(version_relationships, dict) else {},
+                        "version_relationships": version_relationships
+                        if isinstance(version_relationships, dict)
+                        else {},
                         "source_provenance": provenance,
                     },
                 }
@@ -438,10 +557,13 @@ class ClinicalTrialsDatasetAdapter:
         """Search and normalize bounded study metadata with explicit design caveats."""
 
         result = _bounded_cursor_pages(
-            self.client, "https://clinicaltrials.gov/api/v2/studies",
+            self.client,
+            "https://clinicaltrials.gov/api/v2/studies",
             {"query.term": query, "pageSize": 25, "format": "json"},
             extract_items=lambda payload: payload.get("studies"),
-            cursor_field="nextPageToken", cursor_param="pageToken", max_pages=4,
+            cursor_field="nextPageToken",
+            cursor_param="pageToken",
+            max_pages=4,
         )
         self.last_search_status = result["pagination"]
         response_metadata = _client_response_metadata(self.client)
@@ -457,7 +579,9 @@ class ClinicalTrialsDatasetAdapter:
                 continue
             record.metadata["pagination"] = result["pagination"]
             existing = records_by_id.get(record.dataset_id)
-            if existing is None or _clinicaltrials_version(record) > _clinicaltrials_version(existing):
+            if existing is None or _clinicaltrials_version(record) > _clinicaltrials_version(
+                existing
+            ):
                 if existing is not None:
                     _append_clinical_version(record, existing)
                 records_by_id[record.dataset_id] = record
@@ -465,7 +589,8 @@ class ClinicalTrialsDatasetAdapter:
                 _append_clinical_version(existing, record)
         if rejected_indices:
             self.last_search_status.update(
-                status="SCHEMA_DRIFT", completed=False,
+                status="SCHEMA_DRIFT",
+                completed=False,
                 candidate_universe_status="PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE",
                 rejected_record_indices=rejected_indices,
                 retained_valid_rows=len(records_by_id),
@@ -508,7 +633,9 @@ class GEODatasetAdapter:
             title = item.get("title", "") or item["accession"]
             summary = item.get("summary", "")
             accession = str(item["accession"])
-            source_url = f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={item.get('accession', uid)}"
+            source_url = (
+                f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={item.get('accession', uid)}"
+            )
             provenance = remote_source_provenance(
                 source_type="geo",
                 source_url=source_url,
@@ -518,9 +645,14 @@ class GEODatasetAdapter:
                 acquisition_method="ncbi_eutilities",
                 content_scope="dataset_metadata",
                 raw_record_id=accession,
-                limitations=["GEO summaries may require follow-up file inspection for variable-level metadata."],
+                limitations=[
+                    "GEO summaries may require follow-up file inspection for variable-level metadata."
+                ],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("geo"), "cache_snapshot": response_metadata},
+                metadata={
+                    "source_profile": source_profile("geo"),
+                    "cache_snapshot": response_metadata,
+                },
             ).to_dict()
             records.append(
                 classify_dataset_record(
@@ -539,7 +671,13 @@ class GEODatasetAdapter:
                     }
                 )
             )
-        self.last_search_status = {"status": "SCHEMA_DRIFT" if missing_ids else "BOUNDED_RESULTS", "returned_items": len(records), "requested_ids": len(ids), "missing_ids": missing_ids, "candidate_universe_status": "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"}
+        self.last_search_status = {
+            "status": "SCHEMA_DRIFT" if missing_ids else "BOUNDED_RESULTS",
+            "returned_items": len(records),
+            "requested_ids": len(ids),
+            "missing_ids": missing_ids,
+            "candidate_universe_status": "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE",
+        }
         return records
 
 
@@ -586,9 +724,14 @@ class MGnifyDatasetAdapter:
                 acquisition_method="mgnify_api_v2",
                 content_scope="dataset_metadata",
                 raw_record_id=accession,
-                limitations=["MGnify list metadata may need study detail follow-up for full sample context."],
+                limitations=[
+                    "MGnify list metadata may need study detail follow-up for full sample context."
+                ],
                 next_handoff="litdatamatcher run",
-                metadata={"source_profile": source_profile("mgnify"), "cache_snapshot": response_metadata},
+                metadata={
+                    "source_profile": source_profile("mgnify"),
+                    "cache_snapshot": response_metadata,
+                },
             ).to_dict()
             records.append(
                 classify_dataset_record(
@@ -655,11 +798,19 @@ class ENASRADatasetAdapter:
         grouped: dict[str, list[JsonDict]] = {}
         for row in rows if isinstance(rows, list) else []:
             if not isinstance(row, dict):
-                self.last_search_status = {"status": "SCHEMA_DRIFT", "error": "invalid_row", "retained_valid_rows": True}
+                self.last_search_status = {
+                    "status": "SCHEMA_DRIFT",
+                    "error": "invalid_row",
+                    "retained_valid_rows": True,
+                }
                 continue
             study_id = str(row.get("study_accession", "") or "").strip().upper()
             if not re.fullmatch(r"(?:ERP|SRP|DRP|PRJ(?:EB|NA|DB))\d+", study_id):
-                self.last_search_status = {"status": "SCHEMA_DRIFT", "error": "invalid_study_identifier", "retained_valid_rows": True}
+                self.last_search_status = {
+                    "status": "SCHEMA_DRIFT",
+                    "error": "invalid_study_identifier",
+                    "retained_valid_rows": True,
+                }
                 continue
             grouped.setdefault(study_id, []).append(row)
         records = [
@@ -720,22 +871,76 @@ def _ena_study_record(
         "experiments": experiments,
         "samples": samples,
         "run_sample_links": [
-            {"run_accession": str(row.get("run_accession", "") or ""), "sample_accession": str(row.get("sample_accession", "") or ""), "relation": "TECHNICAL_RUN_OF_DECLARED_SAMPLE"}
+            {
+                "run_accession": str(row.get("run_accession", "") or ""),
+                "sample_accession": str(row.get("sample_accession", "") or ""),
+                "relation": "TECHNICAL_RUN_OF_DECLARED_SAMPLE",
+            }
             for row in _dedupe_rows(rows, "run_accession")
         ],
-        "access_availability": {"raw_reads": raw_available, "submitted_files": processed_available, "interpretation": "availability metadata only; file-level access and processing status require inspection"},
+        "access_availability": {
+            "raw_reads": raw_available,
+            "submitted_files": processed_available,
+            "interpretation": "availability metadata only; file-level access and processing status require inspection",
+        },
         "version_time": str(newest.get("last_updated", "UNKNOWN") or "UNKNOWN"),
-        "pagination": {"page_size": 100, "returned_run_rows": len(rows), "status": "BOUNDED_PAGE_NOT_COMPLETE_CENSUS"},
-        "dependence": {"biological_sample_count": len(sample_ids), "technical_run_count": len(run_ids), "donor_links": "AMBIGUOUS_NOT_INFERRED", "deduplication_key": "study_accession+run_accession"},
-        "missingness": {"sample_accessions": "PRESENT" if sample_ids else "MISSING", "run_accessions": "PRESENT" if run_ids else "MISSING", "organism": "PRESENT" if organisms else "MISSING", "library_strategy": "PRESENT" if strategies else "MISSING"},
+        "pagination": {
+            "page_size": 100,
+            "returned_run_rows": len(rows),
+            "status": "BOUNDED_PAGE_NOT_COMPLETE_CENSUS",
+        },
+        "dependence": {
+            "biological_sample_count": len(sample_ids),
+            "technical_run_count": len(run_ids),
+            "donor_links": "AMBIGUOUS_NOT_INFERRED",
+            "deduplication_key": "study_accession+run_accession",
+        },
+        "missingness": {
+            "sample_accessions": "PRESENT" if sample_ids else "MISSING",
+            "run_accessions": "PRESENT" if run_ids else "MISSING",
+            "organism": "PRESENT" if organisms else "MISSING",
+            "library_strategy": "PRESENT" if strategies else "MISSING",
+        },
         "source_provenance": provenance,
     }
     variables = [
-        {"name": "sequencing_run", "category": "technical_metadata", "observed_count": 0, "completeness": 0.8 if run_ids else 0.0},
-        {"name": "biological_sample", "category": "metadata", "observed_count": 0, "completeness": 0.8 if sample_ids else 0.0},
-        {"name": "library_strategy", "category": "assay_metadata", "observed_count": 0, "completeness": 0.8 if strategies else 0.0},
+        {
+            "name": "sequencing_run",
+            "category": "technical_metadata",
+            "observed_count": 0,
+            "completeness": 0.8 if run_ids else 0.0,
+        },
+        {
+            "name": "biological_sample",
+            "category": "metadata",
+            "observed_count": 0,
+            "completeness": 0.8 if sample_ids else 0.0,
+        },
+        {
+            "name": "library_strategy",
+            "category": "assay_metadata",
+            "observed_count": 0,
+            "completeness": 0.8 if strategies else 0.0,
+        },
     ]
-    return classify_dataset_record({"dataset_id": study_id, "title": title, "source": "ENA/SRA", "description": _first_text(newest, "sample_description"), "url": f"https://www.ebi.ac.uk/ena/browser/view/{study_id}", "variables": variables, "populations": [], "organisms": organisms, "assay_types": strategies, "sample_size": 0, "license": "ENA/SRA metadata; source-specific data reuse review required", "access_type": "public metadata; per-file availability as recorded", "quality_score": 0.68, "metadata": metadata})
+    return classify_dataset_record(
+        {
+            "dataset_id": study_id,
+            "title": title,
+            "source": "ENA/SRA",
+            "description": _first_text(newest, "sample_description"),
+            "url": f"https://www.ebi.ac.uk/ena/browser/view/{study_id}",
+            "variables": variables,
+            "populations": [],
+            "organisms": organisms,
+            "assay_types": strategies,
+            "sample_size": 0,
+            "license": "ENA/SRA metadata; source-specific data reuse review required",
+            "access_type": "public metadata; per-file availability as recorded",
+            "quality_score": 0.68,
+            "metadata": metadata,
+        }
+    )
 
 
 def _unique_field(rows: list[JsonDict], name: str) -> list[str]:
@@ -755,9 +960,7 @@ def _has_remote_file(row: JsonDict, *names: str) -> bool:
     return any(str(row.get(name, "") or "").strip() for name in names)
 
 
-def _clinicaltrials_record(
-    study: JsonDict, *, response_metadata: JsonDict
-) -> DatasetRecord | None:
+def _clinicaltrials_record(study: JsonDict, *, response_metadata: JsonDict) -> DatasetRecord | None:
     """Normalize one ClinicalTrials.gov v2 study without implying data access."""
 
     protocol = study.get("protocolSection", {})
@@ -782,7 +985,9 @@ def _clinicaltrials_record(
     other_outcomes = _clinical_outcomes(outcomes_module.get("otherOutcomes", []))
     enrollment = design.get("enrollmentInfo", {})
     enrollment = enrollment if isinstance(enrollment, dict) else {}
-    version_time = _clinical_date(status, "lastUpdatePostDateStruct", "lastUpdateSubmitDate", "studyFirstPostDateStruct")
+    version_time = _clinical_date(
+        status, "lastUpdatePostDateStruct", "lastUpdateSubmitDate", "studyFirstPostDateStruct"
+    )
     source_url = f"https://clinicaltrials.gov/study/{dataset_id}"
     observational = study_type == "OBSERVATIONAL"
     variables = _clinical_variables(
@@ -799,7 +1004,9 @@ def _clinicaltrials_record(
         "Enrollment is registry metadata and is not treated as an analyzed sample count.",
     ]
     if observational:
-        limitations.append("Observational study metadata is not interpreted as perturbational evidence.")
+        limitations.append(
+            "Observational study metadata is not interpreted as perturbational evidence."
+        )
     provenance = remote_source_provenance(
         source_type="clinicaltrials",
         source_url=source_url,
@@ -850,7 +1057,9 @@ def _clinicaltrials_record(
                 "observational_model": _nested_text(design, "designInfo", "observationalModel"),
                 "time_perspective": _nested_text(design, "designInfo", "timePerspective"),
             },
-            "causal_interpretation": "NOT_PERTURBATIONAL" if observational else "REGISTRY_METADATA_ONLY",
+            "causal_interpretation": "NOT_PERTURBATIONAL"
+            if observational
+            else "REGISTRY_METADATA_ONLY",
             "access_status": "PUBLIC_REGISTRY_METADATA",
             "missingness": _clinical_missingness(
                 conditions, interventions, primary_outcomes, eligibility, enrollment
@@ -862,7 +1071,11 @@ def _clinicaltrials_record(
             "dataset_id": dataset_id,
             "title": title,
             "source": "ClinicalTrials.gov",
-            "description": _first_text(_clinical_module(protocol, "descriptionModule"), "briefSummary", "detailedDescription"),
+            "description": _first_text(
+                _clinical_module(protocol, "descriptionModule"),
+                "briefSummary",
+                "detailedDescription",
+            ),
             "url": source_url,
             "variables": variables,
             "populations": _clinical_population(eligibility),
@@ -889,7 +1102,13 @@ def _clinical_interventions(value: object) -> list[JsonDict]:
             continue
         name = str(item.get("name", "") or "").strip()
         if name:
-            rows.append({"name": name, "type": str(item.get("type", "UNKNOWN") or "UNKNOWN"), "description": str(item.get("description", "") or "")})
+            rows.append(
+                {
+                    "name": name,
+                    "type": str(item.get("type", "UNKNOWN") or "UNKNOWN"),
+                    "description": str(item.get("description", "") or ""),
+                }
+            )
     return rows
 
 
@@ -900,7 +1119,14 @@ def _clinical_arms(value: object) -> list[JsonDict]:
             continue
         label = str(item.get("label", "") or "").strip()
         if label:
-            rows.append({"label": label, "type": str(item.get("type", "UNKNOWN") or "UNKNOWN"), "description": str(item.get("description", "") or ""), "intervention_names": _string_list(item.get("interventionNames", []))})
+            rows.append(
+                {
+                    "label": label,
+                    "type": str(item.get("type", "UNKNOWN") or "UNKNOWN"),
+                    "description": str(item.get("description", "") or ""),
+                    "intervention_names": _string_list(item.get("interventionNames", [])),
+                }
+            )
     return rows
 
 
@@ -911,7 +1137,13 @@ def _clinical_outcomes(value: object) -> list[JsonDict]:
             continue
         measure = str(item.get("measure", "") or "").strip()
         if measure:
-            rows.append({"measure": measure, "time_frame": str(item.get("timeFrame", "UNKNOWN") or "UNKNOWN"), "description": str(item.get("description", "") or "")})
+            rows.append(
+                {
+                    "measure": measure,
+                    "time_frame": str(item.get("timeFrame", "UNKNOWN") or "UNKNOWN"),
+                    "description": str(item.get("description", "") or ""),
+                }
+            )
     return rows
 
 
@@ -924,10 +1156,34 @@ def _clinical_variables(**fields: object) -> list[JsonDict]:
         ("outcome", "clinical", [*fields["primary_outcomes"], *fields["secondary_outcomes"]]),
         ("eligibility_criteria", "metadata", fields["eligibility"].get("eligibilityCriteria", "")),
     ):
-        variables.append({"name": name, "category": category, "observed_count": 0, "completeness": 0.8 if values else 0.0})
-    variables.append({"name": "study_type", "category": "study_design_feature", "observed_count": 0, "completeness": 1.0 if fields["study_type"] != "UNKNOWN" else 0.0})
-    if any(item.get("time_frame") not in {"", "UNKNOWN"} for item in [*fields["primary_outcomes"], *fields["secondary_outcomes"]]):
-        variables.append({"name": "timepoint", "category": "temporal_structure", "observed_count": 0, "completeness": 0.65})
+        variables.append(
+            {
+                "name": name,
+                "category": category,
+                "observed_count": 0,
+                "completeness": 0.8 if values else 0.0,
+            }
+        )
+    variables.append(
+        {
+            "name": "study_type",
+            "category": "study_design_feature",
+            "observed_count": 0,
+            "completeness": 1.0 if fields["study_type"] != "UNKNOWN" else 0.0,
+        }
+    )
+    if any(
+        item.get("time_frame") not in {"", "UNKNOWN"}
+        for item in [*fields["primary_outcomes"], *fields["secondary_outcomes"]]
+    ):
+        variables.append(
+            {
+                "name": "timepoint",
+                "category": "temporal_structure",
+                "observed_count": 0,
+                "completeness": 0.65,
+            }
+        )
     return variables
 
 
@@ -955,11 +1211,29 @@ def _optional_nonnegative_int(value: object) -> int | None:
 
 
 def _clinical_population(eligibility: JsonDict) -> list[str]:
-    return ["human", f"sex:{eligibility.get('sex', 'UNKNOWN') or 'UNKNOWN'}", f"age:{eligibility.get('minimumAge', 'UNKNOWN') or 'UNKNOWN'} to {eligibility.get('maximumAge', 'UNKNOWN') or 'UNKNOWN'}"]
+    return [
+        "human",
+        f"sex:{eligibility.get('sex', 'UNKNOWN') or 'UNKNOWN'}",
+        f"age:{eligibility.get('minimumAge', 'UNKNOWN') or 'UNKNOWN'} to {eligibility.get('maximumAge', 'UNKNOWN') or 'UNKNOWN'}",
+    ]
 
 
-def _clinical_missingness(conditions: list[str], interventions: list[JsonDict], outcomes: list[JsonDict], eligibility: JsonDict, enrollment: JsonDict) -> JsonDict:
-    return {"conditions": "PRESENT" if conditions else "MISSING", "interventions": "PRESENT" if interventions else "MISSING", "outcomes": "PRESENT" if outcomes else "MISSING", "eligibility": "PRESENT" if eligibility.get("eligibilityCriteria") else "MISSING", "enrollment": "PRESENT" if _optional_nonnegative_int(enrollment.get("count")) is not None else "MISSING"}
+def _clinical_missingness(
+    conditions: list[str],
+    interventions: list[JsonDict],
+    outcomes: list[JsonDict],
+    eligibility: JsonDict,
+    enrollment: JsonDict,
+) -> JsonDict:
+    return {
+        "conditions": "PRESENT" if conditions else "MISSING",
+        "interventions": "PRESENT" if interventions else "MISSING",
+        "outcomes": "PRESENT" if outcomes else "MISSING",
+        "eligibility": "PRESENT" if eligibility.get("eligibilityCriteria") else "MISSING",
+        "enrollment": "PRESENT"
+        if _optional_nonnegative_int(enrollment.get("count")) is not None
+        else "MISSING",
+    }
 
 
 def _clinicaltrials_version(record: DatasetRecord) -> str:
@@ -982,8 +1256,11 @@ def _datacite_cursor(payload: JsonDict) -> str | None:
     if not isinstance(next_url, str):
         raise ValueError("DataCite next link must be a URL")
     parsed = urlsplit(next_url)
-    if (parsed.scheme != "https" or parsed.netloc != "api.datacite.org"
-            or parsed.path.rstrip("/") != "/dois"):
+    if (
+        parsed.scheme != "https"
+        or parsed.netloc != "api.datacite.org"
+        or parsed.path.rstrip("/") != "/dois"
+    ):
         raise ValueError("Unexpected DataCite pagination origin")
     values = parse_qs(parsed.query).get("page[cursor]", [])
     if len(values) != 1 or not values[0]:
@@ -1003,10 +1280,14 @@ class DataCiteDatasetAdapter:
         if not str(query).strip():
             raise ValueError("DataCite requires a nonempty search query")
         result = _bounded_cursor_pages(
-            self.client, "https://api.datacite.org/dois",
+            self.client,
+            "https://api.datacite.org/dois",
             {"query": query, "resource-type-id": "dataset", "page[size]": 25},
-            extract_items=lambda payload: payload.get("data"), cursor_field="",
-            cursor_param="page[cursor]", initial_cursor="1", max_pages=4,
+            extract_items=lambda payload: payload.get("data"),
+            cursor_field="",
+            cursor_param="page[cursor]",
+            initial_cursor="1",
+            max_pages=4,
             cursor_getter=_datacite_cursor,
         )
         self.last_search_status = result["pagination"]
@@ -1020,44 +1301,92 @@ class DataCiteDatasetAdapter:
                     raise ValueError("Invalid DataCite DOI")
                 if item.get("id") and _normalize_doi(item["id"]) != doi:
                     raise ValueError("Conflicting DataCite DOI identifiers")
-                if _response_object(attributes.get("types")).get("resourceTypeGeneral") != "Dataset":
+                if (
+                    _response_object(attributes.get("types")).get("resourceTypeGeneral")
+                    != "Dataset"
+                ):
                     raise ValueError("DataCite result is not a dataset")
                 titles = _response_list(attributes.get("titles"))
-                title = next((value["title"].strip() for value in titles if isinstance(value.get("title"), str) and value["title"].strip()), "")
+                title = next(
+                    (
+                        value["title"].strip()
+                        for value in titles
+                        if isinstance(value.get("title"), str) and value["title"].strip()
+                    ),
+                    "",
+                )
                 if not title:
                     raise ValueError("DataCite dataset title is missing")
                 descriptions = _response_list(attributes.get("descriptions", []))
-                description = " ".join(_strip_jats(value["description"]) for value in descriptions if isinstance(value.get("description"), str))
+                description = " ".join(
+                    _strip_jats(value["description"])
+                    for value in descriptions
+                    if isinstance(value.get("description"), str)
+                )
                 rights = _response_list(attributes.get("rightsList", []))
             except (KeyError, TypeError, ValueError):
                 rejected += 1
                 continue
             snapshot = _item_page_metadata(result, index, _client_response_metadata(self.client))
             provenance = remote_source_provenance(
-                source_type="datacite", source_url=f"https://doi.org/{doi}",
-                adapter_name=self.name, adapter_version="datacite_rest_dataset_v1",
+                source_type="datacite",
+                source_url=f"https://doi.org/{doi}",
+                adapter_name=self.name,
+                adapter_version="datacite_rest_dataset_v1",
                 retrieval_time_utc=str(snapshot.get("retrieval_time_utc", "")),
-                acquisition_method="datacite_public_api", content_scope="dataset_metadata",
+                acquisition_method="datacite_public_api",
+                content_scope="dataset_metadata",
                 raw_record_id=doi,
-                limitations=["DOI metadata does not establish access to files, observed variables, or independent samples."],
-                metadata={"source_profile": source_profile("datacite"), "cache_snapshot": snapshot, "pagination": result["pagination"]},
+                limitations=[
+                    "DOI metadata does not establish access to files, observed variables, or independent samples."
+                ],
+                metadata={
+                    "source_profile": source_profile("datacite"),
+                    "cache_snapshot": snapshot,
+                    "pagination": result["pagination"],
+                },
             ).to_dict()
-            record = classify_dataset_record({
-                "dataset_id": f"datacite:{doi}", "title": title, "source": "DataCite",
-                "description": description, "url": f"https://doi.org/{doi}",
-                "variables": [], "sample_size": 0,
-                "license": "; ".join(str(value.get("rights") or value.get("rightsUri") or value.get("rightsIdentifier") or "").strip() for value in rights) or "unknown",
-                "access_type": "public DOI metadata; dataset-file access unknown",
-                "metadata": {"source_provenance": provenance, "raw_record": item,
-                             "doi": doi, "related_identifiers": attributes.get("relatedIdentifiers", []),
-                             "publication_year": attributes.get("publicationYear"),
-                             "measurement_status": "NOT_REPORTED", "sample_count": None,
-                             "pagination": result["pagination"]},
-            })
+            record = classify_dataset_record(
+                {
+                    "dataset_id": f"datacite:{doi}",
+                    "title": title,
+                    "source": "DataCite",
+                    "description": description,
+                    "url": f"https://doi.org/{doi}",
+                    "variables": [],
+                    "sample_size": 0,
+                    "license": "; ".join(
+                        str(
+                            value.get("rights")
+                            or value.get("rightsUri")
+                            or value.get("rightsIdentifier")
+                            or ""
+                        ).strip()
+                        for value in rights
+                    )
+                    or "unknown",
+                    "access_type": "public DOI metadata; dataset-file access unknown",
+                    "metadata": {
+                        "source_provenance": provenance,
+                        "raw_record": item,
+                        "doi": doi,
+                        "related_identifiers": attributes.get("relatedIdentifiers", []),
+                        "publication_year": attributes.get("publicationYear"),
+                        "measurement_status": "NOT_REPORTED",
+                        "sample_count": None,
+                        "pagination": result["pagination"],
+                    },
+                }
+            )
             records.setdefault(record.dataset_id, record)
         if rejected:
-            self.last_search_status = {**self.last_search_status, "status": "SCHEMA_DRIFT", "rejected_records": rejected, "completed": False,
-                                       "candidate_universe_status": "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE"}
+            self.last_search_status = {
+                **self.last_search_status,
+                "status": "SCHEMA_DRIFT",
+                "rejected_records": rejected,
+                "completed": False,
+                "candidate_universe_status": "PARTIAL_CANDIDATE_UNIVERSE_NOT_EVIDENCE_COMPLETE",
+            }
         return list(records.values())
 
 
@@ -1083,12 +1412,8 @@ def adapter_source_profiles() -> JsonDict:
     """Return source profiles for optional literature and dataset adapters."""
 
     return {
-        "literature": {
-            name: source_profile(name) for name in sorted(LITERATURE_ADAPTERS)
-        },
-        "datasets": {
-            name: source_profile(name) for name in sorted(DATASET_ADAPTERS)
-        },
+        "literature": {name: source_profile(name) for name in sorted(LITERATURE_ADAPTERS)},
+        "datasets": {name: source_profile(name) for name in sorted(DATASET_ADAPTERS)},
     }
 
 
@@ -1145,7 +1470,13 @@ def search_dataset_sources(
             source_statuses.append(_search_status(adapter))
         except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
             adapter_records = []
-            source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE", "error": type(exc).__name__})
+            source_statuses.append(
+                {
+                    "source": adapter.name,
+                    "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE",
+                    "error": type(exc).__name__,
+                }
+            )
         for record in adapter_records:
             if record.dataset_id in seen:
                 continue
@@ -1175,20 +1506,34 @@ def search_literature_sources(
         except (KeyError, TypeError, ValueError, OSError, RuntimeError) as exc:
             # A source/schema problem is unknown, never an implicit clean result.
             adapter_rows = []
-            source_statuses.append({"source": adapter.name, "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE", "error": type(exc).__name__})
+            source_statuses.append(
+                {
+                    "source": adapter.name,
+                    "status": "UNKNOWN_RETRIEVAL_OR_SCHEMA_FAILURE",
+                    "error": type(exc).__name__,
+                }
+            )
         for original in adapter_rows:
             row = deepcopy(original)
             keys = _literature_identity_keys(row)
-            candidates = {id(candidate): candidate for key in keys for candidate in seen.get(key, [])}
+            candidates = {
+                id(candidate): candidate for key in keys for candidate in seen.get(key, [])
+            }
             duplicate = next(iter(candidates.values())) if len(candidates) == 1 else None
             conflicts = []
             for candidate in candidates.values():
                 fields = _identifier_conflicts(candidate, row)
                 if fields or len(candidates) > 1:
-                    issue = {"status": "CONFLICTING_IDENTIFIERS" if fields else "AMBIGUOUS_SHARED_IDENTIFIER",
-                             "source_ids": [candidate.get("source_id", ""), row.get("source_id", "")],
-                             "fields": fields}
-                    candidate.setdefault("metadata", {}).setdefault("identifier_conflicts", []).append(deepcopy(issue))
+                    issue = {
+                        "status": "CONFLICTING_IDENTIFIERS"
+                        if fields
+                        else "AMBIGUOUS_SHARED_IDENTIFIER",
+                        "source_ids": [candidate.get("source_id", ""), row.get("source_id", "")],
+                        "fields": fields,
+                    }
+                    candidate.setdefault("metadata", {}).setdefault(
+                        "identifier_conflicts", []
+                    ).append(deepcopy(issue))
                     conflicts.append(issue)
             if conflicts:
                 row.setdefault("metadata", {})["identifier_conflicts"] = conflicts
@@ -1210,7 +1555,9 @@ def search_literature_sources(
     return SourceSearchResult(consolidate_literature_rows(rows, source_statuses), source_statuses)
 
 
-def cached_client(cache_dir: str | Path | None = None, *, offline: bool = False) -> CachedHttpClient:
+def cached_client(
+    cache_dir: str | Path | None = None, *, offline: bool = False
+) -> CachedHttpClient:
     """Return a cached HTTP client for CLI adapter commands."""
 
     return CachedHttpClient(cache_dir=cache_dir or Path("local/http_cache"), offline=offline)
@@ -1243,12 +1590,20 @@ def _literature_identity_keys(row: JsonDict) -> list[str]:
     doi = _normalize_doi(row.get("doi", ""))
     if doi:
         return [f"doi:{doi}"]
-    keys = [f"{kind}:{value}" for kind in ("pmid", "pmcid")
-            if (value := _publication_identifier(row.get(kind), kind))]
+    keys = [
+        f"{kind}:{value}"
+        for kind in ("pmid", "pmcid")
+        if (value := _publication_identifier(row.get(kind), kind))
+    ]
     if keys:
         return keys
     source_id, source = row.get("source_id"), row.get("source")
-    if isinstance(source_id, str) and source_id.strip() and isinstance(source, str) and source.strip():
+    if (
+        isinstance(source_id, str)
+        and source_id.strip()
+        and isinstance(source, str)
+        and source.strip()
+    ):
         # Length-prefix the namespace so punctuation cannot create collisions.
         source = source.strip().casefold()
         return [f"source:{len(source)}:{source}:{source_id.strip()}"]
@@ -1259,10 +1614,15 @@ def _identifier_conflicts(existing: JsonDict, incoming: JsonDict) -> list[str]:
     """Retain constraints declared by every member of an existing group."""
 
     members = [existing, *existing.get("metadata", {}).get("merged_source_records", [])]
-    return [kind for kind in ("pmid", "pmcid")
-            if (value := _publication_identifier(incoming.get(kind), kind))
-            and any((other := _publication_identifier(member.get(kind), kind)) and other != value
-                    for member in members)]
+    return [
+        kind
+        for kind in ("pmid", "pmcid")
+        if (value := _publication_identifier(incoming.get(kind), kind))
+        and any(
+            (other := _publication_identifier(member.get(kind), kind)) and other != value
+            for member in members
+        )
+    ]
 
 
 def _client_response_metadata(client: object) -> JsonDict:
@@ -1279,10 +1639,16 @@ def _merge_literature_duplicate(existing: JsonDict, duplicate: JsonDict) -> None
     metadata.setdefault("merged_source_records", []).append(deepcopy(duplicate))
     alternate_ids = metadata.setdefault("alternate_source_ids", [])
     duplicate_id = str(duplicate.get("source_id", "") or "")
-    if duplicate_id and duplicate_id != existing.get("source_id") and duplicate_id not in alternate_ids:
+    if (
+        duplicate_id
+        and duplicate_id != existing.get("source_id")
+        and duplicate_id not in alternate_ids
+    ):
         alternate_ids.append(duplicate_id)
     relations = metadata.setdefault("version_relationships", {})
-    incoming = duplicate.get("version_relationships") or duplicate.get("metadata", {}).get("version_relationships", {})
+    incoming = duplicate.get("version_relationships") or duplicate.get("metadata", {}).get(
+        "version_relationships", {}
+    )
     if isinstance(incoming, dict):
         scoped = relations.setdefault(str(duplicate.get("source", "") or "unknown"), {})
         for name, value in incoming.items():
@@ -1392,7 +1758,10 @@ def _ncbi_search(client: CachedHttpClient, database: str, query: str, limit: int
         },
     )
     ids = _response_object(_response_object(data).get("esearchresult")).get("idlist")
-    if not isinstance(ids, list) or not all(isinstance(uid, (str, int)) and not isinstance(uid, bool) and str(uid).isdigit() for uid in ids):
+    if not isinstance(ids, list) or not all(
+        isinstance(uid, (str, int)) and not isinstance(uid, bool) and str(uid).isdigit()
+        for uid in ids
+    ):
         raise ValueError("NCBI ESearch requires an identifier list")
     return [str(uid) for uid in ids]
 
@@ -1431,7 +1800,9 @@ def _parse_pubmed_xml(xml_text: str) -> dict[str, JsonDict]:
         root = ET.fromstring(xml_text.encode("utf-8"))
     except ET.ParseError as exc:
         raise ValueError("Malformed PubMed XML") from exc
-    if _xml_name(root) != "PubmedArticleSet" or any(_xml_name(item).casefold() == "error" for item in root.iter()):
+    if _xml_name(root) != "PubmedArticleSet" or any(
+        _xml_name(item).casefold() == "error" for item in root.iter()
+    ):
         raise ValueError("Unexpected PubMed XML response envelope")
     records: dict[str, JsonDict] = {}
     for article in root.iter():
@@ -1451,8 +1822,26 @@ def _parse_pubmed_xml(xml_text: str) -> dict[str, JsonDict]:
             "journal": _xml_text(_first_xml(_first_xml(article_node, "Journal"), "Title")),
             "year": _pubmed_xml_year(article_node),
             "authors": _pubmed_authors(article_node),
-            "publication_types": [_xml_text(item) for item in article_node.iter() if _xml_name(item) == "PublicationType"] if article_node is not None else [],
-            "comments_corrections": [{"type": item.get("RefType", ""), "id": _xml_text(_first_xml(item, "PMID")), "reference": _xml_text(_first_xml(item, "RefSource"))} for group in list(medline) if _xml_name(group) == "CommentsCorrectionsList" for item in list(group) if _xml_name(item) == "CommentsCorrections"] if medline is not None else [],
+            "publication_types": [
+                _xml_text(item)
+                for item in article_node.iter()
+                if _xml_name(item) == "PublicationType"
+            ]
+            if article_node is not None
+            else [],
+            "comments_corrections": [
+                {
+                    "type": item.get("RefType", ""),
+                    "id": _xml_text(_first_xml(item, "PMID")),
+                    "reference": _xml_text(_first_xml(item, "RefSource")),
+                }
+                for group in list(medline)
+                if _xml_name(group) == "CommentsCorrectionsList"
+                for item in list(group)
+                if _xml_name(item) == "CommentsCorrections"
+            ]
+            if medline is not None
+            else [],
         }
     return records
 
@@ -1566,14 +1955,27 @@ def _mgnify_metadata(item: JsonDict, provenance: JsonDict, declared_sample_count
     """Retain study metadata without promoting declared counts to analyzed samples."""
 
     metadata = _metadata_with_provenance(item, provenance)
-    metadata.update({
-        "declared_sample_count": {"count": declared_sample_count, "interpretation": "source metadata; not analyzed biological sample count"},
-        "modality": _first_text(item, "experiment-type", "experiment_type", default="UNKNOWN"),
-        "organism_or_biome": _string_list(item.get("biome", []) or item.get("organism", [])),
-        "sample_group_design": item.get("sample_groups", "UNKNOWN"),
-        "raw_processed_availability": {"raw": "UNKNOWN", "processed": "UNKNOWN", "interpretation": "study detail inspection required"},
-        "missingness": {"specimen": "PRESENT" if item.get("biome") else "MISSING", "group_design": "PRESENT" if item.get("sample_groups") else "MISSING", "timepoint": "PRESENT" if item.get("timepoint") else "MISSING"},
-    })
+    metadata.update(
+        {
+            "declared_sample_count": {
+                "count": declared_sample_count,
+                "interpretation": "source metadata; not analyzed biological sample count",
+            },
+            "modality": _first_text(item, "experiment-type", "experiment_type", default="UNKNOWN"),
+            "organism_or_biome": _string_list(item.get("biome", []) or item.get("organism", [])),
+            "sample_group_design": item.get("sample_groups", "UNKNOWN"),
+            "raw_processed_availability": {
+                "raw": "UNKNOWN",
+                "processed": "UNKNOWN",
+                "interpretation": "study detail inspection required",
+            },
+            "missingness": {
+                "specimen": "PRESENT" if item.get("biome") else "MISSING",
+                "group_design": "PRESENT" if item.get("sample_groups") else "MISSING",
+                "timepoint": "PRESENT" if item.get("timepoint") else "MISSING",
+            },
+        }
+    )
     return metadata
 
 

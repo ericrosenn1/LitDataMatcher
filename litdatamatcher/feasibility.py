@@ -67,7 +67,9 @@ def assay_fit(question: QuestionCandidate, dataset: DatasetRecord) -> float:
     required = {item.lower() for item in question.required_variables}
     assays = " ".join(dataset.assay_types).lower()
     # Assay matching is intentionally coarse until richer ontology mappings exist.
-    if "microbiome_composition" in required and any(term in assays for term in ("16s", "metagenomic")):
+    if "microbiome_composition" in required and any(
+        term in assays for term in ("16s", "metagenomic")
+    ):
         return 1.0
     if "transcriptomics" in required and any(term in assays for term in ("rna", "microarray")):
         return 1.0

@@ -126,13 +126,42 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
         else:
             values = cap.value if isinstance(cap.value, list) else [cap.value]
             category = _entity_category(req.field)
-            mappings = [(normalize_entity(str(req.expected), category), normalize_entity(str(value), category)) for value in values] if category else []
-            if category == "assay" and str(req.expected).strip().casefold() in MODALITY_FAMILIES and any(str(req.expected).strip().casefold() in modality_families(value) for value in values) or any(left["status"] == right["status"] == "RESOLVED" and left["candidates"] == right["candidates"] for left, right in mappings):
+            mappings = (
+                [
+                    (
+                        normalize_entity(str(req.expected), category),
+                        normalize_entity(str(value), category),
+                    )
+                    for value in values
+                ]
+                if category
+                else []
+            )
+            if (
+                category == "assay"
+                and str(req.expected).strip().casefold() in MODALITY_FAMILIES
+                and any(
+                    str(req.expected).strip().casefold() in modality_families(value)
+                    for value in values
+                )
+                or any(
+                    left["status"] == right["status"] == "RESOLVED"
+                    and left["candidates"] == right["candidates"]
+                    for left, right in mappings
+                )
+            ):
                 status = "MATCH"
-            elif any(left["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"} or right["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"} for left, right in mappings):
+            elif any(
+                left["status"] in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"}
+                or right["status"]
+                in {"AMBIGUOUS", "UNRESOLVED", "DEPRECATED", "SOURCE_UNAVAILABLE"}
+                for left, right in mappings
+            ):
                 status = "UNKNOWN"
             else:
-                status = "MATCH" if any(_equivalent(req.expected, v) for v in values) else "MISMATCH"
+                status = (
+                    "MATCH" if any(_equivalent(req.expected, v) for v in values) else "MISMATCH"
+                )
         assessments.append(dict(asdict(req), status=status, observation=asdict(cap)))
     essentials = [x for x in assessments if x["essential"]]
     if not essentials:
@@ -169,7 +198,13 @@ def assess_requirements(requirements: list[dict], dataset: dict) -> dict:
 def _clinical_design_status(expected, observed):
     """Resolve only qualified design families from explicit registry design fields."""
     name = " ".join(str(expected).casefold().replace("randomised", "randomized").split())
-    randomized = {"rct", "randomized clinical trial", "randomized clinical trials", "randomized controlled trial", "randomized controlled trials"}
+    randomized = {
+        "rct",
+        "randomized clinical trial",
+        "randomized clinical trials",
+        "randomized controlled trial",
+        "randomized controlled trials",
+    }
     study_type, allocation = observed.get("study_type"), observed.get("allocation")
     if name in randomized:
         if study_type == "OBSERVATIONAL" or allocation == "NON_RANDOMIZED":
@@ -177,7 +212,12 @@ def _clinical_design_status(expected, observed):
         if study_type == "INTERVENTIONAL" and allocation == "RANDOMIZED":
             return "MATCH"
         return "UNKNOWN"
-    families = {"observational": "OBSERVATIONAL", "observational study": "OBSERVATIONAL", "interventional": "INTERVENTIONAL", "interventional study": "INTERVENTIONAL"}
+    families = {
+        "observational": "OBSERVATIONAL",
+        "observational study": "OBSERVATIONAL",
+        "interventional": "INTERVENTIONAL",
+        "interventional study": "INTERVENTIONAL",
+    }
     if name in families and study_type in {"OBSERVATIONAL", "INTERVENTIONAL"}:
         return "MATCH" if families[name] == study_type else "MISMATCH"
     return "UNKNOWN"
@@ -191,7 +231,9 @@ def _compatibility_status(assessments: list[dict], dataset: dict) -> str:
     if not essential:
         return "REQUIRES_ADDITIONAL_DATA"
     mapping_types = {item["observation"]["mapping_type"] for item in assessments}
-    if mapping_types - {"exact", "synonym"} or any(item["observation"]["status"] == "derived" for item in assessments):
+    if mapping_types - {"exact", "synonym"} or any(
+        item["observation"]["status"] == "derived" for item in assessments
+    ):
         return "INDIRECT_SUPPORT"
     if any(item["status"] == "UNKNOWN" for item in essential):
         return "UNKNOWN"
@@ -209,17 +251,24 @@ def _contract_requirement_status(field, expected, contract):
     if field in {"modality", "assay", "assay_modality"}:
         modalities = contract.get("modality", ["UNKNOWN"])
         required_families = modality_families(expected)
-        if modalities != ["UNKNOWN"] and required_families and not required_families.intersection(modalities):
+        if (
+            modalities != ["UNKNOWN"]
+            and required_families
+            and not required_families.intersection(modalities)
+        ):
             if any(not modality_families(value) for value in contract.get("observed_assays", [])):
                 return "UNKNOWN"
             return "MISMATCH"
         # A family match does not equate RNA-seq and microarrays. Preserve
         # precise observed assay constraints when both names are qualified.
         observed = contract.get("observed_assays", [])
-        if (str(expected).strip().casefold() not in MODALITY_FAMILIES
-                and required_families and observed
-                and not any(_equivalent(expected, value) for value in observed)
-                and all(modality_families(value) for value in observed)):
+        if (
+            str(expected).strip().casefold() not in MODALITY_FAMILIES
+            and required_families
+            and observed
+            and not any(_equivalent(expected, value) for value in observed)
+            and all(modality_families(value) for value in observed)
+        ):
             return "MISMATCH"
     if field in {"organism", "species"}:
         observed = contract.get("organisms", [])
@@ -229,26 +278,55 @@ def _contract_requirement_status(field, expected, contract):
                 return "MISMATCH"
             if not any(value is True for value in comparisons):
                 return "UNKNOWN"
-    if field in {"feature_type", "feature_unit", "quantification", "normalization", "temporal_design", "baseline_timing", "followup_window", "intervention_timing", "repeated_measure_unit"}:
+    if field in {
+        "feature_type",
+        "feature_unit",
+        "quantification",
+        "normalization",
+        "temporal_design",
+        "baseline_timing",
+        "followup_window",
+        "intervention_timing",
+        "repeated_measure_unit",
+    }:
         observed = str(contract.get(field, "UNKNOWN") or "UNKNOWN")
         if observed == "UNKNOWN":
             return "UNKNOWN"
         if str(expected).casefold() != observed.casefold():
             return "MISMATCH"
-    if field in {
-        "biological_sample",
-        "biological_sample_count",
-        "donor",
-        "donor_count",
-        "independent_unit",
-        "independent_unit_count",
-    } and contract.get("biological_unit") == "UNKNOWN":
+    if (
+        field
+        in {
+            "biological_sample",
+            "biological_sample_count",
+            "donor",
+            "donor_count",
+            "independent_unit",
+            "independent_unit_count",
+        }
+        and contract.get("biological_unit") == "UNKNOWN"
+    ):
         return "UNKNOWN"
     return ""
 
 
 def _entity_category(field: str) -> str:
-    return {"species": "organism", "organism": "organism", "assay": "assay", "modality": "assay", "tissue": "tissue_cell_type", "cell_type": "tissue_cell_type", "gene": "gene_protein", "protein": "gene_protein", "disease": "disease_condition", "condition": "disease_condition", "intervention": "intervention_chemical", "chemical": "intervention_chemical", "experimental_condition": "experimental_condition", "comparator": "experimental_condition"}.get(str(field).casefold(), "")
+    return {
+        "species": "organism",
+        "organism": "organism",
+        "assay": "assay",
+        "modality": "assay",
+        "tissue": "tissue_cell_type",
+        "cell_type": "tissue_cell_type",
+        "gene": "gene_protein",
+        "protein": "gene_protein",
+        "disease": "disease_condition",
+        "condition": "disease_condition",
+        "intervention": "intervention_chemical",
+        "chemical": "intervention_chemical",
+        "experimental_condition": "experimental_condition",
+        "comparator": "experimental_condition",
+    }.get(str(field).casefold(), "")
 
 
 def rank_candidates(
@@ -383,7 +461,10 @@ def evidence_relation_graph(items: list[dict]) -> dict:
                     seen[key],
                     "derivative_evidence",
                     "primary_publication_id",
-                    str(row.get("source_locator", "") or f"{row['evidence_id']}:primary_publication_ids"),
+                    str(
+                        row.get("source_locator", "")
+                        or f"{row['evidence_id']}:primary_publication_ids"
+                    ),
                 )
             else:
                 seen[key] = row["evidence_id"]
@@ -400,7 +481,10 @@ def evidence_relation_graph(items: list[dict]) -> dict:
                         candidate["evidence_id"],
                         "derivative_evidence",
                         "source_of_source",
-                        str(row.get("source_locator", "") or f"{row['evidence_id']}:source_of_source"),
+                        str(
+                            row.get("source_locator", "")
+                            or f"{row['evidence_id']}:source_of_source"
+                        ),
                     )
         for assertion in row.get("relation_assertions", []):
             if not isinstance(assertion, dict):
@@ -412,7 +496,19 @@ def evidence_relation_graph(items: list[dict]) -> dict:
                 "declared_relation",
                 str(assertion.get("source_locator", "")),
             )
-    return {"schema_version": "evidence_relation_graph_v1", "nodes": sorted(ids), "edges": sorted(edges.values(), key=lambda x: (x["source_evidence_id"], x["target_evidence_id"], x["relation_type"], x["basis"]))}
+    return {
+        "schema_version": "evidence_relation_graph_v1",
+        "nodes": sorted(ids),
+        "edges": sorted(
+            edges.values(),
+            key=lambda x: (
+                x["source_evidence_id"],
+                x["target_evidence_id"],
+                x["relation_type"],
+                x["basis"],
+            ),
+        ),
+    }
 
 
 def dependence_groups(items: list[dict]) -> list[dict]:
@@ -507,8 +603,7 @@ def compile_evidence(
         "relation_graph": relation_graph,
         "dependence_groups": groups,
         "known_dependence_edge_count": sum(
-            edge["relation_type"] in DEPENDENCE_LINK_TYPES
-            for edge in relation_graph["edges"]
+            edge["relation_type"] in DEPENDENCE_LINK_TYPES for edge in relation_graph["edges"]
         ),
         "independent_support_count": None,
         "contradictory_evidence_ids": sorted({x["evidence_id"] for x in contradictions}),

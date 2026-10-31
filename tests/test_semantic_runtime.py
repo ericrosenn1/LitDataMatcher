@@ -1,4 +1,5 @@
 """Semantic runtime challenges; synthetic cases are never reported as real inference."""
+
 import copy
 import json
 
@@ -14,13 +15,26 @@ from litdatamatcher.semantic_runtime import (
 
 
 def case(text="Treatment reduced IL6 in human macrophages."):
-    return {"document_id": "synthetic:challenge", "text": text, "source_provenance": {"kind": "synthetic"}}
+    return {
+        "document_id": "synthetic:challenge",
+        "text": text,
+        "source_provenance": {"kind": "synthetic"},
+    }
 
 
 def claim(quote="Treatment reduced IL6 in human macrophages.", **changes):
-    return {"subject": "Treatment", "predicate": "reduced", "object": "IL6", "quote": quote,
-            "negated": False, "direction": "decrease", "status": "direct_experiment",
-            "context": "human macrophages", "comparator": None, **changes}
+    return {
+        "subject": "Treatment",
+        "predicate": "reduced",
+        "object": "IL6",
+        "quote": quote,
+        "negated": False,
+        "direction": "decrease",
+        "status": "direct_experiment",
+        "context": "human macrophages",
+        "comparator": None,
+        **changes,
+    }
 
 
 def validate(record, document=None):
@@ -33,19 +47,28 @@ def test_exact_source_survives_roundtrip():
     assert result == json.loads(json.dumps(result))
 
 
-@pytest.mark.parametrize("changes", [
-    {"negated": "false"}, {"negated": True}, {"direction": "increase"},
-    {"context": "mouse liver"}, {"comparator": "untreated controls"},
-    {"subject": "IL6", "object": "Treatment"}, {"predicate": "increased"},
-    {"quote": "Treatment reduced IL6."},
-])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"negated": "false"},
+        {"negated": True},
+        {"direction": "increase"},
+        {"context": "mouse liver"},
+        {"comparator": "untreated controls"},
+        {"subject": "IL6", "object": "Treatment"},
+        {"predicate": "increased"},
+        {"quote": "Treatment reduced IL6."},
+    ],
+)
 def test_reject_consequential_hallucinations(changes):
     result = validate(claim(**changes))
     assert not result["claims"] and result["rejected"]
 
 
 def test_omitted_negation_rejected():
-    source = case("We found that Treatment reduced IL6 in human macrophages. This was not reproducible.")
+    source = case(
+        "We found that Treatment reduced IL6 in human macrophages. This was not reproducible."
+    )
     assert not validate(claim(), source)["claims"]
 
 
@@ -62,7 +85,10 @@ def test_background_not_current_result():
 
 def test_direction_cannot_borrow_from_another_predicate():
     text = "Treatment preserved barrier integrity and increased IL6 in human macrophages."
-    result = validate(claim(quote=text, predicate="preserved", object="barrier integrity", direction="increase"), case(text))
+    result = validate(
+        claim(quote=text, predicate="preserved", object="barrier integrity", direction="increase"),
+        case(text),
+    )
     assert not result["claims"]
 
 
@@ -74,7 +100,9 @@ def test_whether_in_a_method_does_not_establish_unresolvedness():
 
 def test_future_not_observation_or_novelty():
     text = "Future studies should test whether Treatment reduced IL6 in human macrophages."
-    result = validate_extraction({"claims": [claim(quote=text)], "questions": [{"quote": text}]}, case(text))
+    result = validate_extraction(
+        {"claims": [claim(quote=text)], "questions": [{"quote": text}]}, case(text)
+    )
     assert not result["claims"]
     assert result["questions"][0]["gap_status"] == "insufficient_coverage"
 
@@ -85,14 +113,20 @@ def test_repeated_quote_abstains():
 
 def test_invalid_model_digest_and_path(tmp_path):
     (tmp_path / "model.safetensors").write_bytes(b"synthetic corruption")
-    manifest = {"revision": "a" * 40, "license": "apache-2.0", "files": [
-        {"path": "model.safetensors", "sha256": "0" * 64}]}
+    manifest = {
+        "revision": "a" * 40,
+        "license": "apache-2.0",
+        "files": [{"path": "model.safetensors", "sha256": "0" * 64}],
+    }
     (tmp_path / "MODEL_MANIFEST.json").write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="integrity"):
         verify_model(tmp_path)
 
 
-@pytest.mark.parametrize("config", [{"max_attempts": 4}, {"max_attempts": True}, {"device": "paid-api"}, {"cpu_threads": 0}])
+@pytest.mark.parametrize(
+    "config",
+    [{"max_attempts": 4}, {"max_attempts": True}, {"device": "paid-api"}, {"cpu_threads": 0}],
+)
 def test_bounded_configuration(config):
     with pytest.raises(ValueError):
         RuntimeConfig(**config)
@@ -110,10 +144,15 @@ def test_content_and_configuration_invalidate_cache_key():
 def stub_runtime(monkeypatch, outputs):
     """Mock only orchestration tests, never model qualification evidence."""
     import importlib.metadata
+
     monkeypatch.setattr(importlib.metadata, "version", lambda name: "synthetic-test-version")
     runtime = LocalSemanticRuntime.__new__(LocalSemanticRuntime)
     runtime.config = RuntimeConfig()
-    runtime.model_manifest = {"model_id": "synthetic-test-double", "revision": "0" * 40, "license": "test"}
+    runtime.model_manifest = {
+        "model_id": "synthetic-test-double",
+        "revision": "0" * 40,
+        "license": "test",
+    }
     generated = iter(outputs)
     runtime._generate = lambda document, repair="", system_prompt=None: (next(generated), 20, 20)
     return runtime
@@ -154,21 +193,51 @@ def test_hostile_source_never_scientific_claim():
 
 
 def test_explicit_requirements_are_proposals_with_unknown_indispensability(monkeypatch):
-    output = {key: None for key in ("species", "tissue", "intervention", "comparator", "outcome", "assay", "time", "paired")}
+    output = {
+        key: None
+        for key in (
+            "species",
+            "tissue",
+            "intervention",
+            "comparator",
+            "outcome",
+            "assay",
+            "time",
+            "paired",
+        )
+    }
     output.update(species="human", outcome="IL6")
     runtime = stub_runtime(monkeypatch, [json.dumps(output)])
     result = runtime.interpret_question("Does treatment alter IL6 in human macrophages?")
     assert all(row["essential"] is None for row in result["requirements"])
-    assert next(row for row in result["requirements"] if row["field"] == "assay")["status"] == "unknown"
+    assert (
+        next(row for row in result["requirements"] if row["field"] == "assay")["status"]
+        == "unknown"
+    )
 
 
 def test_unsupported_requirement_remains_unknown_after_bounded_repair(monkeypatch):
-    output = {key: None for key in ("species", "tissue", "intervention", "comparator", "outcome", "assay", "time", "paired")}
+    output = {
+        key: None
+        for key in (
+            "species",
+            "tissue",
+            "intervention",
+            "comparator",
+            "outcome",
+            "assay",
+            "time",
+            "paired",
+        )
+    }
     output.update(species="human", outcome="IL6 protein concentration")
     runtime = stub_runtime(monkeypatch, [json.dumps(output), json.dumps(output)])
     result = runtime.interpret_question("Does treatment alter IL6 in human macrophages?")
     outcome = next(row for row in result["requirements"] if row["field"] == "outcome")
     assert outcome["expected"] is None
     assert outcome["unknown_reason"] == "model_field_rejected_not_verbatim"
-    assert next(row for row in result["requirements"] if row["field"] == "species")["expected"] == "human"
+    assert (
+        next(row for row in result["requirements"] if row["field"] == "species")["expected"]
+        == "human"
+    )
     assert len(result["inference_manifest"]["attempts"]) == 2

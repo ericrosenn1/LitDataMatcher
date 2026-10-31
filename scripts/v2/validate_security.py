@@ -86,7 +86,9 @@ def _passing_junit_names(path: Path) -> set[str]:
         return set()
     root = ET.parse(path).getroot()
     suites = list(root.iter("testsuite"))
-    if any(int(suite.get(key, "0")) for suite in suites for key in ("failures", "errors", "skipped")):
+    if any(
+        int(suite.get(key, "0")) for suite in suites for key in ("failures", "errors", "skipped")
+    ):
         return set()
     return {
         case.get("name")

@@ -18,16 +18,15 @@ def calibrate_ranking_threshold(
         match.match_id: match
         for match in (MatchCandidate.from_dict(row) for row in read_jsonl(matches_path))
     }
-    labels = [
-        QuestionDataMatchLabel.from_dict(row)
-        for row in read_jsonl(labels_path)
-    ]
+    labels = [QuestionDataMatchLabel.from_dict(row) for row in read_jsonl(labels_path)]
     examples: list[tuple[float, int, str]] = []
     for label in labels:
         match = matches.get(label.match_id)
         if match is None or label.relevance_score is None:
             continue
-        examples.append((match.score.combined, 1 if label.relevance_score > 0 else 0, label.match_id))
+        examples.append(
+            (match.score.combined, 1 if label.relevance_score > 0 else 0, label.match_id)
+        )
 
     thresholds = [round(index / 20, 2) for index in range(21)]
     threshold_metrics = [_threshold_metrics(examples, threshold) for threshold in thresholds]
@@ -105,9 +104,7 @@ def _calibration_bins(examples: list[tuple[float, int, str]]) -> list[JsonDict]:
                 "score_max": round(high, 1),
                 "count": len(members),
                 "positive_labels": positives,
-                "observed_positive_rate": round(positives / len(members), 3)
-                if members
-                else None,
+                "observed_positive_rate": round(positives / len(members), 3) if members else None,
                 "match_ids": [match_id for _, _, match_id in members[:10]],
             }
         )

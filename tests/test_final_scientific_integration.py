@@ -17,7 +17,11 @@ def profile(assay="RNA-seq", species="Homo sapiens"):
         "organisms": [species],
         "capabilities": {
             "assay": {"value": assay, "status": "observed", "source_locator": "fixture:assay"},
-            "species": {"value": species, "status": "observed", "source_locator": "fixture:species"},
+            "species": {
+                "value": species,
+                "status": "observed",
+                "source_locator": "fixture:species",
+            },
         },
     }
 
@@ -34,16 +38,25 @@ def test_organism_synonym_survives_adapter_guard():
     assert compatibility("RNA-seq", "human", profile()) == "PARTIAL"
 
 
-@pytest.mark.parametrize("species, alias", [
-    ("Arabidopsis thaliana", "Arabidopsis thaliana"),
-    ("Drosophila melanogaster", "Drosophila melanogaster (Fruit fly)"),
-    ("Rattus norvegicus", "Rattus norvegicus (Rat)"),
-])
+@pytest.mark.parametrize(
+    "species, alias",
+    [
+        ("Arabidopsis thaliana", "Arabidopsis thaliana"),
+        ("Drosophila melanogaster", "Drosophila melanogaster (Fruit fly)"),
+        ("Rattus norvegicus", "Rattus norvegicus (Rat)"),
+    ],
+)
 def test_qualified_real_omics_organisms_do_not_become_false_exclusions(species, alias):
     requirement = [{"field": "species", "expected": species}]
     assert assess_requirements(requirement, profile(species=alias))["eligibility"] == "DIRECT_FIT"
-    assert assess_requirements(requirement, profile(species="Homo sapiens"))["eligibility"] == "NOT_QUALIFIED"
-    assert assess_requirements(requirement, profile(species=alias + " unknown strain"))["eligibility"] == "REQUIRES_INSPECTION"
+    assert (
+        assess_requirements(requirement, profile(species="Homo sapiens"))["eligibility"]
+        == "NOT_QUALIFIED"
+    )
+    assert (
+        assess_requirements(requirement, profile(species=alias + " unknown strain"))["eligibility"]
+        == "REQUIRES_INSPECTION"
+    )
 
 
 def test_known_different_assays_are_not_equated_by_broad_family():
@@ -52,7 +65,9 @@ def test_known_different_assays_are_not_equated_by_broad_family():
 
 
 def test_unknown_assay_has_no_false_incompatibility_from_string_family_comparison():
-    result = assess_requirements([{"field": "assay", "expected": "unqualified assay alias"}], profile())
+    result = assess_requirements(
+        [{"field": "assay", "expected": "unqualified assay alias"}], profile()
+    )
     assert result["eligibility"] == "REQUIRES_INSPECTION"
 
 
@@ -60,7 +75,10 @@ def test_partially_unqualified_assay_list_cannot_prove_absence_of_a_modality():
     raw = profile("WGS")
     raw["assay_types"].append("unqualified assay")
     assert compatibility("proteomics", "human", raw) == "UNKNOWN"
-    assert assess_requirements([{"field": "modality", "expected": "proteomics"}], raw)["eligibility"] == "REQUIRES_INSPECTION"
+    assert (
+        assess_requirements([{"field": "modality", "expected": "proteomics"}], raw)["eligibility"]
+        == "REQUIRES_INSPECTION"
+    )
 
 
 def test_declared_screen_modality_requires_units_and_specific_design_review():
@@ -71,8 +89,14 @@ def test_declared_screen_modality_requires_units_and_specific_design_review():
     assert broad["eligibility"] == "DIRECT_FIT"
     assert broad["independent_units"] is None
     assert broad["statistical_adequacy"] == "UNKNOWN"
-    assert assess_requirements([{"field": "assay", "expected": "RNAi screen"}], raw)["eligibility"] == "NOT_QUALIFIED"
-    assert assess_requirements([{"field": "donor_count", "expected": 100}], raw)["eligibility"] == "REQUIRES_INSPECTION"
+    assert (
+        assess_requirements([{"field": "assay", "expected": "RNAi screen"}], raw)["eligibility"]
+        == "NOT_QUALIFIED"
+    )
+    assert (
+        assess_requirements([{"field": "donor_count", "expected": 100}], raw)["eligibility"]
+        == "REQUIRES_INSPECTION"
+    )
 
 
 def test_adapter_capabilities_need_source_provenance_and_never_imply_units():
@@ -82,11 +106,21 @@ def test_adapter_capabilities_need_source_provenance_and_never_imply_units():
     raw["source_provenance"] = {"source_url": "https://example.test/study"}
     assert normalize_dataset(raw)["capabilities"] == {}
     raw["field_evidence"] = {
-        field: {"value": raw[field], "status": "observed", "source_locator": f"https://example.test/study#{field}"}
+        field: {
+            "value": raw[field],
+            "status": "observed",
+            "source_locator": f"https://example.test/study#{field}",
+        }
         for field in ("organisms", "assay_types")
     }
     result = normalize_dataset(raw)
-    assessment = assess_requirements([{"field": "modality", "expected": "bulk_transcriptomics"}, {"field": "species", "expected": "human"}], result)
+    assessment = assess_requirements(
+        [
+            {"field": "modality", "expected": "bulk_transcriptomics"},
+            {"field": "species", "expected": "human"},
+        ],
+        result,
+    )
     assert assessment["eligibility"] == "DIRECT_FIT"
     assert assessment["independent_units"] is None
     assert assessment["statistical_adequacy"] == "UNKNOWN"
@@ -94,18 +128,45 @@ def test_adapter_capabilities_need_source_provenance_and_never_imply_units():
 
 
 def test_runtime_document_selection_checks_cross_source_lifecycle():
-    document = {"document_id": "fixture-doc", "text": "Preserved input.", "metadata": {"version_relationships": {"crossref": {"is-retracted-by": [{"id": "fixture-notice"}]}}}}
+    document = {
+        "document_id": "fixture-doc",
+        "text": "Preserved input.",
+        "metadata": {
+            "version_relationships": {"crossref": {"is-retracted-by": [{"id": "fixture-notice"}]}}
+        },
+    }
     assert document_lifecycle_status(document) == "RETRACTED"
     document["metadata"] = {}
     assert document_lifecycle_status(document) == "ACTIVE_METADATA_ONLY"
 
 
 def compiled_fixture():
-    question = {"question_id": "fixture-q", "question": "What does the recorded evidence establish?", "proposition_id": "fixture-p", "source_evidence_ids": ["fixture-e"]}
-    evidence = [{"evidence_id": "fixture-e", "proposition_id": "fixture-p", "source_locator": "fixture:paragraph:1", "role": "background", "direction": "supports"}]
-    bundle = compile_evidence(question, evidence, "2026-09-13", [{"source": "fixture", "status": "success"}])
+    question = {
+        "question_id": "fixture-q",
+        "question": "What does the recorded evidence establish?",
+        "proposition_id": "fixture-p",
+        "source_evidence_ids": ["fixture-e"],
+    }
+    evidence = [
+        {
+            "evidence_id": "fixture-e",
+            "proposition_id": "fixture-p",
+            "source_locator": "fixture:paragraph:1",
+            "role": "background",
+            "direction": "supports",
+        }
+    ]
+    bundle = compile_evidence(
+        question, evidence, "2026-09-13", [{"source": "fixture", "status": "success"}]
+    )
     assessment = assess_requirements([{"field": "species", "expected": "Homo sapiens"}], profile())
-    return question, bundle, assessment, profile(), ["Observed organism; other measurements need review."]
+    return (
+        question,
+        bundle,
+        assessment,
+        profile(),
+        ["Observed organism; other measurements need review."],
+    )
 
 
 def test_compiler_output_is_accepted_by_dossier_without_novelty_overclaim():
@@ -114,7 +175,9 @@ def test_compiler_output_is_accepted_by_dossier_without_novelty_overclaim():
     assert "no global novelty assertion" in dossier["unresolvedness"]["novelty_claim"]
 
 
-@pytest.mark.parametrize("mutation", ["unlinked_question", "wrong_candidate", "missing_locator", "unknown_contradiction"])
+@pytest.mark.parametrize(
+    "mutation", ["unlinked_question", "wrong_candidate", "missing_locator", "unknown_contradiction"]
+)
 def test_dossier_rejects_broken_scientific_lineage(mutation):
     args = copy.deepcopy(compiled_fixture())
     if mutation == "unlinked_question":

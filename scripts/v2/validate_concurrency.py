@@ -72,9 +72,7 @@ def main(argv=None) -> int:
     )
     receipt = {
         "schema_version": "concurrency-validation-v1",
-        "status": "PASS"
-        if overlap > 0 and all(job["exit_code"] == 0 for job in jobs)
-        else "FAIL",
+        "status": "PASS" if overlap > 0 and all(job["exit_code"] == 0 for job in jobs) else "FAIL",
         "source_commit": subprocess.check_output(
             ["git", "-C", str(source), "rev-parse", "HEAD"], text=True
         ).strip(),

@@ -1,4 +1,5 @@
 """Write a deterministic receipt for successful cache refresh lineage."""
+
 from __future__ import annotations
 
 import argparse

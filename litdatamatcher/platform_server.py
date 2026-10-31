@@ -173,6 +173,12 @@ class PlatformService:
         result["progress"] = (
             strict_json_loads(progress.read_text(encoding="utf-8")) if progress.exists() else None
         )
+        request_path = progress.parent / "request.json"
+        if request_path.is_file():
+            request = strict_json_loads(request_path.read_text(encoding="utf-8"))["request"]
+            result["label"] = (
+                request.get("question") or request.get("query") or row["id"]
+            ).replace("\n", " ")[:160]
         return result
 
     def job(self, identifier):

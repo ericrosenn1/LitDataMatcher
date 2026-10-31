@@ -794,7 +794,7 @@ export function ScientificWorkflow() {
               <option value="">Select a saved job</option>
               {jobs.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.id} · {label(item.status)}
+                  {item.label || item.id} · {label(item.status)}
                 </option>
               ))}
             </select>
@@ -991,6 +991,9 @@ export function ScientificWorkflow() {
                   </span>
                 </div>
                 <p>{label(candidate.assessment.compatibility_status)}</p>
+                <p>
+                  Statistical adequacy: {label(candidate.assessment.statistical_adequacy || "UNKNOWN")}
+                </p>
                 {safeScientificUrl(candidate.dataset?.url) && (
                   <a
                     className="scientific-source-link"

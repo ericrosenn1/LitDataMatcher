@@ -538,6 +538,7 @@ def _report(result):
                 f"## {row['dataset_id']} — {row['dataset'].get('title', '')}",
                 f"Decision: {row['assessment']['eligibility']}",
                 f"Compatibility: {row['assessment']['compatibility_status']}",
+                f"Statistical adequacy: {row['assessment'].get('statistical_adequacy', 'UNKNOWN')}",
                 "",
             ]
         )

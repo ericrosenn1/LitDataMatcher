@@ -272,6 +272,7 @@ def test_controller_executes_real_worker_and_receipt_protects_exports(catalog, t
         tmp_path / "service", configuration={"catalog_root": str(catalog), "offline": True}
     )
     submitted = service.submit(request())
+    assert submitted["label"] == request()["question"]
     controller = Controller(service.queue)
     try:
         executed = controller.run_next(timeout=60)

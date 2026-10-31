@@ -44,6 +44,7 @@ export interface ScientificCandidate {
   assessment: {
     eligibility: string;
     compatibility_status?: string;
+    statistical_adequacy?: string;
     requirements: {
       field: string;
       expected: unknown;
@@ -90,6 +91,7 @@ export interface ResearchResult {
 
 export interface ResearchJob {
   id: string;
+  label?: string;
   status: string;
   progress?: { stage?: string };
   error?: unknown;

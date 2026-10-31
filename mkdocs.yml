@@ -13,11 +13,15 @@ nav:
   - Model and evaluation card: model_card.md
   - Configurable source discovery: campaign_20261031/discovery.md
   - Local structured inference: campaign_20261031/model_source_schema.md
+  - Source-index decoding: campaign_20261031/model_source_index.md
+  - Exact source literals: campaign_20261031/model_source_literal.md
   - Batch analysis: campaign_20261031/native_batch.md
   - Retrieval protocol: campaign_20261031/retrieval_protocol.md
   - Model training: campaign_20261031/retriever_training.md
   - Source-backed cases: campaign_20261031/research_cases.md
   - Recovery: campaign_20261031/workflow_recovery.md
+  - Worker process admission: campaign_20261031/workflow_controller_admission.md
+  - Manifest contract: campaign_20261031/manifest_contract.md
   - Installation and CLI: installation.md
   - Architecture: architecture.md
   - Corpus and data: corpus_and_data.md

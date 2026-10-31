@@ -2,7 +2,7 @@
   "schema_version": "research-engine-campaign-1.0",
   "campaign": "biomedical-research-engine-20261031",
   "status": "IN_PROGRESS",
-  "phase": "EXTRACTION_REGRESSION_AND_FAULT_RECOVERY_REPAIR",
+  "phase": "LITERAL_DECODER_QUALIFICATION_AND_CORPUS_COMPLETION",
   "started_utc": "2026-10-31T11:48:16Z",
   "soft_target_hours": 24,
   "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
@@ -40,9 +40,13 @@
     "GEO error envelopes can produce placeholder observed records",
     "Cache acquisition timestamps and digests are not consistently preserved",
     "Controller can mark malformed JSONL successful; nonfinite JSON values are accepted",
-    "Durable analysis checkpoints and bounded retry orchestration need completion"
+    "Durable analysis checkpoints and bounded retry orchestration need completion",
+    "A controller crash between process spawn and durable PID registration permitted an orphan worker (repaired and cross-platform tested)",
+    "Native final manifests emitted an undeclared question_compilation field (schema and write validation repaired)",
+    "The original constrained decoder mishandles escaped source literals; index alternative failed the positive acceptance rule; literal repair remains under review",
+    "CI exposed a pre-admission pause race in the controller; repair in progress"
   ],
-  "next_action": "Finish original source_schema30-case baseline; integrate and qualify source_index plus dependency identity; run post-repair development regression. Finish full ledger before namespace repair, then final integration/package validation.",
+  "next_action": "Freeze current source, qualify source_literal with the two existing development documents, and run a new30-case development regression only after both pass. Finish full ledger before namespace repair; then final full validation and reproducible handoff.",
   "integration_commits": {
     "sources": "30cfb84",
     "model_guard": "ecda49d",
@@ -67,14 +71,14 @@
     "fresh_offline_and_cache_replay": "PASS",
     "smaller_candidate": "1.5B fails positive document2 with zero accepted records",
     "scope": "Previously seen development smoke inputs, no expert accuracy claim",
-    "receipt": "model-selection-v1/SELECTION.json"
+    "receipt": "model-selection-v1/SELECTION.json",
+    "source_index_followup": "NOT_PROMOTED:7B passes1/2 positive docs;1.5B CPU passes0/2; all failures preserved"
   },
   "active_work": [
-    "Full1621-shard revision/deletion ledger; original ledger source frozen",
-    "Original30-case source_schema native batch; original package source frozen",
-    "source_index dependency identity follow-up and7B qualification pending GPU",
-    "Controller startup-admission repair for reproduced orphan crash window",
-    "Final source release and independent output audits"
+    "Full1621-shard revision ledger; implementation frozen",
+    "source_literal positive-document qualification pending",
+    "Final30-case regression contingent on qualification",
+    "Final cross-platform CI, package and evidence validation"
   ],
   "integration_round_1": {
     "status": "PASS",
@@ -105,7 +109,7 @@
       "Evidence Inference 2.0": 15,
       "PubMedQA": 15
     },
-    "pipeline_evaluation": "PENDING"
+    "pipeline_evaluation": "Original source_schema batch finished:9PASS21PARTIAL,2retryable; final engineering audit pending"
   },
   "processed_data_inspections": {
     "status": "PASS",
@@ -165,10 +169,7 @@
     "cause": "Windows Path.resolve may return equivalent extended DOS prefix; isolated fix tested, deferred until fingerprinted jobs finish"
   },
   "pending_repairs": [
-    "Integrate proven Windows namespace containment fix only after full ledger finishes",
-    "Integrate independently reviewed source-archive Git provenance fix after original native batch",
-    "Repair controller crash between worker spawn and durable registration using explicit admission handshake",
-    "Fingerprint runtime/validator dependency versions across inference and checkpoints"
+    "Integrate Windows namespace containment after full ledger completion"
   ],
   "external_prerequisites": [
     "GitHub dependency graph is disabled; existing dependency-review action retained"
@@ -220,5 +221,30 @@
       "Package build"
     ],
     "external_failure": "Dependency review: repository dependency graph disabled; security action retained"
+  },
+  "candidate_integration_round_3": {
+    "status": "PASS",
+    "source_commit": "97419ed2b3eabdcb7196cafd8f13ae1aa12d406b",
+    "tests": 1061,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 190.24,
+    "receipt": "candidate-integration-v1/tests.xml",
+    "scope": "Frozen source_index and dependency-identity candidate; later controller/provenance/auditor integration still needs final validation"
+  },
+  "controller_admission": {
+    "status": "PASS_CROSS_PLATFORM_TESTS",
+    "integrated_commit": "084ab86",
+    "windows_contract_tests": 20,
+    "posix_contract_tests": 20,
+    "independent_crash_probes": 10,
+    "pause_followup": "Integrated6691acc after75Windows and42POSIX tests; rerun of Python3.13 coverage CI pending"
+  },
+  "native_manifest_contract": {
+    "status": "PASS",
+    "commit": "951482c",
+    "real_baseline_manifests_validated": 30,
+    "root_integrated_tests": 39,
+    "source_artifacts_changed": false
   }
 }

@@ -91,3 +91,8 @@ Recovery deliberately fails closed when the fingerprint or checkpoint journal
 cannot establish identity. Use a new output directory after an intentional
 source/code/model change. Keep the old run for comparison; do not delete it to
 make a stale run appear resumable.
+
+The [worker admission protocol](workflow_controller_admission.md) closes the
+crash window between spawning a subprocess and recording its identity. Payload
+execution starts only after durable registration. An ambiguous abandoned
+payload produces `RECOVERY_REQUIRED`, rather than starting a second writer.

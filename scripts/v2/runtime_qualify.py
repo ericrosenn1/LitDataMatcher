@@ -9,11 +9,26 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from litdatamatcher.semantic_runtime import (
+# Direct script execution must qualify the accompanying source implementation.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from litdatamatcher.semantic_runtime import (  # noqa: E402
     LocalSemanticRuntime,
     PretrainedSemanticIndex,
     RuntimeConfig,
     digest,
+)
+
+DENIED_EVENTS = frozenset(
+    {
+        "socket.connect",
+        "socket.getaddrinfo",
+        "socket.gethostbyname",
+        "socket.gethostbyaddr",
+        "socket.getnameinfo",
+        "socket.sendto",
+        "socket.sendmsg",
+    }
 )
 
 
@@ -43,7 +58,7 @@ def main(argv=None) -> int:
     blocked = []
 
     def deny_network(event, arguments):
-        if event in {"socket.connect", "socket.getaddrinfo", "socket.sendto"}:
+        if event in DENIED_EVENTS:
             blocked.append(event)
             raise PermissionError("Runtime qualification denies outgoing Python sockets/DNS")
 
@@ -60,7 +75,8 @@ def main(argv=None) -> int:
         "status": "FAIL",
         "network_control": {
             "kind": "Python process audit hook",
-            "blocked_probe": blocked,
+            "denied_events": sorted(DENIED_EVENTS),
+            "blocked_probe": list(blocked),
             "limitation": "Does not claim OS firewall control over arbitrary native libraries.",
         },
         "scientific_calibration": "NOT_RUN; smoke qualification only",
@@ -146,6 +162,7 @@ def main(argv=None) -> int:
             "error_type": type(error).__name__,
             "message": str(error),
         }
+    report["network_control"]["subsequent_blocked_events"] = blocked[1:]
     args.output.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     fresh = report.get("fresh", {})
     print(

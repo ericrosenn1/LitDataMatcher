@@ -8,6 +8,7 @@ its checkpoint commit together. It never changes the acquired corpus or ledger.
 from __future__ import annotations
 
 import argparse
+import bisect
 import hashlib
 import json
 import re
@@ -310,21 +311,55 @@ class LiteratureIndex:
         if not terms:
             return []
         expression = " OR ".join('"' + term.replace('"', '""') + '"' for term in terms)
-        rows = self.conn.execute(
-            "SELECT v.*, bm25(literature_fts, 2.0, 1.0) AS retrieval_score FROM literature_fts "
-            "JOIN current_records c ON c.rowid=literature_fts.rowid JOIN versions v ON v.id=c.version_id "
-            "WHERE literature_fts MATCH ? ORDER BY retrieval_score, c.pmid LIMIT ?",
-            (expression, limit),
-        ).fetchall()
-        return [
-            dict(
-                self._record(row),
-                score=-float(row["retrieval_score"]),
-                score_kind="fts5_bm25_not_probability",
-                retrieval_scope=self._metadata("status", "EMPTY"),
+        own_transaction = not self.conn.in_transaction
+        if own_transaction:
+            self.conn.execute("BEGIN")
+        try:
+            # SQLite's rank stream avoids loading/sorting full source payloads
+            # for every hit. Consume every boundary tie before PMID ordering,
+            # preserving the exact previous BM25 and deterministic tie policy.
+            # https://www.sqlite.org/fts5.html#sorting_by_auxiliary_function_results
+            cursor = self.conn.execute(
+                "SELECT c.pmid,c.version_id,literature_fts.rank AS score FROM literature_fts "
+                "JOIN current_records c ON c.rowid=literature_fts.rowid "
+                "WHERE literature_fts MATCH ? AND literature_fts.rank MATCH 'bm25(2.0,1.0)' "
+                "ORDER BY literature_fts.rank",
+                (expression,),
             )
-            for row in rows
-        ]
+            selected = []
+            try:
+                for row in cursor:
+                    item = (float(row["score"]), row["pmid"], row["version_id"])
+                    if len(selected) == limit and item[0] > selected[-1][0]:
+                        break
+                    if len(selected) < limit or item < selected[-1]:
+                        bisect.insort(selected, item)
+                        del selected[limit:]
+            finally:
+                cursor.close()
+            if not selected:
+                return []
+            placeholders = ",".join("?" for _ in selected)
+            payloads = {
+                row["id"]: row
+                for row in self.conn.execute(
+                    f"SELECT * FROM versions WHERE id IN ({placeholders})",
+                    [item[2] for item in selected],
+                )
+            }
+            scope = self._metadata("status", "EMPTY")
+            return [
+                dict(
+                    self._record(payloads[version_id]),
+                    score=-score,
+                    score_kind="fts5_bm25_not_probability",
+                    retrieval_scope=scope,
+                )
+                for score, _pmid, version_id in selected
+            ]
+        finally:
+            if own_transaction:
+                self.conn.rollback()
 
     def passages(self, pmid):
         """Return exact source spans with stable content-addressed passage IDs."""

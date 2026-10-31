@@ -56,6 +56,11 @@ fast count; `status()` still computes exact counts. Never fill missing counts
 from an outdated run receipt.
 Use a separate connection per thread. Search uses literal-token FTS5 BM25;
 scores rank retrieval candidates and are not compatibility probabilities.
+Search uses SQLite's [ordered FTS rank interface](https://www.sqlite.org/fts5.html#sorting_by_auxiliary_function_results),
+then loads source payloads only for the retained results. Every score-boundary
+tie is considered before the existing PMID tie-break, so the weighted BM25
+scores and ordering remain unchanged. Ranking and payload reads share one SQLite
+snapshot, including while a writer commits new shards.
 Documents carry stable `PMID:` identifiers, source URLs, source-shard checksums,
 event/version identity, and exact legacy row offsets. Passage results preserve
 their exact character offsets in the title or abstract and content-bound IDs.

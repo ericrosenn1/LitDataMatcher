@@ -369,3 +369,28 @@ def test_one_record_update_does_not_scan_the_existing_corpus(tmp_path):
             index.conn.set_progress_handler(None, 0)
         assert index.get(9999)["pmid"] == "9999"
         assert steps <= 30000
+
+
+def test_rank_stream_matches_original_weighted_bm25_and_all_boundary_ties(tmp_path):
+    corpus, manifest, db, _ = fixture(tmp_path, [[event(i) for i in range(1, 205)]])
+    materialize_pubmed(corpus, manifest, db)
+    with LiteratureIndex(db) as index:
+        for expression, query in [
+            ('"biomarkers"', "biomarkers"),
+            ('"cancer" OR "10"', "cancer 10"),
+        ]:
+            expected = index.conn.execute(
+                "SELECT c.pmid,bm25(literature_fts,2.0,1.0) AS score FROM literature_fts "
+                "JOIN current_records c ON c.rowid=literature_fts.rowid "
+                "WHERE literature_fts MATCH ? ORDER BY score,c.pmid LIMIT 5",
+                (expression,),
+            ).fetchall()
+            actual = index.search(query, limit=5)
+            assert [(row["pmid"], row["score"]) for row in actual] == [
+                (row["pmid"], -row["score"]) for row in expected
+            ]
+            assert not index.conn.in_transaction
+        index.conn.execute("BEGIN")
+        index.search("biomarkers", limit=5)
+        assert index.conn.in_transaction
+        index.conn.rollback()

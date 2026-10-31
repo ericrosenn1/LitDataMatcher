@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import math
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -31,7 +32,8 @@ def render(source: Path, out: Path):
             raise ValueError("Plot requires finite MRR values in [0, 1]")
         values.append(value)
         intervals.append(interval)
-    plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none"})
+    plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none",
+                         "svg.hashsalt": "litdatamatcher-development-1"})
     fig, ax = plt.subplots(figsize=(9, 4.6), layout="constrained")
     fig.set_facecolor("#fbfcfe")
     ax.set_facecolor("#fbfcfe")
@@ -64,12 +66,21 @@ def render(source: Path, out: Path):
     outputs = []
     for suffix in ("png", "svg"):
         target = out / f"retrieval-development.{suffix}"
-        fig.savefig(target, dpi=180, bbox_inches="tight", metadata={"Creator": "LitDataMatcher"})
+        metadata = {"Creator": "LitDataMatcher"}
+        if suffix == "svg":
+            metadata["Date"] = None
+        fig.savefig(target, dpi=180, bbox_inches="tight", metadata=metadata)
+        if suffix == "svg":
+            svg = "\n".join(line.rstrip() for line in target.read_text().splitlines()) + "\n"
+            with target.open("w", encoding="utf-8", newline="\n") as handle:
+                handle.write(svg)
+            ET.fromstring(svg)
         outputs.append({"path": target.name, "sha256": sha(target), "bytes": target.stat().st_size})
     plt.close(fig)
     receipt = {"source_sha256": sha(source), "script_sha256": sha(__file__),
                "matplotlib_version": matplotlib.__version__, "outputs": outputs}
-    (out / "retrieval-development.manifest.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    with (out / "retrieval-development.manifest.json").open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(receipt, indent=2) + "\n")
     return receipt
 
 

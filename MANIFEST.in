@@ -1,0 +1,5 @@
+include LICENSE CITATION.cff requirements-v2.lock
+recursive-include scripts *.py
+recursive-include examples *.json *.jsonl *.md
+recursive-include docs/campaign_20261031 *.md
+global-exclude __pycache__ *.py[cod]

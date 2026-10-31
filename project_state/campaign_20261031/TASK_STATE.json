@@ -2,7 +2,7 @@
   "schema_version": "research-engine-campaign-1.0",
   "campaign": "biomedical-research-engine-20261031",
   "status": "IN_PROGRESS",
-  "phase": "INTEGRATED_BASELINE_AND_SOURCE_INTEGRITY",
+  "phase": "EXPANDED_RETRIEVAL_AND_SHARED_MODEL_WORKFLOW",
   "started_utc": "2026-10-31T11:48:16Z",
   "soft_target_hours": 24,
   "research_base_commit": "068f32618754a822a8bbdb53244b515d11e2050d",
@@ -17,7 +17,14 @@
     "receipt": "local/campaign_20261031/baseline.xml",
     "environment": "C:/Codex/LitDataMatcher-v2/env (read-only existing environment)"
   },
-  "source_corpus_integrity": "NOT_YET_QUALIFIED_FOR_THIS_CAMPAIGN",
+  "source_corpus_integrity": {
+    "annual_baseline": "PASS",
+    "baseline_shards": 1334,
+    "baseline_rows": 39994988,
+    "raw_checksums_recomputed": true,
+    "updates": "REVISION_SEMANTICS_REPAIR_IN_PROGRESS",
+    "initial_update_duplicate_shards": 53
+  },
   "source_corpus_root": "D:/LitDataMatcher-Corpora",
   "run_root": "C:/Codex/LitDataMatcher-v2/data/campaign_20261031",
   "existing_validated_work_preserved": true,
@@ -35,5 +42,83 @@
     "Controller can mark malformed JSONL successful; nonfinite JSON values are accepted",
     "Durable analysis checkpoints and bounded retry orchestration need completion"
   ],
-  "next_action": "Complete integrated baseline, qualify current corpus snapshot, then integrate isolated fixes with before/after evidence."
+  "next_action": "Qualify source-constrained fresh inference; run frozen 30-case pack; compare retrieval in expanded candidate pool; integrate independent review and clean-install validation.",
+  "integration_commits": {
+    "sources": "30cfb84",
+    "model_guard": "ecda49d",
+    "workflow": "41f30e9",
+    "retrieval_contracts": "065ad88",
+    "retrieval_hardening": "6d9fd32",
+    "training": "c83022c"
+  },
+  "retrieval_benchmark": {
+    "train": 1333,
+    "development": 175,
+    "documents": 1508,
+    "paper_overlap": 0,
+    "query_overlap": 0,
+    "source_text_overlap": 0,
+    "scope": "annual baseline; official test and project evaluation_candidate excluded"
+  },
+  "native_model_qualification": {
+    "profile": "unconstrained v2.4",
+    "status": "FAIL_NO_ACCEPTED_RECORDS",
+    "elapsed_seconds": 167.6658445,
+    "interpretation": "Guard correctly rejected unsupported model output; constrained-decoding candidate planned"
+  },
+  "active_work": [
+    "Full PubMed revision/deletion ledger, 2 processes, additive outputs",
+    "Source-constrained local extraction candidate",
+    "Shared-model serial batch workflow with durable resume",
+    "Larger frozen-query candidate pool",
+    "Six-topic live biomedical discovery and replay"
+  ],
+  "integration_round_1": {
+    "status": "PASS",
+    "tests": 814,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 137.305,
+    "receipt": "local/campaign_20261031/integration-round-1.xml",
+    "scope": "Exploratory integrated run; final freeze validation remains required"
+  },
+  "retrieval_training": {
+    "status": "PASS",
+    "selected_experimental_candidate": "epoch-02",
+    "mrr_gain_vs_pretrained": 0.021993197278911567,
+    "paired_query_bootstrap_95_interval": [
+      0.0033319727891156464,
+      0.04324132653061224
+    ],
+    "recall_at_10_gain_vs_pretrained": 0.005714285714285672,
+    "overall_best_method": "BM25",
+    "scope": "175 development source links; no untouched-test or dataset-feasibility claim",
+    "receipt": "retrieval-training-v1/TRAINING_RESULT.json"
+  },
+  "research_cases": {
+    "status": "FROZEN",
+    "count": 30,
+    "by_source": {
+      "Evidence Inference 2.0": 15,
+      "PubMedQA": 15
+    },
+    "pipeline_evaluation": "PENDING"
+  },
+  "processed_data_inspections": {
+    "status": "PASS",
+    "datasets": [
+      "UCI Wisconsin Diagnostic Breast Cancer",
+      "UCI Heart Disease Cleveland"
+    ],
+    "rows": [
+      569,
+      303
+    ],
+    "missing_cells": [
+      0,
+      6
+    ],
+    "biological_analysis_performed": false,
+    "failed_GEO_attempt_retained": true
+  }
 }

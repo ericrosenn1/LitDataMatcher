@@ -17,7 +17,7 @@ import uuid
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 PROMPT_VERSION = "source-extractive-v2.4"
@@ -72,19 +72,197 @@ def runtime_dependency_versions() -> dict[str, str | None]:
     return versions
 
 
+_MODEL_METADATA = frozenset(
+    {
+        "MODEL_MANIFEST.json",
+        "README",
+        "README.md",
+        "README.txt",
+        "LICENSE",
+        "LICENSE.md",
+        "LICENSE.txt",
+        "NOTICE",
+        "NOTICE.md",
+        "NOTICE.txt",
+        ".gitattributes",
+        ".gitignore",
+    }
+)
+
+
+def _model_metadata(name: str) -> bool:
+    """Only known documentation and Hugging Face download bookkeeping are exempt."""
+    if name in _MODEL_METADATA:
+        return True
+    path = PurePosixPath(name)
+    return (
+        name == ".cache/huggingface/.gitignore"
+        or path.parts[:3] == (".cache", "huggingface", "download")
+        and path.suffix in {".metadata", ".lock"}
+    )
+
+
+def _model_asset_path(root: Path, name: str) -> Path:
+    if (
+        not isinstance(name, str)
+        or not name
+        or "\\" in name
+        or ":" in name
+        or PurePosixPath(name).is_absolute()
+        or any(part in {"", ".", ".."} for part in name.split("/"))
+    ):
+        raise ValueError("Invalid model asset path")
+    path = (root / name).resolve(strict=True)
+    if not path.is_relative_to(root) or not path.is_file():
+        raise ValueError("Model asset must be a file inside the model root")
+    return path
+
+
+def _training_sidecars(root: Path, manifest: dict, manifest_sha: str) -> set[str]:
+    """Bind known training-only files without hashing optimizer tensors twice.
+
+    AutoModel never loads these names. validate_epoch remains responsible for
+    checking optimizer bytes before a training resume.
+    """
+    from .data_plane import digest as content_digest
+    from .strict_artifacts import strict_json_loads
+
+    receipt = strict_json_loads(
+        _model_asset_path(root, "EPOCH_RECEIPT.json").read_text(encoding="utf-8")
+    )
+    _model_asset_path(root, "optimizer.pt")
+    if (
+        not isinstance(receipt, dict)
+        or manifest.get("revision_type") != "local_training_content_fingerprint"
+        or type(receipt.get("epoch")) is not int
+        or receipt["epoch"] < 1
+        or receipt.get("model_manifest_sha256") != manifest_sha
+        or receipt.get("training_fingerprint") != manifest.get("training_fingerprint")
+        or not isinstance(receipt.get("optimizer_sha256"), str)
+        or not re.fullmatch(r"[0-9a-f]{64}", receipt["optimizer_sha256"])
+        or not isinstance(manifest.get("training_fingerprint"), str)
+        or not re.fullmatch(r"[0-9a-f]{64}", manifest["training_fingerprint"])
+    ):
+        raise ValueError("Unbound training sidecars in model directory")
+    expected = content_digest(
+        {
+            "files": manifest["files"],
+            "training_fingerprint": manifest["training_fingerprint"],
+            "epoch": receipt["epoch"],
+        }
+    )
+    if (
+        manifest.get("training_content_sha256") != expected
+        or manifest.get("revision") != expected[:40]
+    ):
+        raise ValueError("Invalid local training content fingerprint")
+    return {"optimizer.pt", "EPOCH_RECEIPT.json"}
+
+
 def verify_model(model_dir: str | Path) -> dict:
+    """Cover all local inference assets and verify every declared file once.
+
+    Integrity validation is not scientific/model-quality validation. The caller
+    must keep the directory immutable through subsequent loading and use.
+    """
+    from .strict_artifacts import strict_json_loads
+
     root = Path(model_dir).resolve(strict=True)
-    manifest = json.loads((root / "MODEL_MANIFEST.json").read_text(encoding="utf-8"))
-    if not re.fullmatch(r"[0-9a-f]{40}", manifest.get("revision", "")):
+    raw = _model_asset_path(root, "MODEL_MANIFEST.json").read_bytes()
+    manifest = strict_json_loads(raw.decode("utf-8"))
+    if not isinstance(manifest, dict):
+        raise ValueError("Model manifest must be an object")
+    if not isinstance(manifest.get("revision"), str) or not re.fullmatch(
+        r"[0-9a-f]{40}", manifest["revision"]
+    ):
         raise ValueError("Model revision must be an immutable commit SHA")
-    if not manifest.get("files") or not manifest.get("license"):
+    if (
+        not isinstance(manifest.get("files"), list)
+        or not manifest["files"]
+        or not manifest.get("license")
+    ):
         raise ValueError("Model manifest lacks files or license")
+    listed, folded, hashed = {}, set(), {}
     for item in manifest["files"]:
-        path = (root / item["path"]).resolve(strict=True)
-        if not path.is_relative_to(root) or _file_sha(path) != item["sha256"]:
-            raise ValueError(f"Model integrity failure: {item['path']}")
-    if not any(item["path"].endswith(".safetensors") for item in manifest["files"]):
+        if not isinstance(item, dict):
+            raise ValueError("Invalid model file record")
+        name = item.get("path")
+        path = _model_asset_path(root, name)
+        if PurePosixPath(name).name == "adapter_config.json":
+            raise ValueError(
+                "Adapter configuration requires an unsupported external base-model contract"
+            )
+        if name.casefold() in folded:
+            raise ValueError("Duplicate model asset path")
+        folded.add(name.casefold())
+        expected = item.get("sha256")
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise ValueError("Invalid model integrity digest")
+        if path not in hashed:
+            hashed[path] = _file_sha(path)
+        if hashed[path] != expected:
+            raise ValueError(f"Model integrity failure: {name}")
+        for key in ("bytes", "size_bytes"):
+            if key in item and (type(item[key]) is not int or item[key] != path.stat().st_size):
+                raise ValueError(f"Model asset size mismatch: {name}")
+        listed[name] = path
+    if not any(name.endswith(".safetensors") for name in listed):
         raise ValueError("Safetensors weights required")
+    actual = set()
+    for path in root.rglob("*"):
+        if path.is_dir() and (path.is_symlink() or getattr(path, "is_junction", lambda: False)()):
+            raise ValueError("Linked model asset directories are unsupported")
+        if not path.is_file():
+            continue
+        name = path.relative_to(root).as_posix()
+        resolved = _model_asset_path(root, name)
+        actual.add(name)
+        if name in listed and listed[name] != resolved:
+            raise ValueError("Model asset resolution changed during verification")
+    extras = actual - set(listed)
+    sidecars = (
+        _training_sidecars(root, manifest, hashlib.sha256(raw).hexdigest())
+        if extras & {"optimizer.pt", "EPOCH_RECEIPT.json"}
+        else set()
+    )
+    unknown = sorted(name for name in extras if not _model_metadata(name) and name not in sidecars)
+    if unknown:
+        raise ValueError("Unlisted model asset: " + unknown[0])
+    for name, path in listed.items():
+        if PurePosixPath(name).name not in {"config.json", "tokenizer_config.json"}:
+            continue
+        configuration = strict_json_loads(path.read_text(encoding="utf-8"))
+        if not isinstance(configuration, dict):
+            raise ValueError("Model/tokenizer configuration must be an object")
+        references = []
+        if PurePosixPath(name).name == "tokenizer_config.json":
+            references.extend(
+                value
+                for key, value in configuration.items()
+                if key.endswith("_file") and value is not None
+            )
+        for key in ("fast_tokenizer_files", "configuration_files"):
+            if configuration.get(key) is not None:
+                if not isinstance(configuration[key], list):
+                    raise ValueError("Configuration file references must be an array")
+                references.extend(configuration[key])
+        for reference in references:
+            target = _model_asset_path(root, reference)
+            if reference not in listed or listed[reference] != target:
+                raise ValueError("Configuration references an unlisted model asset")
+    for name, path in listed.items():
+        if not name.endswith(".safetensors.index.json"):
+            continue
+        index = strict_json_loads(path.read_text(encoding="utf-8"))
+        mapping = index.get("weight_map") if isinstance(index, dict) else None
+        if not isinstance(mapping, dict) or not mapping:
+            raise ValueError("Safetensors index requires a nonempty weight_map")
+        for tensor, shard in mapping.items():
+            if not isinstance(tensor, str) or not tensor or not isinstance(shard, str):
+                raise ValueError("Invalid safetensors index entry")
+            target = _model_asset_path(root, shard)
+            if shard not in listed or not shard.endswith(".safetensors") or listed[shard] != target:
+                raise ValueError(f"Safetensors index references an unlisted shard: {shard}")
     return manifest
 
 

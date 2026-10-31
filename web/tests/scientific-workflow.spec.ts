@@ -218,6 +218,11 @@ test("explicit requirements reach a queued job and source evidence remains inspe
   await expect(page.locator(".scientific-table-wrap")).toContainText(
     "Homo sapiens",
   );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
   await expect(page.locator(".scientific-table-wrap a")).toHaveAttribute(
     "href",
     "https://example.org/a#species",

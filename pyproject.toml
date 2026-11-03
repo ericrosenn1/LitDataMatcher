@@ -32,7 +32,7 @@ dependencies = [
 corpus = ["pyarrow>=19.0"]
 runtime = [
   "torch>=2.4,<3",
-  "transformers>=4.57.6,<5",
+  "transformers>=4.57.6,<6",
   "safetensors>=0.8,<1",
 ]
 structured = ["lm-format-enforcer==0.11.3"]
